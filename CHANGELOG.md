@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.3] - 2024-12-XX
+
+### Changed
+- Improved CI/CD workflow with automatic code style fixes
+- Enhanced test validation to ensure all tests pass
+- Added 100% code coverage validation requirement
+- Code style fixes applied automatically on push to main/master
+
+### Fixed
+- Fixed PHPDoc formatting (added blank lines between @author and @see annotations)
+
+## [1.2.2] - 2024-12-XX
+
+### Changed
+- Updated CI/CD workflow configuration
+
 ## [1.2.1] - 2024-12-11
 
 ### Added
