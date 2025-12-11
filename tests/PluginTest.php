@@ -98,13 +98,13 @@ class PluginTest extends TestCase
             mkdir($binDir, 0777, true);
         }
         $sourceFile = $binDir . '/generate-composer-require.sh';
-        
+
         // Backup original file if it exists
         $originalContent = null;
         if (file_exists($sourceFile)) {
             $originalContent = file_get_contents($sourceFile);
         }
-        
+
         try {
             file_put_contents($sourceFile, '#!/bin/sh\necho "test"');
 
@@ -163,13 +163,13 @@ class PluginTest extends TestCase
             mkdir($binDir, 0777, true);
         }
         $sourceFile = $binDir . '/generate-composer-require.sh';
-        
+
         // Backup original file if it exists
         $originalContent = null;
         if (file_exists($sourceFile)) {
             $originalContent = file_get_contents($sourceFile);
         }
-        
+
         try {
             file_put_contents($sourceFile, '#!/bin/sh\necho "test"');
 
@@ -230,13 +230,13 @@ class PluginTest extends TestCase
             mkdir($binDir, 0777, true);
         }
         $sourceFile = $binDir . '/generate-composer-require.sh';
-        
+
         // Backup original file if it exists
         $originalContent = null;
         if (file_exists($sourceFile)) {
             $originalContent = file_get_contents($sourceFile);
         }
-        
+
         try {
             file_put_contents($sourceFile, '#!/bin/sh\necho "new"');
 
