@@ -23,12 +23,13 @@ help:
 	@echo "  setup-hooks   Install git pre-commit hooks"
 	@echo ""
 
-# Start container
+# Build and start container
 up:
+	docker-compose build
 	docker-compose up -d
-	@echo "Waiting for container to be ready..."
-	@sleep 3
-	@echo "Container ready!"
+	@echo "Installing dependencies..."
+	docker-compose exec php composer install --no-interaction
+	@echo "✅ Container ready!"
 
 # Stop container
 down:

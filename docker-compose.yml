@@ -1,8 +1,6 @@
-version: '3.8'
-
 services:
   php:
-    image: php:8.2-cli-alpine
+    build: .
     container_name: composer-update-helper-php
     working_dir: /app
     volumes:
@@ -10,8 +8,7 @@ services:
       - composer-cache:/root/.composer/cache
     environment:
       - COMPOSER_ALLOW_SUPERUSER=1
-    command: ["sh", "-c", "apk add --no-cache git unzip && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer && tail -f /dev/null"]
+    command: ["tail", "-f", "/dev/null"]
 
 volumes:
   composer-cache:
-
