@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.1] - 2024-12-11
+
+### Added
+- PHPDoc documentation in English for all classes and methods
+- Complete method documentation with @param and @return annotations
+- Property documentation with @var annotations
+
 ## [1.2.0] - 2024-12-11
 
 ### Added

@@ -20,24 +20,50 @@ use Composer\Script\ScriptEvents;
  */
 class Plugin implements PluginInterface, EventSubscriberInterface
 {
+    /** @var Composer The Composer instance */
     private Composer $composer;
+
+    /** @var IOInterface The IO interface */
     private IOInterface $io;
 
+    /**
+     * Activate the plugin.
+     *
+     * @param Composer    $composer The Composer instance
+     * @param IOInterface $io       The IO interface
+     */
     public function activate(Composer $composer, IOInterface $io): void
     {
         $this->composer = $composer;
         $this->io = $io;
     }
 
+    /**
+     * Deactivate the plugin.
+     *
+     * @param Composer    $composer The Composer instance
+     * @param IOInterface $io       The IO interface
+     */
     public function deactivate(Composer $composer, IOInterface $io): void
     {
     }
 
+    /**
+     * Uninstall the plugin.
+     *
+     * @param Composer    $composer The Composer instance
+     * @param IOInterface $io       The IO interface
+     */
     public function uninstall(Composer $composer, IOInterface $io): void
     {
         $this->removeFiles($io);
     }
 
+    /**
+     * Get the subscribed events.
+     *
+     * @return array<string, string> The subscribed events
+     */
     public static function getSubscribedEvents(): array
     {
         return [
@@ -46,16 +72,31 @@ class Plugin implements PluginInterface, EventSubscriberInterface
         ];
     }
 
+    /**
+     * Handle post-install command event.
+     *
+     * @param Event $event The script event
+     */
     public function onPostInstall(Event $event): void
     {
         $this->installFiles($event->getIO());
     }
 
+    /**
+     * Handle post-update command event.
+     *
+     * @param Event $event The script event
+     */
     public function onPostUpdate(Event $event): void
     {
         $this->installFiles($event->getIO());
     }
 
+    /**
+     * Install files to the project root.
+     *
+     * @param IOInterface $io The IO interface
+     */
     private function installFiles(IOInterface $io): void
     {
         $vendorDir = $this->composer->getConfig()->get('vendor-dir');
@@ -99,6 +140,11 @@ class Plugin implements PluginInterface, EventSubscriberInterface
         }
     }
 
+    /**
+     * Remove files from the project root.
+     *
+     * @param IOInterface $io The IO interface
+     */
     private function removeFiles(IOInterface $io): void
     {
         $vendorDir = $this->composer->getConfig()->get('vendor-dir');
