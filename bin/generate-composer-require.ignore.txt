@@ -1,9 +1,40 @@
 # Packages to ignore during update
 # Each line is a package name (e.g.: vendor/package)
 # Empty lines and lines starting with # are ignored
+#
+# The script automatically detects and respects framework version constraints.
+# Use this file to ignore specific packages that you don't want to update.
 
-# Examples:
-# doctrine/orm
+# Examples by framework:
+#
+# Symfony:
 # symfony/security-bundle
+# doctrine/orm
+#
+# Laravel:
 # laravel/framework
-
+# laravel/sanctum
+#
+# Yii:
+# yiisoft/yii2
+# yiisoft/yii2-debug
+#
+# CakePHP:
+# cakephp/cakephp
+# cakephp/authentication
+#
+# Laminas:
+# laminas/laminas-mvc
+# laminas/laminas-db
+#
+# CodeIgniter:
+# codeigniter4/framework
+# codeigniter4/shield
+#
+# Slim:
+# slim/slim
+# slim/psr7
+#
+# Common packages to ignore:
+# phpunit/phpunit
+# phpstan/phpstan
