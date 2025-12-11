@@ -98,34 +98,50 @@ class PluginTest extends TestCase
             mkdir($binDir, 0777, true);
         }
         $sourceFile = $binDir . '/generate-composer-require.sh';
-        file_put_contents($sourceFile, '#!/bin/sh\necho "test"');
+        
+        // Backup original file if it exists
+        $originalContent = null;
+        if (file_exists($sourceFile)) {
+            $originalContent = file_get_contents($sourceFile);
+        }
+        
+        try {
+            file_put_contents($sourceFile, '#!/bin/sh\necho "test"');
 
-        $config = $this->createMock(Config::class);
-        $config->method('get')
-            ->with('vendor-dir')
-            ->willReturn($vendorDir);
+            $config = $this->createMock(Config::class);
+            $config->method('get')
+                ->with('vendor-dir')
+                ->willReturn($vendorDir);
 
-        $composer = $this->createMock(Composer::class);
-        $composer->method('getConfig')
-            ->willReturn($config);
+            $composer = $this->createMock(Composer::class);
+            $composer->method('getConfig')
+                ->willReturn($config);
 
-        $io = $this->createMock(IOInterface::class);
-        $io->expects($this->atLeastOnce())
-            ->method('write')
-            ->with($this->logicalOr(
-                $this->stringContains('Installing'),
-                $this->stringContains('Creating generate-composer-require.ignore.txt')
-            ));
+            $io = $this->createMock(IOInterface::class);
+            $io->expects($this->atLeastOnce())
+                ->method('write')
+                ->with($this->logicalOr(
+                    $this->stringContains('Installing'),
+                    $this->stringContains('Creating generate-composer-require.ignore.txt')
+                ));
 
-        $event = $this->createMock(Event::class);
-        $event->method('getIO')
-            ->willReturn($io);
+            $event = $this->createMock(Event::class);
+            $event->method('getIO')
+                ->willReturn($io);
 
-        $plugin = new Plugin();
-        $plugin->activate($composer, $io);
-        $plugin->onPostInstall($event);
+            $plugin = new Plugin();
+            $plugin->activate($composer, $io);
+            $plugin->onPostInstall($event);
 
-        $this->assertFileExists($tempDir . '/generate-composer-require.sh');
+            $this->assertFileExists($tempDir . '/generate-composer-require.sh');
+        } finally {
+            // Restore original file
+            if ($originalContent !== null) {
+                file_put_contents($sourceFile, $originalContent);
+            } elseif (file_exists($sourceFile)) {
+                @unlink($sourceFile);
+            }
+        }
 
         // Cleanup
         @unlink($tempDir . '/generate-composer-require.sh');
@@ -147,34 +163,50 @@ class PluginTest extends TestCase
             mkdir($binDir, 0777, true);
         }
         $sourceFile = $binDir . '/generate-composer-require.sh';
-        file_put_contents($sourceFile, '#!/bin/sh\necho "test"');
+        
+        // Backup original file if it exists
+        $originalContent = null;
+        if (file_exists($sourceFile)) {
+            $originalContent = file_get_contents($sourceFile);
+        }
+        
+        try {
+            file_put_contents($sourceFile, '#!/bin/sh\necho "test"');
 
-        $config = $this->createMock(Config::class);
-        $config->method('get')
-            ->with('vendor-dir')
-            ->willReturn($vendorDir);
+            $config = $this->createMock(Config::class);
+            $config->method('get')
+                ->with('vendor-dir')
+                ->willReturn($vendorDir);
 
-        $composer = $this->createMock(Composer::class);
-        $composer->method('getConfig')
-            ->willReturn($config);
+            $composer = $this->createMock(Composer::class);
+            $composer->method('getConfig')
+                ->willReturn($config);
 
-        $io = $this->createMock(IOInterface::class);
-        $io->expects($this->atLeastOnce())
-            ->method('write')
-            ->with($this->logicalOr(
-                $this->stringContains('Installing'),
-                $this->stringContains('Creating generate-composer-require.ignore.txt')
-            ));
+            $io = $this->createMock(IOInterface::class);
+            $io->expects($this->atLeastOnce())
+                ->method('write')
+                ->with($this->logicalOr(
+                    $this->stringContains('Installing'),
+                    $this->stringContains('Creating generate-composer-require.ignore.txt')
+                ));
 
-        $event = $this->createMock(Event::class);
-        $event->method('getIO')
-            ->willReturn($io);
+            $event = $this->createMock(Event::class);
+            $event->method('getIO')
+                ->willReturn($io);
 
-        $plugin = new Plugin();
-        $plugin->activate($composer, $io);
-        $plugin->onPostUpdate($event);
+            $plugin = new Plugin();
+            $plugin->activate($composer, $io);
+            $plugin->onPostUpdate($event);
 
-        $this->assertFileExists($tempDir . '/generate-composer-require.sh');
+            $this->assertFileExists($tempDir . '/generate-composer-require.sh');
+        } finally {
+            // Restore original file
+            if ($originalContent !== null) {
+                file_put_contents($sourceFile, $originalContent);
+            } elseif (file_exists($sourceFile)) {
+                @unlink($sourceFile);
+            }
+        }
 
         // Cleanup
         @unlink($tempDir . '/generate-composer-require.sh');
@@ -198,35 +230,51 @@ class PluginTest extends TestCase
             mkdir($binDir, 0777, true);
         }
         $sourceFile = $binDir . '/generate-composer-require.sh';
-        file_put_contents($sourceFile, '#!/bin/sh\necho "new"');
+        
+        // Backup original file if it exists
+        $originalContent = null;
+        if (file_exists($sourceFile)) {
+            $originalContent = file_get_contents($sourceFile);
+        }
+        
+        try {
+            file_put_contents($sourceFile, '#!/bin/sh\necho "new"');
 
-        $config = $this->createMock(Config::class);
-        $config->method('get')
-            ->with('vendor-dir')
-            ->willReturn($vendorDir);
+            $config = $this->createMock(Config::class);
+            $config->method('get')
+                ->with('vendor-dir')
+                ->willReturn($vendorDir);
 
-        $composer = $this->createMock(Composer::class);
-        $composer->method('getConfig')
-            ->willReturn($config);
+            $composer = $this->createMock(Composer::class);
+            $composer->method('getConfig')
+                ->willReturn($config);
 
-        $io = $this->createMock(IOInterface::class);
-        $io->expects($this->atLeastOnce())
-            ->method('write')
-            ->with($this->logicalOr(
-                $this->stringContains('Updating'),
-                $this->stringContains('Creating generate-composer-require.ignore.txt')
-            ));
+            $io = $this->createMock(IOInterface::class);
+            $io->expects($this->atLeastOnce())
+                ->method('write')
+                ->with($this->logicalOr(
+                    $this->stringContains('Updating'),
+                    $this->stringContains('Creating generate-composer-require.ignore.txt')
+                ));
 
-        $event = $this->createMock(Event::class);
-        $event->method('getIO')
-            ->willReturn($io);
+            $event = $this->createMock(Event::class);
+            $event->method('getIO')
+                ->willReturn($io);
 
-        $plugin = new Plugin();
-        $plugin->activate($composer, $io);
-        $plugin->onPostInstall($event);
+            $plugin = new Plugin();
+            $plugin->activate($composer, $io);
+            $plugin->onPostInstall($event);
 
-        $this->assertFileExists($tempDir . '/generate-composer-require.sh');
-        $this->assertStringContainsString('new', file_get_contents($tempDir . '/generate-composer-require.sh'));
+            $this->assertFileExists($tempDir . '/generate-composer-require.sh');
+            $this->assertStringContainsString('new', file_get_contents($tempDir . '/generate-composer-require.sh'));
+        } finally {
+            // Restore original file
+            if ($originalContent !== null) {
+                file_put_contents($sourceFile, $originalContent);
+            } elseif (file_exists($sourceFile)) {
+                @unlink($sourceFile);
+            }
+        }
 
         // Cleanup
         @unlink($tempDir . '/generate-composer-require.sh');
