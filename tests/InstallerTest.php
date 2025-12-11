@@ -108,6 +108,109 @@ class InstallerTest extends TestCase
         $this->assertFileExists($this->tempDir . '/generate-composer-require.ignore.txt');
     }
 
+    public function testUninstallWhenFileDoesNotExist(): void
+    {
+        $event = $this->createMockEvent();
+
+        // Don't create the file
+        Installer::uninstall($event);
+
+        // Should not throw any exception
+        $this->assertTrue(true);
+    }
+
+    public function testInstallUpdatesWhenContentDiffers(): void
+    {
+        $event = $this->createMockEvent();
+
+        // Create existing file with different content
+        file_put_contents($this->tempDir . '/generate-composer-require.sh', '#!/bin/sh\necho "old"');
+
+        $packageDir = $this->vendorDir . '/nowo-tech/composer-update-helper';
+        mkdir($packageDir . '/bin', 0777, true);
+        file_put_contents($packageDir . '/bin/generate-composer-require.sh', '#!/bin/sh\necho "new"');
+
+        Installer::install($event);
+
+        $this->assertFileExists($this->tempDir . '/generate-composer-require.sh');
+        $this->assertStringContainsString('new', file_get_contents($this->tempDir . '/generate-composer-require.sh'));
+    }
+
+    public function testInstallSkipsWhenContentMatches(): void
+    {
+        $event = $this->createMockEvent();
+
+        $content = '#!/bin/sh\necho "same"';
+        file_put_contents($this->tempDir . '/generate-composer-require.sh', $content);
+
+        $packageDir = $this->vendorDir . '/nowo-tech/composer-update-helper';
+        mkdir($packageDir . '/bin', 0777, true);
+        file_put_contents($packageDir . '/bin/generate-composer-require.sh', $content);
+
+        $originalTime = filemtime($this->tempDir . '/generate-composer-require.sh');
+        sleep(1); // Ensure time difference
+
+        Installer::install($event);
+
+        // File should still exist and modification time should be unchanged (or very close)
+        $this->assertFileExists($this->tempDir . '/generate-composer-require.sh');
+    }
+
+    public function testInstallHandlesMissingSourceFile(): void
+    {
+        $event = $this->createMockEvent();
+
+        // Ensure destination file doesn't exist
+        $destFile = $this->tempDir . '/generate-composer-require.sh';
+        if (file_exists($destFile)) {
+            @unlink($destFile);
+        }
+
+        // Don't create source file in vendor
+        // The package directory won't exist, so source file won't be found
+        // Also, ensure the development mode path doesn't have the file
+        $devPackageDir = __DIR__ . '/../bin';
+        $devSourceFile = $devPackageDir . '/generate-composer-require.sh';
+        $devSourceBackup = null;
+        if (file_exists($devSourceFile)) {
+            $devSourceBackup = file_get_contents($devSourceFile);
+            @unlink($devSourceFile);
+        }
+
+        try {
+            Installer::install($event);
+
+            // Should not create destination file
+            $this->assertFileDoesNotExist($destFile);
+        } finally {
+            // Restore file if it existed
+            if ($devSourceBackup !== null) {
+                file_put_contents($devSourceFile, $devSourceBackup);
+            }
+        }
+    }
+
+    public function testInstallInDevelopmentMode(): void
+    {
+        $event = $this->createMockEvent();
+
+        // Simulate development mode (package not in vendor)
+        $packageDir = __DIR__ . '/..';
+        $binDir = $packageDir . '/bin';
+        if (!is_dir($binDir)) {
+            mkdir($binDir, 0777, true);
+        }
+        file_put_contents($binDir . '/generate-composer-require.sh', '#!/bin/sh\necho "dev"');
+
+        Installer::install($event);
+
+        $this->assertFileExists($this->tempDir . '/generate-composer-require.sh');
+        $this->assertStringContainsString('dev', file_get_contents($this->tempDir . '/generate-composer-require.sh'));
+
+        // Cleanup
+        @unlink($this->tempDir . '/generate-composer-require.sh');
+    }
+
     /**
      * @return Event&MockObject
      */

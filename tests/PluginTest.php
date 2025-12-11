@@ -7,6 +7,7 @@ namespace NowoTech\ComposerUpdateHelper\Tests;
 use Composer\Composer;
 use Composer\Config;
 use Composer\IO\IOInterface;
+use Composer\Script\Event;
 use Composer\Script\ScriptEvents;
 use NowoTech\ComposerUpdateHelper\Plugin;
 use PHPUnit\Framework\TestCase;
@@ -79,6 +80,301 @@ class PluginTest extends TestCase
         $this->assertFileDoesNotExist($tempDir . '/generate-composer-require.sh');
 
         // Cleanup
+        @rmdir($vendorDir);
+        @rmdir($tempDir);
+    }
+
+    public function testOnPostInstallInstallsFiles(): void
+    {
+        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir = $tempDir . '/vendor';
+        $packageDir = __DIR__ . '/..';
+        mkdir($vendorDir, 0777, true);
+
+        // Create source file in package
+        $binDir = $packageDir . '/bin';
+        if (!is_dir($binDir)) {
+            mkdir($binDir, 0777, true);
+        }
+        $sourceFile = $binDir . '/generate-composer-require.sh';
+        file_put_contents($sourceFile, '#!/bin/sh\necho "test"');
+
+        $config = $this->createMock(Config::class);
+        $config->method('get')
+            ->with('vendor-dir')
+            ->willReturn($vendorDir);
+
+        $composer = $this->createMock(Composer::class);
+        $composer->method('getConfig')
+            ->willReturn($config);
+
+        $io = $this->createMock(IOInterface::class);
+        $io->expects($this->atLeastOnce())
+            ->method('write')
+            ->with($this->logicalOr(
+                $this->stringContains('Installing'),
+                $this->stringContains('Creating generate-composer-require.ignore.txt')
+            ));
+
+        $event = $this->createMock(Event::class);
+        $event->method('getIO')
+            ->willReturn($io);
+
+        $plugin = new Plugin();
+        $plugin->activate($composer, $io);
+        $plugin->onPostInstall($event);
+
+        $this->assertFileExists($tempDir . '/generate-composer-require.sh');
+
+        // Cleanup
+        @unlink($tempDir . '/generate-composer-require.sh');
+        @unlink($tempDir . '/generate-composer-require.ignore.txt');
+        @rmdir($vendorDir);
+        @rmdir($tempDir);
+    }
+
+    public function testOnPostUpdateInstallsFiles(): void
+    {
+        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir = $tempDir . '/vendor';
+        $packageDir = __DIR__ . '/..';
+        mkdir($vendorDir, 0777, true);
+
+        // Create source file in package
+        $binDir = $packageDir . '/bin';
+        if (!is_dir($binDir)) {
+            mkdir($binDir, 0777, true);
+        }
+        $sourceFile = $binDir . '/generate-composer-require.sh';
+        file_put_contents($sourceFile, '#!/bin/sh\necho "test"');
+
+        $config = $this->createMock(Config::class);
+        $config->method('get')
+            ->with('vendor-dir')
+            ->willReturn($vendorDir);
+
+        $composer = $this->createMock(Composer::class);
+        $composer->method('getConfig')
+            ->willReturn($config);
+
+        $io = $this->createMock(IOInterface::class);
+        $io->expects($this->atLeastOnce())
+            ->method('write')
+            ->with($this->logicalOr(
+                $this->stringContains('Installing'),
+                $this->stringContains('Creating generate-composer-require.ignore.txt')
+            ));
+
+        $event = $this->createMock(Event::class);
+        $event->method('getIO')
+            ->willReturn($io);
+
+        $plugin = new Plugin();
+        $plugin->activate($composer, $io);
+        $plugin->onPostUpdate($event);
+
+        $this->assertFileExists($tempDir . '/generate-composer-require.sh');
+
+        // Cleanup
+        @unlink($tempDir . '/generate-composer-require.sh');
+        @rmdir($vendorDir);
+        @rmdir($tempDir);
+    }
+
+    public function testInstallFilesUpdatesWhenContentDiffers(): void
+    {
+        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir = $tempDir . '/vendor';
+        $packageDir = __DIR__ . '/..';
+        mkdir($vendorDir, 0777, true);
+
+        // Create existing file with different content
+        file_put_contents($tempDir . '/generate-composer-require.sh', '#!/bin/sh\necho "old"');
+
+        // Create source file in package with new content
+        $binDir = $packageDir . '/bin';
+        if (!is_dir($binDir)) {
+            mkdir($binDir, 0777, true);
+        }
+        $sourceFile = $binDir . '/generate-composer-require.sh';
+        file_put_contents($sourceFile, '#!/bin/sh\necho "new"');
+
+        $config = $this->createMock(Config::class);
+        $config->method('get')
+            ->with('vendor-dir')
+            ->willReturn($vendorDir);
+
+        $composer = $this->createMock(Composer::class);
+        $composer->method('getConfig')
+            ->willReturn($config);
+
+        $io = $this->createMock(IOInterface::class);
+        $io->expects($this->atLeastOnce())
+            ->method('write')
+            ->with($this->logicalOr(
+                $this->stringContains('Updating'),
+                $this->stringContains('Creating generate-composer-require.ignore.txt')
+            ));
+
+        $event = $this->createMock(Event::class);
+        $event->method('getIO')
+            ->willReturn($io);
+
+        $plugin = new Plugin();
+        $plugin->activate($composer, $io);
+        $plugin->onPostInstall($event);
+
+        $this->assertFileExists($tempDir . '/generate-composer-require.sh');
+        $this->assertStringContainsString('new', file_get_contents($tempDir . '/generate-composer-require.sh'));
+
+        // Cleanup
+        @unlink($tempDir . '/generate-composer-require.sh');
+        @unlink($tempDir . '/generate-composer-require.ignore.txt');
+        @rmdir($vendorDir);
+        @rmdir($tempDir);
+    }
+
+    public function testInstallFilesSkipsWhenContentMatches(): void
+    {
+        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir = $tempDir . '/vendor';
+        $packageDir = __DIR__ . '/..';
+        mkdir($vendorDir, 0777, true);
+
+        $content = '#!/bin/sh\necho "same"';
+        file_put_contents($tempDir . '/generate-composer-require.sh', $content);
+
+        // Create source file in package with same content
+        $binDir = $packageDir . '/bin';
+        if (!is_dir($binDir)) {
+            mkdir($binDir, 0777, true);
+        }
+        $sourceFile = $binDir . '/generate-composer-require.sh';
+        file_put_contents($sourceFile, $content);
+
+        // Ensure ignore file doesn't exist to avoid triggering its creation
+        $ignoreSource = $binDir . '/generate-composer-require.ignore.txt';
+        if (file_exists($ignoreSource)) {
+            @unlink($ignoreSource);
+        }
+
+        $config = $this->createMock(Config::class);
+        $config->method('get')
+            ->with('vendor-dir')
+            ->willReturn($vendorDir);
+
+        $composer = $this->createMock(Composer::class);
+        $composer->method('getConfig')
+            ->willReturn($config);
+
+        $io = $this->createMock(IOInterface::class);
+        $io->expects($this->never())
+            ->method('write')
+            ->with($this->logicalOr(
+                $this->stringContains('Updating'),
+                $this->stringContains('Installing')
+            ));
+
+        $event = $this->createMock(Event::class);
+        $event->method('getIO')
+            ->willReturn($io);
+
+        $plugin = new Plugin();
+        $plugin->activate($composer, $io);
+        $plugin->onPostInstall($event);
+
+        // Cleanup
+        @unlink($tempDir . '/generate-composer-require.sh');
+        @rmdir($vendorDir);
+        @rmdir($tempDir);
+    }
+
+    public function testInstallFilesHandlesMissingSourceFile(): void
+    {
+        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir = $tempDir . '/vendor';
+        $packageDir = __DIR__ . '/..';
+        mkdir($vendorDir, 0777, true);
+
+        // Ensure source file doesn't exist
+        $binDir = $packageDir . '/bin';
+        $sourceFile = $binDir . '/generate-composer-require.sh';
+        if (file_exists($sourceFile)) {
+            @unlink($sourceFile);
+        }
+
+        $config = $this->createMock(Config::class);
+        $config->method('get')
+            ->with('vendor-dir')
+            ->willReturn($vendorDir);
+
+        $composer = $this->createMock(Composer::class);
+        $composer->method('getConfig')
+            ->willReturn($config);
+
+        $io = $this->createMock(IOInterface::class);
+        $io->expects($this->atLeastOnce())
+            ->method('writeError')
+            ->with($this->stringContains('Source file not found'));
+
+        $event = $this->createMock(Event::class);
+        $event->method('getIO')
+            ->willReturn($io);
+
+        $plugin = new Plugin();
+        $plugin->activate($composer, $io);
+        $plugin->onPostInstall($event);
+
+        // Cleanup
+        @rmdir($vendorDir);
+        @rmdir($tempDir);
+    }
+
+    public function testInstallFilesCreatesIgnoreFileIfNotExists(): void
+    {
+        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir = $tempDir . '/vendor';
+        $packageDir = __DIR__ . '/..';
+        mkdir($vendorDir, 0777, true);
+
+        // Create source files in package
+        $binDir = $packageDir . '/bin';
+        if (!is_dir($binDir)) {
+            mkdir($binDir, 0777, true);
+        }
+        file_put_contents($binDir . '/generate-composer-require.sh', '#!/bin/sh');
+        file_put_contents($binDir . '/generate-composer-require.ignore.txt', '# Ignore file');
+
+        $config = $this->createMock(Config::class);
+        $config->method('get')
+            ->with('vendor-dir')
+            ->willReturn($vendorDir);
+
+        $composer = $this->createMock(Composer::class);
+        $composer->method('getConfig')
+            ->willReturn($config);
+
+        $io = $this->createMock(IOInterface::class);
+        $io->expects($this->atLeastOnce())
+            ->method('write')
+            ->with($this->logicalOr(
+                $this->stringContains('Installing'),
+                $this->stringContains('Creating generate-composer-require.ignore.txt')
+            ));
+
+        $event = $this->createMock(Event::class);
+        $event->method('getIO')
+            ->willReturn($io);
+
+        $plugin = new Plugin();
+        $plugin->activate($composer, $io);
+        $plugin->onPostInstall($event);
+
+        $this->assertFileExists($tempDir . '/generate-composer-require.ignore.txt');
+
+        // Cleanup
+        @unlink($tempDir . '/generate-composer-require.sh');
+        @unlink($tempDir . '/generate-composer-require.ignore.txt');
         @rmdir($vendorDir);
         @rmdir($tempDir);
     }
