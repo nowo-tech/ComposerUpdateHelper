@@ -102,7 +102,12 @@ class Plugin implements PluginInterface, EventSubscriberInterface
     {
         $vendorDir = $this->composer->getConfig()->get('vendor-dir');
         $projectDir = dirname($vendorDir);
-        $packageDir = __DIR__ . '/..';
+        $packageDir = $vendorDir . '/nowo-tech/composer-update-helper';
+
+        // If package is not in vendor (development mode), use current directory
+        if (!is_dir($packageDir)) {
+            $packageDir = __DIR__ . '/..';
+        }
 
         $files = [
             'bin/generate-composer-require.sh' => 'generate-composer-require.sh',
