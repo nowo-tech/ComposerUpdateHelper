@@ -43,6 +43,7 @@ class ScriptTest extends TestCase
         // Skip if script is not fully implemented
         if (strlen($content) < 100) {
             $this->markTestSkipped('Script file is not fully implemented');
+
             return;
         }
 
@@ -59,6 +60,7 @@ class ScriptTest extends TestCase
         // Skip if script is not fully implemented
         if (strlen($content) < 100) {
             $this->markTestSkipped('Script file is not fully implemented');
+
             return;
         }
 
@@ -79,6 +81,7 @@ class ScriptTest extends TestCase
         // Skip if script is not fully implemented
         if (strlen($content) < 100) {
             $this->markTestSkipped('Script file is not fully implemented');
+
             return;
         }
 
@@ -95,6 +98,7 @@ class ScriptTest extends TestCase
         // Skip if script is not fully implemented
         if (strlen($content) < 100) {
             $this->markTestSkipped('Script file is not fully implemented');
+
             return;
         }
 
@@ -110,6 +114,7 @@ class ScriptTest extends TestCase
         // Skip if script is not fully implemented
         if (strlen($content) < 100) {
             $this->markTestSkipped('Script file is not fully implemented');
+
             return;
         }
 
@@ -124,6 +129,7 @@ class ScriptTest extends TestCase
         // Skip if script is not fully implemented
         if (strlen($content) < 100) {
             $this->markTestSkipped('Script file is not fully implemented');
+
             return;
         }
 
@@ -140,9 +146,10 @@ class ScriptTest extends TestCase
     public function testIgnoreFileHasCorrectFormat(): void
     {
         $ignoreFile = dirname(__DIR__) . '/bin/generate-composer-require.ignore.txt';
-        
+
         if (!file_exists($ignoreFile)) {
             $this->markTestSkipped('Ignore file template does not exist');
+
             return;
         }
 
