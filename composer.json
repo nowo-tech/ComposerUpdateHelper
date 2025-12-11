@@ -1,0 +1,85 @@
+{
+    "name": "nowo-tech/composer-update-helper",
+    "description": "Generates composer require commands from outdated dependencies. Works with any PHP project (Symfony, Laravel, Yii, CodeIgniter, etc.)",
+    "type": "composer-plugin",
+    "license": "MIT",
+    "keywords": [
+        "composer",
+        "update",
+        "dependencies",
+        "outdated",
+        "require",
+        "symfony",
+        "laravel",
+        "yii",
+        "codeigniter",
+        "php"
+    ],
+    "homepage": "https://github.com/nowo-tech/composer-update-helper",
+    "support": {
+        "issues": "https://github.com/nowo-tech/composer-update-helper/issues",
+        "source": "https://github.com/nowo-tech/composer-update-helper"
+    },
+    "authors": [
+        {
+            "name": "Héctor Franco Aceituno",
+            "email": "hectorfranco@nowo.com",
+            "homepage": "https://github.com/HecFranco",
+            "role": "Developer"
+        },
+        {
+            "name": "Nowo.tech",
+            "homepage": "https://nowo.tech"
+        }
+    ],
+    "require": {
+        "php": ">=7.4",
+        "composer-plugin-api": "^2.0"
+    },
+    "require-dev": {
+        "composer/composer": "^2.0",
+        "phpunit/phpunit": "^9.6 || ^10.0 || ^11.0",
+        "friendsofphp/php-cs-fixer": "^3.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "NowoTech\\ComposerUpdateHelper\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "NowoTech\\ComposerUpdateHelper\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "class": "NowoTech\\ComposerUpdateHelper\\Plugin",
+        "branch-alias": {
+            "dev-main": "1.0-dev"
+        }
+    },
+    "scripts": {
+        "test": "phpunit",
+        "test-coverage": "phpunit --coverage-html coverage --coverage-clover coverage.xml",
+        "cs-check": "php-cs-fixer fix --dry-run --diff",
+        "cs-fix": "php-cs-fixer fix",
+        "qa": [
+            "@cs-check",
+            "@test"
+        ]
+    },
+    "scripts-descriptions": {
+        "test": "Run PHPUnit tests",
+        "test-coverage": "Run PHPUnit tests with code coverage",
+        "cs-check": "Check code style with PHP-CS-Fixer",
+        "cs-fix": "Fix code style with PHP-CS-Fixer",
+        "qa": "Run all quality assurance checks"
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "composer/package-versions-deprecated": true
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
