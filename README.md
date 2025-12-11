@@ -210,6 +210,8 @@ See [GitHub Actions](https://github.com/nowo-tech/ComposerUpdateHelper/actions) 
 
 Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
+For branching strategy, see [docs/BRANCHING.md](docs/BRANCHING.md).
+
 ## Changelog
 
 Please see [CHANGELOG.md](CHANGELOG.md) for version history.

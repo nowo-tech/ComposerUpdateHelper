@@ -54,10 +54,27 @@ This project is maintained by [Héctor Franco Aceituno](https://github.com/HecFr
    composer test
    ```
 
+## Branching Strategy
+
+We follow a simplified Git Flow. See [docs/BRANCHING.md](docs/BRANCHING.md) for full details.
+
+| Branch | Purpose |
+|--------|---------|
+| `main` | Production releases only |
+| `develop` | Development integration |
+| `feature/*` | New features |
+| `bugfix/*` | Bug fixes |
+| `hotfix/*` | Urgent production fixes |
+
 ## Pull Request Process
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+2. Create a branch from `develop`:
+   ```bash
+   git checkout develop
+   git pull origin develop
+   git checkout -b feature/amazing-feature
+   ```
 3. Make your changes
 4. Run tests and code style checks:
    ```bash
@@ -65,9 +82,15 @@ This project is maintained by [Héctor Franco Aceituno](https://github.com/HecFr
    # or without Docker:
    composer qa
    ```
-5. Commit your changes (`git commit -m 'Add amazing feature'`)
-6. Push to the branch (`git push origin feature/amazing-feature`)
-7. Open a Pull Request
+5. Commit your changes following [Conventional Commits](https://www.conventionalcommits.org/):
+   ```bash
+   git commit -m 'feat(scope): add amazing feature'
+   ```
+6. Push to the branch:
+   ```bash
+   git push origin feature/amazing-feature
+   ```
+7. Open a Pull Request **to `develop`** (not `main`)
 
 ## Coding Standards
 
