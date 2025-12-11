@@ -8,6 +8,36 @@ This project is maintained by [Héctor Franco Aceituno](https://github.com/HecFr
 
 ## Development Setup
 
+### Using Docker (Recommended)
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/nowo-tech/composer-update-helper.git
+   cd composer-update-helper
+   ```
+
+2. Start the Docker container:
+   ```bash
+   make up
+   ```
+
+3. Install dependencies:
+   ```bash
+   make install
+   ```
+
+4. Run tests:
+   ```bash
+   make test
+   ```
+
+5. Open a shell in the container (optional):
+   ```bash
+   make shell
+   ```
+
+### Without Docker
+
 1. Clone the repository:
    ```bash
    git clone https://github.com/nowo-tech/composer-update-helper.git
@@ -31,8 +61,9 @@ This project is maintained by [Héctor Franco Aceituno](https://github.com/HecFr
 3. Make your changes
 4. Run tests and code style checks:
    ```bash
-   composer test
-   composer cs-check
+   make qa
+   # or without Docker:
+   composer qa
    ```
 5. Commit your changes (`git commit -m 'Add amazing feature'`)
 6. Push to the branch (`git push origin feature/amazing-feature`)
@@ -47,6 +78,27 @@ This project is maintained by [Héctor Franco Aceituno](https://github.com/HecFr
 
 ## Running Tests
 
+### With Docker
+
+```bash
+# Run all tests
+make test
+
+# Run tests with coverage
+make test-coverage
+
+# Check code style
+make cs-check
+
+# Fix code style
+make cs-fix
+
+# Run all QA checks
+make qa
+```
+
+### Without Docker
+
 ```bash
 # Run all tests
 composer test
@@ -60,6 +112,21 @@ composer cs-check
 # Fix code style
 composer cs-fix
 ```
+
+## Available Make Commands
+
+| Command | Description |
+|---------|-------------|
+| `make up` | Start Docker container |
+| `make down` | Stop Docker container |
+| `make shell` | Open shell in container |
+| `make install` | Install Composer dependencies |
+| `make test` | Run PHPUnit tests |
+| `make test-coverage` | Run tests with code coverage |
+| `make cs-check` | Check code style (PSR-12) |
+| `make cs-fix` | Fix code style |
+| `make qa` | Run all QA checks |
+| `make clean` | Remove vendor and cache |
 
 ## Reporting Issues
 

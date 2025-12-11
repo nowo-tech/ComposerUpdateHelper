@@ -1,0 +1,24 @@
+# Git
+.git
+.gitignore
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+coverage
+coverage.xml
+.phpunit.cache
+.php-cs-fixer.cache
+
+# Documentation (not needed in container)
+*.md
+!README.md
+

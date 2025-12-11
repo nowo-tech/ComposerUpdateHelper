@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2024-12-11
+
+### Added
+- Docker Compose configuration for local development
+- Makefile with common development commands
+- `.dockerignore` for optimized Docker builds
+- Git pre-commit hooks for automatic CS-check and tests
+- `make setup-hooks` command to install git hooks
+
+### Changed
+- Updated README with Docker development instructions
+- Updated README with CI/CD information
+- Updated CONTRIBUTING with Docker workflow
+
 ## [1.0.0] - 2024-12-11
 
 ### Added
@@ -18,4 +32,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Separation of production and development dependencies
 - `--run` flag to execute suggested commands directly
 - Compatible with any PHP project (Symfony, Laravel, Yii, CodeIgniter, etc.)
-
+- PHPUnit tests
+- GitHub Actions CI/CD pipeline
+- PHP-CS-Fixer configuration (PSR-12)
+- Dependabot configuration for automated updates
+- Issue and PR templates
+- Security policy

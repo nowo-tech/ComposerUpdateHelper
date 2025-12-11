@@ -106,18 +106,55 @@ This prevents suggesting Symfony package updates that would exceed your configur
 
 ## Development
 
-### Setup
+### Using Docker (Recommended)
+
+The project includes Docker configuration for easy development:
 
 ```bash
-git clone https://github.com/nowo-tech/composer-update-helper.git
-cd composer-update-helper
-composer install
+# Start the container
+make up
+
+# Install dependencies
+make install
+
+# Run tests
+make test
+
+# Run tests with coverage
+make test-coverage
+
+# Check code style
+make cs-check
+
+# Fix code style
+make cs-fix
+
+# Run all QA checks
+make qa
+
+# Open shell in container
+make shell
+
+# Stop container
+make down
+
+# Clean build artifacts
+make clean
 ```
 
-### Running Tests
+### Without Docker
+
+If you have PHP and Composer installed locally:
 
 ```bash
-# Run all tests
+# Clone repository
+git clone https://github.com/nowo-tech/composer-update-helper.git
+cd composer-update-helper
+
+# Install dependencies
+composer install
+
+# Run tests
 composer test
 
 # Run tests with coverage
@@ -132,6 +169,42 @@ composer cs-fix
 # Run all QA checks
 composer qa
 ```
+
+### Available Make Commands
+
+| Command | Description |
+|---------|-------------|
+| `make up` | Start Docker container |
+| `make down` | Stop Docker container |
+| `make shell` | Open shell in container |
+| `make install` | Install Composer dependencies |
+| `make test` | Run PHPUnit tests |
+| `make test-coverage` | Run tests with code coverage |
+| `make cs-check` | Check code style (PSR-12) |
+| `make cs-fix` | Fix code style |
+| `make qa` | Run all QA checks |
+| `make clean` | Remove vendor and cache |
+| `make setup-hooks` | Install git pre-commit hooks |
+
+### Pre-commit Hooks (Optional)
+
+Install git hooks to automatically run CS-check and tests before each commit:
+
+```bash
+make setup-hooks
+```
+
+This ensures code quality checks run locally before pushing to GitHub.
+
+## Continuous Integration
+
+Every push to GitHub automatically triggers:
+
+- ✅ **Tests** on PHP 7.4, 8.0, 8.1, 8.2, 8.3
+- ✅ **Code Style** check (PSR-12)
+- ✅ **Code Coverage** report
+
+See [GitHub Actions](https://github.com/nowo-tech/ComposerUpdateHelper/actions) for build status.
 
 ## Contributing
 
