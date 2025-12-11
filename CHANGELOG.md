@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.4] - 2024-12-11
+
+### Fixed
+- Fixed Plugin.php to correctly detect vendor vs development mode
+- Fixed tests to backup and restore original generate-composer-require.sh file
+- Restored correct generate-composer-require.sh script content (was overwritten with test content)
+
+### Changed
+- Improved generate-composer-require.ignore.txt template with better documentation
+- Added examples and usage guidelines to ignore file template
+- Made ignore file template more practical and user-friendly
+
 ## [1.2.3] - 2024-12-11
 
 ### Added
