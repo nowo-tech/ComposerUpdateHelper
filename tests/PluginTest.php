@@ -13,6 +13,7 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * @author Héctor Franco Aceituno <hectorfranco@nowo.com>
+ *
  * @see    https://github.com/HecFranco
  */
 class PluginTest extends TestCase

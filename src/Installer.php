@@ -11,6 +11,7 @@ use Composer\Script\Event;
  * Can be used directly in composer.json scripts section.
  *
  * @author Héctor Franco Aceituno <hectorfranco@nowo.com>
+ *
  * @see    https://github.com/HecFranco
  */
 class Installer

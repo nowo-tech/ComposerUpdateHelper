@@ -16,6 +16,7 @@ use Composer\Script\ScriptEvents;
  * Works with any PHP project (Symfony, Laravel, Yii, CodeIgniter, etc.)
  *
  * @author Héctor Franco Aceituno <hectorfranco@nowo.com>
+ *
  * @see    https://github.com/HecFranco
  */
 class Plugin implements PluginInterface, EventSubscriberInterface
