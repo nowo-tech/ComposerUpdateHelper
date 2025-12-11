@@ -1,1 +1,22 @@
-# Ignore file
+# Packages to ignore during update
+# Each line is a package name (e.g.: vendor/package)
+# Empty lines and lines starting with # are ignored
+#
+# Ignored packages will still be displayed in the output with their available versions,
+# but won't be included in the composer require commands.
+#
+# Common packages to ignore:
+# - Framework core packages (usually updated separately)
+# - Packages with breaking changes between major versions
+# - Packages that require manual migration steps
+#
+# Examples (uncomment the ones you want to ignore):
+# doctrine/orm
+# doctrine/doctrine-bundle
+# doctrine/doctrine-migrations-bundle
+# symfony/security-bundle
+# laravel/framework
+# yiisoft/yii2
+# cakephp/cakephp
+# codeigniter4/framework
+# slim/slim
