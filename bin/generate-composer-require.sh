@@ -1,14 +1,22 @@
 #!/bin/sh
 # generate-composer-require.sh
 # Generates composer require commands (prod and dev) from "composer outdated --direct".
-# Works with any PHP project (Symfony, Laravel, Yii, CodeIgniter, etc.)
+# Works with any PHP project (Symfony, Laravel, Yii, CodeIgniter, CakePHP, Laminas, Slim, etc.)
 #
 # Usage:
 #   ./generate-composer-require.sh
 #   ./generate-composer-require.sh --run   # to execute the suggested commands
 #
 # Packages listed in generate-composer-require.ignore.txt (one per line) will be skipped.
-# For Symfony projects, respects "extra.symfony.require" constraint if present.
+#
+# Framework support:
+#   - Symfony: respects "extra.symfony.require" constraint
+#   - Laravel: respects laravel/framework major.minor version
+#   - Yii: respects yiisoft/yii2 major.minor version
+#   - CakePHP: respects cakephp/cakephp major.minor version
+#   - Laminas: respects laminas/* major.minor versions
+#   - CodeIgniter: respects codeigniter4/framework major.minor version
+#   - Slim: respects slim/slim major.minor version
 
 set -eu
 
@@ -66,6 +74,7 @@ if (!$report || empty($report['installed'])) {
 $composer = json_decode(file_get_contents('composer.json'), true);
 $require    = $composer['require']     ?? [];
 $requireDev = $composer['require-dev'] ?? [];
+$allDeps = array_merge($require, $requireDev);
 $devSet = array_fill_keys(array_keys($requireDev), true);
 
 // Load ignored packages from environment
@@ -75,51 +84,127 @@ if ($ignoredPackagesRaw) {
     $ignoredPackages = array_flip(explode('|', $ignoredPackagesRaw));
 }
 
-// Get Symfony constraint if it exists (for Symfony projects)
-$symfonyConstraint = null;
-if (isset($composer['extra']['symfony']['require'])) {
-    $symfonyConstraint = $composer['extra']['symfony']['require'];
-}
+// ============================================================================
+// FRAMEWORK DETECTION AND CONSTRAINTS
+// ============================================================================
 
-// Function to extract the base version from a constraint (e.g.: "7.4.*" -> "7.4")
+// Framework configurations: prefix => core package
+$frameworkConfigs = [
+    'symfony' => [
+        'prefix' => 'symfony/',
+        'corePackage' => null, // Uses extra.symfony.require
+        'extraKey' => ['extra', 'symfony', 'require'],
+    ],
+    'laravel' => [
+        'prefix' => 'laravel/',
+        'corePackage' => 'laravel/framework',
+        'related' => ['illuminate/'],
+    ],
+    'yii' => [
+        'prefix' => 'yiisoft/',
+        'corePackage' => 'yiisoft/yii2',
+    ],
+    'cakephp' => [
+        'prefix' => 'cakephp/',
+        'corePackage' => 'cakephp/cakephp',
+    ],
+    'laminas' => [
+        'prefix' => 'laminas/',
+        'corePackage' => 'laminas/laminas-mvc',
+        'fallbackCore' => 'laminas/laminas-servicemanager',
+    ],
+    'codeigniter' => [
+        'prefix' => 'codeigniter4/',
+        'corePackage' => 'codeigniter4/framework',
+    ],
+    'slim' => [
+        'prefix' => 'slim/',
+        'corePackage' => 'slim/slim',
+    ],
+];
+
+// Detected framework constraints (prefix => base version like "7.1")
+$frameworkConstraints = [];
+
+// Function to extract the base version from a constraint or version (e.g.: "7.4.*" -> "7.4", "^8.0" -> "8.0")
 function extractBaseVersion($constraint) {
     // Remove special characters and get the main numeric part
+    $constraint = ltrim($constraint, '^~>=<vV');
     $parts = preg_split('/[^0-9]/', $constraint, 3);
-    if (count($parts) >= 2) {
+    if (count($parts) >= 2 && is_numeric($parts[0]) && is_numeric($parts[1])) {
         return $parts[0] . '.' . $parts[1];
     }
     return null;
 }
 
-// Function to check if a version exceeds the Symfony constraint
-function shouldLimitVersion($packageName, $latestVersion, $symfonyConstraint) {
-    // Only apply to Symfony packages
-    if (strpos($packageName, 'symfony/') !== 0) {
+// Detect Symfony constraint from extra.symfony.require
+if (isset($composer['extra']['symfony']['require'])) {
+    $baseVersion = extractBaseVersion($composer['extra']['symfony']['require']);
+    if ($baseVersion) {
+        $frameworkConstraints['symfony/'] = $baseVersion;
+    }
+}
+
+// Detect other frameworks from installed versions
+foreach ($frameworkConfigs as $name => $config) {
+    if ($name === 'symfony') continue; // Already handled above
+    
+    $prefix = $config['prefix'];
+    if (isset($frameworkConstraints[$prefix])) continue;
+    
+    // Try core package
+    $corePackage = $config['corePackage'] ?? null;
+    if ($corePackage && isset($allDeps[$corePackage])) {
+        $baseVersion = extractBaseVersion($allDeps[$corePackage]);
+        if ($baseVersion) {
+            $frameworkConstraints[$prefix] = $baseVersion;
+            // Also add related prefixes (e.g., illuminate/ for Laravel)
+            if (isset($config['related'])) {
+                foreach ($config['related'] as $relatedPrefix) {
+                    $frameworkConstraints[$relatedPrefix] = $baseVersion;
+                }
+            }
+            continue;
+        }
+    }
+    
+    // Try fallback core package
+    $fallbackCore = $config['fallbackCore'] ?? null;
+    if ($fallbackCore && isset($allDeps[$fallbackCore])) {
+        $baseVersion = extractBaseVersion($allDeps[$fallbackCore]);
+        if ($baseVersion) {
+            $frameworkConstraints[$prefix] = $baseVersion;
+        }
+    }
+}
+
+// Function to check if a package belongs to a framework and get its constraint
+function getFrameworkConstraint($packageName, $frameworkConstraints) {
+    foreach ($frameworkConstraints as $prefix => $baseVersion) {
+        if (strpos($packageName, $prefix) === 0) {
+            return $baseVersion;
+        }
+    }
+    return null;
+}
+
+// Function to check if a version exceeds the framework constraint
+function shouldLimitVersion($packageName, $latestVersion, $frameworkConstraints) {
+    $constraintBase = getFrameworkConstraint($packageName, $frameworkConstraints);
+    if (!$constraintBase) {
         return false;
     }
 
-    if (!$symfonyConstraint) {
-        return false;
-    }
-
-    // Normalize versions (remove 'v' prefix)
+    // Normalize latest version
     $latest = ltrim($latestVersion, 'v');
-    $baseVersion = extractBaseVersion($symfonyConstraint);
-
-    if (!$baseVersion) {
-        return false;
-    }
-
-    // Extract base version from latest (e.g.: "8.0.1" -> "8.0")
     $latestBase = extractBaseVersion($latest);
     if (!$latestBase) {
         return false;
     }
 
-    // If the base version of latest is greater than the constraint, limit
-    // E.g.: latest is 8.0.x and constraint is 7.4.* -> limit
+    // Compare base versions
     $latestParts = explode('.', $latestBase);
-    $baseParts = explode('.', $baseVersion);
+    $baseParts = explode('.', $constraintBase);
 
     if (count($latestParts) >= 2 && count($baseParts) >= 2) {
         $latestMajor = (int)$latestParts[0];
@@ -127,7 +212,7 @@ function shouldLimitVersion($packageName, $latestVersion, $symfonyConstraint) {
         $baseMajor = (int)$baseParts[0];
         $baseMinor = (int)$baseParts[1];
 
-        // If latest is a major version or a higher minor within the same major
+        // If latest exceeds the constraint
         if ($latestMajor > $baseMajor || ($latestMajor === $baseMajor && $latestMinor > $baseMinor)) {
             return true;
         }
@@ -137,7 +222,7 @@ function shouldLimitVersion($packageName, $latestVersion, $symfonyConstraint) {
 }
 
 // Function to get the latest specific version that meets a constraint
-function getLatestVersionInConstraint($packageName, $constraint) {
+function getLatestVersionInConstraint($packageName, $baseVersion) {
     $composerBin = getenv('COMPOSER_BIN') ?: 'composer';
     $phpBin = getenv('PHP_BIN') ?: 'php';
 
@@ -155,12 +240,6 @@ function getLatestVersionInConstraint($packageName, $constraint) {
         return null;
     }
 
-    // Convert constraint to pattern (e.g.: "7.4.*" -> "7.4.")
-    $baseVersion = extractBaseVersion($constraint);
-    if (!$baseVersion) {
-        return null;
-    }
-
     $basePrefix = $baseVersion . '.';
 
     // Filter versions that start with the prefix and get the latest one
@@ -168,7 +247,10 @@ function getLatestVersionInConstraint($packageName, $constraint) {
     foreach ($data['versions'] as $version) {
         $normalized = ltrim($version, 'v');
         if (strpos($normalized, $basePrefix) === 0) {
-            $matchingVersions[] = $normalized;
+            // Exclude dev/alpha/beta/RC versions
+            if (!preg_match('/(dev|alpha|beta|rc)/i', $version)) {
+                $matchingVersions[] = $normalized;
+            }
         }
     }
 
@@ -180,6 +262,10 @@ function getLatestVersionInConstraint($packageName, $constraint) {
     usort($matchingVersions, 'version_compare');
     return end($matchingVersions);
 }
+
+// ============================================================================
+// PROCESS PACKAGES
+// ============================================================================
 
 $prod = [];
 $dev  = [];
@@ -210,14 +296,15 @@ foreach ($report['installed'] as $pkg) {
     $normalized = ltrim($latest, 'v');
     $installedNormalized = $installed ? ltrim($installed, 'v') : null;
 
-    // If it's a Symfony package and exceeds the constraint, get the latest specific version within the constraint
-    if (shouldLimitVersion($name, $latest, $symfonyConstraint)) {
-        $specificVersion = getLatestVersionInConstraint($name, $symfonyConstraint);
+    // Check if this package belongs to a framework and should be limited
+    if (shouldLimitVersion($name, $latest, $frameworkConstraints)) {
+        $frameworkBase = getFrameworkConstraint($name, $frameworkConstraints);
+        $specificVersion = getLatestVersionInConstraint($name, $frameworkBase);
         if ($specificVersion) {
             $constraint = $specificVersion;
         } else {
-            // Fallback: use the constraint if we can't get the specific version
-            $constraint = $symfonyConstraint;
+            // Fallback: use the base version with wildcard
+            $constraint = $frameworkBase . '.*';
         }
     } else {
         $constraint = $normalized;
@@ -225,7 +312,6 @@ foreach ($report['installed'] as $pkg) {
 
     // Compare installed version with the proposed one: only include if there's really an update
     if ($installedNormalized) {
-        // Normalize constraint for comparison (can be "7.4.*" or "7.4.5")
         $constraintNormalized = $constraint;
         // If it's a wildcard constraint, we can't compare directly, so we include it
         if (strpos($constraint, '*') === false && strpos($constraint, '^') === false && strpos($constraint, '~') === false) {
@@ -244,8 +330,19 @@ foreach ($report['installed'] as $pkg) {
     }
 }
 
-// Output format: sections separated by markers
+// ============================================================================
+// OUTPUT
+// ============================================================================
+
 $output = [];
+
+// Detected frameworks section
+$detectedFrameworks = [];
+foreach ($frameworkConstraints as $prefix => $version) {
+    $detectedFrameworks[] = rtrim($prefix, '/') . ' ' . $version . '.*';
+}
+$output[] = "---FRAMEWORKS---";
+$output[] = implode(' ', $detectedFrameworks);
 
 // Commands section
 $commands = [];
@@ -268,6 +365,7 @@ PHP
 OUTPUT="$(printf "%s\n" "$OUTPUT" | grep -v '^Warning:' || true)"
 
 # Parse the structured output
+FRAMEWORKS="$(printf "%s\n" "$OUTPUT" | sed -n '/^---FRAMEWORKS---$/,/^---COMMANDS---$/p' | grep -v '^---' || true)"
 COMMANDS="$(printf "%s\n" "$OUTPUT" | sed -n '/^---COMMANDS---$/,/^---IGNORED_PROD---$/p' | grep -v '^---' || true)"
 IGNORED_PROD="$(printf "%s\n" "$OUTPUT" | sed -n '/^---IGNORED_PROD---$/,/^---IGNORED_DEV---$/p' | grep -v '^---' || true)"
 IGNORED_DEV="$(printf "%s\n" "$OUTPUT" | sed -n '/^---IGNORED_DEV---$/,$p' | grep -v '^---' || true)"
@@ -276,6 +374,15 @@ IGNORED_DEV="$(printf "%s\n" "$OUTPUT" | sed -n '/^---IGNORED_DEV---$/,$p' | gre
 if [ -z "$COMMANDS" ] && [ -z "$IGNORED_PROD" ] && [ -z "$IGNORED_DEV" ]; then
   echo "✅ No outdated direct dependencies."
   exit 0
+fi
+
+# Show detected frameworks
+if [ -n "$FRAMEWORKS" ]; then
+  echo "🔧 Detected framework constraints:"
+  printf "%s\n" "$FRAMEWORKS" | tr ' ' '\n' | while read -r fw; do
+    [ -n "$fw" ] && echo "  - $fw"
+  done
+  echo ""
 fi
 
 # Show ignored packages if any (prod)
@@ -315,4 +422,3 @@ if [ "$RUN_FLAG" = "--run" ]; then
   done
   echo "✅ Update completed."
 fi
-
