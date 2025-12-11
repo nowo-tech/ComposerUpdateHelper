@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.3] - 2024-12-11
+
+### Added
+- Comprehensive test suite achieving 100% code coverage
+- Automatic PHP CS Fixer code style fixes on push to main/master branch
+- 100% code coverage validation requirement in CI/CD pipeline
+- Explicit test validation to ensure all tests pass before deployment
+
+### Changed
+- Improved CI/CD workflow with automatic code style fixes and commits
+- Enhanced test coverage with additional test cases for Plugin and Installer classes
+- Better error handling in test suite for edge cases
+
+### Fixed
+- Fixed PHPDoc formatting (added blank lines between @author and @see annotations)
+- Fixed test expectations to handle multiple IO write calls correctly
+
+## [1.2.2] - 2024-12-11
+
+### Changed
+- Updated CI/CD workflow configuration
+
 ## [1.2.1] - 2024-12-11
 
 ### Added
