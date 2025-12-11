@@ -27,7 +27,7 @@ Generates `composer require` commands from outdated dependencies. Works with any
 ## Installation
 
 ```bash
-composer require nowo-tech/composer-update-helper
+composer require --dev nowo-tech/composer-update-helper
 ```
 
 After installation, two files will be copied to your project root:
