@@ -15,6 +15,11 @@ use Composer\Script\Event;
  */
 class Installer
 {
+    /**
+     * Install files to the project root.
+     *
+     * @param Event $event The script event
+     */
     public static function install(Event $event): void
     {
         $io = $event->getIO();
@@ -62,6 +67,11 @@ class Installer
         }
     }
 
+    /**
+     * Uninstall files from the project root.
+     *
+     * @param Event $event The script event
+     */
     public static function uninstall(Event $event): void
     {
         $io = $event->getIO();
