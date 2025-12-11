@@ -45,6 +45,39 @@ class ScriptTest extends TestCase
         $this->assertStringContainsString('--with-all-dependencies', $content);
     }
 
+    public function testScriptSupportsMultipleFrameworks(): void
+    {
+        $content = file_get_contents($this->scriptPath);
+
+        // Check for framework configurations
+        $this->assertStringContainsString("'symfony'", $content);
+        $this->assertStringContainsString("'laravel'", $content);
+        $this->assertStringContainsString("'yii'", $content);
+        $this->assertStringContainsString("'cakephp'", $content);
+        $this->assertStringContainsString("'laminas'", $content);
+        $this->assertStringContainsString("'codeigniter'", $content);
+        $this->assertStringContainsString("'slim'", $content);
+    }
+
+    public function testScriptDetectsFrameworkConstraints(): void
+    {
+        $content = file_get_contents($this->scriptPath);
+
+        // Check for framework detection logic
+        $this->assertStringContainsString('frameworkConfigs', $content);
+        $this->assertStringContainsString('frameworkConstraints', $content);
+        $this->assertStringContainsString('getFrameworkConstraint', $content);
+    }
+
+    public function testScriptSupportsLaravelIlluminatePackages(): void
+    {
+        $content = file_get_contents($this->scriptPath);
+
+        // Check Laravel also limits illuminate/* packages
+        $this->assertStringContainsString("'illuminate/'", $content);
+        $this->assertStringContainsString('laravel/framework', $content);
+    }
+
     public function testScriptHandlesIgnoreFile(): void
     {
         $content = file_get_contents($this->scriptPath);

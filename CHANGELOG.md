@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2024-12-11
+
+### Added
+- **Multi-framework support**: automatic detection and version constraints for:
+  - Laravel (`laravel/*` and `illuminate/*` packages)
+  - Yii (`yiisoft/*` packages)
+  - CakePHP (`cakephp/*` packages)
+  - Laminas (`laminas/*` packages)
+  - CodeIgniter (`codeigniter4/*` packages)
+  - Slim (`slim/*` packages)
+- Display detected framework constraints in output
+- Exclude dev/alpha/beta/RC versions when finding latest compatible version
+
+### Changed
+- Improved version detection logic for all frameworks
+- Better output formatting with framework detection info
+
 ## [1.1.0] - 2024-12-11
 
 ### Added

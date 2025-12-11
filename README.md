@@ -12,7 +12,14 @@ Generates `composer require` commands from outdated dependencies. Works with any
 - ✅ Works with any PHP project
 - ✅ Separates production and development dependencies
 - ✅ Shows ignored packages with available versions
-- ✅ For Symfony projects: respects `extra.symfony.require` constraint
+- ✅ **Multi-framework support** with version constraints:
+  - **Symfony**: respects `extra.symfony.require`
+  - **Laravel**: respects `laravel/framework` + `illuminate/*` versions
+  - **Yii**: respects `yiisoft/yii2` version
+  - **CakePHP**: respects `cakephp/cakephp` version
+  - **Laminas**: respects `laminas/*` versions
+  - **CodeIgniter**: respects `codeigniter4/framework` version
+  - **Slim**: respects `slim/slim` version
 - ✅ Compares versions to avoid unnecessary updates
 - ✅ Can execute commands directly with `--run` flag
 - ✅ Automatic installation via Composer plugin
@@ -83,9 +90,13 @@ Example:
 PHP_BIN=/usr/bin/php8.2 ./generate-composer-require.sh
 ```
 
-## Symfony Version Constraints
+## Framework Version Constraints
 
-For Symfony projects, the script respects the `extra.symfony.require` constraint in your `composer.json`:
+The script automatically detects your framework and respects version constraints to prevent breaking updates.
+
+### Symfony
+
+Respects `extra.symfony.require` in `composer.json`:
 
 ```json
 {
@@ -97,7 +108,41 @@ For Symfony projects, the script respects the `extra.symfony.require` constraint
 }
 ```
 
-This prevents suggesting Symfony package updates that would exceed your configured version.
+### Laravel
+
+Automatically detects `laravel/framework` version and limits all `laravel/*` and `illuminate/*` packages:
+
+```json
+{
+    "require": {
+        "laravel/framework": "^11.0"
+    }
+}
+```
+
+### Other Frameworks
+
+| Framework | Core Package | Limited Packages |
+|-----------|--------------|------------------|
+| **Yii** | `yiisoft/yii2` | `yiisoft/*` |
+| **CakePHP** | `cakephp/cakephp` | `cakephp/*` |
+| **Laminas** | `laminas/laminas-mvc` | `laminas/*` |
+| **CodeIgniter** | `codeigniter4/framework` | `codeigniter4/*` |
+| **Slim** | `slim/slim` | `slim/*` |
+
+### Example Output
+
+```
+🔧 Detected framework constraints:
+  - symfony 7.1.*
+  - laravel 11.0.*
+
+⏭️  Ignored packages (prod):
+  - doctrine/orm:3.0.0
+
+🔧 Suggested commands:
+  composer require --with-all-dependencies symfony/console:7.1.8
+```
 
 ## Requirements
 
