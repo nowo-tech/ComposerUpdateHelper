@@ -127,7 +127,8 @@ final class PluginTest extends TestCase
                 ->method('write')
                 ->with($this->logicalOr(
                     $this->stringContains('Installing'),
-                    $this->stringContains('Creating generate-composer-require.ignore.txt')
+                    $this->stringContains('Creating generate-composer-require.ignore.txt'),
+                    $this->stringContains('Updated .gitignore')
                 ));
 
             $event = $this->createMock(Event::class);
@@ -195,7 +196,8 @@ final class PluginTest extends TestCase
                 ->method('write')
                 ->with($this->logicalOr(
                     $this->stringContains('Installing'),
-                    $this->stringContains('Creating generate-composer-require.ignore.txt')
+                    $this->stringContains('Creating generate-composer-require.ignore.txt'),
+                    $this->stringContains('Updated .gitignore')
                 ));
 
             $event = $this->createMock(Event::class);
@@ -265,7 +267,8 @@ final class PluginTest extends TestCase
                 ->method('write')
                 ->with($this->logicalOr(
                     $this->stringContains('Updating'),
-                    $this->stringContains('Creating generate-composer-require.ignore.txt')
+                    $this->stringContains('Creating generate-composer-require.ignore.txt'),
+                    $this->stringContains('Updated .gitignore')
                 ));
 
             $event = $this->createMock(Event::class);
@@ -331,6 +334,10 @@ final class PluginTest extends TestCase
             ->willReturn($config);
 
         $io = $this->createMock(IOInterface::class);
+        // Allow .gitignore update message, but not file installation/update messages
+        $io->expects($this->atMost(1))
+            ->method('write')
+            ->with($this->stringContains('Updated .gitignore'));
         $io->expects($this->never())
             ->method('write')
             ->with($this->logicalOr(
@@ -425,7 +432,8 @@ final class PluginTest extends TestCase
             ->method('write')
             ->with($this->logicalOr(
                 $this->stringContains('Installing'),
-                $this->stringContains('Creating generate-composer-require.ignore.txt')
+                $this->stringContains('Creating generate-composer-require.ignore.txt'),
+                $this->stringContains('Updated .gitignore')
             ));
 
         $event = $this->createMock(Event::class);
@@ -485,6 +493,7 @@ final class PluginTest extends TestCase
                 ->method('write')
                 ->with($this->logicalOr(
                     $this->stringContains('Installing'),
+                    $this->stringContains('Creating generate-composer-require.ignore.txt'),
                     $this->stringContains('Updated .gitignore')
                 ));
 
