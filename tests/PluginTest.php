@@ -108,8 +108,12 @@ final class PluginTest extends TestCase
             $originalContent = file_get_contents($sourceFile);
         }
 
+<<<<<<< HEAD
         try
         {
+=======
+        try {
+>>>>>>> 5518e3edfb22658947047faeca2f2d525967fedf
             file_put_contents($sourceFile, '#!/bin/sh\necho "test"');
 
             $config = $this->createMock(Config::class);
@@ -184,8 +188,12 @@ final class PluginTest extends TestCase
             $originalContent = file_get_contents($sourceFile);
         }
 
+<<<<<<< HEAD
         try
         {
+=======
+        try {
+>>>>>>> 5518e3edfb22658947047faeca2f2d525967fedf
             file_put_contents($sourceFile, '#!/bin/sh\necho "test"');
 
             $config = $this->createMock(Config::class);
@@ -262,8 +270,12 @@ final class PluginTest extends TestCase
             $originalContent = file_get_contents($sourceFile);
         }
 
+<<<<<<< HEAD
         try
         {
+=======
+        try {
+>>>>>>> 5518e3edfb22658947047faeca2f2d525967fedf
             file_put_contents($sourceFile, '#!/bin/sh\necho "new"');
 
             $config = $this->createMock(Config::class);
