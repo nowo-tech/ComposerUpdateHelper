@@ -7,9 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.5] - 2025-12-12
+
 ### Changed
 - Updated installation documentation to use `--dev` flag
   - Package should be installed as development dependency: `composer require --dev nowo-tech/composer-update-helper`
+- Updated author email address from `hectorfranco@nowo.com` to `hectorfranco@nowo.tech`
+- Code style improvements and formatting updates
 
 ## [1.2.4] - 2024-12-11
 

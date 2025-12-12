@@ -4,20 +4,18 @@ declare(strict_types=1);
 
 namespace NowoTech\ComposerUpdateHelper\Tests;
 
-use Composer\Composer;
-use Composer\Config;
+use Composer\{Composer, Config};
 use Composer\IO\IOInterface;
-use Composer\Script\Event;
-use Composer\Script\ScriptEvents;
+use Composer\Script\{Event, ScriptEvents};
 use NowoTech\ComposerUpdateHelper\Plugin;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @author Héctor Franco Aceituno <hectorfranco@nowo.com>
+ * @author Héctor Franco Aceituno <hectorfranco@nowo.tech>
  *
  * @see    https://github.com/HecFranco
  */
-class PluginTest extends TestCase
+final class PluginTest extends TestCase
 {
     public function testGetSubscribedEvents(): void
     {
@@ -32,9 +30,9 @@ class PluginTest extends TestCase
 
     public function testActivateStoresComposerAndIo(): void
     {
-        $plugin = new Plugin();
+        $plugin   = new Plugin();
         $composer = $this->createMock(Composer::class);
-        $io = $this->createMock(IOInterface::class);
+        $io       = $this->createMock(IOInterface::class);
 
         // Should not throw any exception
         $plugin->activate($composer, $io);
@@ -44,9 +42,9 @@ class PluginTest extends TestCase
 
     public function testDeactivateDoesNothing(): void
     {
-        $plugin = new Plugin();
+        $plugin   = new Plugin();
         $composer = $this->createMock(Composer::class);
-        $io = $this->createMock(IOInterface::class);
+        $io       = $this->createMock(IOInterface::class);
 
         // Should not throw any exception
         $plugin->deactivate($composer, $io);
@@ -56,9 +54,9 @@ class PluginTest extends TestCase
 
     public function testUninstallRemovesFiles(): void
     {
-        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $tempDir   = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
         $vendorDir = $tempDir . '/vendor';
-        mkdir($vendorDir, 0777, true);
+        mkdir($vendorDir, 0o777, true);
 
         // Create test file
         file_put_contents($tempDir . '/generate-composer-require.sh', '#!/bin/sh');
@@ -87,25 +85,31 @@ class PluginTest extends TestCase
 
     public function testOnPostInstallInstallsFiles(): void
     {
-        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
-        $vendorDir = $tempDir . '/vendor';
+        $tempDir    = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir  = $tempDir . '/vendor';
         $packageDir = __DIR__ . '/..';
-        mkdir($vendorDir, 0777, true);
+        mkdir($vendorDir, 0o777, true);
 
         // Create source file in package
         $binDir = $packageDir . '/bin';
-        if (!is_dir($binDir)) {
-            mkdir($binDir, 0777, true);
+
+        if (!is_dir($binDir))
+        {
+            mkdir($binDir, 0o777, true);
         }
+
         $sourceFile = $binDir . '/generate-composer-require.sh';
-        
+
         // Backup original file if it exists
         $originalContent = null;
-        if (file_exists($sourceFile)) {
+
+        if (file_exists($sourceFile))
+        {
             $originalContent = file_get_contents($sourceFile);
         }
-        
-        try {
+
+        try
+        {
             file_put_contents($sourceFile, '#!/bin/sh\necho "test"');
 
             $config = $this->createMock(Config::class);
@@ -121,8 +125,8 @@ class PluginTest extends TestCase
             $io->expects($this->atLeastOnce())
                 ->method('write')
                 ->with($this->logicalOr(
-                    $this->stringContains('Installing'),
-                    $this->stringContains('Creating generate-composer-require.ignore.txt')
+                  $this->stringContains('Installing'),
+                  $this->stringContains('Creating generate-composer-require.ignore.txt')
                 ));
 
             $event = $this->createMock(Event::class);
@@ -134,11 +138,16 @@ class PluginTest extends TestCase
             $plugin->onPostInstall($event);
 
             $this->assertFileExists($tempDir . '/generate-composer-require.sh');
-        } finally {
+        }
+        finally
+        {
             // Restore original file
-            if ($originalContent !== null) {
+            if ($originalContent !== null)
+            {
                 file_put_contents($sourceFile, $originalContent);
-            } elseif (file_exists($sourceFile)) {
+            }
+            elseif (file_exists($sourceFile))
+            {
                 @unlink($sourceFile);
             }
         }
@@ -152,25 +161,31 @@ class PluginTest extends TestCase
 
     public function testOnPostUpdateInstallsFiles(): void
     {
-        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
-        $vendorDir = $tempDir . '/vendor';
+        $tempDir    = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir  = $tempDir . '/vendor';
         $packageDir = __DIR__ . '/..';
-        mkdir($vendorDir, 0777, true);
+        mkdir($vendorDir, 0o777, true);
 
         // Create source file in package
         $binDir = $packageDir . '/bin';
-        if (!is_dir($binDir)) {
-            mkdir($binDir, 0777, true);
+
+        if (!is_dir($binDir))
+        {
+            mkdir($binDir, 0o777, true);
         }
+
         $sourceFile = $binDir . '/generate-composer-require.sh';
-        
+
         // Backup original file if it exists
         $originalContent = null;
-        if (file_exists($sourceFile)) {
+
+        if (file_exists($sourceFile))
+        {
             $originalContent = file_get_contents($sourceFile);
         }
-        
-        try {
+
+        try
+        {
             file_put_contents($sourceFile, '#!/bin/sh\necho "test"');
 
             $config = $this->createMock(Config::class);
@@ -186,8 +201,8 @@ class PluginTest extends TestCase
             $io->expects($this->atLeastOnce())
                 ->method('write')
                 ->with($this->logicalOr(
-                    $this->stringContains('Installing'),
-                    $this->stringContains('Creating generate-composer-require.ignore.txt')
+                  $this->stringContains('Installing'),
+                  $this->stringContains('Creating generate-composer-require.ignore.txt')
                 ));
 
             $event = $this->createMock(Event::class);
@@ -199,11 +214,16 @@ class PluginTest extends TestCase
             $plugin->onPostUpdate($event);
 
             $this->assertFileExists($tempDir . '/generate-composer-require.sh');
-        } finally {
+        }
+        finally
+        {
             // Restore original file
-            if ($originalContent !== null) {
+            if ($originalContent !== null)
+            {
                 file_put_contents($sourceFile, $originalContent);
-            } elseif (file_exists($sourceFile)) {
+            }
+            elseif (file_exists($sourceFile))
+            {
                 @unlink($sourceFile);
             }
         }
@@ -216,28 +236,34 @@ class PluginTest extends TestCase
 
     public function testInstallFilesUpdatesWhenContentDiffers(): void
     {
-        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
-        $vendorDir = $tempDir . '/vendor';
+        $tempDir    = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir  = $tempDir . '/vendor';
         $packageDir = __DIR__ . '/..';
-        mkdir($vendorDir, 0777, true);
+        mkdir($vendorDir, 0o777, true);
 
         // Create existing file with different content
         file_put_contents($tempDir . '/generate-composer-require.sh', '#!/bin/sh\necho "old"');
 
         // Create source file in package with new content
         $binDir = $packageDir . '/bin';
-        if (!is_dir($binDir)) {
-            mkdir($binDir, 0777, true);
+
+        if (!is_dir($binDir))
+        {
+            mkdir($binDir, 0o777, true);
         }
+
         $sourceFile = $binDir . '/generate-composer-require.sh';
-        
+
         // Backup original file if it exists
         $originalContent = null;
-        if (file_exists($sourceFile)) {
+
+        if (file_exists($sourceFile))
+        {
             $originalContent = file_get_contents($sourceFile);
         }
-        
-        try {
+
+        try
+        {
             file_put_contents($sourceFile, '#!/bin/sh\necho "new"');
 
             $config = $this->createMock(Config::class);
@@ -253,8 +279,8 @@ class PluginTest extends TestCase
             $io->expects($this->atLeastOnce())
                 ->method('write')
                 ->with($this->logicalOr(
-                    $this->stringContains('Updating'),
-                    $this->stringContains('Creating generate-composer-require.ignore.txt')
+                  $this->stringContains('Updating'),
+                  $this->stringContains('Creating generate-composer-require.ignore.txt')
                 ));
 
             $event = $this->createMock(Event::class);
@@ -266,12 +292,17 @@ class PluginTest extends TestCase
             $plugin->onPostInstall($event);
 
             $this->assertFileExists($tempDir . '/generate-composer-require.sh');
-            $this->assertStringContainsString('new', file_get_contents($tempDir . '/generate-composer-require.sh'));
-        } finally {
+            $this->assertStringContainsString('new', (string) file_get_contents($tempDir . '/generate-composer-require.sh'));
+        }
+        finally
+        {
             // Restore original file
-            if ($originalContent !== null) {
+            if ($originalContent !== null)
+            {
                 file_put_contents($sourceFile, $originalContent);
-            } elseif (file_exists($sourceFile)) {
+            }
+            elseif (file_exists($sourceFile))
+            {
                 @unlink($sourceFile);
             }
         }
@@ -285,25 +316,30 @@ class PluginTest extends TestCase
 
     public function testInstallFilesSkipsWhenContentMatches(): void
     {
-        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
-        $vendorDir = $tempDir . '/vendor';
+        $tempDir    = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir  = $tempDir . '/vendor';
         $packageDir = __DIR__ . '/..';
-        mkdir($vendorDir, 0777, true);
+        mkdir($vendorDir, 0o777, true);
 
         $content = '#!/bin/sh\necho "same"';
         file_put_contents($tempDir . '/generate-composer-require.sh', $content);
 
         // Create source file in package with same content
         $binDir = $packageDir . '/bin';
-        if (!is_dir($binDir)) {
-            mkdir($binDir, 0777, true);
+
+        if (!is_dir($binDir))
+        {
+            mkdir($binDir, 0o777, true);
         }
+
         $sourceFile = $binDir . '/generate-composer-require.sh';
         file_put_contents($sourceFile, $content);
 
         // Ensure ignore file doesn't exist to avoid triggering its creation
         $ignoreSource = $binDir . '/generate-composer-require.ignore.txt';
-        if (file_exists($ignoreSource)) {
+
+        if (file_exists($ignoreSource))
+        {
             @unlink($ignoreSource);
         }
 
@@ -320,8 +356,8 @@ class PluginTest extends TestCase
         $io->expects($this->never())
             ->method('write')
             ->with($this->logicalOr(
-                $this->stringContains('Updating'),
-                $this->stringContains('Installing')
+              $this->stringContains('Updating'),
+              $this->stringContains('Installing')
             ));
 
         $event = $this->createMock(Event::class);
@@ -340,15 +376,17 @@ class PluginTest extends TestCase
 
     public function testInstallFilesHandlesMissingSourceFile(): void
     {
-        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
-        $vendorDir = $tempDir . '/vendor';
+        $tempDir    = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir  = $tempDir . '/vendor';
         $packageDir = __DIR__ . '/..';
-        mkdir($vendorDir, 0777, true);
+        mkdir($vendorDir, 0o777, true);
 
         // Ensure source file doesn't exist
-        $binDir = $packageDir . '/bin';
+        $binDir     = $packageDir . '/bin';
         $sourceFile = $binDir . '/generate-composer-require.sh';
-        if (file_exists($sourceFile)) {
+
+        if (file_exists($sourceFile))
+        {
             @unlink($sourceFile);
         }
 
@@ -381,16 +419,19 @@ class PluginTest extends TestCase
 
     public function testInstallFilesCreatesIgnoreFileIfNotExists(): void
     {
-        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
-        $vendorDir = $tempDir . '/vendor';
+        $tempDir    = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir  = $tempDir . '/vendor';
         $packageDir = __DIR__ . '/..';
-        mkdir($vendorDir, 0777, true);
+        mkdir($vendorDir, 0o777, true);
 
         // Create source files in package
         $binDir = $packageDir . '/bin';
-        if (!is_dir($binDir)) {
-            mkdir($binDir, 0777, true);
+
+        if (!is_dir($binDir))
+        {
+            mkdir($binDir, 0o777, true);
         }
+
         file_put_contents($binDir . '/generate-composer-require.sh', '#!/bin/sh');
         file_put_contents($binDir . '/generate-composer-require.ignore.txt', '# Ignore file');
 
@@ -407,8 +448,8 @@ class PluginTest extends TestCase
         $io->expects($this->atLeastOnce())
             ->method('write')
             ->with($this->logicalOr(
-                $this->stringContains('Installing'),
-                $this->stringContains('Creating generate-composer-require.ignore.txt')
+              $this->stringContains('Installing'),
+              $this->stringContains('Creating generate-composer-require.ignore.txt')
             ));
 
         $event = $this->createMock(Event::class);

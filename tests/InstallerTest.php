@@ -4,30 +4,32 @@ declare(strict_types=1);
 
 namespace NowoTech\ComposerUpdateHelper\Tests;
 
-use Composer\Composer;
-use Composer\Config;
+use Composer\{Composer, Config};
 use Composer\IO\IOInterface;
 use Composer\Script\Event;
 use NowoTech\ComposerUpdateHelper\Installer;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 
 /**
- * @author Héctor Franco Aceituno <hectorfranco@nowo.com>
+ * @author Héctor Franco Aceituno <hectorfranco@nowo.tech>
  *
  * @see    https://github.com/HecFranco
  */
-class InstallerTest extends TestCase
+final class InstallerTest extends TestCase
 {
     private string $tempDir;
+
     private string $vendorDir;
 
     protected function setUp(): void
     {
-        $this->tempDir = sys_get_temp_dir() . '/composer-update-helper-test-' . uniqid();
+        $this->tempDir   = sys_get_temp_dir() . '/composer-update-helper-test-' . uniqid();
         $this->vendorDir = $this->tempDir . '/vendor';
 
-        mkdir($this->vendorDir, 0777, true);
+        mkdir($this->vendorDir, 0o777, true);
     }
 
     protected function tearDown(): void
@@ -41,7 +43,7 @@ class InstallerTest extends TestCase
 
         // Create source files in the package directory
         $packageDir = $this->vendorDir . '/nowo-tech/composer-update-helper';
-        mkdir($packageDir . '/bin', 0777, true);
+        mkdir($packageDir . '/bin', 0o777, true);
         file_put_contents($packageDir . '/bin/generate-composer-require.sh', '#!/bin/sh\necho "test"');
 
         Installer::install($event);
@@ -54,7 +56,7 @@ class InstallerTest extends TestCase
         $event = $this->createMockEvent();
 
         $packageDir = $this->vendorDir . '/nowo-tech/composer-update-helper';
-        mkdir($packageDir . '/bin', 0777, true);
+        mkdir($packageDir . '/bin', 0o777, true);
         file_put_contents($packageDir . '/bin/generate-composer-require.sh', '#!/bin/sh');
         file_put_contents($packageDir . '/bin/generate-composer-require.ignore.txt', '# Ignore file');
 
@@ -72,14 +74,14 @@ class InstallerTest extends TestCase
         file_put_contents($this->tempDir . '/generate-composer-require.ignore.txt', $customContent);
 
         $packageDir = $this->vendorDir . '/nowo-tech/composer-update-helper';
-        mkdir($packageDir . '/bin', 0777, true);
+        mkdir($packageDir . '/bin', 0o777, true);
         file_put_contents($packageDir . '/bin/generate-composer-require.sh', '#!/bin/sh');
         file_put_contents($packageDir . '/bin/generate-composer-require.ignore.txt', '# Default ignore file');
 
         Installer::install($event);
 
         // Verify the custom content was preserved
-        $this->assertStringContainsString('My custom packages', file_get_contents($this->tempDir . '/generate-composer-require.ignore.txt'));
+        $this->assertStringContainsString('My custom packages', (string) file_get_contents($this->tempDir . '/generate-composer-require.ignore.txt'));
     }
 
     public function testUninstallRemovesScript(): void
@@ -128,13 +130,13 @@ class InstallerTest extends TestCase
         file_put_contents($this->tempDir . '/generate-composer-require.sh', '#!/bin/sh\necho "old"');
 
         $packageDir = $this->vendorDir . '/nowo-tech/composer-update-helper';
-        mkdir($packageDir . '/bin', 0777, true);
+        mkdir($packageDir . '/bin', 0o777, true);
         file_put_contents($packageDir . '/bin/generate-composer-require.sh', '#!/bin/sh\necho "new"');
 
         Installer::install($event);
 
         $this->assertFileExists($this->tempDir . '/generate-composer-require.sh');
-        $this->assertStringContainsString('new', file_get_contents($this->tempDir . '/generate-composer-require.sh'));
+        $this->assertStringContainsString('new', (string) file_get_contents($this->tempDir . '/generate-composer-require.sh'));
     }
 
     public function testInstallSkipsWhenContentMatches(): void
@@ -145,10 +147,8 @@ class InstallerTest extends TestCase
         file_put_contents($this->tempDir . '/generate-composer-require.sh', $content);
 
         $packageDir = $this->vendorDir . '/nowo-tech/composer-update-helper';
-        mkdir($packageDir . '/bin', 0777, true);
+        mkdir($packageDir . '/bin', 0o777, true);
         file_put_contents($packageDir . '/bin/generate-composer-require.sh', $content);
-
-        $originalTime = filemtime($this->tempDir . '/generate-composer-require.sh');
         sleep(1); // Ensure time difference
 
         Installer::install($event);
@@ -163,29 +163,37 @@ class InstallerTest extends TestCase
 
         // Ensure destination file doesn't exist
         $destFile = $this->tempDir . '/generate-composer-require.sh';
-        if (file_exists($destFile)) {
+
+        if (file_exists($destFile))
+        {
             @unlink($destFile);
         }
 
         // Don't create source file in vendor
         // The package directory won't exist, so source file won't be found
         // Also, ensure the development mode path doesn't have the file
-        $devPackageDir = __DIR__ . '/../bin';
-        $devSourceFile = $devPackageDir . '/generate-composer-require.sh';
+        $devPackageDir   = __DIR__ . '/../bin';
+        $devSourceFile   = $devPackageDir . '/generate-composer-require.sh';
         $devSourceBackup = null;
-        if (file_exists($devSourceFile)) {
+
+        if (file_exists($devSourceFile))
+        {
             $devSourceBackup = file_get_contents($devSourceFile);
             @unlink($devSourceFile);
         }
 
-        try {
+        try
+        {
             Installer::install($event);
 
             // Should not create destination file
             $this->assertFileDoesNotExist($destFile);
-        } finally {
+        }
+        finally
+        {
             // Restore file if it existed
-            if ($devSourceBackup !== null) {
+            if ($devSourceBackup !== null)
+            {
                 file_put_contents($devSourceFile, $devSourceBackup);
             }
         }
@@ -197,16 +205,19 @@ class InstallerTest extends TestCase
 
         // Simulate development mode (package not in vendor)
         $packageDir = __DIR__ . '/..';
-        $binDir = $packageDir . '/bin';
-        if (!is_dir($binDir)) {
-            mkdir($binDir, 0777, true);
+        $binDir     = $packageDir . '/bin';
+
+        if (!is_dir($binDir))
+        {
+            mkdir($binDir, 0o777, true);
         }
+
         file_put_contents($binDir . '/generate-composer-require.sh', '#!/bin/sh\necho "dev"');
 
         Installer::install($event);
 
         $this->assertFileExists($this->tempDir . '/generate-composer-require.sh');
-        $this->assertStringContainsString('dev', file_get_contents($this->tempDir . '/generate-composer-require.sh'));
+        $this->assertStringContainsString('dev', (string) file_get_contents($this->tempDir . '/generate-composer-require.sh'));
 
         // Cleanup
         @unlink($this->tempDir . '/generate-composer-require.sh');
@@ -239,19 +250,24 @@ class InstallerTest extends TestCase
 
     private function removeDirectory(string $dir): void
     {
-        if (!is_dir($dir)) {
+        if (!is_dir($dir))
+        {
             return;
         }
 
-        $items = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator($dir, \RecursiveDirectoryIterator::SKIP_DOTS),
-            \RecursiveIteratorIterator::CHILD_FIRST
+        $items = new RecursiveIteratorIterator(
+          new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS),
+          RecursiveIteratorIterator::CHILD_FIRST
         );
 
-        foreach ($items as $item) {
-            if ($item->isDir()) {
+        foreach ($items as $item)
+        {
+            if ($item->isDir())
+            {
                 rmdir($item->getRealPath());
-            } else {
+            }
+            else
+            {
                 unlink($item->getRealPath());
             }
         }

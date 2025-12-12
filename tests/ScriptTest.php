@@ -7,11 +7,11 @@ namespace NowoTech\ComposerUpdateHelper\Tests;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @author Héctor Franco Aceituno <hectorfranco@nowo.com>
+ * @author Héctor Franco Aceituno <hectorfranco@nowo.tech>
  *
  * @see    https://github.com/HecFranco
  */
-class ScriptTest extends TestCase
+final class ScriptTest extends TestCase
 {
     private string $scriptPath;
 
@@ -41,16 +41,17 @@ class ScriptTest extends TestCase
         $content = file_get_contents($this->scriptPath);
 
         // Skip if script is not fully implemented
-        if (strlen($content) < 100) {
+        if (strlen($content) < 100)
+        {
             $this->markTestSkipped('Script file is not fully implemented');
 
             return;
         }
 
         // Check for essential parts
-        $this->assertStringContainsString('composer outdated', $content);
-        $this->assertStringContainsString('IGNORED_PACKAGES', $content);
-        $this->assertStringContainsString('--with-all-dependencies', $content);
+        $this->assertStringContainsString('composer outdated', (string) $content);
+        $this->assertStringContainsString('IGNORED_PACKAGES', (string) $content);
+        $this->assertStringContainsString('--with-all-dependencies', (string) $content);
     }
 
     public function testScriptSupportsMultipleFrameworks(): void
@@ -58,20 +59,21 @@ class ScriptTest extends TestCase
         $content = file_get_contents($this->scriptPath);
 
         // Skip if script is not fully implemented
-        if (strlen($content) < 100) {
+        if (strlen($content) < 100)
+        {
             $this->markTestSkipped('Script file is not fully implemented');
 
             return;
         }
 
         // Check for framework configurations
-        $this->assertStringContainsString("'symfony'", $content);
-        $this->assertStringContainsString("'laravel'", $content);
-        $this->assertStringContainsString("'yii'", $content);
-        $this->assertStringContainsString("'cakephp'", $content);
-        $this->assertStringContainsString("'laminas'", $content);
-        $this->assertStringContainsString("'codeigniter'", $content);
-        $this->assertStringContainsString("'slim'", $content);
+        $this->assertStringContainsString("'symfony'", (string) $content);
+        $this->assertStringContainsString("'laravel'", (string) $content);
+        $this->assertStringContainsString("'yii'", (string) $content);
+        $this->assertStringContainsString("'cakephp'", (string) $content);
+        $this->assertStringContainsString("'laminas'", (string) $content);
+        $this->assertStringContainsString("'codeigniter'", (string) $content);
+        $this->assertStringContainsString("'slim'", (string) $content);
     }
 
     public function testScriptDetectsFrameworkConstraints(): void
@@ -79,16 +81,17 @@ class ScriptTest extends TestCase
         $content = file_get_contents($this->scriptPath);
 
         // Skip if script is not fully implemented
-        if (strlen($content) < 100) {
+        if (strlen($content) < 100)
+        {
             $this->markTestSkipped('Script file is not fully implemented');
 
             return;
         }
 
         // Check for framework detection logic
-        $this->assertStringContainsString('frameworkConfigs', $content);
-        $this->assertStringContainsString('frameworkConstraints', $content);
-        $this->assertStringContainsString('getFrameworkConstraint', $content);
+        $this->assertStringContainsString('frameworkConfigs', (string) $content);
+        $this->assertStringContainsString('frameworkConstraints', (string) $content);
+        $this->assertStringContainsString('getFrameworkConstraint', (string) $content);
     }
 
     public function testScriptSupportsLaravelIlluminatePackages(): void
@@ -96,15 +99,16 @@ class ScriptTest extends TestCase
         $content = file_get_contents($this->scriptPath);
 
         // Skip if script is not fully implemented
-        if (strlen($content) < 100) {
+        if (strlen($content) < 100)
+        {
             $this->markTestSkipped('Script file is not fully implemented');
 
             return;
         }
 
         // Check Laravel also limits illuminate/* packages
-        $this->assertStringContainsString("'illuminate/'", $content);
-        $this->assertStringContainsString('laravel/framework', $content);
+        $this->assertStringContainsString("'illuminate/'", (string) $content);
+        $this->assertStringContainsString('laravel/framework', (string) $content);
     }
 
     public function testScriptHandlesIgnoreFile(): void
@@ -112,14 +116,15 @@ class ScriptTest extends TestCase
         $content = file_get_contents($this->scriptPath);
 
         // Skip if script is not fully implemented
-        if (strlen($content) < 100) {
+        if (strlen($content) < 100)
+        {
             $this->markTestSkipped('Script file is not fully implemented');
 
             return;
         }
 
-        $this->assertStringContainsString('generate-composer-require.ignore.txt', $content);
-        $this->assertStringContainsString('IGNORE_FILE', $content);
+        $this->assertStringContainsString('generate-composer-require.ignore.txt', (string) $content);
+        $this->assertStringContainsString('IGNORE_FILE', (string) $content);
     }
 
     public function testScriptSupportsRunFlag(): void
@@ -127,14 +132,15 @@ class ScriptTest extends TestCase
         $content = file_get_contents($this->scriptPath);
 
         // Skip if script is not fully implemented
-        if (strlen($content) < 100) {
+        if (strlen($content) < 100)
+        {
             $this->markTestSkipped('Script file is not fully implemented');
 
             return;
         }
 
-        $this->assertStringContainsString('--run', $content);
-        $this->assertStringContainsString('RUN_FLAG', $content);
+        $this->assertStringContainsString('--run', (string) $content);
+        $this->assertStringContainsString('RUN_FLAG', (string) $content);
     }
 
     public function testIgnoreFileTemplateExists(): void
@@ -147,7 +153,8 @@ class ScriptTest extends TestCase
     {
         $ignoreFile = dirname(__DIR__) . '/bin/generate-composer-require.ignore.txt';
 
-        if (!file_exists($ignoreFile)) {
+        if (!file_exists($ignoreFile))
+        {
             $this->markTestSkipped('Ignore file template does not exist');
 
             return;
@@ -156,11 +163,13 @@ class ScriptTest extends TestCase
         $content = file_get_contents($ignoreFile);
 
         // Should have comment lines
-        $this->assertStringContainsString('#', $content);
+        $this->assertStringContainsString('#', (string) $content);
+
         // Should have example packages (if file has enough content)
         // Only check if file has substantial content (more than just a comment)
-        if (strlen($content) > 20) {
-            $this->assertStringContainsString('/', $content);
+        if (strlen($content) > 20)
+        {
+            $this->assertStringContainsString('/', (string) $content);
         }
     }
 }
