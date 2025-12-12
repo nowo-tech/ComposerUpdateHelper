@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile
     container_name: demo-yii
     ports:
-      - "${PORT:-8003}:80"
+      - "${PORT:-8001}:80"
     volumes:
       - .:/var/www/html
     environment:
