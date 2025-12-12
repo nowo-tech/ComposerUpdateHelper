@@ -93,14 +93,9 @@ final class PluginTest extends TestCase
         // Create source file in package
         $binDir = $packageDir . '/bin';
 
-<<<<<<< HEAD
         if (!is_dir($binDir))
         {
             mkdir($binDir, 0777, true);
-=======
-        if (!is_dir($binDir)) {
-            mkdir($binDir, 0o777, true);
->>>>>>> 9432a5fc46e1f4f759e75ced98886d91912bc67a
         }
 
         $sourceFile = $binDir . '/generate-composer-require.sh';
@@ -167,14 +162,9 @@ final class PluginTest extends TestCase
         // Create source file in package
         $binDir = $packageDir . '/bin';
 
-<<<<<<< HEAD
         if (!is_dir($binDir))
         {
             mkdir($binDir, 0777, true);
-=======
-        if (!is_dir($binDir)) {
-            mkdir($binDir, 0o777, true);
->>>>>>> 9432a5fc46e1f4f759e75ced98886d91912bc67a
         }
 
         $sourceFile = $binDir . '/generate-composer-require.sh';
@@ -243,14 +233,9 @@ final class PluginTest extends TestCase
         // Create source file in package with new content
         $binDir = $packageDir . '/bin';
 
-<<<<<<< HEAD
         if (!is_dir($binDir))
         {
             mkdir($binDir, 0777, true);
-=======
-        if (!is_dir($binDir)) {
-            mkdir($binDir, 0o777, true);
->>>>>>> 9432a5fc46e1f4f759e75ced98886d91912bc67a
         }
 
         $sourceFile = $binDir . '/generate-composer-require.sh';
@@ -321,14 +306,9 @@ final class PluginTest extends TestCase
         // Create source file in package with same content
         $binDir = $packageDir . '/bin';
 
-<<<<<<< HEAD
         if (!is_dir($binDir))
         {
             mkdir($binDir, 0777, true);
-=======
-        if (!is_dir($binDir)) {
-            mkdir($binDir, 0o777, true);
->>>>>>> 9432a5fc46e1f4f759e75ced98886d91912bc67a
         }
 
         $sourceFile = $binDir . '/generate-composer-require.sh';
@@ -424,14 +404,9 @@ final class PluginTest extends TestCase
         // Create source files in package
         $binDir = $packageDir . '/bin';
 
-<<<<<<< HEAD
         if (!is_dir($binDir))
         {
             mkdir($binDir, 0777, true);
-=======
-        if (!is_dir($binDir)) {
-            mkdir($binDir, 0o777, true);
->>>>>>> 9432a5fc46e1f4f759e75ced98886d91912bc67a
         }
 
         file_put_contents($binDir . '/generate-composer-require.sh', '#!/bin/sh');
