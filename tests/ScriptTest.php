@@ -41,8 +41,7 @@ final class ScriptTest extends TestCase
         $content = file_get_contents($this->scriptPath);
 
         // Skip if script is not fully implemented
-        if (strlen($content) < 100)
-        {
+        if (strlen($content) < 100) {
             $this->markTestSkipped('Script file is not fully implemented');
 
             return;
@@ -59,8 +58,7 @@ final class ScriptTest extends TestCase
         $content = file_get_contents($this->scriptPath);
 
         // Skip if script is not fully implemented
-        if (strlen($content) < 100)
-        {
+        if (strlen($content) < 100) {
             $this->markTestSkipped('Script file is not fully implemented');
 
             return;
@@ -81,8 +79,7 @@ final class ScriptTest extends TestCase
         $content = file_get_contents($this->scriptPath);
 
         // Skip if script is not fully implemented
-        if (strlen($content) < 100)
-        {
+        if (strlen($content) < 100) {
             $this->markTestSkipped('Script file is not fully implemented');
 
             return;
@@ -99,8 +96,7 @@ final class ScriptTest extends TestCase
         $content = file_get_contents($this->scriptPath);
 
         // Skip if script is not fully implemented
-        if (strlen($content) < 100)
-        {
+        if (strlen($content) < 100) {
             $this->markTestSkipped('Script file is not fully implemented');
 
             return;
@@ -116,8 +112,7 @@ final class ScriptTest extends TestCase
         $content = file_get_contents($this->scriptPath);
 
         // Skip if script is not fully implemented
-        if (strlen($content) < 100)
-        {
+        if (strlen($content) < 100) {
             $this->markTestSkipped('Script file is not fully implemented');
 
             return;
@@ -132,8 +127,7 @@ final class ScriptTest extends TestCase
         $content = file_get_contents($this->scriptPath);
 
         // Skip if script is not fully implemented
-        if (strlen($content) < 100)
-        {
+        if (strlen($content) < 100) {
             $this->markTestSkipped('Script file is not fully implemented');
 
             return;
@@ -153,8 +147,7 @@ final class ScriptTest extends TestCase
     {
         $ignoreFile = dirname(__DIR__) . '/bin/generate-composer-require.ignore.txt';
 
-        if (!file_exists($ignoreFile))
-        {
+        if (!file_exists($ignoreFile)) {
             $this->markTestSkipped('Ignore file template does not exist');
 
             return;
@@ -167,8 +160,7 @@ final class ScriptTest extends TestCase
 
         // Should have example packages (if file has enough content)
         // Only check if file has substantial content (more than just a comment)
-        if (strlen($content) > 20)
-        {
+        if (strlen($content) > 20) {
             $this->assertStringContainsString('/', (string) $content);
         }
     }

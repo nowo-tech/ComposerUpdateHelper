@@ -26,7 +26,7 @@ final class InstallerTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->tempDir   = sys_get_temp_dir() . '/composer-update-helper-test-' . uniqid();
+        $this->tempDir = sys_get_temp_dir() . '/composer-update-helper-test-' . uniqid();
         $this->vendorDir = $this->tempDir . '/vendor';
 
         mkdir($this->vendorDir, 0o777, true);
@@ -164,36 +164,30 @@ final class InstallerTest extends TestCase
         // Ensure destination file doesn't exist
         $destFile = $this->tempDir . '/generate-composer-require.sh';
 
-        if (file_exists($destFile))
-        {
+        if (file_exists($destFile)) {
             @unlink($destFile);
         }
 
         // Don't create source file in vendor
         // The package directory won't exist, so source file won't be found
         // Also, ensure the development mode path doesn't have the file
-        $devPackageDir   = __DIR__ . '/../bin';
-        $devSourceFile   = $devPackageDir . '/generate-composer-require.sh';
+        $devPackageDir = __DIR__ . '/../bin';
+        $devSourceFile = $devPackageDir . '/generate-composer-require.sh';
         $devSourceBackup = null;
 
-        if (file_exists($devSourceFile))
-        {
+        if (file_exists($devSourceFile)) {
             $devSourceBackup = file_get_contents($devSourceFile);
             @unlink($devSourceFile);
         }
 
-        try
-        {
+        try {
             Installer::install($event);
 
             // Should not create destination file
             $this->assertFileDoesNotExist($destFile);
-        }
-        finally
-        {
+        } finally {
             // Restore file if it existed
-            if ($devSourceBackup !== null)
-            {
+            if ($devSourceBackup !== null) {
                 file_put_contents($devSourceFile, $devSourceBackup);
             }
         }
@@ -205,10 +199,9 @@ final class InstallerTest extends TestCase
 
         // Simulate development mode (package not in vendor)
         $packageDir = __DIR__ . '/..';
-        $binDir     = $packageDir . '/bin';
+        $binDir = $packageDir . '/bin';
 
-        if (!is_dir($binDir))
-        {
+        if (!is_dir($binDir)) {
             mkdir($binDir, 0o777, true);
         }
 
@@ -250,24 +243,19 @@ final class InstallerTest extends TestCase
 
     private function removeDirectory(string $dir): void
     {
-        if (!is_dir($dir))
-        {
+        if (!is_dir($dir)) {
             return;
         }
 
         $items = new RecursiveIteratorIterator(
-          new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS),
-          RecursiveIteratorIterator::CHILD_FIRST
+            new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS),
+            RecursiveIteratorIterator::CHILD_FIRST
         );
 
-        foreach ($items as $item)
-        {
-            if ($item->isDir())
-            {
+        foreach ($items as $item) {
+            if ($item->isDir()) {
                 rmdir($item->getRealPath());
-            }
-            else
-            {
+            } else {
                 unlink($item->getRealPath());
             }
         }
