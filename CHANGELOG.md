@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Fixed merge conflicts in PluginTest.php
 - Resolved code formatting inconsistencies in test file
+- Fixed PHP 7.4 compatibility: replaced octal literal syntax `0o777` with `0777` in test files
+  - PHP 7.4 does not support explicit octal notation (`0o` prefix), only implicit octal (`0` prefix)
 
 ## [1.2.5] - 2025-12-12
 

@@ -29,7 +29,7 @@ final class InstallerTest extends TestCase
         $this->tempDir = sys_get_temp_dir() . '/composer-update-helper-test-' . uniqid();
         $this->vendorDir = $this->tempDir . '/vendor';
 
-        mkdir($this->vendorDir, 0o777, true);
+        mkdir($this->vendorDir, 0777, true);
     }
 
     protected function tearDown(): void
@@ -43,7 +43,7 @@ final class InstallerTest extends TestCase
 
         // Create source files in the package directory
         $packageDir = $this->vendorDir . '/nowo-tech/composer-update-helper';
-        mkdir($packageDir . '/bin', 0o777, true);
+        mkdir($packageDir . '/bin', 0777, true);
         file_put_contents($packageDir . '/bin/generate-composer-require.sh', '#!/bin/sh\necho "test"');
 
         Installer::install($event);
@@ -56,7 +56,7 @@ final class InstallerTest extends TestCase
         $event = $this->createMockEvent();
 
         $packageDir = $this->vendorDir . '/nowo-tech/composer-update-helper';
-        mkdir($packageDir . '/bin', 0o777, true);
+        mkdir($packageDir . '/bin', 0777, true);
         file_put_contents($packageDir . '/bin/generate-composer-require.sh', '#!/bin/sh');
         file_put_contents($packageDir . '/bin/generate-composer-require.ignore.txt', '# Ignore file');
 
@@ -74,7 +74,7 @@ final class InstallerTest extends TestCase
         file_put_contents($this->tempDir . '/generate-composer-require.ignore.txt', $customContent);
 
         $packageDir = $this->vendorDir . '/nowo-tech/composer-update-helper';
-        mkdir($packageDir . '/bin', 0o777, true);
+        mkdir($packageDir . '/bin', 0777, true);
         file_put_contents($packageDir . '/bin/generate-composer-require.sh', '#!/bin/sh');
         file_put_contents($packageDir . '/bin/generate-composer-require.ignore.txt', '# Default ignore file');
 
@@ -130,7 +130,7 @@ final class InstallerTest extends TestCase
         file_put_contents($this->tempDir . '/generate-composer-require.sh', '#!/bin/sh\necho "old"');
 
         $packageDir = $this->vendorDir . '/nowo-tech/composer-update-helper';
-        mkdir($packageDir . '/bin', 0o777, true);
+        mkdir($packageDir . '/bin', 0777, true);
         file_put_contents($packageDir . '/bin/generate-composer-require.sh', '#!/bin/sh\necho "new"');
 
         Installer::install($event);
@@ -147,7 +147,7 @@ final class InstallerTest extends TestCase
         file_put_contents($this->tempDir . '/generate-composer-require.sh', $content);
 
         $packageDir = $this->vendorDir . '/nowo-tech/composer-update-helper';
-        mkdir($packageDir . '/bin', 0o777, true);
+        mkdir($packageDir . '/bin', 0777, true);
         file_put_contents($packageDir . '/bin/generate-composer-require.sh', $content);
         sleep(1); // Ensure time difference
 
@@ -202,7 +202,7 @@ final class InstallerTest extends TestCase
         $binDir = $packageDir . '/bin';
 
         if (!is_dir($binDir)) {
-            mkdir($binDir, 0o777, true);
+            mkdir($binDir, 0777, true);
         }
 
         file_put_contents($binDir . '/generate-composer-require.sh', '#!/bin/sh\necho "dev"');
