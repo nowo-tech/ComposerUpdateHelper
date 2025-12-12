@@ -12,11 +12,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Fixed merge conflicts in PluginTest.php
 - Resolved code formatting inconsistencies in test file
-- Fixed PHP 7.4 and 8.0 compatibility: replaced octal literal syntax `0o777` and `0o755` with `0777` and `0755`
+- Fixed PHP 7.4 and 8.0 compatibility: replaced octal literal syntax `0o777` with `0777` in test files
   - PHP 7.4 and 8.0 do not support explicit octal notation (`0o` prefix), only implicit octal (`0` prefix)
-  - Explicit octal notation (`0o`) was introduced in PHP 8.1
   - Fixed in test files (`tests/InstallerTest.php`, `tests/PluginTest.php`)
-  - Fixed in source files (`src/Installer.php`, `src/Plugin.php`)
+
+### Changed
+- Improved chmod permission handling: now uses PHP version detection to use the most modern syntax available
+  - Uses explicit octal notation (`0o755`) for PHP 8.1+ when available
+  - Falls back to implicit octal (`0755`) for PHP 7.4 and 8.0 compatibility
+  - Implemented in `src/Installer.php` and `src/Plugin.php` with `getChmodMode()` method
 
 ## [1.2.5] - 2025-12-12
 

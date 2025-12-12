@@ -27,6 +27,23 @@ class Plugin implements PluginInterface, EventSubscriberInterface
     private IOInterface $io;
 
     /**
+     * Get the octal permission mode compatible with the current PHP version.
+     * Uses explicit octal notation (0o755) for PHP 8.1+, implicit (0755) for older versions.
+     *
+     * @return int The permission mode
+     */
+    private function getChmodMode(): int
+    {
+        // Explicit octal notation (0o755) was introduced in PHP 8.1
+        // Use it when available, fallback to implicit (0755) for PHP 7.4 and 8.0
+        if (version_compare(PHP_VERSION, '8.1.0', '>=')) {
+            return 0o755;
+        }
+
+        return 0755;
+    }
+
+    /**
      * Activate the plugin.
      *
      * @param Composer    $composer The Composer instance
@@ -133,7 +150,7 @@ class Plugin implements PluginInterface, EventSubscriberInterface
             }
 
             copy($sourcePath, $destPath);
-            chmod($destPath, 0755);
+            chmod($destPath, $this->getChmodMode());
         }
 
         // Create ignore file only if it doesn't exist (don't overwrite user's config)

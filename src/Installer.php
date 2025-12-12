@@ -17,6 +17,23 @@ use Composer\Script\Event;
 class Installer
 {
     /**
+     * Get the octal permission mode compatible with the current PHP version.
+     * Uses explicit octal notation (0o755) for PHP 8.1+, implicit (0755) for older versions.
+     *
+     * @return int The permission mode
+     */
+    private static function getChmodMode(): int
+    {
+        // Explicit octal notation (0o755) was introduced in PHP 8.1
+        // Use it when available, fallback to implicit (0755) for PHP 7.4 and 8.0
+        if (version_compare(PHP_VERSION, '8.1.0', '>=')) {
+            return 0o755;
+        }
+
+        return 0755;
+    }
+
+    /**
      * Install files to the project root.
      *
      * @param Event $event The script event
@@ -56,7 +73,7 @@ class Installer
             }
 
             copy($sourcePath, $destPath);
-            chmod($destPath, 0755);
+            chmod($destPath, self::getChmodMode());
         }
 
         // Create ignore file only if it doesn't exist
