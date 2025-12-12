@@ -279,10 +279,18 @@ Each demo is independent and can be run separately with Docker Compose. See [dem
 ```bash
 # Using Makefile (recommended)
 cd demo
-make laravel        # Start Laravel demo
-make all            # Start all demos
-make test DEMO=laravel  # Run tests
-make shell DEMO=laravel # Open shell
+make laravel           # Start Laravel demo
+make laravel-down      # Stop Laravel demo
+make laravel-install   # Install dependencies
+make laravel-test      # Run tests
+make all               # Start all demos
+
+# Generic commands
+make up DEMO=laravel      # Start a demo
+make down DEMO=laravel    # Stop a demo
+make install DEMO=laravel # Install dependencies
+make test DEMO=laravel    # Run tests
+make shell DEMO=laravel   # Open shell
 
 # Or using docker-compose directly
 cd demo/laravel

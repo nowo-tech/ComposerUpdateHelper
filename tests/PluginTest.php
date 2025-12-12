@@ -11,6 +11,10 @@ use NowoTech\ComposerUpdateHelper\Plugin;
 use PHPUnit\Framework\TestCase;
 
 /**
+ * Test suite for the Plugin class.
+ * Tests the Composer plugin functionality including file installation,
+ * event subscription, and .gitignore updates.
+ *
  * @author Héctor Franco Aceituno <hectorfranco@nowo.tech>
  *
  * @see    https://github.com/HecFranco

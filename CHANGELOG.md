@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.2] - 2025-12-12
+
+### Added
+- **Enhanced demo Makefile**: Added new commands for managing demo projects
+  - Specific commands for each demo: `make laravel-down`, `make laravel-install`, `make laravel-test`
+  - Generic install command: `make install DEMO=<name>` to install dependencies
+  - Improved test commands that automatically start containers if not running
+  - Commands available for all demos: laravel, symfony, yii, codeigniter, slim, legacy
+
+### Changed
+- Improved demo Makefile with better error handling and automatic container management
+- Updated demo README with comprehensive documentation of all available commands
+
+## [1.3.1] - 2025-12-12
+
+### Added
+- **PHPDoc documentation**: Added comprehensive PHPDoc comments in English to all PHP classes
+  - All classes in `src/` directory (Plugin, Installer)
+  - All test classes in `tests/` directory (PluginTest, InstallerTest, ScriptTest)
+  - All demo test classes in `demo/*/tests/` directory
+  - Each class includes description, `@author`, and `@see` annotations
+  - Improved code documentation and IDE support
+
+### Changed
+- Fixed missing `IOInterface` import in `Installer.php`
+- Enhanced class documentation with detailed descriptions
+
 ## [1.3.0] - 2025-12-12
 
 ### Added

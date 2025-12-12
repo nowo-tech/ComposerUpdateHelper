@@ -14,6 +14,10 @@ use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 
 /**
+ * Test suite for the Installer class.
+ * Tests the static installer functionality for Composer scripts,
+ * including file installation and uninstallation.
+ *
  * @author Héctor Franco Aceituno <hectorfranco@nowo.tech>
  *
  * @see    https://github.com/HecFranco

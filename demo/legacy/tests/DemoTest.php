@@ -4,6 +4,14 @@ namespace Tests;
 
 use PHPUnit\Framework\TestCase;
 
+/**
+ * Feature tests for Legacy Laravel 5.8 demo project.
+ * Tests PHP 7.4 version, Composer Update Helper installation, and project structure.
+ *
+ * @author Héctor Franco Aceituno <hectorfranco@nowo.tech>
+ *
+ * @see    https://github.com/HecFranco
+ */
 class DemoTest extends TestCase
 {
     public function testLegacyVersion(): void

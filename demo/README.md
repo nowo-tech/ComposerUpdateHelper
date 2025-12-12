@@ -62,9 +62,21 @@ make legacy
 # Levantar todos los demos
 make all
 
+# Comandos específicos por demo
+make laravel-down       # Detener Laravel
+make laravel-install    # Instalar dependencias de Laravel
+make laravel-test       # Ejecutar tests de Laravel
+
+make symfony-down       # Detener Symfony
+make symfony-install    # Instalar dependencias de Symfony
+make symfony-test       # Ejecutar tests de Symfony
+
+# (Mismo patrón para yii, codeigniter, slim, legacy)
+
 # Comandos genéricos (requieren DEMO=<nombre>)
 make up DEMO=laravel      # Levantar un demo
 make down DEMO=laravel    # Detener un demo
+make install DEMO=laravel # Instalar dependencias
 make logs DEMO=laravel    # Ver logs
 make test DEMO=laravel    # Ejecutar tests
 make shell DEMO=laravel   # Abrir shell en el contenedor
@@ -129,7 +141,15 @@ docker-compose logs -f db
 ### Detener los demos
 
 ```bash
-# Usando Makefile
+# Usando Makefile (comandos específicos)
+make laravel-down
+make symfony-down
+make yii-down
+make codeigniter-down
+make slim-down
+make legacy-down
+
+# O usando comandos genéricos
 make down DEMO=laravel
 
 # O directamente con docker-compose
@@ -138,6 +158,26 @@ docker-compose down
 
 # Detener y eliminar volúmenes
 docker-compose down -v
+```
+
+### Instalar dependencias
+
+```bash
+# Usando Makefile (comandos específicos)
+make laravel-install
+make symfony-install
+make yii-install
+make codeigniter-install
+make slim-install
+make legacy-install
+
+# O usando comandos genéricos
+make install DEMO=laravel
+
+# O directamente con docker-compose
+cd laravel
+docker-compose up -d
+docker-compose exec app composer install
 ```
 
 ## Acceso a los Demos
@@ -156,7 +196,15 @@ Una vez levantados, los demos estarán disponibles en:
 Cada demo incluye una suite de tests básicos. Para ejecutarlos:
 
 ```bash
-# Usando Makefile
+# Usando Makefile (comandos específicos)
+make laravel-test
+make symfony-test
+make yii-test
+make codeigniter-test
+make slim-test
+make legacy-test
+
+# O usando comandos genéricos
 make test DEMO=laravel
 make test DEMO=symfony
 make test DEMO=yii
@@ -168,6 +216,8 @@ make test DEMO=legacy
 cd laravel
 docker-compose exec app composer test
 ```
+
+**Nota:** Los comandos de test del Makefile automáticamente levantan el contenedor si no está corriendo antes de ejecutar los tests.
 
 ## Probar Composer Update Helper
 
