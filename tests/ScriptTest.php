@@ -7,6 +7,10 @@ namespace NowoTech\ComposerUpdateHelper\Tests;
 use PHPUnit\Framework\TestCase;
 
 /**
+ * Test suite for the generate-composer-require.sh script.
+ * Tests script existence, executability, and functionality including
+ * framework support and ignore file handling.
+ *
  * @author Héctor Franco Aceituno <hectorfranco@nowo.tech>
  *
  * @see    https://github.com/HecFranco

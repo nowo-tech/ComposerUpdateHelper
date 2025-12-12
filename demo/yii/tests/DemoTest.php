@@ -4,6 +4,14 @@ namespace app\tests;
 
 use PHPUnit\Framework\TestCase;
 
+/**
+ * Feature tests for Yii 2 demo project.
+ * Tests PHP version, Composer Update Helper installation, and project structure.
+ *
+ * @author Héctor Franco Aceituno <hectorfranco@nowo.tech>
+ *
+ * @see    https://github.com/HecFranco
+ */
 class DemoTest extends TestCase
 {
     public function testYiiVersion(): void

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace NowoTech\ComposerUpdateHelper;
 
+use Composer\IO\IOInterface;
 use Composer\Script\Event;
 
 /**

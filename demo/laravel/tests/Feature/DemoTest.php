@@ -4,6 +4,14 @@ namespace Tests\Feature;
 
 use Tests\TestCase;
 
+/**
+ * Feature tests for Laravel 12 demo project.
+ * Tests PHP version, Composer Update Helper installation, and project structure.
+ *
+ * @author Héctor Franco Aceituno <hectorfranco@nowo.tech>
+ *
+ * @see    https://github.com/HecFranco
+ */
 class DemoTest extends TestCase
 {
     public function test_laravel_version(): void

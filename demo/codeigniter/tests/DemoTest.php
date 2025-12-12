@@ -4,6 +4,14 @@ namespace Tests;
 
 use PHPUnit\Framework\TestCase;
 
+/**
+ * Feature tests for CodeIgniter 5 demo project.
+ * Tests PHP version, Composer Update Helper installation, and project structure.
+ *
+ * @author Héctor Franco Aceituno <hectorfranco@nowo.tech>
+ *
+ * @see    https://github.com/HecFranco
+ */
 class DemoTest extends TestCase
 {
     public function testCodeIgniterVersion(): void
