@@ -93,8 +93,7 @@ final class PluginTest extends TestCase
         // Create source file in package
         $binDir = $packageDir . '/bin';
 
-        if (!is_dir($binDir))
-        {
+        if (!is_dir($binDir)) {
             mkdir($binDir, 0777, true);
         }
 
@@ -162,8 +161,7 @@ final class PluginTest extends TestCase
         // Create source file in package
         $binDir = $packageDir . '/bin';
 
-        if (!is_dir($binDir))
-        {
+        if (!is_dir($binDir)) {
             mkdir($binDir, 0777, true);
         }
 
@@ -233,8 +231,7 @@ final class PluginTest extends TestCase
         // Create source file in package with new content
         $binDir = $packageDir . '/bin';
 
-        if (!is_dir($binDir))
-        {
+        if (!is_dir($binDir)) {
             mkdir($binDir, 0777, true);
         }
 
@@ -306,8 +303,7 @@ final class PluginTest extends TestCase
         // Create source file in package with same content
         $binDir = $packageDir . '/bin';
 
-        if (!is_dir($binDir))
-        {
+        if (!is_dir($binDir)) {
             mkdir($binDir, 0777, true);
         }
 
@@ -404,8 +400,7 @@ final class PluginTest extends TestCase
         // Create source files in package
         $binDir = $packageDir . '/bin';
 
-        if (!is_dir($binDir))
-        {
+        if (!is_dir($binDir)) {
             mkdir($binDir, 0777, true);
         }
 
