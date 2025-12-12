@@ -56,7 +56,7 @@ final class PluginTest extends TestCase
     {
         $tempDir   = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
         $vendorDir = $tempDir . '/vendor';
-        mkdir($vendorDir, 0o777, true);
+        mkdir($vendorDir, 0777, true);
 
         // Create test file
         file_put_contents($tempDir . '/generate-composer-require.sh', '#!/bin/sh');
@@ -88,14 +88,14 @@ final class PluginTest extends TestCase
         $tempDir    = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
         $vendorDir  = $tempDir . '/vendor';
         $packageDir = __DIR__ . '/..';
-        mkdir($vendorDir, 0o777, true);
+        mkdir($vendorDir, 0777, true);
 
         // Create source file in package
         $binDir = $packageDir . '/bin';
 
         if (!is_dir($binDir))
         {
-            mkdir($binDir, 0o777, true);
+            mkdir($binDir, 0777, true);
         }
 
         $sourceFile = $binDir . '/generate-composer-require.sh';
@@ -163,14 +163,14 @@ final class PluginTest extends TestCase
         $tempDir    = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
         $vendorDir  = $tempDir . '/vendor';
         $packageDir = __DIR__ . '/..';
-        mkdir($vendorDir, 0o777, true);
+        mkdir($vendorDir, 0777, true);
 
         // Create source file in package
         $binDir = $packageDir . '/bin';
 
         if (!is_dir($binDir))
         {
-            mkdir($binDir, 0o777, true);
+            mkdir($binDir, 0777, true);
         }
 
         $sourceFile = $binDir . '/generate-composer-require.sh';
@@ -237,7 +237,7 @@ final class PluginTest extends TestCase
         $tempDir    = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
         $vendorDir  = $tempDir . '/vendor';
         $packageDir = __DIR__ . '/..';
-        mkdir($vendorDir, 0o777, true);
+        mkdir($vendorDir, 0777, true);
 
         // Create existing file with different content
         file_put_contents($tempDir . '/generate-composer-require.sh', '#!/bin/sh\necho "old"');
@@ -247,7 +247,7 @@ final class PluginTest extends TestCase
 
         if (!is_dir($binDir))
         {
-            mkdir($binDir, 0o777, true);
+            mkdir($binDir, 0777, true);
         }
 
         $sourceFile = $binDir . '/generate-composer-require.sh';
@@ -316,7 +316,7 @@ final class PluginTest extends TestCase
         $tempDir    = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
         $vendorDir  = $tempDir . '/vendor';
         $packageDir = __DIR__ . '/..';
-        mkdir($vendorDir, 0o777, true);
+        mkdir($vendorDir, 0777, true);
 
         $content = '#!/bin/sh\necho "same"';
         file_put_contents($tempDir . '/generate-composer-require.sh', $content);
@@ -326,7 +326,7 @@ final class PluginTest extends TestCase
 
         if (!is_dir($binDir))
         {
-            mkdir($binDir, 0o777, true);
+            mkdir($binDir, 0777, true);
         }
 
         $sourceFile = $binDir . '/generate-composer-require.sh';
@@ -376,7 +376,7 @@ final class PluginTest extends TestCase
         $tempDir    = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
         $vendorDir  = $tempDir . '/vendor';
         $packageDir = __DIR__ . '/..';
-        mkdir($vendorDir, 0o777, true);
+        mkdir($vendorDir, 0777, true);
 
         // Ensure source file doesn't exist
         $binDir     = $packageDir . '/bin';
@@ -419,14 +419,14 @@ final class PluginTest extends TestCase
         $tempDir    = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
         $vendorDir  = $tempDir . '/vendor';
         $packageDir = __DIR__ . '/..';
-        mkdir($vendorDir, 0o777, true);
+        mkdir($vendorDir, 0777, true);
 
         // Create source files in package
         $binDir = $packageDir . '/bin';
 
         if (!is_dir($binDir))
         {
-            mkdir($binDir, 0o777, true);
+            mkdir($binDir, 0777, true);
         }
 
         file_put_contents($binDir . '/generate-composer-require.sh', '#!/bin/sh');
