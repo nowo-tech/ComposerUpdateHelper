@@ -1,0 +1,26 @@
+{
+    "name": "demo/legacy",
+    "type": "project",
+    "description": "Legacy Laravel 5.8 Demo Project (PHP 7.4)",
+    "keywords": ["laravel", "legacy", "demo"],
+    "license": "MIT",
+    "require": {
+        "php": "^7.4",
+        "laravel/framework": "5.8.*"
+    },
+    "require-dev": {
+        "nowo-tech/composer-update-helper": "*",
+        "phpunit/phpunit": "^9.6"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/"
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "scripts": {
+        "test": "phpunit"
+    }
+}
+

@@ -1,0 +1,25 @@
+# Environment files
+.env
+
+# Vendor directories (will be installed in containers)
+*/vendor/
+*/node_modules/
+
+# Framework specific files
+*/storage/
+*/cache/
+*/var/
+*/.env
+*/.env.local
+
+# IDE files
+*/.idea/
+*/.vscode/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+

@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2025-12-12
+
+### Added
+- **Demo projects**: Added comprehensive demo projects for testing Composer Update Helper
+  - Laravel 12 demo (PHP 8.5)
+  - Symfony 8.0 demo (PHP 8.5)
+  - Yii 2 demo (PHP 8.5)
+  - CodeIgniter 5 demo (PHP 8.5)
+  - Slim 5 demo (PHP 8.5)
+  - Legacy Laravel 5.8 demo (PHP 7.4)
+  - Each demo is independent with its own `docker-compose.yml`
+  - All demos include test suites
+  - All demos automatically install Composer Update Helper on `composer install`
+- **Automatic .gitignore updates**: Plugin now automatically adds installed files to `.gitignore`
+  - Adds `generate-composer-require.sh` to `.gitignore`
+  - Adds `generate-composer-require.ignore.txt` to `.gitignore`
+  - Prevents duplicate entries
+  - Adds comment section for clarity
+
+### Changed
+- Updated all demo projects to use latest framework versions:
+  - Laravel: 11 → 12
+  - Symfony: 7.1 → 8.0
+  - CodeIgniter: 4 → 5
+  - Slim: 4 → 5
+- Updated all modern demos to use PHP 8.5 (latest stable version)
+- Improved plugin installation process with automatic dependency installation in Docker containers
+
 ## [1.2.7] - 2025-12-12
 
 ### Fixed

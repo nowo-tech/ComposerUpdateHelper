@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: demo-symfony
+    ports:
+      - "${PORT:-8002}:80"
+    volumes:
+      - .:/var/www/html
+    environment:
+      - APP_ENV=dev
+      - APP_DEBUG=1
+    networks:
+      - demo-network
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  db:
+    image: mysql:8.0
+    container_name: demo-symfony-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: symfony
+      MYSQL_USER: symfony
+      MYSQL_PASSWORD: symfony
+    volumes:
+      - symfony-db-data:/var/lib/mysql
+    networks:
+      - demo-network
+    restart: unless-stopped
+
+volumes:
+  symfony-db-data:
+
+networks:
+  demo-network:
+    driver: bridge
+
