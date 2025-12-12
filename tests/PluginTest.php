@@ -440,4 +440,152 @@ final class PluginTest extends TestCase
         @rmdir($vendorDir);
         @rmdir($tempDir);
     }
+
+    public function testInstallFilesUpdatesGitignore(): void
+    {
+        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir = $tempDir . '/vendor';
+        $packageDir = __DIR__ . '/..';
+        mkdir($vendorDir, 0777, true);
+
+        // Create source file in package
+        $binDir = $packageDir . '/bin';
+
+        if (!is_dir($binDir)) {
+            mkdir($binDir, 0777, true);
+        }
+
+        $sourceFile = $binDir . '/generate-composer-require.sh';
+
+        // Backup original file if it exists
+        $originalContent = null;
+
+        if (file_exists($sourceFile)) {
+            $originalContent = file_get_contents($sourceFile);
+        }
+
+        try {
+            file_put_contents($sourceFile, '#!/bin/sh\necho "test"');
+
+            $config = $this->createMock(Config::class);
+            $config->method('get')
+                ->with('vendor-dir')
+                ->willReturn($vendorDir);
+
+            $composer = $this->createMock(Composer::class);
+            $composer->method('getConfig')
+                ->willReturn($config);
+
+            $io = $this->createMock(IOInterface::class);
+            $io->expects($this->atLeastOnce())
+                ->method('write')
+                ->with($this->logicalOr(
+                    $this->stringContains('Installing'),
+                    $this->stringContains('Updated .gitignore')
+                ));
+
+            $event = $this->createMock(Event::class);
+            $event->method('getIO')
+                ->willReturn($io);
+
+            $plugin = new Plugin();
+            $plugin->activate($composer, $io);
+            $plugin->onPostInstall($event);
+
+            // Verify .gitignore was created/updated
+            $gitignorePath = $tempDir . '/.gitignore';
+            $this->assertFileExists($gitignorePath);
+
+            $gitignoreContent = file_get_contents($gitignorePath);
+            $this->assertStringContainsString('generate-composer-require.sh', $gitignoreContent);
+            $this->assertStringContainsString('generate-composer-require.ignore.txt', $gitignoreContent);
+            $this->assertStringContainsString('# Composer Update Helper', $gitignoreContent);
+        } finally {
+            // Restore original file
+            if ($originalContent !== null) {
+                file_put_contents($sourceFile, $originalContent);
+            } elseif (file_exists($sourceFile)) {
+                @unlink($sourceFile);
+            }
+        }
+
+        // Cleanup
+        @unlink($tempDir . '/generate-composer-require.sh');
+        @unlink($tempDir . '/.gitignore');
+        @rmdir($vendorDir);
+        @rmdir($tempDir);
+    }
+
+    public function testInstallFilesDoesNotDuplicateGitignoreEntries(): void
+    {
+        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir = $tempDir . '/vendor';
+        $packageDir = __DIR__ . '/..';
+        mkdir($vendorDir, 0777, true);
+
+        // Create existing .gitignore with entries
+        $gitignorePath = $tempDir . '/.gitignore';
+        file_put_contents($gitignorePath, "# Existing entries\ngenerate-composer-require.sh\nvendor/\n");
+
+        // Create source file in package
+        $binDir = $packageDir . '/bin';
+
+        if (!is_dir($binDir)) {
+            mkdir($binDir, 0777, true);
+        }
+
+        $sourceFile = $binDir . '/generate-composer-require.sh';
+
+        // Backup original file if it exists
+        $originalContent = null;
+
+        if (file_exists($sourceFile)) {
+            $originalContent = file_get_contents($sourceFile);
+        }
+
+        try {
+            file_put_contents($sourceFile, '#!/bin/sh\necho "test"');
+
+            $config = $this->createMock(Config::class);
+            $config->method('get')
+                ->with('vendor-dir')
+                ->willReturn($vendorDir);
+
+            $composer = $this->createMock(Composer::class);
+            $composer->method('getConfig')
+                ->willReturn($config);
+
+            $io = $this->createMock(IOInterface::class);
+
+            $event = $this->createMock(Event::class);
+            $event->method('getIO')
+                ->willReturn($io);
+
+            $plugin = new Plugin();
+            $plugin->activate($composer, $io);
+            $plugin->onPostInstall($event);
+
+            // Verify .gitignore was updated but entries are not duplicated
+            $gitignoreContent = file_get_contents($gitignorePath);
+            $this->assertStringContainsString('generate-composer-require.sh', $gitignoreContent);
+            $this->assertStringContainsString('generate-composer-require.ignore.txt', $gitignoreContent);
+
+            // Count occurrences - should be only one of each
+            $this->assertEquals(1, substr_count($gitignoreContent, 'generate-composer-require.sh'));
+            $this->assertEquals(1, substr_count($gitignoreContent, 'generate-composer-require.ignore.txt'));
+        } finally {
+            // Restore original file
+            if ($originalContent !== null) {
+                file_put_contents($sourceFile, $originalContent);
+            } elseif (file_exists($sourceFile)) {
+                @unlink($sourceFile);
+            }
+        }
+
+        // Cleanup
+        @unlink($tempDir . '/generate-composer-require.sh');
+        @unlink($tempDir . '/.gitignore');
+        @rmdir($vendorDir);
+        @rmdir($tempDir);
+    }
 }

@@ -34,6 +34,8 @@ After installation, two files will be copied to your project root:
 - `generate-composer-require.sh` - The main script
 - `generate-composer-require.ignore.txt` - Configuration file for ignored packages (only created if doesn't exist)
 
+**Note:** These files are automatically added to your `.gitignore` during installation to prevent them from being committed to your repository.
+
 ## Usage
 
 ### Show suggested update commands
@@ -102,7 +104,7 @@ Respects `extra.symfony.require` in `composer.json`:
 {
     "extra": {
         "symfony": {
-            "require": "7.1.*"
+            "require": "8.0.*"
         }
     }
 }
@@ -115,7 +117,7 @@ Automatically detects `laravel/framework` version and limits all `laravel/*` and
 ```json
 {
     "require": {
-        "laravel/framework": "^11.0"
+        "laravel/framework": "^12.0"
     }
 }
 ```
@@ -134,8 +136,8 @@ Automatically detects `laravel/framework` version and limits all `laravel/*` and
 
 ```
 🔧 Detected framework constraints:
-  - symfony 7.1.*
-  - laravel 11.0.*
+  - symfony 8.0.*
+  - laravel 12.0.*
 
 ⏭️  Ignored packages (prod):
   - doctrine/orm:3.0.0
@@ -258,6 +260,32 @@ Every push to GitHub automatically triggers:
 - **Pull Request Validation**: On pull requests, code style is checked (but not auto-fixed) to maintain code quality
 
 See [GitHub Actions](https://github.com/nowo-tech/ComposerUpdateHelper/actions) for build status.
+
+## Demo Projects
+
+The repository includes demo projects for different PHP frameworks to test the Composer Update Helper:
+
+- **Laravel 12** (PHP 8.5)
+- **Symfony 8.0** (PHP 8.5)
+- **Yii 2** (PHP 8.5)
+- **CodeIgniter 5** (PHP 8.5)
+- **Slim 5** (PHP 8.5)
+- **Legacy** - Laravel 5.8 (PHP 7.4)
+
+Each demo is independent and can be run separately with Docker Compose. See [demo/README.md](demo/README.md) for detailed instructions.
+
+### Quick Start with Demos
+
+```bash
+# Example: Run Laravel demo
+cd demo/laravel
+cp .env.example .env
+docker-compose up -d
+
+# Access at http://localhost:8001
+# Run tests
+docker-compose exec app composer test
+```
 
 ## Contributing
 

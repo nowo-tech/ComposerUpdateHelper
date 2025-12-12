@@ -160,6 +160,58 @@ class Plugin implements PluginInterface, EventSubscriberInterface
             $io->write('<info>Creating generate-composer-require.ignore.txt</info>');
             copy($ignoreSource, $ignoreDest);
         }
+
+        // Update .gitignore to exclude installed files
+        $this->updateGitignore($projectDir, $io);
+    }
+
+    /**
+     * Update .gitignore to exclude Composer Update Helper files.
+     *
+     * @param string      $projectDir The project root directory
+     * @param IOInterface $io         The IO interface
+     */
+    private function updateGitignore(string $projectDir, IOInterface $io): void
+    {
+        $gitignorePath = $projectDir . '/.gitignore';
+        $entriesToAdd = [
+            'generate-composer-require.sh',
+            'generate-composer-require.ignore.txt',
+        ];
+
+        $content = '';
+        $lines = [];
+
+        if (file_exists($gitignorePath)) {
+            $content = file_get_contents($gitignorePath);
+            $lines = explode("\n", $content);
+        }
+
+        $updated = false;
+        $existingEntries = array_map('trim', $lines);
+
+        foreach ($entriesToAdd as $entry) {
+            if (!in_array($entry, $existingEntries, true)) {
+                // Add a comment if this is the first entry and file exists
+                if (!$updated && file_exists($gitignorePath) && !empty($content)) {
+                    $trimmedContent = trim($content);
+                    if ($trimmedContent !== '' && substr($trimmedContent, -1) !== "\n") {
+                        $lines[] = '';
+                    }
+                }
+                // Add comment header if this is the first Composer Update Helper entry
+                if (!$updated && !in_array('# Composer Update Helper', $existingEntries, true)) {
+                    $lines[] = '# Composer Update Helper';
+                }
+                $lines[] = $entry;
+                $updated = true;
+            }
+        }
+
+        if ($updated) {
+            file_put_contents($gitignorePath, implode("\n", $lines) . "\n");
+            $io->write('<info>Updated .gitignore to exclude Composer Update Helper files</info>');
+        }
     }
 
     /**

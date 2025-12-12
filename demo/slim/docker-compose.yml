@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: demo-slim
+    ports:
+      - "${PORT:-8005}:80"
+    volumes:
+      - .:/var/www/html
+    environment:
+      - APP_ENV=development
+    networks:
+      - demo-network
+    restart: unless-stopped
+
+volumes:
+
+networks:
+  demo-network:
+    driver: bridge
+

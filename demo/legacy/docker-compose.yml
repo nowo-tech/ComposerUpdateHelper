@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: demo-legacy
+    ports:
+      - "${PORT:-8006}:80"
+    volumes:
+      - .:/var/www/html
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+    networks:
+      - demo-network
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  db:
+    image: mysql:5.7
+    container_name: demo-legacy-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: legacy
+      MYSQL_USER: legacy
+      MYSQL_PASSWORD: legacy
+    volumes:
+      - legacy-db-data:/var/lib/mysql
+    networks:
+      - demo-network
+    restart: unless-stopped
+
+volumes:
+  legacy-db-data:
+
+networks:
+  demo-network:
+    driver: bridge
+

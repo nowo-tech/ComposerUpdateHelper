@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: demo-yii
+    ports:
+      - "${PORT:-8003}:80"
+    volumes:
+      - .:/var/www/html
+    environment:
+      - YII_ENV=dev
+      - YII_DEBUG=1
+    networks:
+      - demo-network
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  db:
+    image: mysql:8.0
+    container_name: demo-yii-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: yii
+      MYSQL_USER: yii
+      MYSQL_PASSWORD: yii
+    volumes:
+      - yii-db-data:/var/lib/mysql
+    networks:
+      - demo-network
+    restart: unless-stopped
+
+volumes:
+  yii-db-data:
+
+networks:
+  demo-network:
+    driver: bridge
+
