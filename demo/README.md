@@ -41,17 +41,51 @@ PORT=8001
 
 ## Uso
 
-Cada demo es completamente independiente y tiene su propio `docker-compose.yml`. Puedes levantar cada uno por separado.
+Cada demo es completamente independiente y tiene su propio `docker-compose.yml`. Puedes levantar cada uno por separado usando el Makefile incluido o directamente con docker-compose.
 
-### Levantar un demo específico
+### Usando Makefile (Recomendado)
+
+El Makefile simplifica el manejo de los demos:
 
 ```bash
-# Laravel 11
+# Ver ayuda
+make help
+
+# Levantar un demo específico
+make laravel
+make symfony
+make yii
+make codeigniter
+make slim
+make legacy
+
+# Levantar todos los demos
+make all
+
+# Comandos genéricos (requieren DEMO=<nombre>)
+make up DEMO=laravel      # Levantar un demo
+make down DEMO=laravel    # Detener un demo
+make logs DEMO=laravel    # Ver logs
+make test DEMO=laravel    # Ejecutar tests
+make shell DEMO=laravel   # Abrir shell en el contenedor
+
+# Limpiar todos los demos (detener y eliminar volúmenes)
+make clean
+```
+
+**Nota:** Al iniciar los contenedores por primera vez, se ejecutará automáticamente `composer install` en cada demo, lo que instalará el script `generate-composer-require.sh` del Composer Update Helper en la raíz de cada proyecto.
+
+### Usando Docker Compose directamente
+
+Si prefieres usar docker-compose directamente:
+
+```bash
+# Laravel 12
 cd laravel
 cp .env.example .env  # Editar PORT si es necesario
 docker-compose up -d
 
-# Symfony 7.1
+# Symfony 8.0
 cd symfony
 cp .env.example .env  # Editar PORT si es necesario
 docker-compose up -d
@@ -61,12 +95,12 @@ cd yii
 cp .env.example .env  # Editar PORT si es necesario
 docker-compose up -d
 
-# CodeIgniter 4
+# CodeIgniter 5
 cd codeigniter
 cp .env.example .env  # Editar PORT si es necesario
 docker-compose up -d
 
-# Slim 4
+# Slim 5
 cd slim
 cp .env.example .env  # Editar PORT si es necesario
 docker-compose up -d
@@ -77,39 +111,13 @@ cp .env.example .env  # Editar PORT si es necesario
 docker-compose up -d
 ```
 
-**Nota:** Al iniciar los contenedores por primera vez, se ejecutará automáticamente `composer install` en cada demo, lo que instalará el script `generate-composer-require.sh` del Composer Update Helper en la raíz de cada proyecto.
-
-### Levantar todos los demos
-
-Si quieres levantar todos los demos a la vez, puedes usar un script o ejecutarlos en paralelo:
-
-```bash
-# Desde la raíz de demo/
-cd demo
-
-# Laravel
-cd laravel && docker-compose up -d && cd ..
-
-# Symfony
-cd symfony && docker-compose up -d && cd ..
-
-# Yii
-cd yii && docker-compose up -d && cd ..
-
-# CodeIgniter
-cd codeigniter && docker-compose up -d && cd ..
-
-# Slim
-cd slim && docker-compose up -d && cd ..
-
-# Legacy
-cd legacy && docker-compose up -d && cd ..
-```
-
 ### Ver los logs
 
 ```bash
-# Desde dentro de cada demo
+# Usando Makefile
+make logs DEMO=laravel
+
+# O directamente con docker-compose
 cd laravel
 docker-compose logs -f
 
@@ -121,7 +129,10 @@ docker-compose logs -f db
 ### Detener los demos
 
 ```bash
-# Desde dentro de cada demo
+# Usando Makefile
+make down DEMO=laravel
+
+# O directamente con docker-compose
 cd laravel
 docker-compose down
 
@@ -134,39 +145,27 @@ docker-compose down -v
 Una vez levantados, los demos estarán disponibles en:
 
 - **Laravel 11**: http://localhost:8001
-- **Symfony 7.1**: http://localhost:8002
-- **Yii 2**: http://localhost:8003
-- **CodeIgniter 4**: http://localhost:8004
-- **Slim 4**: http://localhost:8005
-- **Legacy (Laravel 5.8)**: http://localhost:8006
+- **Symfony 7.1**: http://localhost:8001
+- **Yii 2**: http://localhost:8001
+- **CodeIgniter 4**: http://localhost:8001
+- **Slim 4**: http://localhost:8001
+- **Legacy (Laravel 5.8)**: http://localhost:8001
 
 ## Ejecutar Tests
 
 Cada demo incluye una suite de tests básicos. Para ejecutarlos:
 
 ```bash
-# Desde dentro de cada demo
+# Usando Makefile
+make test DEMO=laravel
+make test DEMO=symfony
+make test DEMO=yii
+make test DEMO=codeigniter
+make test DEMO=slim
+make test DEMO=legacy
+
+# O directamente con docker-compose
 cd laravel
-docker-compose exec app composer test
-
-# Symfony
-cd symfony
-docker-compose exec app composer test
-
-# Yii
-cd yii
-docker-compose exec app composer test
-
-# CodeIgniter
-cd codeigniter
-docker-compose exec app composer test
-
-# Slim
-cd slim
-docker-compose exec app composer test
-
-# Legacy
-cd legacy
 docker-compose exec app composer test
 ```
 
@@ -177,11 +176,8 @@ Cada demo tiene el Composer Update Helper instalado como dependencia de desarrol
 Para probarlo:
 
 ```bash
-# Desde dentro de cada demo
-cd laravel
-
-# Entrar al contenedor
-docker-compose exec app sh
+# Usando Makefile para abrir shell
+make shell DEMO=laravel
 
 # Dentro del contenedor, ejecutar el script (ya está instalado en la raíz)
 ./generate-composer-require.sh
@@ -193,13 +189,15 @@ docker-compose exec app sh
 ### Verificar que el script está instalado
 
 ```bash
-# Desde dentro de cada demo
+# Usando Makefile
+make shell DEMO=laravel
+# Dentro del contenedor:
+ls -la generate-composer-require.sh
+head -20 generate-composer-require.sh
+
+# O directamente con docker-compose
 cd laravel
-
-# Verificar que el script existe
 docker-compose exec app ls -la generate-composer-require.sh
-
-# Ver el contenido del script
 docker-compose exec app head -20 generate-composer-require.sh
 ```
 
@@ -208,15 +206,10 @@ docker-compose exec app head -20 generate-composer-require.sh
 Si necesitas reinstalar el script manualmente:
 
 ```bash
-# Desde dentro de cada demo
-cd laravel
-
-# Entrar al contenedor
-docker-compose exec app sh
-
-# Ejecutar composer install o update
+# Usando Makefile
+make shell DEMO=laravel
+# Dentro del contenedor:
 composer install
-
 # O forzar la reinstalación del plugin
 composer update nowo-tech/composer-update-helper
 ```

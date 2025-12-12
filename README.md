@@ -277,15 +277,22 @@ Each demo is independent and can be run separately with Docker Compose. See [dem
 ### Quick Start with Demos
 
 ```bash
-# Example: Run Laravel demo
+# Using Makefile (recommended)
+cd demo
+make laravel        # Start Laravel demo
+make all            # Start all demos
+make test DEMO=laravel  # Run tests
+make shell DEMO=laravel # Open shell
+
+# Or using docker-compose directly
 cd demo/laravel
 cp .env.example .env
 docker-compose up -d
 
 # Access at http://localhost:8001
-# Run tests
-docker-compose exec app composer test
 ```
+
+See [demo/README.md](demo/README.md) for complete documentation.
 
 ## Contributing
 
