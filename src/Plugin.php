@@ -133,7 +133,7 @@ class Plugin implements PluginInterface, EventSubscriberInterface
             }
 
             copy($sourcePath, $destPath);
-            chmod($destPath, 0o755);
+            chmod($destPath, 0755);
         }
 
         // Create ignore file only if it doesn't exist (don't overwrite user's config)
