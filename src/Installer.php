@@ -91,8 +91,8 @@ class Installer
     /**
      * Update .gitignore to exclude Composer Update Helper files.
      *
-     * @param string $projectDir The project root directory
-     * @param IOInterface $io The IO interface
+     * @param string      $projectDir The project root directory
+     * @param IOInterface $io         The IO interface
      */
     private static function updateGitignore(string $projectDir, IOInterface $io): void
     {
