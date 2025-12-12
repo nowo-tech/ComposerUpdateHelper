@@ -20,6 +20,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved demo Makefile with better error handling and automatic container management
 - Updated demo README with comprehensive documentation of all available commands
 
+### Fixed
+- Fixed PluginTest expectations to include `.gitignore` update messages
+  - All tests now correctly expect the automatic `.gitignore` update message
+  - Fixed `testInstallFilesSkipsWhenContentMatches` to allow `.gitignore` update message
+
 ## [1.3.1] - 2025-12-12
 
 ### Added
