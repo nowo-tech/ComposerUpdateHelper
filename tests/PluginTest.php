@@ -324,6 +324,10 @@ final class PluginTest extends TestCase
             @unlink($ignoreSource);
         }
 
+        // Create .gitignore with entries already present to avoid update message
+        $gitignorePath = $tempDir . '/.gitignore';
+        file_put_contents($gitignorePath, "# Composer Update Helper\ngenerate-composer-require.sh\ngenerate-composer-require.ignore.txt\n");
+
         $config = $this->createMock(Config::class);
         $config->method('get')
             ->with('vendor-dir')
@@ -334,16 +338,10 @@ final class PluginTest extends TestCase
             ->willReturn($config);
 
         $io = $this->createMock(IOInterface::class);
-        // Allow .gitignore update message, but not file installation/update messages
-        $io->expects($this->atMost(1))
-            ->method('write')
-            ->with($this->stringContains('Updated .gitignore'));
+        // Since .gitignore already has the entries, no update message should be shown
+        // and since file content matches, no installation/update messages should be shown
         $io->expects($this->never())
-            ->method('write')
-            ->with($this->logicalOr(
-                $this->stringContains('Updating'),
-                $this->stringContains('Installing')
-            ));
+            ->method('write');
 
         $event = $this->createMock(Event::class);
         $event->method('getIO')
