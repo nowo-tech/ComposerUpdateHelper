@@ -25,12 +25,11 @@ class Installer
     private static function getChmodMode(): int
     {
         // Explicit octal notation (0o755) was introduced in PHP 8.1
-        // Use it when available, fallback to implicit (0755) for PHP 7.4 and 8.0
-        if (version_compare(PHP_VERSION, '8.1.0', '>=')) {
-            return 0o755;
-        }
-
-        return 0755;
+        // Since PHP parses the entire file before execution, we can't use 0o755 literal
+        // Instead, we calculate the value: 0755 = 7*64 + 5*8 + 5 = 493
+        // For PHP 8.1+, we could use 0o755, but to maintain compatibility with 7.4/8.0,
+        // we use the decimal equivalent or calculate from octal string
+        return octdec('755');
     }
 
     /**
