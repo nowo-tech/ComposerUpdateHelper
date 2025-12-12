@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.7] - 2025-12-12
+
+### Changed
+- Improved chmod permission handling with PHP version detection
+  - Uses explicit octal notation (`0o755`) for PHP 8.1+ when available
+  - Falls back to implicit octal (`0755`) for PHP 7.4 and 8.0 compatibility
+  - Implemented in `src/Installer.php` and `src/Plugin.php` with `getChmodMode()` method
+  - Ensures compatibility while using the most modern syntax available
+
 ## [1.2.6] - 2025-12-12
 
 ### Fixed
