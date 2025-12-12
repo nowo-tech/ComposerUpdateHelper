@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.6] - 2025-12-12
+
+### Fixed
+- Fixed merge conflicts in PluginTest.php
+- Resolved code formatting inconsistencies in test file
+
 ## [1.2.5] - 2025-12-12
 
 ### Changed
