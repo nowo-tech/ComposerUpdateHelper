@@ -48,6 +48,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Automatic port conflict detection and resolution
 
 ### Fixed
+- **Fixed test suite issues**:
+  - Fixed `testInstallFilesCreatesIgnoreFileIfNotExists` to use temporary directories instead of real project directory
+  - Tests no longer delete `bin/generate-composer-require.ignore.txt` from the actual project during cleanup
+  - Improved `ScriptTest` to handle cases where script is not available in CI/CD environments
+  - All script-related tests now properly skip when script file doesn't exist instead of failing
 - **Fixed 502 Bad Gateway error** in all demo projects:
   - Changed PHP-FPM configuration from Unix socket to TCP (127.0.0.1:9000)
   - Updated all nginx configurations to use `fastcgi_pass 127.0.0.1:9000;`
