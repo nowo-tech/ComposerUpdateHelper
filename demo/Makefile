@@ -12,11 +12,11 @@ help:
 	@echo "Targets:"
 	@echo "  help              Show this help message"
 	@echo "  laravel           Start Laravel 12 demo (port 8001)"
-	@echo "  symfony           Start Symfony 8.0 demo (port 8002)"
-	@echo "  yii               Start Yii 2 demo (port 8003)"
-	@echo "  codeigniter       Start CodeIgniter 5 demo (port 8004)"
-	@echo "  slim              Start Slim 5 demo (port 8005)"
-	@echo "  legacy            Start Legacy Laravel 5.8 demo (port 8006)"
+	@echo "  symfony           Start Symfony 8.0 demo (port 8001)"
+	@echo "  yii               Start Yii 2 demo (port 8001)"
+	@echo "  codeigniter       Start CodeIgniter 4 demo (port 8001)"
+	@echo "  slim              Start Slim 4 demo (port 8001)"
+	@echo "  legacy            Start Laravel 12 demo (port 8001)"
 	@echo "  all               Start all demos"
 	@echo ""
 	@echo "Generic commands (use with DEMO=<name>):"
@@ -40,8 +40,18 @@ laravel:
 	@echo "🚀 Starting Laravel 12 demo..."
 	@cd laravel && \
 		if [ ! -f .env ]; then cp .env.example .env; fi && \
+		PORT=$$(grep "^PORT=" .env 2>/dev/null | cut -d= -f2 | head -1 || echo 8001); \
+		echo "🔍 Checking port $$PORT..."; \
+		CONTAINER=$$(docker ps --format "{{.Names}}" --filter "publish=$$PORT" 2>/dev/null | head -1); \
+		if [ -n "$$CONTAINER" ]; then \
+			echo "⚠️  Port $$PORT is in use by container: $$CONTAINER"; \
+			echo "🛑 Stopping container $$CONTAINER..."; \
+			docker stop $$CONTAINER 2>/dev/null || true; \
+			docker rm $$CONTAINER 2>/dev/null || true; \
+			echo "✅ Port $$PORT is now free"; \
+		fi && \
 		docker-compose up -d && \
-		echo "✅ Laravel demo running at http://localhost:$$(grep PORT .env | cut -d= -f2 || echo 8001)"
+		echo "✅ Laravel demo running at http://localhost:$$PORT"
 
 # Stop Laravel demo
 laravel-down:
@@ -53,22 +63,44 @@ laravel-down:
 laravel-install:
 	@echo "📦 Installing Laravel dependencies..."
 	@cd laravel && docker-compose exec app composer install || \
-		(docker-compose up -d && sleep 2 && docker-compose exec app composer install)
+		(PORT=$$(grep "^PORT=" .env 2>/dev/null | cut -d= -f2 | head -1 || echo 8001); \
+		CONTAINER=$$(docker ps --format "{{.Names}}" --filter "publish=$$PORT" 2>/dev/null | head -1); \
+		if [ -n "$$CONTAINER" ]; then \
+			docker stop $$CONTAINER 2>/dev/null || true; \
+			docker rm $$CONTAINER 2>/dev/null || true; \
+		fi; \
+		docker-compose up -d && sleep 2 && docker-compose exec app composer install)
 	@echo "✅ Laravel dependencies installed!"
 
 # Run Laravel tests
 laravel-test:
 	@echo "🧪 Running Laravel tests..."
 	@cd laravel && docker-compose exec app composer test || \
-		(docker-compose up -d && sleep 2 && docker-compose exec app composer test)
+		(PORT=$$(grep "^PORT=" .env 2>/dev/null | cut -d= -f2 | head -1 || echo 8001); \
+		CONTAINER=$$(docker ps --format "{{.Names}}" --filter "publish=$$PORT" 2>/dev/null | head -1); \
+		if [ -n "$$CONTAINER" ]; then \
+			docker stop $$CONTAINER 2>/dev/null || true; \
+			docker rm $$CONTAINER 2>/dev/null || true; \
+		fi; \
+		docker-compose up -d && sleep 2 && docker-compose exec app composer test)
 
 # Start Symfony demo
 symfony:
 	@echo "🎯 Starting Symfony 8.0 demo..."
 	@cd symfony && \
 		if [ ! -f .env ]; then cp .env.example .env; fi && \
+		PORT=$$(grep "^PORT=" .env 2>/dev/null | cut -d= -f2 | head -1 || echo 8001); \
+		echo "🔍 Checking port $$PORT..."; \
+		CONTAINER=$$(docker ps --format "{{.Names}}" --filter "publish=$$PORT" 2>/dev/null | head -1); \
+		if [ -n "$$CONTAINER" ]; then \
+			echo "⚠️  Port $$PORT is in use by container: $$CONTAINER"; \
+			echo "🛑 Stopping container $$CONTAINER..."; \
+			docker stop $$CONTAINER 2>/dev/null || true; \
+			docker rm $$CONTAINER 2>/dev/null || true; \
+			echo "✅ Port $$PORT is now free"; \
+		fi && \
 		docker-compose up -d && \
-		echo "✅ Symfony demo running at http://localhost:$$(grep PORT .env | cut -d= -f2 || echo 8002)"
+		echo "✅ Symfony demo running at http://localhost:$$PORT"
 
 # Stop Symfony demo
 symfony-down:
@@ -80,22 +112,44 @@ symfony-down:
 symfony-install:
 	@echo "📦 Installing Symfony dependencies..."
 	@cd symfony && docker-compose exec app composer install || \
-		(docker-compose up -d && sleep 2 && docker-compose exec app composer install)
+		(PORT=$$(grep "^PORT=" .env 2>/dev/null | cut -d= -f2 | head -1 || echo 8001); \
+		CONTAINER=$$(docker ps --format "{{.Names}}" --filter "publish=$$PORT" 2>/dev/null | head -1); \
+		if [ -n "$$CONTAINER" ]; then \
+			docker stop $$CONTAINER 2>/dev/null || true; \
+			docker rm $$CONTAINER 2>/dev/null || true; \
+		fi; \
+		docker-compose up -d && sleep 2 && docker-compose exec app composer install)
 	@echo "✅ Symfony dependencies installed!"
 
 # Run Symfony tests
 symfony-test:
 	@echo "🧪 Running Symfony tests..."
 	@cd symfony && docker-compose exec app composer test || \
-		(docker-compose up -d && sleep 2 && docker-compose exec app composer test)
+		(PORT=$$(grep "^PORT=" .env 2>/dev/null | cut -d= -f2 | head -1 || echo 8001); \
+		CONTAINER=$$(docker ps --format "{{.Names}}" --filter "publish=$$PORT" 2>/dev/null | head -1); \
+		if [ -n "$$CONTAINER" ]; then \
+			docker stop $$CONTAINER 2>/dev/null || true; \
+			docker rm $$CONTAINER 2>/dev/null || true; \
+		fi; \
+		docker-compose up -d && sleep 2 && docker-compose exec app composer test)
 
 # Start Yii demo
 yii:
 	@echo "🎨 Starting Yii 2 demo..."
 	@cd yii && \
 		if [ ! -f .env ]; then cp .env.example .env; fi && \
+		PORT=$$(grep "^PORT=" .env 2>/dev/null | cut -d= -f2 | head -1 || echo 8001); \
+		echo "🔍 Checking port $$PORT..."; \
+		CONTAINER=$$(docker ps --format "{{.Names}}" --filter "publish=$$PORT" 2>/dev/null | head -1); \
+		if [ -n "$$CONTAINER" ]; then \
+			echo "⚠️  Port $$PORT is in use by container: $$CONTAINER"; \
+			echo "🛑 Stopping container $$CONTAINER..."; \
+			docker stop $$CONTAINER 2>/dev/null || true; \
+			docker rm $$CONTAINER 2>/dev/null || true; \
+			echo "✅ Port $$PORT is now free"; \
+		fi && \
 		docker-compose up -d && \
-		echo "✅ Yii demo running at http://localhost:$$(grep PORT .env | cut -d= -f2 || echo 8003)"
+		echo "✅ Yii demo running at http://localhost:$$PORT"
 
 # Stop Yii demo
 yii-down:
@@ -107,22 +161,44 @@ yii-down:
 yii-install:
 	@echo "📦 Installing Yii dependencies..."
 	@cd yii && docker-compose exec app composer install || \
-		(docker-compose up -d && sleep 2 && docker-compose exec app composer install)
+		(PORT=$$(grep "^PORT=" .env 2>/dev/null | cut -d= -f2 | head -1 || echo 8001); \
+		CONTAINER=$$(docker ps --format "{{.Names}}" --filter "publish=$$PORT" 2>/dev/null | head -1); \
+		if [ -n "$$CONTAINER" ]; then \
+			docker stop $$CONTAINER 2>/dev/null || true; \
+			docker rm $$CONTAINER 2>/dev/null || true; \
+		fi; \
+		docker-compose up -d && sleep 2 && docker-compose exec app composer install)
 	@echo "✅ Yii dependencies installed!"
 
 # Run Yii tests
 yii-test:
 	@echo "🧪 Running Yii tests..."
 	@cd yii && docker-compose exec app composer test || \
-		(docker-compose up -d && sleep 2 && docker-compose exec app composer test)
+		(PORT=$$(grep "^PORT=" .env 2>/dev/null | cut -d= -f2 | head -1 || echo 8001); \
+		CONTAINER=$$(docker ps --format "{{.Names}}" --filter "publish=$$PORT" 2>/dev/null | head -1); \
+		if [ -n "$$CONTAINER" ]; then \
+			docker stop $$CONTAINER 2>/dev/null || true; \
+			docker rm $$CONTAINER 2>/dev/null || true; \
+		fi; \
+		docker-compose up -d && sleep 2 && docker-compose exec app composer test)
 
 # Start CodeIgniter demo
 codeigniter:
-	@echo "🔥 Starting CodeIgniter 5 demo..."
+	@echo "🔥 Starting CodeIgniter 4 demo..."
 	@cd codeigniter && \
 		if [ ! -f .env ]; then cp .env.example .env; fi && \
+		PORT=$$(grep "^PORT=" .env 2>/dev/null | cut -d= -f2 | head -1 || echo 8001); \
+		echo "🔍 Checking port $$PORT..."; \
+		CONTAINER=$$(docker ps --format "{{.Names}}" --filter "publish=$$PORT" 2>/dev/null | head -1); \
+		if [ -n "$$CONTAINER" ]; then \
+			echo "⚠️  Port $$PORT is in use by container: $$CONTAINER"; \
+			echo "🛑 Stopping container $$CONTAINER..."; \
+			docker stop $$CONTAINER 2>/dev/null || true; \
+			docker rm $$CONTAINER 2>/dev/null || true; \
+			echo "✅ Port $$PORT is now free"; \
+		fi && \
 		docker-compose up -d && \
-		echo "✅ CodeIgniter demo running at http://localhost:$$(grep PORT .env | cut -d= -f2 || echo 8004)"
+		echo "✅ CodeIgniter demo running at http://localhost:$$PORT"
 
 # Stop CodeIgniter demo
 codeigniter-down:
@@ -134,22 +210,44 @@ codeigniter-down:
 codeigniter-install:
 	@echo "📦 Installing CodeIgniter dependencies..."
 	@cd codeigniter && docker-compose exec app composer install || \
-		(docker-compose up -d && sleep 2 && docker-compose exec app composer install)
+		(PORT=$$(grep "^PORT=" .env 2>/dev/null | cut -d= -f2 | head -1 || echo 8001); \
+		CONTAINER=$$(docker ps --format "{{.Names}}" --filter "publish=$$PORT" 2>/dev/null | head -1); \
+		if [ -n "$$CONTAINER" ]; then \
+			docker stop $$CONTAINER 2>/dev/null || true; \
+			docker rm $$CONTAINER 2>/dev/null || true; \
+		fi; \
+		docker-compose up -d && sleep 2 && docker-compose exec app composer install)
 	@echo "✅ CodeIgniter dependencies installed!"
 
 # Run CodeIgniter tests
 codeigniter-test:
 	@echo "🧪 Running CodeIgniter tests..."
 	@cd codeigniter && docker-compose exec app composer test || \
-		(docker-compose up -d && sleep 2 && docker-compose exec app composer test)
+		(PORT=$$(grep "^PORT=" .env 2>/dev/null | cut -d= -f2 | head -1 || echo 8001); \
+		CONTAINER=$$(docker ps --format "{{.Names}}" --filter "publish=$$PORT" 2>/dev/null | head -1); \
+		if [ -n "$$CONTAINER" ]; then \
+			docker stop $$CONTAINER 2>/dev/null || true; \
+			docker rm $$CONTAINER 2>/dev/null || true; \
+		fi; \
+		docker-compose up -d && sleep 2 && docker-compose exec app composer test)
 
 # Start Slim demo
 slim:
-	@echo "⚡ Starting Slim 5 demo..."
+	@echo "⚡ Starting Slim 4 demo..."
 	@cd slim && \
 		if [ ! -f .env ]; then cp .env.example .env; fi && \
+		PORT=$$(grep "^PORT=" .env 2>/dev/null | cut -d= -f2 | head -1 || echo 8001); \
+		echo "🔍 Checking port $$PORT..."; \
+		CONTAINER=$$(docker ps --format "{{.Names}}" --filter "publish=$$PORT" 2>/dev/null | head -1); \
+		if [ -n "$$CONTAINER" ]; then \
+			echo "⚠️  Port $$PORT is in use by container: $$CONTAINER"; \
+			echo "🛑 Stopping container $$CONTAINER..."; \
+			docker stop $$CONTAINER 2>/dev/null || true; \
+			docker rm $$CONTAINER 2>/dev/null || true; \
+			echo "✅ Port $$PORT is now free"; \
+		fi && \
 		docker-compose up -d && \
-		echo "✅ Slim demo running at http://localhost:$$(grep PORT .env | cut -d= -f2 || echo 8005)"
+		echo "✅ Slim demo running at http://localhost:$$PORT"
 
 # Stop Slim demo
 slim-down:
@@ -161,22 +259,44 @@ slim-down:
 slim-install:
 	@echo "📦 Installing Slim dependencies..."
 	@cd slim && docker-compose exec app composer install || \
-		(docker-compose up -d && sleep 2 && docker-compose exec app composer install)
+		(PORT=$$(grep "^PORT=" .env 2>/dev/null | cut -d= -f2 | head -1 || echo 8001); \
+		CONTAINER=$$(docker ps --format "{{.Names}}" --filter "publish=$$PORT" 2>/dev/null | head -1); \
+		if [ -n "$$CONTAINER" ]; then \
+			docker stop $$CONTAINER 2>/dev/null || true; \
+			docker rm $$CONTAINER 2>/dev/null || true; \
+		fi; \
+		docker-compose up -d && sleep 2 && docker-compose exec app composer install)
 	@echo "✅ Slim dependencies installed!"
 
 # Run Slim tests
 slim-test:
 	@echo "🧪 Running Slim tests..."
 	@cd slim && docker-compose exec app composer test || \
-		(docker-compose up -d && sleep 2 && docker-compose exec app composer test)
+		(PORT=$$(grep "^PORT=" .env 2>/dev/null | cut -d= -f2 | head -1 || echo 8001); \
+		CONTAINER=$$(docker ps --format "{{.Names}}" --filter "publish=$$PORT" 2>/dev/null | head -1); \
+		if [ -n "$$CONTAINER" ]; then \
+			docker stop $$CONTAINER 2>/dev/null || true; \
+			docker rm $$CONTAINER 2>/dev/null || true; \
+		fi; \
+		docker-compose up -d && sleep 2 && docker-compose exec app composer test)
 
 # Start Legacy demo
 legacy:
-	@echo "🔧 Starting Legacy Laravel 5.8 demo..."
+	@echo "🔧 Starting Laravel 12 demo..."
 	@cd legacy && \
 		if [ ! -f .env ]; then cp .env.example .env; fi && \
+		PORT=$$(grep "^PORT=" .env 2>/dev/null | cut -d= -f2 | head -1 || echo 8001); \
+		echo "🔍 Checking port $$PORT..."; \
+		CONTAINER=$$(docker ps --format "{{.Names}}" --filter "publish=$$PORT" 2>/dev/null | head -1); \
+		if [ -n "$$CONTAINER" ]; then \
+			echo "⚠️  Port $$PORT is in use by container: $$CONTAINER"; \
+			echo "🛑 Stopping container $$CONTAINER..."; \
+			docker stop $$CONTAINER 2>/dev/null || true; \
+			docker rm $$CONTAINER 2>/dev/null || true; \
+			echo "✅ Port $$PORT is now free"; \
+		fi && \
 		docker-compose up -d && \
-		echo "✅ Legacy demo running at http://localhost:$$(grep PORT .env | cut -d= -f2 || echo 8006)"
+		echo "✅ Legacy demo running at http://localhost:$$PORT"
 
 # Stop Legacy demo
 legacy-down:
@@ -188,14 +308,26 @@ legacy-down:
 legacy-install:
 	@echo "📦 Installing Legacy dependencies..."
 	@cd legacy && docker-compose exec app composer install || \
-		(docker-compose up -d && sleep 2 && docker-compose exec app composer install)
+		(PORT=$$(grep "^PORT=" .env 2>/dev/null | cut -d= -f2 | head -1 || echo 8001); \
+		CONTAINER=$$(docker ps --format "{{.Names}}" --filter "publish=$$PORT" 2>/dev/null | head -1); \
+		if [ -n "$$CONTAINER" ]; then \
+			docker stop $$CONTAINER 2>/dev/null || true; \
+			docker rm $$CONTAINER 2>/dev/null || true; \
+		fi; \
+		docker-compose up -d && sleep 2 && docker-compose exec app composer install)
 	@echo "✅ Legacy dependencies installed!"
 
 # Run Legacy tests
 legacy-test:
 	@echo "🧪 Running Legacy tests..."
 	@cd legacy && docker-compose exec app composer test || \
-		(docker-compose up -d && sleep 2 && docker-compose exec app composer test)
+		(PORT=$$(grep "^PORT=" .env 2>/dev/null | cut -d= -f2 | head -1 || echo 8001); \
+		CONTAINER=$$(docker ps --format "{{.Names}}" --filter "publish=$$PORT" 2>/dev/null | head -1); \
+		if [ -n "$$CONTAINER" ]; then \
+			docker stop $$CONTAINER 2>/dev/null || true; \
+			docker rm $$CONTAINER 2>/dev/null || true; \
+		fi; \
+		docker-compose up -d && sleep 2 && docker-compose exec app composer test)
 
 # Start all demos
 all: laravel symfony yii codeigniter slim legacy
@@ -204,11 +336,11 @@ all: laravel symfony yii codeigniter slim legacy
 	@echo ""
 	@echo "Access demos at:"
 	@echo "  - Laravel:      http://localhost:8001"
-	@echo "  - Symfony:     http://localhost:8002"
-	@echo "  - Yii:         http://localhost:8003"
-	@echo "  - CodeIgniter: http://localhost:8004"
-	@echo "  - Slim:        http://localhost:8005"
-	@echo "  - Legacy:      http://localhost:8006"
+	@echo "  - Symfony:     http://localhost:8001"
+	@echo "  - Yii:         http://localhost:8001"
+	@echo "  - CodeIgniter: http://localhost:8001"
+	@echo "  - Slim:        http://localhost:8001"
+	@echo "  - Legacy:      http://localhost:8001"
 
 # Generic up command
 up:
@@ -220,6 +352,19 @@ up:
 	@echo "🚀 Starting $(DEMO) demo..."
 	@cd $(DEMO) && \
 		if [ ! -f .env ]; then cp .env.example .env; fi && \
+		PORT_DEFAULT=8001; \
+		PORT=$$(grep "^PORT=" .env 2>/dev/null | cut -d= -f2 | head -1 || echo $$PORT_DEFAULT); \
+		if [ -n "$$PORT" ]; then \
+			echo "🔍 Checking port $$PORT..."; \
+			CONTAINER=$$(docker ps --format "{{.Names}}" --filter "publish=$$PORT" 2>/dev/null | head -1); \
+			if [ -n "$$CONTAINER" ]; then \
+				echo "⚠️  Port $$PORT is in use by container: $$CONTAINER"; \
+				echo "🛑 Stopping container $$CONTAINER..."; \
+				docker stop $$CONTAINER 2>/dev/null || true; \
+				docker rm $$CONTAINER 2>/dev/null || true; \
+				echo "✅ Port $$PORT is now free"; \
+			fi; \
+		fi && \
 		docker-compose up -d && \
 		echo "✅ $(DEMO) demo started!"
 
@@ -243,7 +388,19 @@ install:
 	fi
 	@echo "📦 Installing dependencies for $(DEMO) demo..."
 	@cd $(DEMO) && docker-compose exec app composer install || \
-		(docker-compose up -d && sleep 2 && docker-compose exec app composer install)
+		(PORT_DEFAULT=$$([ "$(DEMO)" = "laravel" ] && echo "8001" || \
+		                 [ "$(DEMO)" = "symfony" ] && echo "8002" || \
+		                 [ "$(DEMO)" = "yii" ] && echo "8003" || \
+		                 [ "$(DEMO)" = "codeigniter" ] && echo "8004" || \
+		                 [ "$(DEMO)" = "slim" ] && echo "8005" || \
+		                 [ "$(DEMO)" = "legacy" ] && echo "8006" || echo "8001"); \
+		PORT=$$(grep "^PORT=" .env 2>/dev/null | cut -d= -f2 | head -1 || echo $$PORT_DEFAULT); \
+		CONTAINER=$$(docker ps --format "{{.Names}}" --filter "publish=$$PORT" 2>/dev/null | head -1); \
+		if [ -n "$$CONTAINER" ]; then \
+			docker stop $$CONTAINER 2>/dev/null || true; \
+			docker rm $$CONTAINER 2>/dev/null || true; \
+		fi; \
+		docker-compose up -d && sleep 2 && docker-compose exec app composer install)
 	@echo "✅ $(DEMO) dependencies installed!"
 
 # Generic logs command
@@ -264,7 +421,19 @@ test:
 	fi
 	@echo "🧪 Running tests for $(DEMO) demo..."
 	@cd $(DEMO) && docker-compose exec app composer test || \
-		(docker-compose up -d && sleep 2 && docker-compose exec app composer test)
+		(PORT_DEFAULT=$$([ "$(DEMO)" = "laravel" ] && echo "8001" || \
+		                 [ "$(DEMO)" = "symfony" ] && echo "8002" || \
+		                 [ "$(DEMO)" = "yii" ] && echo "8003" || \
+		                 [ "$(DEMO)" = "codeigniter" ] && echo "8004" || \
+		                 [ "$(DEMO)" = "slim" ] && echo "8005" || \
+		                 [ "$(DEMO)" = "legacy" ] && echo "8006" || echo "8001"); \
+		PORT=$$(grep "^PORT=" .env 2>/dev/null | cut -d= -f2 | head -1 || echo $$PORT_DEFAULT); \
+		CONTAINER=$$(docker ps --format "{{.Names}}" --filter "publish=$$PORT" 2>/dev/null | head -1); \
+		if [ -n "$$CONTAINER" ]; then \
+			docker stop $$CONTAINER 2>/dev/null || true; \
+			docker rm $$CONTAINER 2>/dev/null || true; \
+		fi; \
+		docker-compose up -d && sleep 2 && docker-compose exec app composer test)
 
 # Generic shell command
 shell:

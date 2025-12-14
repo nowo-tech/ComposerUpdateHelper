@@ -16,7 +16,8 @@
     },
     "config": {
         "allow-plugins": {
-            "symfony/flex": true
+            "symfony/flex": true,
+            "nowo-tech/composer-update-helper": true
         }
     },
     "autoload": {
@@ -32,7 +33,6 @@
         }
     },
     "scripts": {
-        "test": "phpunit"
+        "test": "vendor/bin/phpunit"
     }
 }
-

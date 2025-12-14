@@ -262,12 +262,12 @@ See [GitHub Actions](https://github.com/nowo-tech/ComposerUpdateHelper/actions) 
 
 The repository includes demo projects for different PHP frameworks to test the Composer Update Helper:
 
-- **Laravel 12** (PHP 8.5)
-- **Symfony 8.0** (PHP 8.5)
-- **Yii 2** (PHP 8.5)
-- **CodeIgniter 5** (PHP 8.5)
-- **Slim 5** (PHP 8.5)
-- **Legacy** - Laravel 5.8 (PHP 7.4)
+- **Laravel 12** (PHP 8.5) - Latest stable version
+- **Symfony 8.0** (PHP 8.5) - Latest stable version
+- **Yii 2** (PHP 8.5) - Latest stable version (Yii 3 in development)
+- **CodeIgniter 4.6** (PHP 8.5) - Latest stable version
+- **Slim 4.12** (PHP 8.5) - Latest stable version
+- **Legacy** - Laravel 12 (PHP 8.5) - Updated from Laravel 5.8
 
 Each demo is independent and can be run separately with Docker Compose. See [demo/README.md](demo/README.md) for detailed instructions.
 

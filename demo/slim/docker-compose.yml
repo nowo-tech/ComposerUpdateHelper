@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   app:
     build:
@@ -15,8 +13,6 @@ services:
     networks:
       - demo-network
     restart: unless-stopped
-
-volumes:
 
 networks:
   demo-network:

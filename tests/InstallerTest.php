@@ -220,6 +220,44 @@ final class InstallerTest extends TestCase
         @unlink($this->tempDir . '/generate-composer-require.sh');
     }
 
+    public function testInstallUpdatesGitignoreWhenExistsWithoutNewline(): void
+    {
+        $event = $this->createMockEvent();
+
+        // Create .gitignore file without trailing newline
+        $gitignorePath = $this->tempDir . '/.gitignore';
+        file_put_contents($gitignorePath, 'vendor/', FILE_APPEND); // No newline at end
+
+        $packageDir = $this->vendorDir . '/nowo-tech/composer-update-helper';
+        mkdir($packageDir . '/bin', 0777, true);
+        file_put_contents($packageDir . '/bin/generate-composer-require.sh', '#!/bin/sh');
+
+        Installer::install($event);
+
+        $gitignoreContent = file_get_contents($gitignorePath);
+        $this->assertStringContainsString('generate-composer-require.sh', $gitignoreContent);
+        $this->assertStringContainsString('generate-composer-require.ignore.txt', $gitignoreContent);
+    }
+
+    public function testInstallUpdatesGitignoreWhenExistsWithContent(): void
+    {
+        $event = $this->createMockEvent();
+
+        // Create .gitignore file with content
+        $gitignorePath = $this->tempDir . '/.gitignore';
+        file_put_contents($gitignorePath, "vendor/\nnode_modules/\n");
+
+        $packageDir = $this->vendorDir . '/nowo-tech/composer-update-helper';
+        mkdir($packageDir . '/bin', 0777, true);
+        file_put_contents($packageDir . '/bin/generate-composer-require.sh', '#!/bin/sh');
+
+        Installer::install($event);
+
+        $gitignoreContent = file_get_contents($gitignorePath);
+        $this->assertStringContainsString('generate-composer-require.sh', $gitignoreContent);
+        $this->assertStringContainsString('generate-composer-require.ignore.txt', $gitignoreContent);
+    }
+
     /**
      * @return Event&MockObject
      */

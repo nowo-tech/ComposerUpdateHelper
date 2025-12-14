@@ -1,16 +1,16 @@
 {
     "name": "demo/codeigniter",
     "type": "project",
-    "description": "CodeIgniter 5 Demo Project",
+    "description": "CodeIgniter 4 Demo Project",
     "keywords": ["codeigniter", "framework", "demo"],
     "license": "MIT",
     "require": {
         "php": "^8.5",
-        "codeigniter4/framework": "^5.0"
+        "codeigniter4/framework": "^4.6"
     },
     "require-dev": {
         "nowo-tech/composer-update-helper": "*",
-        "phpunit/phpunit": "^10.0"
+        "phpunit/phpunit": "^11.0"
     },
     "autoload": {
         "psr-4": {
@@ -19,8 +19,13 @@
     },
     "minimum-stability": "stable",
     "prefer-stable": true,
+    "config": {
+        "allow-plugins": {
+            "nowo-tech/composer-update-helper": true
+        }
+    },
     "scripts": {
-        "test": "phpunit"
+        "test": "vendor/bin/phpunit"
     }
 }
 
