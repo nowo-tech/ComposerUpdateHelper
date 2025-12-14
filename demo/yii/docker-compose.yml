@@ -21,10 +21,10 @@ services:
     image: mysql:8.0
     container_name: demo-yii-db
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: yii
-      MYSQL_USER: yii
-      MYSQL_PASSWORD: yii
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-yii}
+      MYSQL_USER: ${MYSQL_USER:-yii}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     volumes:
       - yii-db-data:/var/lib/mysql
     networks:

@@ -21,10 +21,10 @@ services:
     image: mysql:8.0
     container_name: demo-laravel-db
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: laravel
-      MYSQL_USER: laravel
-      MYSQL_PASSWORD: laravel
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE:-laravel}
+      MYSQL_USER: ${DB_USERNAME:-laravel}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     volumes:
       - laravel-db-data:/var/lib/mysql
     networks:
