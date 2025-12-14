@@ -353,10 +353,12 @@ final class PluginTest extends TestCase
     {
         $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
         $vendorDir = $tempDir . '/vendor';
-        $packageDir = __DIR__ . '/..';
+        // Simulate package is in vendor (not development mode) to avoid using real project directory
+        $packageDir = $vendorDir . '/nowo-tech/composer-update-helper';
         mkdir($vendorDir, 0777, true);
+        mkdir($packageDir, 0777, true);
 
-        // Create source files in package
+        // Create source files in package (using temporary directory, not real project)
         $binDir = $packageDir . '/bin';
 
         if (!is_dir($binDir)) {
