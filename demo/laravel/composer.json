@@ -26,8 +26,13 @@
     },
     "minimum-stability": "stable",
     "prefer-stable": true,
+    "config": {
+        "allow-plugins": {
+            "nowo-tech/composer-update-helper": true
+        }
+    },
     "scripts": {
-        "test": "phpunit"
+        "test": "vendor/bin/phpunit"
     }
 }
 

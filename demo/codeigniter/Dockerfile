@@ -9,7 +9,8 @@ RUN apk add --no-cache \
     mysql-client
 
 # Install PHP extensions
-RUN docker-php-ext-install pdo_mysql opcache
+# Note: opcache comes preinstalled in PHP 8.5, only install pdo_mysql
+RUN docker-php-ext-install pdo_mysql
 
 # Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
@@ -18,9 +19,7 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 COPY nginx.conf /etc/nginx/nginx.conf
 
 # Configure PHP-FPM
-RUN sed -i 's/listen = 127.0.0.1:9000/listen = \/var\/run\/php-fpm.sock/' /usr/local/etc/php-fpm.d/www.conf && \
-    sed -i 's/;listen.owner = www-data/listen.owner = www-data/' /usr/local/etc/php-fpm.d/www.conf && \
-    sed -i 's/;listen.group = www-data/listen.group = www-data/' /usr/local/etc/php-fpm.d/www.conf
+# Using default TCP configuration (127.0.0.1:9000) which works better in Docker
 
 # Configure supervisor
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf

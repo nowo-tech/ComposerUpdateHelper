@@ -95,7 +95,7 @@ class Plugin implements PluginInterface, EventSubscriberInterface
      */
     public function onPostInstall(Event $event): void
     {
-        $this->installFiles($event->getIO());
+        $this->installFiles($event->getIO(), false);
     }
 
     /**
@@ -105,15 +105,18 @@ class Plugin implements PluginInterface, EventSubscriberInterface
      */
     public function onPostUpdate(Event $event): void
     {
-        $this->installFiles($event->getIO());
+        // Only update .gitignore on updates, don't regenerate files
+        $this->updateGitignoreOnUpdate($event->getIO());
     }
 
     /**
      * Install files to the project root.
+     * Only installs files if they don't exist (first installation only).
      *
      * @param IOInterface $io The IO interface
+     * @param bool        $forceUpdate Force update even if files exist
      */
-    private function installFiles(IOInterface $io): void
+    private function installFiles(IOInterface $io, bool $forceUpdate = false): void
     {
         $vendorDir = $this->composer->getConfig()->get('vendor-dir');
         $projectDir = dirname((string) $vendorDir);
@@ -137,12 +140,12 @@ class Plugin implements PluginInterface, EventSubscriberInterface
                 continue;
             }
 
-            if (file_exists($destPath)) {
-                // Check if it's the same content
-                if (md5_file($sourcePath) === md5_file($destPath)) {
-                    continue;
-                }
+            // Only install if file doesn't exist (first installation)
+            if (file_exists($destPath) && !$forceUpdate) {
+                continue;
+            }
 
+            if (file_exists($destPath)) {
                 $io->write(sprintf('<info>Updating %s</info>', $dest));
             } else {
                 $io->write(sprintf('<info>Installing %s</info>', $dest));
@@ -162,6 +165,18 @@ class Plugin implements PluginInterface, EventSubscriberInterface
         }
 
         // Update .gitignore to exclude installed files
+        $this->updateGitignore($projectDir, $io);
+    }
+
+    /**
+     * Update .gitignore on update (without regenerating files).
+     *
+     * @param IOInterface $io The IO interface
+     */
+    private function updateGitignoreOnUpdate(IOInterface $io): void
+    {
+        $vendorDir = $this->composer->getConfig()->get('vendor-dir');
+        $projectDir = dirname((string) $vendorDir);
         $this->updateGitignore($projectDir, $io);
     }
 

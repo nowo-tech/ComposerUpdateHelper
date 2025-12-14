@@ -1,0 +1,46 @@
+# Laravel 5.8 (Legacy)
+/vendor/
+/node_modules/
+/public/hot
+/public/storage
+/storage/*.key
+/storage/app/*
+!/storage/app/.gitkeep
+/storage/framework/cache/*
+!/storage/framework/cache/.gitkeep
+/storage/framework/sessions/*
+!/storage/framework/sessions/.gitkeep
+/storage/framework/testing/*
+!/storage/framework/testing/.gitkeep
+/storage/framework/views/*
+!/storage/framework/views/.gitkeep
+/storage/logs/*
+!/storage/logs/.gitkeep
+/bootstrap/cache/*
+!/bootstrap/cache/.gitkeep
+
+# Environment
+.env
+.env.backup
+.env.production
+.phpunit.result.cache
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Supervisor
+supervisord.log
+supervisord.pid
+
+# Composer Update Helper
+generate-composer-require.sh
+generate-composer-require.ignore.txt
+

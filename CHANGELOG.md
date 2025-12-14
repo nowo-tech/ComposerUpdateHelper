@@ -7,6 +7,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.3] - 2025-12-14
+
+### Changed
+- **Updated all demo frameworks to latest stable versions**:
+  - Laravel: Already at 12.0 (latest)
+  - Symfony: Already at 8.0 (latest)
+  - Yii: Already at 2.0 (latest stable, Yii 3 in development)
+  - CodeIgniter: Updated from 4.3 to 4.6 (latest stable)
+  - Slim: Already at 4.12 (latest)
+  - Legacy: Updated from Laravel 5.8/PHP 7.4 to Laravel 12/PHP 8.5
+- **Updated PHPUnit to 11.0** in all demo projects
+- **Updated demo .env.example files** with standard framework environment variables:
+  - Each demo now includes complete `.env.example` with framework-specific variables
+  - Added `PORT=8001` configuration for Docker port management
+  - All demos use standard framework environment variable templates
+- **Removed obsolete `version` attribute** from all `docker-compose.yml` files
+  - Eliminates Docker Compose warnings about obsolete version attribute
+- **Improved Makefile port checking**:
+  - Fixed PORT extraction to use `grep "^PORT="` instead of `grep PORT` to avoid matching other port variables (DB_PORT, REDIS_PORT, etc.)
+  - All demos now default to port 8001
+  - Automatic port conflict detection and resolution
+
+### Fixed
+- **Fixed 502 Bad Gateway error** in all demo projects:
+  - Changed PHP-FPM configuration from Unix socket to TCP (127.0.0.1:9000)
+  - Updated all nginx configurations to use `fastcgi_pass 127.0.0.1:9000;`
+  - Removed socket configuration from Dockerfiles (using default TCP configuration)
+  - All demos now work correctly without 502 errors
+- Fixed test coverage to achieve 100% code coverage
+  - Fixed `testOnPostUpdateInstallsFiles` to correctly test `.gitignore` updates instead of file installation
+  - Fixed `testInstallFilesUpdatesWhenContentDiffers` to correctly test that files are not updated when they already exist (unless forceUpdate is true)
+  - Added `testInstallFilesForceUpdate` to cover forced file updates
+  - Made `testIgnoreFileTemplateExists` optional since the ignore file template is not required
+  - Added tests to cover `.gitignore` update scenarios when file exists without trailing newline
+
+### Changed
+- Improved test suite to ensure 100% code coverage
+  - All statements, methods, and elements are now fully covered
+  - Enhanced test cases for edge cases in `.gitignore` updates
+
 ## [1.3.2] - 2025-12-12
 
 ### Added

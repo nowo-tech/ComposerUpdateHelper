@@ -4,12 +4,12 @@ Esta carpeta contiene proyectos de demostración de diferentes frameworks PHP pa
 
 ## Frameworks Incluidos
 
-- **Laravel 12** - Framework moderno (PHP 8.5)
-- **Symfony 8.0** - Framework enterprise (PHP 8.5)
-- **Yii 2** - Framework rápido (PHP 8.5)
-- **CodeIgniter 5** - Framework ligero (PHP 8.5)
-- **Slim 5** - Micro-framework (PHP 8.5)
-- **Legacy** - Laravel 5.8 con PHP 7.4 (proyecto legacy)
+- **Laravel 12** - Framework moderno (PHP 8.5) - Última versión estable
+- **Symfony 8.0** - Framework enterprise (PHP 8.5) - Última versión estable
+- **Yii 2** - Framework rápido (PHP 8.5) - Última versión estable (Yii 3 en desarrollo)
+- **CodeIgniter 4.6** - Framework ligero (PHP 8.5) - Última versión estable
+- **Slim 4.12** - Micro-framework (PHP 8.5) - Última versión estable
+- **Legacy** - Laravel 12 (PHP 8.5) - Actualizado desde Laravel 5.8
 
 ## Requisitos
 
@@ -184,12 +184,14 @@ docker-compose exec app composer install
 
 Una vez levantados, los demos estarán disponibles en:
 
-- **Laravel 11**: http://localhost:8001
-- **Symfony 7.1**: http://localhost:8001
+- **Laravel 12**: http://localhost:8001
+- **Symfony 8.0**: http://localhost:8001
 - **Yii 2**: http://localhost:8001
-- **CodeIgniter 4**: http://localhost:8001
-- **Slim 4**: http://localhost:8001
-- **Legacy (Laravel 5.8)**: http://localhost:8001
+- **CodeIgniter 4.6**: http://localhost:8001
+- **Slim 4.12**: http://localhost:8001
+- **Legacy (Laravel 12)**: http://localhost:8001
+
+**Nota:** Todos los demos usan el puerto 8001 por defecto. El Makefile gestiona automáticamente los conflictos de puertos, deteniendo cualquier contenedor que esté usando el puerto antes de levantar un nuevo demo.
 
 ## Ejecutar Tests
 
@@ -269,39 +271,40 @@ composer update nowo-tech/composer-update-helper
 ```
 demo/
 ├── README.md               # Este archivo
-├── laravel/                # Demo Laravel 11 (independiente)
+├── Makefile                # Makefile para gestionar todos los demos
+├── laravel/                # Demo Laravel 12 (independiente)
 │   ├── docker-compose.yml  # Docker Compose específico de Laravel
-│   ├── .env.example        # Configuración de ejemplo
+│   ├── .env.example        # Variables de entorno estándar de Laravel + PORT
 │   ├── Dockerfile
 │   ├── composer.json
 │   └── public/
-├── symfony/                # Demo Symfony 7.1 (independiente)
+├── symfony/                # Demo Symfony 8.0 (independiente)
 │   ├── docker-compose.yml  # Docker Compose específico de Symfony
-│   ├── .env.example        # Configuración de ejemplo
+│   ├── .env.example        # Variables de entorno estándar de Symfony + PORT
 │   ├── Dockerfile
 │   ├── composer.json
 │   └── public/
 ├── yii/                    # Demo Yii 2 (independiente)
 │   ├── docker-compose.yml  # Docker Compose específico de Yii
-│   ├── .env.example        # Configuración de ejemplo
+│   ├── .env.example        # Variables de entorno estándar de Yii + PORT
 │   ├── Dockerfile
 │   ├── composer.json
 │   └── web/
-├── codeigniter/           # Demo CodeIgniter 4 (independiente)
+├── codeigniter/           # Demo CodeIgniter 4.6 (independiente)
 │   ├── docker-compose.yml  # Docker Compose específico de CodeIgniter
-│   ├── .env.example        # Configuración de ejemplo
+│   ├── .env.example        # Variables de entorno estándar de CodeIgniter + PORT
 │   ├── Dockerfile
 │   ├── composer.json
 │   └── public/
-├── slim/                   # Demo Slim 4 (independiente)
+├── slim/                   # Demo Slim 4.12 (independiente)
 │   ├── docker-compose.yml  # Docker Compose específico de Slim
-│   ├── .env.example        # Configuración de ejemplo
+│   ├── .env.example        # Variables de entorno estándar de Slim + PORT
 │   ├── Dockerfile
 │   ├── composer.json
 │   └── public/
-└── legacy/                 # Demo Legacy (Laravel 5.8 + PHP 7.4) (independiente)
+└── legacy/                 # Demo Legacy (Laravel 12 + PHP 8.5) (independiente)
     ├── docker-compose.yml  # Docker Compose específico de Legacy
-    ├── .env.example        # Configuración de ejemplo
+    ├── .env.example        # Variables de entorno estándar de Laravel + PORT
     ├── Dockerfile
     ├── composer.json
     └── public/
@@ -315,4 +318,8 @@ Cada demo es completamente independiente y puede ejecutarse por separado sin nec
 - Los volúmenes de las bases de datos persisten entre reinicios
 - Para reiniciar desde cero, usa `docker-compose down -v`
 - Los demos son proyectos mínimos para pruebas, no incluyen todas las características de los frameworks
+- Todos los demos usan **PHP 8.5** y las **últimas versiones estables** de cada framework
+- Todos los demos usan **PHPUnit 11.0** para testing
+- Los archivos `.env.example` incluyen las variables de entorno estándar de cada framework más la configuración `PORT=8001` para Docker
+- El Makefile gestiona automáticamente los conflictos de puertos, deteniendo contenedores que ocupen el puerto antes de levantar un nuevo demo
 

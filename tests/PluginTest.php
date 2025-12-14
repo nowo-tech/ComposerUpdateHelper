@@ -91,140 +91,97 @@ final class PluginTest extends TestCase
     {
         $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
         $vendorDir = $tempDir . '/vendor';
-        $packageDir = __DIR__ . '/..';
-        mkdir($vendorDir, 0777, true);
-
-        // Create source file in package
+        $packageDir = $vendorDir . '/nowo-tech/composer-update-helper';
         $binDir = $packageDir . '/bin';
+        mkdir($binDir, 0777, true);
 
-        if (!is_dir($binDir)) {
-            mkdir($binDir, 0777, true);
-        }
-
+        // Create source file in temporary package directory (not in real project)
         $sourceFile = $binDir . '/generate-composer-require.sh';
+        file_put_contents($sourceFile, '#!/bin/sh\necho "test"');
 
-        // Backup original file if it exists
-        $originalContent = null;
+        $config = $this->createMock(Config::class);
+        $config->method('get')
+            ->with('vendor-dir')
+            ->willReturn($vendorDir);
 
-        if (file_exists($sourceFile)) {
-            $originalContent = file_get_contents($sourceFile);
-        }
+        $composer = $this->createMock(Composer::class);
+        $composer->method('getConfig')
+            ->willReturn($config);
 
-        try {
-            file_put_contents($sourceFile, '#!/bin/sh\necho "test"');
+        $io = $this->createMock(IOInterface::class);
+        $io->expects($this->atLeastOnce())
+            ->method('write')
+            ->with($this->logicalOr(
+                $this->stringContains('Installing'),
+                $this->stringContains('Creating generate-composer-require.ignore.txt'),
+                $this->stringContains('Updated .gitignore')
+            ));
 
-            $config = $this->createMock(Config::class);
-            $config->method('get')
-                ->with('vendor-dir')
-                ->willReturn($vendorDir);
+        $event = $this->createMock(Event::class);
+        $event->method('getIO')
+            ->willReturn($io);
 
-            $composer = $this->createMock(Composer::class);
-            $composer->method('getConfig')
-                ->willReturn($config);
+        $plugin = new Plugin();
+        $plugin->activate($composer, $io);
+        $plugin->onPostInstall($event);
 
-            $io = $this->createMock(IOInterface::class);
-            $io->expects($this->atLeastOnce())
-                ->method('write')
-                ->with($this->logicalOr(
-                    $this->stringContains('Installing'),
-                    $this->stringContains('Creating generate-composer-require.ignore.txt'),
-                    $this->stringContains('Updated .gitignore')
-                ));
-
-            $event = $this->createMock(Event::class);
-            $event->method('getIO')
-                ->willReturn($io);
-
-            $plugin = new Plugin();
-            $plugin->activate($composer, $io);
-            $plugin->onPostInstall($event);
-
-            $this->assertFileExists($tempDir . '/generate-composer-require.sh');
-        } finally {
-            // Restore original file
-            if ($originalContent !== null) {
-                file_put_contents($sourceFile, $originalContent);
-            } elseif (file_exists($sourceFile)) {
-                @unlink($sourceFile);
-            }
-        }
+        $this->assertFileExists($tempDir . '/generate-composer-require.sh');
 
         // Cleanup
         @unlink($tempDir . '/generate-composer-require.sh');
         @unlink($tempDir . '/generate-composer-require.ignore.txt');
+        @unlink($sourceFile);
+        @rmdir($binDir);
+        @rmdir($packageDir);
+        @rmdir($vendorDir . '/nowo-tech');
         @rmdir($vendorDir);
         @rmdir($tempDir);
     }
 
-    public function testOnPostUpdateInstallsFiles(): void
+    public function testOnPostUpdateUpdatesGitignore(): void
     {
         $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
         $vendorDir = $tempDir . '/vendor';
-        $packageDir = __DIR__ . '/..';
         mkdir($vendorDir, 0777, true);
 
-        // Create source file in package
-        $binDir = $packageDir . '/bin';
+        // Create .gitignore file
+        $gitignorePath = $tempDir . '/.gitignore';
+        file_put_contents($gitignorePath, 'vendor/');
 
-        if (!is_dir($binDir)) {
-            mkdir($binDir, 0777, true);
-        }
+        $config = $this->createMock(Config::class);
+        $config->method('get')
+            ->with('vendor-dir')
+            ->willReturn($vendorDir);
 
-        $sourceFile = $binDir . '/generate-composer-require.sh';
+        $composer = $this->createMock(Composer::class);
+        $composer->method('getConfig')
+            ->willReturn($config);
 
-        // Backup original file if it exists
-        $originalContent = null;
+        $io = $this->createMock(IOInterface::class);
+        $io->expects($this->atLeastOnce())
+            ->method('write')
+            ->with($this->stringContains('Updated .gitignore'));
 
-        if (file_exists($sourceFile)) {
-            $originalContent = file_get_contents($sourceFile);
-        }
+        $event = $this->createMock(Event::class);
+        $event->method('getIO')
+            ->willReturn($io);
 
-        try {
-            file_put_contents($sourceFile, '#!/bin/sh\necho "test"');
+        $plugin = new Plugin();
+        $plugin->activate($composer, $io);
+        $plugin->onPostUpdate($event);
 
-            $config = $this->createMock(Config::class);
-            $config->method('get')
-                ->with('vendor-dir')
-                ->willReturn($vendorDir);
-
-            $composer = $this->createMock(Composer::class);
-            $composer->method('getConfig')
-                ->willReturn($config);
-
-            $io = $this->createMock(IOInterface::class);
-            $io->expects($this->atLeastOnce())
-                ->method('write')
-                ->with($this->logicalOr(
-                    $this->stringContains('Installing'),
-                    $this->stringContains('Creating generate-composer-require.ignore.txt'),
-                    $this->stringContains('Updated .gitignore')
-                ));
-
-            $event = $this->createMock(Event::class);
-            $event->method('getIO')
-                ->willReturn($io);
-
-            $plugin = new Plugin();
-            $plugin->activate($composer, $io);
-            $plugin->onPostUpdate($event);
-
-            $this->assertFileExists($tempDir . '/generate-composer-require.sh');
-        } finally {
-            // Restore original file
-            if ($originalContent !== null) {
-                file_put_contents($sourceFile, $originalContent);
-            } elseif (file_exists($sourceFile)) {
-                @unlink($sourceFile);
-            }
-        }
+        // Verify .gitignore was updated
+        $gitignoreContent = file_get_contents($gitignorePath);
+        $this->assertStringContainsString('generate-composer-require.sh', $gitignoreContent);
+        $this->assertStringContainsString('generate-composer-require.ignore.txt', $gitignoreContent);
 
         // Cleanup
-        @unlink($tempDir . '/generate-composer-require.sh');
+        @unlink($gitignorePath);
         @rmdir($vendorDir);
         @rmdir($tempDir);
     }
 
-    public function testInstallFilesUpdatesWhenContentDiffers(): void
+    public function testInstallFilesSkipsWhenFileExists(): void
     {
         $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
         $vendorDir = $tempDir . '/vendor';
@@ -232,7 +189,8 @@ final class PluginTest extends TestCase
         mkdir($vendorDir, 0777, true);
 
         // Create existing file with different content
-        file_put_contents($tempDir . '/generate-composer-require.sh', '#!/bin/sh\necho "old"');
+        $existingContent = '#!/bin/sh\necho "old"';
+        file_put_contents($tempDir . '/generate-composer-require.sh', $existingContent);
 
         // Create source file in package with new content
         $binDir = $packageDir . '/bin';
@@ -266,7 +224,6 @@ final class PluginTest extends TestCase
             $io->expects($this->atLeastOnce())
                 ->method('write')
                 ->with($this->logicalOr(
-                    $this->stringContains('Updating'),
                     $this->stringContains('Creating generate-composer-require.ignore.txt'),
                     $this->stringContains('Updated .gitignore')
                 ));
@@ -279,8 +236,9 @@ final class PluginTest extends TestCase
             $plugin->activate($composer, $io);
             $plugin->onPostInstall($event);
 
+            // File should still exist with original content (not updated)
             $this->assertFileExists($tempDir . '/generate-composer-require.sh');
-            $this->assertStringContainsString('new', (string) file_get_contents($tempDir . '/generate-composer-require.sh'));
+            $this->assertStringContainsString('old', (string) file_get_contents($tempDir . '/generate-composer-require.sh'));
         } finally {
             // Restore original file
             if ($originalContent !== null) {
@@ -301,28 +259,16 @@ final class PluginTest extends TestCase
     {
         $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
         $vendorDir = $tempDir . '/vendor';
-        $packageDir = __DIR__ . '/..';
-        mkdir($vendorDir, 0777, true);
+        $packageDir = $vendorDir . '/nowo-tech/composer-update-helper';
+        $binDir = $packageDir . '/bin';
+        mkdir($binDir, 0777, true);
 
         $content = '#!/bin/sh\necho "same"';
         file_put_contents($tempDir . '/generate-composer-require.sh', $content);
 
-        // Create source file in package with same content
-        $binDir = $packageDir . '/bin';
-
-        if (!is_dir($binDir)) {
-            mkdir($binDir, 0777, true);
-        }
-
+        // Create source file in temporary package directory (not in real project)
         $sourceFile = $binDir . '/generate-composer-require.sh';
         file_put_contents($sourceFile, $content);
-
-        // Ensure ignore file doesn't exist to avoid triggering its creation
-        $ignoreSource = $binDir . '/generate-composer-require.ignore.txt';
-
-        if (file_exists($ignoreSource)) {
-            @unlink($ignoreSource);
-        }
 
         // Create .gitignore with entries already present to avoid update message
         $gitignorePath = $tempDir . '/.gitignore';
@@ -353,6 +299,10 @@ final class PluginTest extends TestCase
 
         // Cleanup
         @unlink($tempDir . '/generate-composer-require.sh');
+        @unlink($sourceFile);
+        @rmdir($binDir);
+        @rmdir($packageDir);
+        @rmdir($vendorDir . '/nowo-tech');
         @rmdir($vendorDir);
         @rmdir($tempDir);
     }
@@ -361,11 +311,11 @@ final class PluginTest extends TestCase
     {
         $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
         $vendorDir = $tempDir . '/vendor';
-        $packageDir = __DIR__ . '/..';
-        mkdir($vendorDir, 0777, true);
-
-        // Ensure source file doesn't exist
+        $packageDir = $vendorDir . '/nowo-tech/composer-update-helper';
         $binDir = $packageDir . '/bin';
+        mkdir($binDir, 0777, true);
+
+        // Ensure source file doesn't exist (don't create it)
         $sourceFile = $binDir . '/generate-composer-require.sh';
 
         if (file_exists($sourceFile)) {
@@ -447,6 +397,11 @@ final class PluginTest extends TestCase
         // Cleanup
         @unlink($tempDir . '/generate-composer-require.sh');
         @unlink($tempDir . '/generate-composer-require.ignore.txt');
+        @unlink($binDir . '/generate-composer-require.sh');
+        @unlink($binDir . '/generate-composer-require.ignore.txt');
+        @rmdir($binDir);
+        @rmdir($packageDir);
+        @rmdir($vendorDir . '/nowo-tech');
         @rmdir($vendorDir);
         @rmdir($tempDir);
     }
@@ -455,27 +410,13 @@ final class PluginTest extends TestCase
     {
         $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
         $vendorDir = $tempDir . '/vendor';
-        $packageDir = __DIR__ . '/..';
-        mkdir($vendorDir, 0777, true);
-
-        // Create source file in package
+        $packageDir = $vendorDir . '/nowo-tech/composer-update-helper';
         $binDir = $packageDir . '/bin';
+        mkdir($binDir, 0777, true);
 
-        if (!is_dir($binDir)) {
-            mkdir($binDir, 0777, true);
-        }
-
+        // Create source file in temporary package directory (not in real project)
         $sourceFile = $binDir . '/generate-composer-require.sh';
-
-        // Backup original file if it exists
-        $originalContent = null;
-
-        if (file_exists($sourceFile)) {
-            $originalContent = file_get_contents($sourceFile);
-        }
-
-        try {
-            file_put_contents($sourceFile, '#!/bin/sh\necho "test"');
+        file_put_contents($sourceFile, '#!/bin/sh\necho "test"');
 
             $config = $this->createMock(Config::class);
             $config->method('get')
@@ -511,18 +452,14 @@ final class PluginTest extends TestCase
             $this->assertStringContainsString('generate-composer-require.sh', $gitignoreContent);
             $this->assertStringContainsString('generate-composer-require.ignore.txt', $gitignoreContent);
             $this->assertStringContainsString('# Composer Update Helper', $gitignoreContent);
-        } finally {
-            // Restore original file
-            if ($originalContent !== null) {
-                file_put_contents($sourceFile, $originalContent);
-            } elseif (file_exists($sourceFile)) {
-                @unlink($sourceFile);
-            }
-        }
 
         // Cleanup
         @unlink($tempDir . '/generate-composer-require.sh');
         @unlink($tempDir . '/.gitignore');
+        @unlink($sourceFile);
+        @rmdir($binDir);
+        @rmdir($packageDir);
+        @rmdir($vendorDir . '/nowo-tech');
         @rmdir($vendorDir);
         @rmdir($tempDir);
     }
@@ -531,31 +468,17 @@ final class PluginTest extends TestCase
     {
         $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
         $vendorDir = $tempDir . '/vendor';
-        $packageDir = __DIR__ . '/..';
-        mkdir($vendorDir, 0777, true);
+        $packageDir = $vendorDir . '/nowo-tech/composer-update-helper';
+        $binDir = $packageDir . '/bin';
+        mkdir($binDir, 0777, true);
 
         // Create existing .gitignore with entries
         $gitignorePath = $tempDir . '/.gitignore';
         file_put_contents($gitignorePath, "# Existing entries\ngenerate-composer-require.sh\nvendor/\n");
 
-        // Create source file in package
-        $binDir = $packageDir . '/bin';
-
-        if (!is_dir($binDir)) {
-            mkdir($binDir, 0777, true);
-        }
-
+        // Create source file in temporary package directory (not in real project)
         $sourceFile = $binDir . '/generate-composer-require.sh';
-
-        // Backup original file if it exists
-        $originalContent = null;
-
-        if (file_exists($sourceFile)) {
-            $originalContent = file_get_contents($sourceFile);
-        }
-
-        try {
-            file_put_contents($sourceFile, '#!/bin/sh\necho "test"');
+        file_put_contents($sourceFile, '#!/bin/sh\necho "test"');
 
             $config = $this->createMock(Config::class);
             $config->method('get')
@@ -584,6 +507,77 @@ final class PluginTest extends TestCase
             // Count occurrences - should be only one of each
             $this->assertEquals(1, substr_count($gitignoreContent, 'generate-composer-require.sh'));
             $this->assertEquals(1, substr_count($gitignoreContent, 'generate-composer-require.ignore.txt'));
+
+        // Cleanup
+        @unlink($tempDir . '/generate-composer-require.sh');
+        @unlink($tempDir . '/.gitignore');
+        @unlink($sourceFile);
+        @rmdir($binDir);
+        @rmdir($packageDir);
+        @rmdir($vendorDir . '/nowo-tech');
+        @rmdir($vendorDir);
+        @rmdir($tempDir);
+    }
+
+    public function testInstallFilesForceUpdate(): void
+    {
+        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir = $tempDir . '/vendor';
+        $packageDir = __DIR__ . '/..';
+        mkdir($vendorDir, 0777, true);
+
+        // Create existing file with old content
+        file_put_contents($tempDir . '/generate-composer-require.sh', '#!/bin/sh\necho "old"');
+
+        // Create source file in package with new content
+        $binDir = $packageDir . '/bin';
+
+        if (!is_dir($binDir)) {
+            mkdir($binDir, 0777, true);
+        }
+
+        $sourceFile = $binDir . '/generate-composer-require.sh';
+
+        // Backup original file if it exists
+        $originalContent = null;
+
+        if (file_exists($sourceFile)) {
+            $originalContent = file_get_contents($sourceFile);
+        }
+
+        try {
+            file_put_contents($sourceFile, '#!/bin/sh\necho "new"');
+
+            $config = $this->createMock(Config::class);
+            $config->method('get')
+                ->with('vendor-dir')
+                ->willReturn($vendorDir);
+
+            $composer = $this->createMock(Composer::class);
+            $composer->method('getConfig')
+                ->willReturn($config);
+
+            $io = $this->createMock(IOInterface::class);
+            $io->expects($this->atLeastOnce())
+                ->method('write')
+                ->with($this->logicalOr(
+                    $this->stringContains('Updating'),
+                    $this->stringContains('Creating generate-composer-require.ignore.txt'),
+                    $this->stringContains('Updated .gitignore')
+                ));
+
+            $plugin = new Plugin();
+            $plugin->activate($composer, $io);
+
+            // Use reflection to call private installFiles method with forceUpdate = true
+            $reflection = new \ReflectionClass($plugin);
+            $method = $reflection->getMethod('installFiles');
+            $method->setAccessible(true);
+            $method->invoke($plugin, $io, true);
+
+            // File should be updated with new content
+            $this->assertFileExists($tempDir . '/generate-composer-require.sh');
+            $this->assertStringContainsString('new', (string) file_get_contents($tempDir . '/generate-composer-require.sh'));
         } finally {
             // Restore original file
             if ($originalContent !== null) {
@@ -595,7 +589,7 @@ final class PluginTest extends TestCase
 
         // Cleanup
         @unlink($tempDir . '/generate-composer-require.sh');
-        @unlink($tempDir . '/.gitignore');
+        @unlink($tempDir . '/generate-composer-require.ignore.txt');
         @rmdir($vendorDir);
         @rmdir($tempDir);
     }
