@@ -9,7 +9,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.3.3] - 2025-12-14
 
+### Security
+- **Removed hardcoded passwords from docker-compose.yml files**:
+  - All MySQL passwords now use environment variables without default values
+  - `MYSQL_ROOT_PASSWORD` and `MYSQL_PASSWORD` must be explicitly set in `.env` file
+  - Prevents accidental use of default passwords in production
+  - Affects all demo projects: Laravel, Symfony, Yii, CodeIgniter, Legacy
+
 ### Changed
+- **Improved security in demo docker-compose.yml files**:
+  - Removed default password values from environment variable substitutions
+  - Passwords are now mandatory and must be defined in `.env` file
+  - Other MySQL variables (database, user) still have defaults for convenience
+- **Updated demo .env.example files**:
+  - Added MySQL Docker container configuration variables (`MYSQL_ROOT_PASSWORD`, `MYSQL_PASSWORD`, etc.)
+  - All demos now include complete MySQL configuration in `.env.example`
+  - Each demo now includes complete `.env.example` with framework-specific variables
+  - Added `PORT=8001` configuration for Docker port management
+  - All demos use standard framework environment variable templates
+- **Enhanced documentation**:
+  - Clarified that `.env.example` must be copied and renamed to `.env` (removing `.example`)
+  - Added security warnings about changing default MySQL passwords before production use
+  - Updated all examples to mention password configuration
+  - Documented automatic `.env.example` to `.env` copy by Makefile
 - **Updated all demo frameworks to latest stable versions**:
   - Laravel: Already at 12.0 (latest)
   - Symfony: Already at 8.0 (latest)
@@ -18,10 +40,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Slim: Already at 4.12 (latest)
   - Legacy: Updated from Laravel 5.8/PHP 7.4 to Laravel 12/PHP 8.5
 - **Updated PHPUnit to 11.0** in all demo projects
-- **Updated demo .env.example files** with standard framework environment variables:
-  - Each demo now includes complete `.env.example` with framework-specific variables
-  - Added `PORT=8001` configuration for Docker port management
-  - All demos use standard framework environment variable templates
 - **Removed obsolete `version` attribute** from all `docker-compose.yml` files
   - Eliminates Docker Compose warnings about obsolete version attribute
 - **Improved Makefile port checking**:

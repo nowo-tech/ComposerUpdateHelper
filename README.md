@@ -291,7 +291,8 @@ make shell DEMO=laravel   # Open shell
 
 # Or using docker-compose directly
 cd demo/laravel
-cp .env.example .env
+cp .env.example .env  # Copia y renombra (quita .example)
+# Edita .env para cambiar PORT y contraseñas MySQL si es necesario
 docker-compose up -d
 
 # Access at http://localhost:8001

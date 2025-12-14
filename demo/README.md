@@ -26,18 +26,24 @@ Cada demo tiene su propio archivo `.env.example`. Para configurar un demo:
 cd laravel  # o symfony, yii, codeigniter, slim, legacy
 ```
 
-2. Copia el archivo de ejemplo de configuración:
+2. Copia el archivo de ejemplo de configuración y renómbralo (quita el `.example`):
 
 ```bash
 cp .env.example .env
 ```
 
-3. Edita el archivo `.env` para configurar el puerto si es necesario:
+3. Edita el archivo `.env` para configurar el puerto y las contraseñas de MySQL si es necesario:
 
 ```env
 # Puerto del demo (por defecto según el demo)
 PORT=8001
+
+# MySQL Docker container configuration (¡IMPORTANTE: Cambia estas contraseñas en producción!)
+MYSQL_ROOT_PASSWORD=root
+MYSQL_PASSWORD=tu_contraseña_segura
 ```
+
+**Nota:** El Makefile copia automáticamente `.env.example` a `.env` si no existe cuando levantas un demo, pero es recomendable revisar y cambiar las contraseñas por defecto.
 
 ## Uso
 
@@ -94,32 +100,38 @@ Si prefieres usar docker-compose directamente:
 ```bash
 # Laravel 12
 cd laravel
-cp .env.example .env  # Editar PORT si es necesario
+cp .env.example .env  # Copia y renombra (quita .example)
+# Edita .env para cambiar PORT y contraseñas MySQL si es necesario
 docker-compose up -d
 
 # Symfony 8.0
 cd symfony
-cp .env.example .env  # Editar PORT si es necesario
+cp .env.example .env  # Copia y renombra (quita .example)
+# Edita .env para cambiar PORT y contraseñas MySQL si es necesario
 docker-compose up -d
 
 # Yii 2
 cd yii
-cp .env.example .env  # Editar PORT si es necesario
+cp .env.example .env  # Copia y renombra (quita .example)
+# Edita .env para cambiar PORT y contraseñas MySQL si es necesario
 docker-compose up -d
 
 # CodeIgniter 5
 cd codeigniter
-cp .env.example .env  # Editar PORT si es necesario
+cp .env.example .env  # Copia y renombra (quita .example)
+# Edita .env para cambiar PORT y contraseñas MySQL si es necesario
 docker-compose up -d
 
 # Slim 5
 cd slim
-cp .env.example .env  # Editar PORT si es necesario
+cp .env.example .env  # Copia y renombra (quita .example)
+# Edita .env para cambiar PORT si es necesario
 docker-compose up -d
 
-# Legacy (Laravel 5.8 + PHP 7.4)
+# Legacy (Laravel 12 + PHP 8.5)
 cd legacy
-cp .env.example .env  # Editar PORT si es necesario
+cp .env.example .env  # Copia y renombra (quita .example)
+# Edita .env para cambiar PORT y contraseñas MySQL si es necesario
 docker-compose up -d
 ```
 
@@ -320,6 +332,8 @@ Cada demo es completamente independiente y puede ejecutarse por separado sin nec
 - Los demos son proyectos mínimos para pruebas, no incluyen todas las características de los frameworks
 - Todos los demos usan **PHP 8.5** y las **últimas versiones estables** de cada framework
 - Todos los demos usan **PHPUnit 11.0** para testing
-- Los archivos `.env.example` incluyen las variables de entorno estándar de cada framework más la configuración `PORT=8001` para Docker
+- Los archivos `.env.example` incluyen las variables de entorno estándar de cada framework más la configuración `PORT=8001` para Docker y las variables de MySQL
+- **Importante:** Debes copiar `.env.example` a `.env` (renombrar quitando `.example`) y cambiar las contraseñas de MySQL por defecto antes de usar en producción
 - El Makefile gestiona automáticamente los conflictos de puertos, deteniendo contenedores que ocupen el puerto antes de levantar un nuevo demo
+- El Makefile copia automáticamente `.env.example` a `.env` si no existe cuando levantas un demo
 

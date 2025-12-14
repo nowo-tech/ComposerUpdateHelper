@@ -21,10 +21,10 @@ services:
     image: mysql:5.7
     container_name: demo-legacy-db
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: legacy
-      MYSQL_USER: legacy
-      MYSQL_PASSWORD: legacy
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE:-legacy}
+      MYSQL_USER: ${DB_USERNAME:-legacy}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     volumes:
       - legacy-db-data:/var/lib/mysql
     networks:
