@@ -418,40 +418,40 @@ final class PluginTest extends TestCase
         $sourceFile = $binDir . '/generate-composer-require.sh';
         file_put_contents($sourceFile, '#!/bin/sh\necho "test"');
 
-            $config = $this->createMock(Config::class);
-            $config->method('get')
-                ->with('vendor-dir')
-                ->willReturn($vendorDir);
+        $config = $this->createMock(Config::class);
+        $config->method('get')
+            ->with('vendor-dir')
+            ->willReturn($vendorDir);
 
-            $composer = $this->createMock(Composer::class);
-            $composer->method('getConfig')
-                ->willReturn($config);
+        $composer = $this->createMock(Composer::class);
+        $composer->method('getConfig')
+            ->willReturn($config);
 
-            $io = $this->createMock(IOInterface::class);
-            $io->expects($this->atLeastOnce())
-                ->method('write')
-                ->with($this->logicalOr(
-                    $this->stringContains('Installing'),
-                    $this->stringContains('Creating generate-composer-require.ignore.txt'),
-                    $this->stringContains('Updated .gitignore')
-                ));
+        $io = $this->createMock(IOInterface::class);
+        $io->expects($this->atLeastOnce())
+            ->method('write')
+            ->with($this->logicalOr(
+                $this->stringContains('Installing'),
+                $this->stringContains('Creating generate-composer-require.ignore.txt'),
+                $this->stringContains('Updated .gitignore')
+            ));
 
-            $event = $this->createMock(Event::class);
-            $event->method('getIO')
-                ->willReturn($io);
+        $event = $this->createMock(Event::class);
+        $event->method('getIO')
+            ->willReturn($io);
 
-            $plugin = new Plugin();
-            $plugin->activate($composer, $io);
-            $plugin->onPostInstall($event);
+        $plugin = new Plugin();
+        $plugin->activate($composer, $io);
+        $plugin->onPostInstall($event);
 
-            // Verify .gitignore was created/updated
-            $gitignorePath = $tempDir . '/.gitignore';
-            $this->assertFileExists($gitignorePath);
+        // Verify .gitignore was created/updated
+        $gitignorePath = $tempDir . '/.gitignore';
+        $this->assertFileExists($gitignorePath);
 
-            $gitignoreContent = file_get_contents($gitignorePath);
-            $this->assertStringContainsString('generate-composer-require.sh', $gitignoreContent);
-            $this->assertStringContainsString('generate-composer-require.ignore.txt', $gitignoreContent);
-            $this->assertStringContainsString('# Composer Update Helper', $gitignoreContent);
+        $gitignoreContent = file_get_contents($gitignorePath);
+        $this->assertStringContainsString('generate-composer-require.sh', $gitignoreContent);
+        $this->assertStringContainsString('generate-composer-require.ignore.txt', $gitignoreContent);
+        $this->assertStringContainsString('# Composer Update Helper', $gitignoreContent);
 
         // Cleanup
         @unlink($tempDir . '/generate-composer-require.sh');
@@ -480,33 +480,33 @@ final class PluginTest extends TestCase
         $sourceFile = $binDir . '/generate-composer-require.sh';
         file_put_contents($sourceFile, '#!/bin/sh\necho "test"');
 
-            $config = $this->createMock(Config::class);
-            $config->method('get')
-                ->with('vendor-dir')
-                ->willReturn($vendorDir);
+        $config = $this->createMock(Config::class);
+        $config->method('get')
+            ->with('vendor-dir')
+            ->willReturn($vendorDir);
 
-            $composer = $this->createMock(Composer::class);
-            $composer->method('getConfig')
-                ->willReturn($config);
+        $composer = $this->createMock(Composer::class);
+        $composer->method('getConfig')
+            ->willReturn($config);
 
-            $io = $this->createMock(IOInterface::class);
+        $io = $this->createMock(IOInterface::class);
 
-            $event = $this->createMock(Event::class);
-            $event->method('getIO')
-                ->willReturn($io);
+        $event = $this->createMock(Event::class);
+        $event->method('getIO')
+            ->willReturn($io);
 
-            $plugin = new Plugin();
-            $plugin->activate($composer, $io);
-            $plugin->onPostInstall($event);
+        $plugin = new Plugin();
+        $plugin->activate($composer, $io);
+        $plugin->onPostInstall($event);
 
-            // Verify .gitignore was updated but entries are not duplicated
-            $gitignoreContent = file_get_contents($gitignorePath);
-            $this->assertStringContainsString('generate-composer-require.sh', $gitignoreContent);
-            $this->assertStringContainsString('generate-composer-require.ignore.txt', $gitignoreContent);
+        // Verify .gitignore was updated but entries are not duplicated
+        $gitignoreContent = file_get_contents($gitignorePath);
+        $this->assertStringContainsString('generate-composer-require.sh', $gitignoreContent);
+        $this->assertStringContainsString('generate-composer-require.ignore.txt', $gitignoreContent);
 
-            // Count occurrences - should be only one of each
-            $this->assertEquals(1, substr_count($gitignoreContent, 'generate-composer-require.sh'));
-            $this->assertEquals(1, substr_count($gitignoreContent, 'generate-composer-require.ignore.txt'));
+        // Count occurrences - should be only one of each
+        $this->assertEquals(1, substr_count($gitignoreContent, 'generate-composer-require.sh'));
+        $this->assertEquals(1, substr_count($gitignoreContent, 'generate-composer-require.ignore.txt'));
 
         // Cleanup
         @unlink($tempDir . '/generate-composer-require.sh');
