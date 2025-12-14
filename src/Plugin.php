@@ -113,7 +113,7 @@ class Plugin implements PluginInterface, EventSubscriberInterface
      * Install files to the project root.
      * Only installs files if they don't exist (first installation only).
      *
-     * @param IOInterface $io The IO interface
+     * @param IOInterface $io          The IO interface
      * @param bool        $forceUpdate Force update even if files exist
      */
     private function installFiles(IOInterface $io, bool $forceUpdate = false): void
