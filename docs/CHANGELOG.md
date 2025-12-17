@@ -7,7 +7,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.4] - 2025-12-14
+
+### Added
+- **Help option**: Added `--help` and `-h` flags to display comprehensive usage information
+  - Shows all available options, examples, and framework support details
+  - Works without requiring Composer to be installed
+  - Provides detailed documentation directly from the script
+
+### Changed
+- **Performance optimization**: Emojis are now defined as variables at script initialization
+  - All emojis loaded once at startup instead of being repeated throughout the script
+  - Reduces script size and improves execution performance
+  - Makes the script more maintainable (change emoji once, affects all uses)
+- **Improved output formatting**: Added spacing after emojis for better console readability
+  - All emojis now have proper spacing (2 spaces for simple emojis, 3 for compound emojis)
+  - Better visual separation in terminal output
+- **Enhanced demo Makefile**:
+  - Each demo now uses a unique port (laravel: 8001, symfony: 8002, yii: 8003, codeigniter: 8004, slim: 8005, legacy: 8006)
+  - Improved port conflict detection (checks all containers, running and stopped)
+  - Better error messages with HTTP status codes for debugging
+  - Fixed variable expansion issues in while loops
+
+### Fixed
+- Fixed Makefile variable expansion issues that prevented proper demo startup detection
+- Fixed port detection to correctly identify and free occupied ports before starting demos
+- Improved error handling in demo startup process
+
 ## [1.3.3] - 2025-12-14
+
+### Added
+- **Release information and changelogs**:
+  - Script now automatically fetches release information from GitHub API
+  - Shows release links and changelog links for outdated packages (default mode)
+  - New `--release-detail` option to show full release changelog with complete details
+  - New `--no-release-info` option to skip release information entirely
+  - Default mode shows summary: package name, release link, and changelog link
+  - Detailed mode (`--release-detail`) shows full release name and complete changelog
+  - Only fetches release info for specific versions (not wildcards)
+  - Gracefully handles API failures and network issues
+  - All options are combinable with `--run` flag
 
 ### Security
 - **Removed hardcoded passwords from docker-compose.yml files**:

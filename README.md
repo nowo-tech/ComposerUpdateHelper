@@ -20,6 +20,9 @@ Generates `composer require` commands from outdated dependencies. Works with any
 - ✅ Compares versions to avoid unnecessary updates
 - ✅ Can execute commands directly with `--run` flag
 - ✅ Automatic installation via Composer plugin
+- ✅ **Release information and changelogs**: Shows GitHub release links and changelog previews for outdated packages
+- ✅ **Help option**: Built-in `--help` flag for comprehensive usage information
+- ✅ **Performance optimized**: Emojis and common elements are optimized for better performance
 
 ## Installation
 
@@ -41,7 +44,7 @@ After installation, two files will be copied to your project root:
 ./generate-composer-require.sh
 ```
 
-Example output:
+Example output (default mode - summary):
 
 ```
 ⏭️  Ignored packages (prod):
@@ -53,12 +56,61 @@ Example output:
 🔧 Suggested commands:
   composer require --with-all-dependencies vendor/package:1.2.3 another/package:4.5.6
   composer require --dev --with-all-dependencies phpstan/phpstan:2.0.0
+
+📋 Release information:
+  📦 vendor/package
+     🔗 Release: https://github.com/vendor/package/releases/tag/v1.2.3
+     📝 Changelog: https://github.com/vendor/package/releases
+```
+
+### Show full release details
+
+```bash
+./generate-composer-require.sh --release-detail
+```
+
+Example output (detailed mode):
+
+```
+📋 Release information:
+  📦 vendor/package
+     🔗 Release: https://github.com/vendor/package/releases/tag/v1.2.3
+     📝 Changelog: https://github.com/vendor/package/releases
+     📋 Release Name v1.2.3
+     ──────────────────────────────────────
+     What's Changed
+     * Fix issue #123
+     * Improve performance
+     * Add new feature
+     [Complete changelog...]
+     ──────────────────────────────────────
+```
+
+### Skip release information
+
+```bash
+./generate-composer-require.sh --no-release-info
+```
+
+### Show help
+
+```bash
+./generate-composer-require.sh --help
+# or
+./generate-composer-require.sh -h
 ```
 
 ### Execute the update commands
 
 ```bash
 ./generate-composer-require.sh --run
+```
+
+You can combine options:
+
+```bash
+./generate-composer-require.sh --run --release-detail    # Execute and show full details
+./generate-composer-require.sh --run --no-release-info   # Execute without release info
 ```
 
 ## Ignoring Packages
@@ -75,6 +127,28 @@ laravel/framework
 ```
 
 Ignored packages will still be displayed in the output with their available versions, but won't be included in the `composer require` commands.
+
+## Release Information
+
+The script automatically fetches release information from GitHub for outdated packages:
+
+- **Automatic detection**: Extracts GitHub repository URL from Packagist
+- **Default mode**: Shows summary with release link and changelog link
+- **Detailed mode** (`--release-detail`): Shows full release name and complete changelog
+- **Skip option** (`--no-release-info`): Omits all release information
+- **Graceful fallback**: Silently handles API failures or network issues
+
+Release information is only fetched for packages with specific version constraints (not wildcards like `^1.0` or `~2.0`) to avoid unnecessary API calls.
+
+### Release Information Options
+
+| Option | Description |
+|--------|-------------|
+| Default (no option) | Shows summary: package name, release link, changelog link |
+| `--release-detail` | Shows full release details including complete changelog |
+| `--no-release-info` | Skips all release information |
+| `--run` | Executes suggested commands (can be combined with other options) |
+| `--help` or `-h` | Shows comprehensive usage information and examples |
 
 ## Environment Variables
 
@@ -302,13 +376,17 @@ See [demo/README.md](demo/README.md) for complete documentation.
 
 ## Contributing
 
-Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details.
+Please see [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) for details.
 
 For branching strategy, see [docs/BRANCHING.md](docs/BRANCHING.md).
 
 ## Changelog
 
-Please see [CHANGELOG.md](CHANGELOG.md) for version history.
+Please see [docs/CHANGELOG.md](docs/CHANGELOG.md) for version history.
+
+## Upgrading
+
+Please see [docs/UPGRADING.md](docs/UPGRADING.md) for upgrade instructions and migration notes.
 
 ## Author
 

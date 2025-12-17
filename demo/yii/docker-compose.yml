@@ -1,11 +1,23 @@
 services:
+  nginx:
+    image: nginx:alpine
+    container_name: demo-yii-nginx
+    ports:
+      - "${PORT:-8001}:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - .:/var/www/html:ro
+    depends_on:
+      - app
+    networks:
+      - demo-network
+    restart: unless-stopped
+
   app:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: demo-yii
-    ports:
-      - "${PORT:-8001}:80"
     volumes:
       - .:/var/www/html
     environment:
@@ -13,28 +25,10 @@ services:
       - YII_DEBUG=1
     networks:
       - demo-network
-    depends_on:
-      - db
     restart: unless-stopped
-
-  db:
-    image: mysql:8.0
-    container_name: demo-yii-db
-    environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE:-yii}
-      MYSQL_USER: ${MYSQL_USER:-yii}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-    volumes:
-      - yii-db-data:/var/lib/mysql
-    networks:
-      - demo-network
-    restart: unless-stopped
-
-volumes:
-  yii-db-data:
 
 networks:
   demo-network:
     driver: bridge
+
 
