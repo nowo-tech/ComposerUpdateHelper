@@ -1,6 +1,8 @@
 # Composer Update Helper
 
-[![CI](https://github.com/nowo-tech/composer-update-helper/actions/workflows/ci.yml/badge.svg)](https://github.com/nowo-tech/composer-update-helper/actions/workflows/ci.yml) [![Latest Stable Version](https://poser.pugx.org/nowo-tech/composer-update-helper/v)](https://packagist.org/packages/nowo-tech/composer-update-helper) [![License](https://poser.pugx.org/nowo-tech/composer-update-helper/license)](https://packagist.org/packages/nowo-tech/composer-update-helper) [![PHP Version Require](https://poser.pugx.org/nowo-tech/composer-update-helper/require/php)](https://packagist.org/packages/nowo-tech/composer-update-helper)
+[![CI](https://github.com/nowo-tech/composer-update-helper/actions/workflows/ci.yml/badge.svg)](https://github.com/nowo-tech/composer-update-helper/actions/workflows/ci.yml) [![Latest Stable Version](https://poser.pugx.org/nowo-tech/composer-update-helper/v)](https://packagist.org/packages/nowo-tech/composer-update-helper) [![License](https://poser.pugx.org/nowo-tech/composer-update-helper/license)](https://packagist.org/packages/nowo-tech/composer-update-helper) [![PHP Version Require](https://poser.pugx.org/nowo-tech/composer-update-helper/require/php)](https://packagist.org/packages/nowo-tech/composer-update-helper) [![GitHub stars](https://img.shields.io/github/stars/nowo-tech/composer-update-helper.svg?style=social&label=Star)](https://github.com/nowo-tech/composer-update-helper)
+
+> ⭐ **Found this project useful?** Give it a star on GitHub! It helps us maintain and improve the project.
 
 Generates `composer require` commands from outdated dependencies. Works with any PHP project: **Symfony**, **Laravel**, **Yii**, **CodeIgniter**, **Slim**, **Laminas**, etc.
 
