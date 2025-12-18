@@ -84,8 +84,6 @@ This guide will help you upgrade Composer Update Helper to newer versions.
 
 #### Breaking Changes
 
-- Demo projects updated to latest framework versions
-- PHP 8.5 required for modern demos
 - PHPUnit updated to 11.0
 
 #### Migration Steps
@@ -95,9 +93,7 @@ This guide will help you upgrade Composer Update Helper to newer versions.
    composer update nowo-tech/composer-update-helper
    ```
 
-2. If using demo projects, update your PHP version to 8.5+ (for modern demos)
-
-3. Update your test suites to be compatible with PHPUnit 11.0
+2. Update your test suites to be compatible with PHPUnit 11.0
 
 ### Upgrading to 1.2.0+
 

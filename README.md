@@ -334,48 +334,6 @@ Every push to GitHub automatically triggers:
 
 See [GitHub Actions](https://github.com/nowo-tech/ComposerUpdateHelper/actions) for build status.
 
-## Demo Projects
-
-The repository includes demo projects for different PHP frameworks to test the Composer Update Helper:
-
-- **Laravel 12** (PHP 8.5) - Latest stable version
-- **Symfony 8.0** (PHP 8.5) - Latest stable version
-- **Yii 2** (PHP 8.5) - Latest stable version (Yii 3 in development)
-- **CodeIgniter 4.6** (PHP 8.5) - Latest stable version
-- **Slim 4.12** (PHP 8.5) - Latest stable version
-- **Legacy** - Laravel 12 (PHP 8.5) - Updated from Laravel 5.8
-
-Each demo is independent and can be run separately with Docker Compose. See [demo/README.md](demo/README.md) for detailed instructions.
-
-### Quick Start with Demos
-
-```bash
-# Using Makefile (recommended)
-cd demo
-make laravel           # Start Laravel demo
-make laravel-down      # Stop Laravel demo
-make laravel-install   # Install dependencies
-make laravel-test      # Run tests
-make all               # Start all demos
-
-# Generic commands
-make up DEMO=laravel      # Start a demo
-make down DEMO=laravel    # Stop a demo
-make install DEMO=laravel # Install dependencies
-make test DEMO=laravel    # Run tests
-make shell DEMO=laravel   # Open shell
-
-# Or using docker-compose directly
-cd demo/laravel
-cp .env.example .env  # Copia y renombra (quita .example)
-# Edita .env para cambiar PORT y contraseñas MySQL si es necesario
-docker-compose up -d
-
-# Access at http://localhost:8001
-```
-
-See [demo/README.md](demo/README.md) for complete documentation.
-
 ## Contributing
 
 Please see [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) for details.
