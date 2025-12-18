@@ -23,16 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Improved output formatting**: Added spacing after emojis for better console readability
   - All emojis now have proper spacing (2 spaces for simple emojis, 3 for compound emojis)
   - Better visual separation in terminal output
-- **Enhanced demo Makefile**:
-  - Each demo now uses a unique port (laravel: 8001, symfony: 8002, yii: 8003, codeigniter: 8004, slim: 8005, legacy: 8006)
-  - Improved port conflict detection (checks all containers, running and stopped)
-  - Better error messages with HTTP status codes for debugging
-  - Fixed variable expansion issues in while loops
-
 ### Fixed
-- Fixed Makefile variable expansion issues that prevented proper demo startup detection
-- Fixed port detection to correctly identify and free occupied ports before starting demos
-- Improved error handling in demo startup process
 
 ## [1.3.3] - 2025-12-14
 
@@ -48,43 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Gracefully handles API failures and network issues
   - All options are combinable with `--run` flag
 
-### Security
-- **Removed hardcoded passwords from docker-compose.yml files**:
-  - All MySQL passwords now use environment variables without default values
-  - `MYSQL_ROOT_PASSWORD` and `MYSQL_PASSWORD` must be explicitly set in `.env` file
-  - Prevents accidental use of default passwords in production
-  - Affects all demo projects: Laravel, Symfony, Yii, CodeIgniter, Legacy
-
 ### Changed
-- **Improved security in demo docker-compose.yml files**:
-  - Removed default password values from environment variable substitutions
-  - Passwords are now mandatory and must be defined in `.env` file
-  - Other MySQL variables (database, user) still have defaults for convenience
-- **Updated demo .env.example files**:
-  - Added MySQL Docker container configuration variables (`MYSQL_ROOT_PASSWORD`, `MYSQL_PASSWORD`, etc.)
-  - All demos now include complete MySQL configuration in `.env.example`
-  - Each demo now includes complete `.env.example` with framework-specific variables
-  - Added `PORT=8001` configuration for Docker port management
-  - All demos use standard framework environment variable templates
-- **Enhanced documentation**:
-  - Clarified that `.env.example` must be copied and renamed to `.env` (removing `.example`)
-  - Added security warnings about changing default MySQL passwords before production use
-  - Updated all examples to mention password configuration
-  - Documented automatic `.env.example` to `.env` copy by Makefile
-- **Updated all demo frameworks to latest stable versions**:
-  - Laravel: Already at 12.0 (latest)
-  - Symfony: Already at 8.0 (latest)
-  - Yii: Already at 2.0 (latest stable, Yii 3 in development)
-  - CodeIgniter: Updated from 4.3 to 4.6 (latest stable)
-  - Slim: Already at 4.12 (latest)
-  - Legacy: Updated from Laravel 5.8/PHP 7.4 to Laravel 12/PHP 8.5
-- **Updated PHPUnit to 11.0** in all demo projects
-- **Removed obsolete `version` attribute** from all `docker-compose.yml` files
-  - Eliminates Docker Compose warnings about obsolete version attribute
-- **Improved Makefile port checking**:
-  - Fixed PORT extraction to use `grep "^PORT="` instead of `grep PORT` to avoid matching other port variables (DB_PORT, REDIS_PORT, etc.)
-  - All demos now default to port 8001
-  - Automatic port conflict detection and resolution
 
 ### Fixed
 - **Fixed test suite issues**:
@@ -92,11 +47,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Tests no longer delete `bin/generate-composer-require.ignore.txt` from the actual project during cleanup
   - Improved `ScriptTest` to handle cases where script is not available in CI/CD environments
   - All script-related tests now properly skip when script file doesn't exist instead of failing
-- **Fixed 502 Bad Gateway error** in all demo projects:
-  - Changed PHP-FPM configuration from Unix socket to TCP (127.0.0.1:9000)
-  - Updated all nginx configurations to use `fastcgi_pass 127.0.0.1:9000;`
-  - Removed socket configuration from Dockerfiles (using default TCP configuration)
-  - All demos now work correctly without 502 errors
 - Fixed test coverage to achieve 100% code coverage
   - Fixed `testOnPostUpdateInstallsFiles` to correctly test `.gitignore` updates instead of file installation
   - Fixed `testInstallFilesUpdatesWhenContentDiffers` to correctly test that files are not updated when they already exist (unless forceUpdate is true)
@@ -112,15 +62,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.3.2] - 2025-12-12
 
 ### Added
-- **Enhanced demo Makefile**: Added new commands for managing demo projects
-  - Specific commands for each demo: `make laravel-down`, `make laravel-install`, `make laravel-test`
-  - Generic install command: `make install DEMO=<name>` to install dependencies
-  - Improved test commands that automatically start containers if not running
-  - Commands available for all demos: laravel, symfony, yii, codeigniter, slim, legacy
 
 ### Changed
-- Improved demo Makefile with better error handling and automatic container management
-- Updated demo README with comprehensive documentation of all available commands
 
 ### Fixed
 - Fixed PluginTest expectations to include `.gitignore` update messages
@@ -133,7 +76,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **PHPDoc documentation**: Added comprehensive PHPDoc comments in English to all PHP classes
   - All classes in `src/` directory (Plugin, Installer)
   - All test classes in `tests/` directory (PluginTest, InstallerTest, ScriptTest)
-  - All demo test classes in `demo/*/tests/` directory
   - Each class includes description, `@author`, and `@see` annotations
   - Improved code documentation and IDE support
 
@@ -144,16 +86,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.3.0] - 2025-12-12
 
 ### Added
-- **Demo projects**: Added comprehensive demo projects for testing Composer Update Helper
-  - Laravel 12 demo (PHP 8.5)
-  - Symfony 8.0 demo (PHP 8.5)
-  - Yii 2 demo (PHP 8.5)
-  - CodeIgniter 5 demo (PHP 8.5)
-  - Slim 5 demo (PHP 8.5)
-  - Legacy Laravel 5.8 demo (PHP 7.4)
-  - Each demo is independent with its own `docker-compose.yml`
-  - All demos include test suites
-  - All demos automatically install Composer Update Helper on `composer install`
 - **Automatic .gitignore updates**: Plugin now automatically adds installed files to `.gitignore`
   - Adds `generate-composer-require.sh` to `.gitignore`
   - Adds `generate-composer-require.ignore.txt` to `.gitignore`
@@ -161,12 +93,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Adds comment section for clarity
 
 ### Changed
-- Updated all demo projects to use latest framework versions:
-  - Laravel: 11 → 12
-  - Symfony: 7.1 → 8.0
-  - CodeIgniter: 4 → 5
-  - Slim: 4 → 5
-- Updated all modern demos to use PHP 8.5 (latest stable version)
 - Improved plugin installation process with automatic dependency installation in Docker containers
 
 ## [1.2.7] - 2025-12-12
