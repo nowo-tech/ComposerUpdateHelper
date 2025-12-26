@@ -32,6 +32,8 @@ Generates `composer require` commands from outdated dependencies. Works with any
 composer require --dev nowo-tech/composer-update-helper
 ```
 
+> 💡 **Tip**: We also recommend installing [Code Review Guardian](https://github.com/nowo-tech/CodeReviewGuardian) for a complete code quality workflow. See [Related Packages](#related-packages) section below.
+
 After installation, two files will be copied to your project root:
 - `generate-composer-require.sh` - The main script
 - `generate-composer-require.yaml` - Configuration file for ignored packages (only created if doesn't exist)
@@ -358,7 +360,7 @@ Please see [docs/UPGRADING.md](docs/UPGRADING.md) for upgrade instructions and m
 
 ### Code Review Guardian
 
-Looking for a complete code review solution? Check out **[Code Review Guardian](https://github.com/nowo-tech/code-review-guardian)** - a provider-agnostic code review guardian that works perfectly with Composer Update Helper:
+Looking for a complete code review solution? We highly recommend **[Code Review Guardian](https://github.com/nowo-tech/CodeReviewGuardian)** - a provider-agnostic code review guardian that works perfectly with Composer Update Helper:
 
 - ✅ **Provider-agnostic**: Works with GitHub, GitLab, Bitbucket, and any Git provider
 - ✅ **Multi-framework support**: Automatic framework detection (Symfony, Laravel, etc.)
@@ -366,13 +368,26 @@ Looking for a complete code review solution? Check out **[Code Review Guardian](
 - ✅ **Easy integration**: Simple YAML configuration
 - ✅ **Framework-specific configs**: Optimized configurations for each framework
 
+**Installation:**
 ```bash
 composer require --dev nowo-tech/code-review-guardian
 ```
 
-Together with Composer Update Helper, you get a complete workflow:
-1. **Composer Update Helper** keeps your dependencies up to date
-2. **Code Review Guardian** ensures code quality in your pull requests
+**Why use both together?**
+
+Together with Composer Update Helper, you get a complete development workflow:
+
+1. **Composer Update Helper** → Keeps your dependencies up to date
+   - Automatically detects outdated packages
+   - Generates update commands
+   - Respects framework version constraints
+
+2. **Code Review Guardian** → Ensures code quality in your pull requests
+   - Runs code quality checks automatically
+   - Validates code style and standards
+   - Prevents merging low-quality code
+
+**Perfect combination for maintaining high-quality PHP projects!** 🚀
 
 ## Author
 
