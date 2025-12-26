@@ -4,6 +4,11 @@
 # List of packages to ignore during update
 # Ignored packages will still be displayed in the output with their available versions,
 # but won't be included in the composer require commands.
+#
+# IMPORTANT: Only uncommented packages are read. Lines starting with # are ignored.
+# To ignore a package, remove the # and space before the dash:
+#   - package/name  ✅ This will be read and ignored
+#   # - package/name  ❌ This is a comment and will NOT be read
 ignore:
   # Add packages to ignore (uncomment and add more as needed)
   # - doctrine/orm
@@ -19,6 +24,11 @@ ignore:
 # List of packages to force include during update
 # Included packages will be added to the composer require commands even if they are in the ignore list.
 # The include section has priority over the ignore section.
+#
+# IMPORTANT: Only uncommented packages are read. Lines starting with # are ignored.
+# To force include a package, remove the # and space before the dash:
+#   - package/name  ✅ This will be read and force included
+#   # - package/name  ❌ This is a comment and will NOT be read
 include:
   # Add packages to force include (uncomment and add more as needed)
   # - some/package

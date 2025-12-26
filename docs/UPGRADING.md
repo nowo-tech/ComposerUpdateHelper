@@ -18,9 +18,36 @@ This guide will help you upgrade Composer Update Helper to newer versions.
 
 ## Version-Specific Upgrade Notes
 
-### Upgrading to 2.0.7+
+### Upgrading to 2.0.8+
 
 #### Changed
+- **Improved debug messages**: Debug and verbose modes now provide clearer messages when no packages are found
+  - Helps identify when packages are commented out in YAML configuration
+  - Makes troubleshooting configuration issues easier
+
+#### Documentation
+- **YAML configuration clarification**: README now explicitly explains that only uncommented packages are read
+  - Lines starting with `#` are treated as comments and ignored
+  - Examples show the difference between commented and uncommented packages
+
+**No action required**: This is a documentation and messaging improvement. Existing configurations continue to work as before.
+
+### Upgrading to 2.0.7+
+
+#### Added
+- **Verbose and Debug modes**: New `-v, --verbose` and `--debug` options for troubleshooting
+  - Use `--verbose` or `-v` to see detailed information about configuration files and packages
+  - Use `--debug` for very detailed debug information (includes verbose mode)
+  - All debug/verbose output is sent to stderr to avoid interfering with normal output
+- **Support for `.yml` extension**: You can now use either `.yaml` or `.yml` for configuration files
+  - Priority: `.yaml` first, then `.yml`, then `.txt` (backward compatibility)
+  - Allows users to use either extension based on their preference
+
+#### Changed
+- **Configuration file location**: Script now searches for configuration files in the current directory (where `composer.json` is located)
+  - Previously searched in the script's directory (`$(dirname "$0")`)
+  - Now searches in the current working directory (where the script is executed)
+  - This ensures configuration files are found correctly regardless of script location
 - **Release information default behavior**: Release information is now **disabled by default**
   - If you were relying on release information being shown automatically, you now need to use `--release-info` or `--release-detail`
   - This improves performance by default (no API calls are made)
@@ -28,9 +55,17 @@ This guide will help you upgrade Composer Update Helper to newer versions.
   - Use `--release-detail` to show full release changelog
 
 #### Fixed
+- **Configuration file reading**: Fixed issue where script couldn't find YAML files in the project directory
+  - Script now correctly searches in the current directory instead of script directory
+  - Resolves issues where configuration files weren't being read properly
 - **Migration verification**: Fixed issue where migration verification failed when YAML had packages in `include` section
   - Migration now correctly compares only `ignore` section with TXT content
   - TXT file is now properly deleted after successful migration
+
+#### Migration Notes
+- **No action required**: Existing configuration files will continue to work
+- **File location**: If your configuration file is in the script directory, move it to the project root (where `composer.json` is)
+- **Extension**: You can rename `.yaml` to `.yml` if preferred (both are supported)
 
 #### Action Required
 - **If you use release information**: Add `--release-info` or `--release-detail` flag to your commands
@@ -213,10 +248,11 @@ ignore:
 
 #### New Features
 
-- **Release Information**: The script now shows GitHub release links and changelogs by default.
+- **Release Information**: The script can show GitHub release links and changelogs when requested.
+  - Use `--release-info` to show summary (package, release link, changelog link)
   - Use `--release-detail` to see full changelog details
-  - Use `--no-release-info` to skip release information
-  - Default mode shows summary (package, release link, changelog link)
+  - Use `--no-release-info` to explicitly skip release information (default behavior)
+  - **Note**: In v2.0.7+, release information is disabled by default for better performance
 
 #### Breaking Changes
 

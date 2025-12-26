@@ -10,7 +10,7 @@
 #   ./generate-composer-require.sh --no-release-info         # skip release information
 #   ./generate-composer-require.sh --run --release-detail    # execute and show full changelog
 #
-# Packages listed in the "ignore" section of generate-composer-require.yaml (or .ignore.txt for backward compatibility) will be skipped.
+# Packages listed in the "ignore" section of generate-composer-require.yaml or .yml (or .ignore.txt for backward compatibility) will be skipped.
 # Packages listed in the "include" section will be forced to be included, even if they are in the ignore list.
 #
 # Framework support:
@@ -48,6 +48,8 @@ OPTIONS:
     --release-info           Show release information (summary with links)
     --release-detail         Show full release changelog for each package
     --no-release-info        Skip release information section (default)
+    -v, --verbose            Show verbose output (configuration files, packages, etc.)
+    --debug                  Show debug information (very detailed, includes file paths, parsing, etc.)
     -h, --help               Show this help message
 
 EXAMPLES:
@@ -56,6 +58,8 @@ EXAMPLES:
     $0 --release-info                     # Show release information summary
     $0 --release-detail                    # Show full changelogs
     $0 --run --release-detail             # Execute and show full changelogs
+    $0 --verbose                           # Show verbose output with configuration details
+    $0 --debug                             # Show detailed debug information
 
 FRAMEWORK SUPPORT:
     The script automatically respects framework version constraints:
@@ -68,18 +72,19 @@ FRAMEWORK SUPPORT:
     - Slim: respects slim/slim major.minor version
 
 IGNORED PACKAGES:
-    Packages listed in generate-composer-require.yaml will be skipped.
+    Packages listed in generate-composer-require.yaml or .yml will be skipped.
+    The script searches for configuration files in the current directory (where composer.json is located).
     Old format (generate-composer-require.ignore.txt) is still supported for backward compatibility.
     Comments starting with # are ignored.
 
 RELEASE INFORMATION:
     By default, release information is NOT shown (no API calls are made).
-    
+
     Use --release-info to show a summary with:
     - Package name
     - Release URL
     - Changelog URL
-    
+
     Use --release-detail to see the full release changelog.
     Use --no-release-info to explicitly skip release information (default behavior).
 
@@ -90,6 +95,8 @@ EOF
 RUN_FLAG=""
 SHOW_RELEASE_DETAIL=false
 SHOW_RELEASE_INFO=false
+VERBOSE=false
+DEBUG=false
 
 for arg in "$@"; do
     case "$arg" in
@@ -109,6 +116,13 @@ for arg in "$@"; do
             ;;
         --no-release-info|--skip-releases|--no-releases)
             SHOW_RELEASE_INFO=false
+            ;;
+        -v|--verbose)
+            VERBOSE=true
+            ;;
+        --debug)
+            DEBUG=true
+            VERBOSE=true
             ;;
         *)
             echo "$E_ERROR  Unknown option: $arg" >&2
@@ -135,12 +149,62 @@ fi
 
 # Load ignored and included packages from YAML file (if exists)
 # Fallback to old TXT file for backward compatibility
-IGNORE_FILE_YAML="$(dirname "$0")/generate-composer-require.yaml"
-IGNORE_FILE_TXT="$(dirname "$0")/generate-composer-require.ignore.txt"
+# Search in current directory (where composer.json is), not in script directory
+# Support both .yaml and .yml extensions (priority: .yaml first)
+IGNORE_FILE_YAML=""
+IGNORE_FILE_YML=""
+IGNORE_FILE_TXT="generate-composer-require.ignore.txt"
 IGNORED_PACKAGES=""
 INCLUDED_PACKAGES=""
 
-if [ -f "$IGNORE_FILE_YAML" ]; then
+# Debug: Show current directory and files being searched
+if [ "$DEBUG" = "true" ]; then
+  echo "🔍 DEBUG: Current directory: $(pwd)" >&2
+  echo "🔍 DEBUG: Searching for configuration files:" >&2
+  echo "   - generate-composer-require.yaml" >&2
+  echo "   - generate-composer-require.yml" >&2
+  echo "   - $IGNORE_FILE_TXT" >&2
+fi
+
+# Check for .yaml first, then .yml, then .txt
+if [ -f "generate-composer-require.yaml" ]; then
+  IGNORE_FILE_YAML="generate-composer-require.yaml"
+  if [ "$VERBOSE" = "true" ] || [ "$DEBUG" = "true" ]; then
+    echo "📋 Found configuration file: generate-composer-require.yaml" >&2
+  fi
+elif [ -f "generate-composer-require.yml" ]; then
+  IGNORE_FILE_YML="generate-composer-require.yml"
+  if [ "$VERBOSE" = "true" ] || [ "$DEBUG" = "true" ]; then
+    echo "📋 Found configuration file: generate-composer-require.yml" >&2
+  fi
+elif [ -f "$IGNORE_FILE_TXT" ]; then
+  # Fallback to old TXT format for backward compatibility
+  if [ "$VERBOSE" = "true" ] || [ "$DEBUG" = "true" ]; then
+    echo "📋 Found configuration file: $IGNORE_FILE_TXT (old format)" >&2
+  fi
+  IGNORED_PACKAGES="$(grep -v '^\s*#' "$IGNORE_FILE_TXT" | grep -v '^\s*$' | tr '\n' '|' | sed 's/|$//' || true)"
+  if [ "$DEBUG" = "true" ]; then
+    echo "🔍 DEBUG: Ignored packages from TXT: ${IGNORED_PACKAGES:-none}" >&2
+  fi
+else
+  if [ "$VERBOSE" = "true" ] || [ "$DEBUG" = "true" ]; then
+    echo "ℹ️  No configuration file found (using defaults)" >&2
+  fi
+fi
+
+# Process YAML file (either .yaml or .yml)
+if [ -n "$IGNORE_FILE_YAML" ] || [ -n "$IGNORE_FILE_YML" ]; then
+  # Use .yaml if available, otherwise .yml
+  YAML_FILE="${IGNORE_FILE_YAML:-$IGNORE_FILE_YML}"
+
+  if [ "$DEBUG" = "true" ]; then
+    echo "🔍 DEBUG: Processing YAML file: $YAML_FILE" >&2
+    echo "🔍 DEBUG: File exists: $([ -f "$YAML_FILE" ] && echo 'yes' || echo 'no')" >&2
+    if [ -f "$YAML_FILE" ]; then
+      echo "🔍 DEBUG: File size: $(wc -c < "$YAML_FILE") bytes" >&2
+    fi
+  fi
+
   # Read YAML file and extract packages from ignore array
   # Improved YAML parsing: extract lines starting with "  - " or "    - " after "ignore:"
   # Handles different indentation levels and inline comments
@@ -153,7 +217,23 @@ if [ -f "$IGNORE_FILE_YAML" ]; then
       gsub(/^\s+|\s+$/, "");
       if ($0 != "") print
     }
-  ' "$IGNORE_FILE_YAML" | tr '\n' '|' | sed 's/|$//' || true)"
+  ' "$YAML_FILE" | tr '\n' '|' | sed 's/|$//' || true)"
+
+  if [ "$DEBUG" = "true" ]; then
+    echo "🔍 DEBUG: Ignored packages from YAML: ${IGNORED_PACKAGES:-none}" >&2
+    if [ -n "$IGNORED_PACKAGES" ]; then
+      echo "🔍 DEBUG: Ignored packages list:" >&2
+      echo "$IGNORED_PACKAGES" | tr '|' '\n' | sed 's/^/   - /' >&2
+    else
+      echo "🔍 DEBUG: No ignored packages found (all packages are commented or section is empty)" >&2
+    fi
+  elif [ "$VERBOSE" = "true" ]; then
+    if [ -n "$IGNORED_PACKAGES" ]; then
+      echo "📋 Ignored packages: $(echo "$IGNORED_PACKAGES" | tr '|' ', ')" >&2
+    else
+      echo "📋 Ignored packages: none (all packages are commented or section is empty)" >&2
+    fi
+  fi
 
   # Read YAML file and extract packages from include array (if exists)
   # Improved YAML parsing: extract lines starting with "  - " or "    - " after "include:"
@@ -167,10 +247,23 @@ if [ -f "$IGNORE_FILE_YAML" ]; then
       gsub(/^\s+|\s+$/, "");
       if ($0 != "") print
     }
-  ' "$IGNORE_FILE_YAML" | tr '\n' '|' | sed 's/|$//' || true)"
-elif [ -f "$IGNORE_FILE_TXT" ]; then
-  # Fallback to old TXT format for backward compatibility
-  IGNORED_PACKAGES="$(grep -v '^\s*#' "$IGNORE_FILE_TXT" | grep -v '^\s*$' | tr '\n' '|' | sed 's/|$//' || true)"
+  ' "$YAML_FILE" | tr '\n' '|' | sed 's/|$//' || true)"
+
+  if [ "$DEBUG" = "true" ]; then
+    echo "🔍 DEBUG: Included packages from YAML: ${INCLUDED_PACKAGES:-none}" >&2
+    if [ -n "$INCLUDED_PACKAGES" ]; then
+      echo "🔍 DEBUG: Included packages list:" >&2
+      echo "$INCLUDED_PACKAGES" | tr '|' '\n' | sed 's/^/   - /' >&2
+    else
+      echo "🔍 DEBUG: No included packages found (all packages are commented or section is empty)" >&2
+    fi
+  elif [ "$VERBOSE" = "true" ]; then
+    if [ -n "$INCLUDED_PACKAGES" ]; then
+      echo "📋 Included packages: $(echo "$INCLUDED_PACKAGES" | tr '|' ', ')" >&2
+    else
+      echo "📋 Included packages: none (all packages are commented or section is empty)" >&2
+    fi
+  fi
 fi
 
 # Run composer with forced timezone to avoid warnings
@@ -178,13 +271,28 @@ fi
 OUTDATED_JSON="$("$PHP_BIN" -d date.timezone=UTC "$COMPOSER_BIN" outdated --direct --format=json 2>&1 \
   | grep -v '^Warning:' || true)"
 
+if [ "$DEBUG" = "true" ]; then
+  echo "🔍 DEBUG: Composer outdated command executed" >&2
+  echo "🔍 DEBUG: OUTDATED_JSON length: ${#OUTDATED_JSON} characters" >&2
+fi
+
 if [ -z "${OUTDATED_JSON}" ]; then
+  if [ "$DEBUG" = "true" ]; then
+    echo "🔍 DEBUG: Composer outdated returned empty JSON" >&2
+  fi
   echo "$E_OK  No outdated direct dependencies."
   exit 0
 fi
 
 # Process JSON with PHP (also with forced timezone)
-OUTPUT="$(OUTDATED_JSON="$OUTDATED_JSON" COMPOSER_BIN="$COMPOSER_BIN" PHP_BIN="$PHP_BIN" IGNORED_PACKAGES="$IGNORED_PACKAGES" INCLUDED_PACKAGES="$INCLUDED_PACKAGES" SHOW_RELEASE_INFO="$SHOW_RELEASE_INFO" "$PHP_BIN" -d date.timezone=UTC <<'PHP'
+if [ "$DEBUG" = "true" ]; then
+  echo "🔍 DEBUG: Passing to PHP script:" >&2
+  echo "   - IGNORED_PACKAGES: ${IGNORED_PACKAGES:-none}" >&2
+  echo "   - INCLUDED_PACKAGES: ${INCLUDED_PACKAGES:-none}" >&2
+  echo "   - SHOW_RELEASE_INFO: $SHOW_RELEASE_INFO" >&2
+fi
+
+OUTPUT="$(OUTDATED_JSON="$OUTDATED_JSON" COMPOSER_BIN="$COMPOSER_BIN" PHP_BIN="$PHP_BIN" IGNORED_PACKAGES="$IGNORED_PACKAGES" INCLUDED_PACKAGES="$INCLUDED_PACKAGES" SHOW_RELEASE_INFO="$SHOW_RELEASE_INFO" DEBUG="$DEBUG" "$PHP_BIN" -d date.timezone=UTC <<'PHP'
 <?php
 $raw = getenv('OUTDATED_JSON') ?: '';
 // In case some noise got in, try to isolate the first valid JSON:
@@ -222,6 +330,22 @@ if ($includedPackagesRaw) {
 
 // Check if release info should be skipped
 $showReleaseInfo = getenv('SHOW_RELEASE_INFO') !== 'false';
+$debug = getenv('DEBUG') === 'true';
+
+if ($debug) {
+    error_log("DEBUG: showReleaseInfo = " . ($showReleaseInfo ? 'true' : 'false'));
+    error_log("DEBUG: ignoredPackages count = " . count($ignoredPackages));
+    error_log("DEBUG: includedPackages count = " . count($includedPackages));
+    if (count($ignoredPackages) > 0) {
+        error_log("DEBUG: ignoredPackages list: " . implode(', ', array_keys($ignoredPackages)));
+    }
+    if (count($includedPackages) > 0) {
+        error_log("DEBUG: includedPackages list: " . implode(', ', array_keys($includedPackages)));
+    }
+    error_log("DEBUG: Total outdated packages: " . count($report['installed']));
+    error_log("DEBUG: require packages: " . count($require));
+    error_log("DEBUG: require-dev packages: " . count($requireDev));
+}
 
 // ============================================================================
 // FRAMEWORK DETECTION AND CONSTRAINTS
@@ -281,6 +405,9 @@ if (isset($composer['extra']['symfony']['require'])) {
     $baseVersion = extractBaseVersion($composer['extra']['symfony']['require']);
     if ($baseVersion) {
         $frameworkConstraints['symfony/'] = $baseVersion;
+        if ($debug) {
+            error_log("DEBUG: Detected Symfony constraint: {$baseVersion}.* (from extra.symfony.require)");
+        }
     }
 }
 
@@ -297,10 +424,16 @@ foreach ($frameworkConfigs as $name => $config) {
         $baseVersion = extractBaseVersion($allDeps[$corePackage]);
         if ($baseVersion) {
             $frameworkConstraints[$prefix] = $baseVersion;
+            if ($debug) {
+                error_log("DEBUG: Detected {$name} framework constraint: {$baseVersion}.* (from {$corePackage})");
+            }
             // Also add related prefixes (e.g., illuminate/ for Laravel)
             if (isset($config['related'])) {
                 foreach ($config['related'] as $relatedPrefix) {
                     $frameworkConstraints[$relatedPrefix] = $baseVersion;
+                    if ($debug) {
+                        error_log("DEBUG: Added related prefix constraint: {$relatedPrefix} = {$baseVersion}.*");
+                    }
                 }
             }
             continue;
@@ -515,11 +648,24 @@ foreach ($report['installed'] as $pkg) {
     $installed = $pkg['version'] ?? null;
     $latest = $pkg['latest'] ?? null;
 
+    if ($debug) {
+        error_log("DEBUG: Processing package: {$name} (installed: {$installed}, latest: {$latest})");
+    }
+
     // Check if package is included (force include even if ignored)
     $isIncluded = isset($includedPackages[$name]);
+    $isIgnored = isset($ignoredPackages[$name]);
+
+    if ($debug) {
+        error_log("DEBUG:   - isIgnored: " . ($isIgnored ? 'true' : 'false'));
+        error_log("DEBUG:   - isIncluded: " . ($isIncluded ? 'true' : 'false'));
+    }
 
     // Check if package is ignored (unless it's explicitly included)
-    if (isset($ignoredPackages[$name]) && !$isIncluded) {
+    if ($isIgnored && !$isIncluded) {
+        if ($debug) {
+            error_log("DEBUG:   - Action: IGNORED (in ignore list and not in include list)");
+        }
         if ($latest) {
             $normalized = ltrim($latest, 'v');
             if (isset($devSet[$name])) {
@@ -531,7 +677,16 @@ foreach ($report['installed'] as $pkg) {
         continue;
     }
 
-    if (!$latest) continue;
+    if ($isIncluded && $debug) {
+        error_log("DEBUG:   - Action: INCLUDED (forced include, overriding ignore)");
+    }
+
+    if (!$latest) {
+        if ($debug) {
+            error_log("DEBUG:   - Action: SKIPPED (no latest version available)");
+        }
+        continue;
+    }
 
     $normalized = ltrim($latest, 'v');
     $installedNormalized = $installed ? ltrim($installed, 'v') : null;
@@ -556,10 +711,19 @@ foreach ($report['installed'] as $pkg) {
         // If it's a wildcard constraint, we can't compare directly, so we include it
         if (strpos($constraint, '*') === false && strpos($constraint, '^') === false && strpos($constraint, '~') === false) {
             // It's a specific version, we can compare
-            if (version_compare($installedNormalized, $constraintNormalized, '>=')) {
+            $comparison = version_compare($installedNormalized, $constraintNormalized, '>=');
+            if ($debug) {
+                error_log("DEBUG:   - Version comparison: {$installedNormalized} >= {$constraintNormalized} = " . ($comparison ? 'true' : 'false'));
+            }
+            if ($comparison) {
                 // Already at that version or higher, don't include
+                if ($debug) {
+                    error_log("DEBUG:   - Action: SKIPPED (already at or above target version)");
+                }
                 continue;
             }
+        } elseif ($debug) {
+            error_log("DEBUG:   - Wildcard constraint, including for update");
         }
     }
 
@@ -577,8 +741,14 @@ foreach ($report['installed'] as $pkg) {
 
     if (isset($devSet[$name])) {
         $dev[] = $name . ':' . $constraint;
+        if ($debug) {
+            error_log("DEBUG:   - Action: ADDED to dev dependencies: {$name}:{$constraint}");
+        }
     } else {
         $prod[] = $name . ':' . $constraint;
+        if ($debug) {
+            error_log("DEBUG:   - Action: ADDED to prod dependencies: {$name}:{$constraint}");
+        }
     }
 }
 
@@ -603,6 +773,22 @@ if ($dev)  $commands[] = "composer require --dev --with-all-dependencies " . imp
 $output[] = "---COMMANDS---";
 $output[] = implode(PHP_EOL, $commands);
 
+if ($debug) {
+    error_log("DEBUG: Generated commands:");
+    error_log("DEBUG:   - Prod packages: " . count($prod) . " (" . implode(', ', $prod) . ")");
+    error_log("DEBUG:   - Dev packages: " . count($dev) . " (" . implode(', ', $dev) . ")");
+    error_log("DEBUG:   - Ignored prod: " . count($ignoredProd) . " (" . implode(', ', $ignoredProd) . ")");
+    error_log("DEBUG:   - Ignored dev: " . count($ignoredDev) . " (" . implode(', ', $ignoredDev) . ")");
+}
+
+if ($debug) {
+    error_log("DEBUG: Generated commands:");
+    error_log("DEBUG:   - Prod packages: " . count($prod) . " (" . implode(', ', $prod) . ")");
+    error_log("DEBUG:   - Dev packages: " . count($dev) . " (" . implode(', ', $dev) . ")");
+    error_log("DEBUG:   - Ignored prod: " . count($ignoredProd) . " (" . implode(', ', $ignoredProd) . ")");
+    error_log("DEBUG:   - Ignored dev: " . count($ignoredDev) . " (" . implode(', ', $ignoredDev) . ")");
+}
+
 // Ignored packages section
 $output[] = "---IGNORED_PROD---";
 $output[] = implode(' ', $ignoredProd);
@@ -626,6 +812,11 @@ PHP
 # Filter any "Warning:" that might have slipped in from PHP (double safety)
 OUTPUT="$(printf "%s\n" "$OUTPUT" | grep -v '^Warning:' || true)"
 
+if [ "$DEBUG" = "true" ]; then
+  echo "🔍 DEBUG: PHP script output length: ${#OUTPUT} characters" >&2
+  echo "🔍 DEBUG: Parsing structured output..." >&2
+fi
+
 # Parse the structured output
 FRAMEWORKS="$(printf "%s\n" "$OUTPUT" | sed -n '/^---FRAMEWORKS---$/,/^---COMMANDS---$/p' | grep -v '^---' || true)"
 COMMANDS="$(printf "%s\n" "$OUTPUT" | sed -n '/^---COMMANDS---$/,/^---IGNORED_PROD---$/p' | grep -v '^---' || true)"
@@ -635,8 +826,20 @@ RELEASES="$(printf "%s\n" "$OUTPUT" | sed -n '/^---RELEASES---$/,$p' | grep -v '
 
 # Check if there's anything to show
 if [ -z "$COMMANDS" ] && [ -z "$IGNORED_PROD" ] && [ -z "$IGNORED_DEV" ]; then
+  if [ "$VERBOSE" = "true" ] || [ "$DEBUG" = "true" ]; then
+    echo "ℹ️  No outdated direct dependencies found." >&2
+  fi
   echo "$E_OK  No outdated direct dependencies."
   exit 0
+fi
+
+if [ "$DEBUG" = "true" ]; then
+  echo "🔍 DEBUG: Parsed output:" >&2
+  echo "   - FRAMEWORKS: ${FRAMEWORKS:-none}" >&2
+  echo "   - COMMANDS: ${COMMANDS:-none}" >&2
+  echo "   - IGNORED_PROD: ${IGNORED_PROD:-none}" >&2
+  echo "   - IGNORED_DEV: ${IGNORED_DEV:-none}" >&2
+  echo "   - RELEASES: ${RELEASES:-none}" >&2
 fi
 
 # Show detected frameworks

@@ -7,16 +7,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [2.0.7] - 2025-12-26
-
-### Fixed
-- **Migration verification**: Fixed migration verification to only compare packages from the `ignore` section with TXT content
-  - Previously, verification included packages from both `ignore` and `include` sections
-  - This caused migration to fail when YAML had packages in `include` section that weren't in TXT
-  - Now only `ignore` section is compared, allowing TXT file to be deleted correctly
-  - Fixes test failures in `testMigrationReadsIncludeSectionFromYaml`
+## [2.0.8] - 2025-12-26
 
 ### Changed
+- **Improved debug messages**: Enhanced verbose and debug output to clearly indicate when no packages are found
+  - Debug mode now shows: "No ignored packages found (all packages are commented or section is empty)"
+  - Verbose mode now shows: "Ignored packages: none (all packages are commented or section is empty)"
+  - Helps users understand why packages might not be read from YAML configuration
+
+### Documentation
+- **Clarified YAML configuration**: Updated README.md to explicitly explain that only uncommented packages are read
+  - Added examples showing the difference between commented and uncommented packages
+  - Clarified that lines starting with `#` are treated as comments and ignored
+  - Added important notes in both "Ignoring Packages" and "Forcing Package Inclusion" sections
+
+## [2.0.7] - 2025-12-26
+
+### Added
+- **Verbose and Debug modes**: New options for troubleshooting and detailed information
+  - `-v, --verbose`: Shows detailed information about configuration files and packages
+  - `--debug`: Shows very detailed debug information (includes verbose mode)
+  - All debug/verbose output is sent to stderr to avoid interfering with normal output
+  - Useful for troubleshooting configuration file issues, package detection, and script behavior
+- **Support for `.yml` extension**: Script now supports both `.yaml` and `.yml` extensions
+  - Priority: `.yaml` first, then `.yml`, then `.txt` (backward compatibility)
+  - Allows users to use either extension based on their preference
+- **New flag `--release-info`**: Enables release information summary (release link and changelog link)
+  - Complements `--release-detail` which shows full changelog
+  - Both flags enable release information (previously only `--release-detail` existed)
+
+### Changed
+- **Configuration file location**: Script now searches for configuration files in the current directory (where `composer.json` is located)
+  - Previously searched in the script's directory (`$(dirname "$0")`)
+  - Now searches in the current working directory (where the script is executed)
+  - This ensures configuration files are found correctly regardless of script location
 - **Release information default behavior**: Release information is now **disabled by default**
   - Previously, release information was shown by default (required API calls)
   - Now, release information is only shown when explicitly requested
@@ -24,16 +48,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Use `--release-info` to enable release information summary
   - Use `--release-detail` to enable full release changelog
   - Use `--no-release-info` to explicitly disable (default behavior)
+- **Improved configuration file detection**: Better handling of file search and detection
+  - Clearer messages when files are found or not found
+  - Better error handling for missing files
 
-### Added
-- **New flag `--release-info`**: Enables release information summary (release link and changelog link)
-  - Complements `--release-detail` which shows full changelog
-  - Both flags enable release information (previously only `--release-detail` existed)
+### Fixed
+- **Configuration file reading**: Fixed issue where script couldn't find YAML files in the project directory
+  - Script now correctly searches in the current directory instead of script directory
+  - Resolves issues where configuration files weren't being read properly
+- **Migration verification**: Fixed migration verification to only compare packages from the `ignore` section with TXT content
+  - Previously, verification included packages from both `ignore` and `include` sections
+  - This caused migration to fail when YAML had packages in `include` section that weren't in TXT
+  - Now only `ignore` section is compared, allowing TXT file to be deleted correctly
+  - Fixes test failures in `testMigrationReadsIncludeSectionFromYaml`
 
 ### Documentation
-- Updated help text to reflect new default behavior
-- Updated README.md with correct release information options
+- Updated help text to reflect new default behavior and new options
+- Updated README.md with verbose/debug options, .yml support, and configuration file location
 - Updated examples to show new flags and default behavior
+- Added comprehensive upgrade instructions in UPGRADING.md
 
 ## [2.0.6] - 2025-12-26
 
@@ -52,8 +85,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - **Documentation improvements**: Enhanced README.md with better release information documentation
-  - Clarified that release information is enabled by default
-  - Added note about performance improvement when using `--no-release-info`
+  - Clarified that release information is disabled by default (improves performance)
+  - Added note about performance improvement when not using release info
   - Better explanation of when release information is fetched
 - **YAML template comments**: Updated comments in `bin/generate-composer-require.yaml`
   - Clarified that include section has priority over ignore section
