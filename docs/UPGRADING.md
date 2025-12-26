@@ -18,6 +18,25 @@ This guide will help you upgrade Composer Update Helper to newer versions.
 
 ## Version-Specific Upgrade Notes
 
+### Upgrading to 2.0.4+
+
+#### Changed
+- **Migration verification**: Migration now verifies that packages were correctly migrated before deleting the old `.ignore.txt` file
+  - Compares packages from TXT and YAML files to ensure data integrity
+  - Only deletes TXT file if migration is verified as correct
+  - Shows warning if verification fails and preserves TXT file for safety
+
+#### Fixed
+- **`.gitignore` behavior**: `.sh` and `.yaml` files are no longer added to `.gitignore`
+  - These files should be committed to the repository for team collaboration
+  - Plugin now removes old `.ignore.txt` entries from `.gitignore` if they exist
+  - Plugin also removes `.sh` and `.yaml` entries if they were previously added (cleanup)
+
+#### Migration Notes
+- Migration is now safer with verification step
+- Files should be committed to repository (not ignored)
+- Old `.gitignore` entries are automatically cleaned up
+
 ### Upgrading to 2.0.2+
 
 #### Fixed
