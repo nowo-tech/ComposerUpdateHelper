@@ -34,7 +34,7 @@ composer require --dev nowo-tech/composer-update-helper
 
 After installation, two files will be copied to your project root:
 - `generate-composer-require.sh` - The main script
-- `generate-composer-require.ignore.txt` - Configuration file for ignored packages (only created if doesn't exist)
+- `generate-composer-require.yaml` - Configuration file for ignored packages (only created if doesn't exist)
 
 **Note:** These files are automatically added to your `.gitignore` during installation to prevent them from being committed to your repository.
 
@@ -117,18 +117,24 @@ You can combine options:
 
 ## Ignoring Packages
 
-Edit `generate-composer-require.ignore.txt` to exclude packages from updates:
+Edit `generate-composer-require.yaml` to exclude packages from updates:
 
-```txt
-# Packages to ignore during update
-# Each line is a package name (e.g.: vendor/package)
+```yaml
+# Composer Update Helper Configuration
+# Configuration file for ignored packages during composer update suggestions
 
-doctrine/orm
-symfony/security-bundle
-laravel/framework
+# List of packages to ignore during update
+ignore:
+  - doctrine/orm
+  - symfony/security-bundle
+  - laravel/framework
 ```
 
 Ignored packages will still be displayed in the output with their available versions, but won't be included in the `composer require` commands.
+
+### Backward Compatibility
+
+If you have an old `generate-composer-require.ignore.txt` file, it will be automatically migrated to the new YAML format when you update the package. The script also supports reading the old TXT format for backward compatibility.
 
 ## Release Information
 

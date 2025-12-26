@@ -10,7 +10,7 @@
 #   ./generate-composer-require.sh --no-release-info         # skip release information
 #   ./generate-composer-require.sh --run --release-detail    # execute and show full changelog
 #
-# Packages listed in generate-composer-require.ignore.txt (one per line) will be skipped.
+# Packages listed in generate-composer-require.yaml (or .ignore.txt for backward compatibility) will be skipped.
 #
 # Framework support:
 #   - Symfony: respects "extra.symfony.require" constraint
@@ -66,7 +66,8 @@ FRAMEWORK SUPPORT:
     - Slim: respects slim/slim major.minor version
 
 IGNORED PACKAGES:
-    Packages listed in generate-composer-require.ignore.txt (one per line) will be skipped.
+    Packages listed in generate-composer-require.yaml will be skipped.
+    Old format (generate-composer-require.ignore.txt) is still supported for backward compatibility.
     Comments starting with # are ignored.
 
 RELEASE INFORMATION:
@@ -124,12 +125,19 @@ if [ ! -f composer.json ]; then
   exit 1
 fi
 
-# Load ignored packages from file (if exists)
-IGNORE_FILE="$(dirname "$0")/generate-composer-require.ignore.txt"
+# Load ignored packages from YAML file (if exists)
+# Fallback to old TXT file for backward compatibility
+IGNORE_FILE_YAML="$(dirname "$0")/generate-composer-require.yaml"
+IGNORE_FILE_TXT="$(dirname "$0")/generate-composer-require.ignore.txt"
 IGNORED_PACKAGES=""
-if [ -f "$IGNORE_FILE" ]; then
-  # Read file, remove comments and empty lines
-  IGNORED_PACKAGES="$(grep -v '^\s*#' "$IGNORE_FILE" | grep -v '^\s*$' | tr '\n' '|' | sed 's/|$//' || true)"
+
+if [ -f "$IGNORE_FILE_YAML" ]; then
+  # Read YAML file and extract packages from ignore array
+  # Simple YAML parsing: extract lines starting with "  - " after "ignore:"
+  IGNORED_PACKAGES="$(awk '/^ignore:/{flag=1; next} flag && /^  - /{gsub(/^  - /, ""); print} flag && /^[^ ]/{flag=0}' "$IGNORE_FILE_YAML" | tr '\n' '|' | sed 's/|$//' || true)"
+elif [ -f "$IGNORE_FILE_TXT" ]; then
+  # Fallback to old TXT format for backward compatibility
+  IGNORED_PACKAGES="$(grep -v '^\s*#' "$IGNORE_FILE_TXT" | grep -v '^\s*$' | tr '\n' '|' | sed 's/|$//' || true)"
 fi
 
 # Run composer with forced timezone to avoid warnings

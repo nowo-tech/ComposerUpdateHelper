@@ -113,7 +113,7 @@ final class PluginTest extends TestCase
             ->method('write')
             ->with($this->logicalOr(
                 $this->stringContains('Installing'),
-                $this->stringContains('Creating generate-composer-require.ignore.txt'),
+                $this->stringContains('Creating generate-composer-require.yaml'),
                 $this->stringContains('Updated .gitignore')
             ));
 
@@ -129,7 +129,7 @@ final class PluginTest extends TestCase
 
         // Cleanup
         @unlink($tempDir . '/generate-composer-require.sh');
-        @unlink($tempDir . '/generate-composer-require.ignore.txt');
+        @unlink($tempDir . '/generate-composer-require.yaml');
         @unlink($sourceFile);
         @rmdir($binDir);
         @rmdir($packageDir);
@@ -173,7 +173,7 @@ final class PluginTest extends TestCase
         // Verify .gitignore was updated
         $gitignoreContent = file_get_contents($gitignorePath);
         $this->assertStringContainsString('generate-composer-require.sh', $gitignoreContent);
-        $this->assertStringContainsString('generate-composer-require.ignore.txt', $gitignoreContent);
+        $this->assertStringContainsString('generate-composer-require.yaml', $gitignoreContent);
 
         // Cleanup
         @unlink($gitignorePath);
@@ -224,7 +224,7 @@ final class PluginTest extends TestCase
             $io->expects($this->atLeastOnce())
                 ->method('write')
                 ->with($this->logicalOr(
-                    $this->stringContains('Creating generate-composer-require.ignore.txt'),
+                    $this->stringContains('Creating generate-composer-require.yaml'),
                     $this->stringContains('Updated .gitignore')
                 ));
 
@@ -250,7 +250,7 @@ final class PluginTest extends TestCase
 
         // Cleanup
         @unlink($tempDir . '/generate-composer-require.sh');
-        @unlink($tempDir . '/generate-composer-require.ignore.txt');
+        @unlink($tempDir . '/generate-composer-require.yaml');
         @rmdir($vendorDir);
         @rmdir($tempDir);
     }
@@ -272,7 +272,7 @@ final class PluginTest extends TestCase
 
         // Create .gitignore with entries already present to avoid update message
         $gitignorePath = $tempDir . '/.gitignore';
-        file_put_contents($gitignorePath, "# Composer Update Helper\ngenerate-composer-require.sh\ngenerate-composer-require.ignore.txt\n");
+        file_put_contents($gitignorePath, "# Composer Update Helper\ngenerate-composer-require.sh\ngenerate-composer-require.yaml\n");
 
         $config = $this->createMock(Config::class);
         $config->method('get')
@@ -349,7 +349,7 @@ final class PluginTest extends TestCase
         @rmdir($tempDir);
     }
 
-    public function testInstallFilesCreatesIgnoreFileIfNotExists(): void
+    public function testInstallFilesCreatesYamlConfigFileIfNotExists(): void
     {
         $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
         $vendorDir = $tempDir . '/vendor';
@@ -366,7 +366,7 @@ final class PluginTest extends TestCase
         }
 
         file_put_contents($binDir . '/generate-composer-require.sh', '#!/bin/sh');
-        file_put_contents($binDir . '/generate-composer-require.ignore.txt', '# Ignore file');
+        file_put_contents($binDir . '/generate-composer-require.yaml', '# YAML config file');
 
         $config = $this->createMock(Config::class);
         $config->method('get')
@@ -382,7 +382,7 @@ final class PluginTest extends TestCase
             ->method('write')
             ->with($this->logicalOr(
                 $this->stringContains('Installing'),
-                $this->stringContains('Creating generate-composer-require.ignore.txt'),
+                $this->stringContains('Creating generate-composer-require.yaml'),
                 $this->stringContains('Updated .gitignore')
             ));
 
@@ -394,13 +394,13 @@ final class PluginTest extends TestCase
         $plugin->activate($composer, $io);
         $plugin->onPostInstall($event);
 
-        $this->assertFileExists($tempDir . '/generate-composer-require.ignore.txt');
+        $this->assertFileExists($tempDir . '/generate-composer-require.yaml');
 
         // Cleanup
         @unlink($tempDir . '/generate-composer-require.sh');
-        @unlink($tempDir . '/generate-composer-require.ignore.txt');
+        @unlink($tempDir . '/generate-composer-require.yaml');
         @unlink($binDir . '/generate-composer-require.sh');
-        @unlink($binDir . '/generate-composer-require.ignore.txt');
+        @unlink($binDir . '/generate-composer-require.yaml');
         @rmdir($binDir);
         @rmdir($packageDir);
         @rmdir($vendorDir . '/nowo-tech');
@@ -434,7 +434,7 @@ final class PluginTest extends TestCase
             ->method('write')
             ->with($this->logicalOr(
                 $this->stringContains('Installing'),
-                $this->stringContains('Creating generate-composer-require.ignore.txt'),
+                $this->stringContains('Creating generate-composer-require.yaml'),
                 $this->stringContains('Updated .gitignore')
             ));
 
@@ -452,7 +452,7 @@ final class PluginTest extends TestCase
 
         $gitignoreContent = file_get_contents($gitignorePath);
         $this->assertStringContainsString('generate-composer-require.sh', $gitignoreContent);
-        $this->assertStringContainsString('generate-composer-require.ignore.txt', $gitignoreContent);
+        $this->assertStringContainsString('generate-composer-require.yaml', $gitignoreContent);
         $this->assertStringContainsString('# Composer Update Helper', $gitignoreContent);
 
         // Cleanup
@@ -504,11 +504,11 @@ final class PluginTest extends TestCase
         // Verify .gitignore was updated but entries are not duplicated
         $gitignoreContent = file_get_contents($gitignorePath);
         $this->assertStringContainsString('generate-composer-require.sh', $gitignoreContent);
-        $this->assertStringContainsString('generate-composer-require.ignore.txt', $gitignoreContent);
+        $this->assertStringContainsString('generate-composer-require.yaml', $gitignoreContent);
 
         // Count occurrences - should be only one of each
         $this->assertEquals(1, substr_count($gitignoreContent, 'generate-composer-require.sh'));
-        $this->assertEquals(1, substr_count($gitignoreContent, 'generate-composer-require.ignore.txt'));
+        $this->assertEquals(1, substr_count($gitignoreContent, 'generate-composer-require.yaml'));
 
         // Cleanup
         @unlink($tempDir . '/generate-composer-require.sh');
@@ -591,7 +591,131 @@ final class PluginTest extends TestCase
 
         // Cleanup
         @unlink($tempDir . '/generate-composer-require.sh');
-        @unlink($tempDir . '/generate-composer-require.ignore.txt');
+        @unlink($tempDir . '/generate-composer-require.yaml');
+        @rmdir($vendorDir);
+        @rmdir($tempDir);
+    }
+
+    public function testMigratesTxtToYamlWhenTxtExists(): void
+    {
+        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir = $tempDir . '/vendor';
+        $packageDir = $vendorDir . '/nowo-tech/composer-update-helper';
+        $binDir = $packageDir . '/bin';
+        mkdir($binDir, 0777, true);
+
+        // Create source files
+        file_put_contents($binDir . '/generate-composer-require.sh', '#!/bin/sh');
+        file_put_contents($binDir . '/generate-composer-require.yaml', '# YAML config');
+
+        // Create old TXT file in project (simulating upgrade scenario)
+        $oldTxtFile = $tempDir . '/generate-composer-require.ignore.txt';
+        file_put_contents($oldTxtFile, "doctrine/orm\nsymfony/security-bundle\n# Comment line\n");
+
+        $config = $this->createMock(Config::class);
+        $config->method('get')
+            ->with('vendor-dir')
+            ->willReturn($vendorDir);
+
+        $composer = $this->createMock(Composer::class);
+        $composer->method('getConfig')
+            ->willReturn($config);
+
+        $io = $this->createMock(IOInterface::class);
+        $io->expects($this->atLeastOnce())
+            ->method('write')
+            ->with($this->logicalOr(
+                $this->stringContains('Installing'),
+                $this->stringContains('Migrating configuration from TXT to YAML format'),
+                $this->stringContains('Configuration migrated to'),
+                $this->stringContains('Updated .gitignore')
+            ));
+
+        $event = $this->createMock(Event::class);
+        $event->method('getIO')
+            ->willReturn($io);
+
+        $plugin = new Plugin();
+        $plugin->activate($composer, $io);
+        $plugin->onPostInstall($event);
+
+        // Verify YAML file was created
+        $yamlFile = $tempDir . '/generate-composer-require.yaml';
+        $this->assertFileExists($yamlFile);
+
+        // Verify content was migrated correctly
+        $yamlContent = file_get_contents($yamlFile);
+        $this->assertStringContainsString('doctrine/orm', $yamlContent);
+        $this->assertStringContainsString('symfony/security-bundle', $yamlContent);
+        $this->assertStringContainsString('ignore:', $yamlContent);
+        $this->assertStringContainsString('Migrated from generate-composer-require.ignore.txt', $yamlContent);
+
+        // Verify old TXT file still exists (not deleted)
+        $this->assertFileExists($oldTxtFile);
+
+        // Cleanup
+        @unlink($tempDir . '/generate-composer-require.sh');
+        @unlink($tempDir . '/generate-composer-require.yaml');
+        @unlink($oldTxtFile);
+        @unlink($binDir . '/generate-composer-require.sh');
+        @unlink($binDir . '/generate-composer-require.yaml');
+        @rmdir($binDir);
+        @rmdir($packageDir);
+        @rmdir($vendorDir . '/nowo-tech');
+        @rmdir($vendorDir);
+        @rmdir($tempDir);
+    }
+
+    public function testOnPostUpdateMigratesTxtToYaml(): void
+    {
+        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir = $tempDir . '/vendor';
+        $packageDir = $vendorDir . '/nowo-tech/composer-update-helper';
+        $binDir = $packageDir . '/bin';
+        mkdir($binDir, 0777, true);
+
+        file_put_contents($binDir . '/generate-composer-require.yaml', '# YAML config');
+
+        // Create old TXT file in project (simulating upgrade scenario)
+        $oldTxtFile = $tempDir . '/generate-composer-require.ignore.txt';
+        file_put_contents($oldTxtFile, "doctrine/orm\n");
+
+        $config = $this->createMock(Config::class);
+        $config->method('get')
+            ->with('vendor-dir')
+            ->willReturn($vendorDir);
+
+        $composer = $this->createMock(Composer::class);
+        $composer->method('getConfig')
+            ->willReturn($config);
+
+        $io = $this->createMock(IOInterface::class);
+        $io->expects($this->atLeastOnce())
+            ->method('write')
+            ->with($this->logicalOr(
+                $this->stringContains('Migrating configuration from TXT to YAML format'),
+                $this->stringContains('Updated .gitignore')
+            ));
+
+        $event = $this->createMock(Event::class);
+        $event->method('getIO')
+            ->willReturn($io);
+
+        $plugin = new Plugin();
+        $plugin->activate($composer, $io);
+        $plugin->onPostUpdate($event);
+
+        // Verify YAML file was created
+        $yamlFile = $tempDir . '/generate-composer-require.yaml';
+        $this->assertFileExists($yamlFile);
+
+        // Cleanup
+        @unlink($tempDir . '/generate-composer-require.yaml');
+        @unlink($oldTxtFile);
+        @unlink($binDir . '/generate-composer-require.yaml');
+        @rmdir($binDir);
+        @rmdir($packageDir);
+        @rmdir($vendorDir . '/nowo-tech');
         @rmdir($vendorDir);
         @rmdir($tempDir);
     }

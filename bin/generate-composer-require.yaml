@@ -1,0 +1,18 @@
+# Composer Update Helper Configuration
+# Configuration file for ignored packages during composer update suggestions
+
+# List of packages to ignore during update
+# Ignored packages will still be displayed in the output with their available versions,
+# but won't be included in the composer require commands.
+ignore:
+  # Add packages to ignore (uncomment and add more as needed)
+  # - doctrine/orm
+  # - doctrine/doctrine-bundle
+  # - doctrine/doctrine-migrations-bundle
+  # - symfony/security-bundle
+  # - laravel/framework
+  # - yiisoft/yii2
+  # - cakephp/cakephp
+  # - codeigniter4/framework
+  # - slim/slim
+
