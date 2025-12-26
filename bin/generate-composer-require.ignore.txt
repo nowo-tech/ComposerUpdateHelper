@@ -1,3 +1,4 @@
+# deprecated
 # Packages to ignore during update
 # Each line is a package name (e.g.: vendor/package)
 # Empty lines and lines starting with # are ignored

@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.6] - 2025-12-26
+
+### Added
+- **Verification documentation**: New `docs/VERIFICATION.md` file documenting complete verification of YAML include/ignore functionality
+  - Comprehensive verification of YAML parsing (Bash/AWK)
+  - PHP loading and processing verification
+  - Priority logic verification
+  - Test cases documentation
+  - Unit tests coverage information
+- **Utility scripts**: New utility scripts in `tests/` directory
+  - `check-coverage.php`: Script to validate 100% code coverage (same logic as CI/CD)
+  - `test-yaml-include.sh`: Test script to verify YAML reading and include logic
+  - `test-release-info.sh`: Test script to verify release information behavior
+  - All scripts are in English and properly organized
+
+### Changed
+- **Documentation improvements**: Enhanced README.md with better release information documentation
+  - Clarified that release information is enabled by default
+  - Added note about performance improvement when using `--no-release-info`
+  - Better explanation of when release information is fetched
+- **YAML template comments**: Updated comments in `bin/generate-composer-require.yaml`
+  - Clarified that include section has priority over ignore section
+  - Removed incorrect reference to "not direct dependencies"
+
+### Fixed
+- **Documentation accuracy**: Corrected documentation to accurately reflect functionality
+  - Removed misleading statement about processing packages that are not direct dependencies
+  - Clarified that include section overrides ignore list, not that it processes non-dependencies
+
 ## [2.0.5] - 2025-12-26
 
 ### Added
