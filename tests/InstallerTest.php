@@ -289,6 +289,63 @@ final class InstallerTest extends TestCase
         $this->assertFileDoesNotExist($oldTxtFile);
     }
 
+    public function testInstallMigratesTxtToYamlWhenYamlExistsButIsEmpty(): void
+    {
+        $event = $this->createMockEvent();
+
+        // Create empty YAML file
+        $yamlFile = $this->tempDir . '/generate-composer-require.yaml';
+        file_put_contents($yamlFile, '');
+
+        // Create old TXT file with packages
+        $oldTxtFile = $this->tempDir . '/generate-composer-require.ignore.txt';
+        file_put_contents($oldTxtFile, "doctrine/orm\nsymfony/security-bundle\n");
+
+        $packageDir = $this->vendorDir . '/nowo-tech/composer-update-helper';
+        mkdir($packageDir . '/bin', 0777, true);
+        file_put_contents($packageDir . '/bin/generate-composer-require.sh', '#!/bin/sh');
+        file_put_contents($packageDir . '/bin/generate-composer-require.yaml', '# YAML config');
+
+        Installer::install($event);
+
+        // Verify YAML file was updated with migrated content
+        $yamlContent = file_get_contents($yamlFile);
+        $this->assertStringContainsString('doctrine/orm', $yamlContent);
+        $this->assertStringContainsString('symfony/security-bundle', $yamlContent);
+        $this->assertStringContainsString('ignore:', $yamlContent);
+
+        // Verify old TXT file was deleted
+        $this->assertFileDoesNotExist($oldTxtFile);
+    }
+
+    public function testInstallDoesNotMigrateTxtWhenYamlHasUserPackages(): void
+    {
+        $event = $this->createMockEvent();
+
+        // Create YAML file with user-defined packages
+        $yamlFile = $this->tempDir . '/generate-composer-require.yaml';
+        file_put_contents($yamlFile, "# Composer Update Helper Configuration\nignore:\n  - existing/package\n");
+
+        // Create old TXT file with different packages
+        $oldTxtFile = $this->tempDir . '/generate-composer-require.ignore.txt';
+        file_put_contents($oldTxtFile, "doctrine/orm\n");
+
+        $packageDir = $this->vendorDir . '/nowo-tech/composer-update-helper';
+        mkdir($packageDir . '/bin', 0777, true);
+        file_put_contents($packageDir . '/bin/generate-composer-require.sh', '#!/bin/sh');
+        file_put_contents($packageDir . '/bin/generate-composer-require.yaml', '# YAML config');
+
+        Installer::install($event);
+
+        // Verify YAML file was NOT changed (preserves user packages)
+        $yamlContent = file_get_contents($yamlFile);
+        $this->assertStringContainsString('existing/package', $yamlContent);
+        $this->assertStringNotContainsString('doctrine/orm', $yamlContent);
+
+        // Verify old TXT file still exists (not migrated)
+        $this->assertFileExists($oldTxtFile);
+    }
+
     /**
      * @return Event&MockObject
      */
