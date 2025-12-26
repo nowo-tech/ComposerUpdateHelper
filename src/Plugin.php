@@ -445,10 +445,10 @@ class Plugin implements PluginInterface, EventSubscriberInterface
                     }
                 }
                 array_splice($newYamlLines, $insertPos, 0, [
-                    "# List of packages to ignore during update",
-                    "# Ignored packages will still be displayed in the output with their available versions,",
+                    '# List of packages to ignore during update',
+                    '# Ignored packages will still be displayed in the output with their available versions,',
                     "# but won't be included in the composer require commands.",
-                    "ignore:"
+                    'ignore:',
                 ]);
                 foreach ($allPackages as $pkg) {
                     array_splice($newYamlLines, $insertPos + 4, 0, "  - {$pkg}");
