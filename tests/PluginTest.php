@@ -920,4 +920,125 @@ final class PluginTest extends TestCase
         @rmdir($vendorDir);
         @rmdir($tempDir);
     }
+
+    public function testMigrationReadsIncludeSectionFromYaml(): void
+    {
+        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir = $tempDir . '/vendor';
+        $packageDir = $vendorDir . '/nowo-tech/composer-update-helper';
+        $binDir = $packageDir . '/bin';
+        mkdir($binDir, 0777, true);
+
+        file_put_contents($binDir . '/generate-composer-require.yaml', '# YAML config');
+
+        // Create YAML file with both ignore and include sections
+        $yamlFile = $tempDir . '/generate-composer-require.yaml';
+        file_put_contents($yamlFile, "ignore:\n  - package1/one\n  - package2/two\ninclude:\n  - included1/one\n  - included2/two\n");
+
+        // Create old TXT file with packages
+        $oldTxtFile = $tempDir . '/generate-composer-require.ignore.txt';
+        file_put_contents($oldTxtFile, "package1/one\npackage2/two\n");
+
+        $config = $this->createMock(Config::class);
+        $config->method('get')
+            ->with('vendor-dir')
+            ->willReturn($vendorDir);
+
+        $composer = $this->createMock(Composer::class);
+        $composer->method('getConfig')
+            ->willReturn($config);
+
+        $io = $this->createMock(IOInterface::class);
+        $io->expects($this->atLeastOnce())
+            ->method('write')
+            ->with($this->logicalOr(
+                $this->stringContains('Migrating configuration from TXT to YAML format'),
+                $this->stringContains('Configuration migrated to'),
+                $this->stringContains('Removed old generate-composer-require.ignore.txt file')
+            ));
+
+        $event = $this->createMock(Event::class);
+        $event->method('getIO')
+            ->willReturn($io);
+
+        $plugin = new Plugin();
+        $plugin->activate($composer, $io);
+        $plugin->onPostUpdate($event);
+
+        // Verify YAML file was updated with migrated content
+        $this->assertFileExists($yamlFile);
+        $yamlContent = file_get_contents($yamlFile);
+        $this->assertStringContainsString('package1/one', $yamlContent);
+        $this->assertStringContainsString('package2/two', $yamlContent);
+        // Include section should still be there
+        $this->assertStringContainsString('included1/one', $yamlContent);
+        $this->assertStringContainsString('included2/two', $yamlContent);
+
+        // Verify old TXT file was deleted
+        $this->assertFileDoesNotExist($oldTxtFile);
+
+        // Cleanup
+        @unlink($tempDir . '/generate-composer-require.yaml');
+        @unlink($binDir . '/generate-composer-require.yaml');
+        @rmdir($binDir);
+        @rmdir($packageDir);
+        @rmdir($vendorDir . '/nowo-tech');
+        @rmdir($vendorDir);
+        @rmdir($tempDir);
+    }
+
+    public function testIsYamlEmptyOrTemplateDetectsIncludeSection(): void
+    {
+        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir = $tempDir . '/vendor';
+        $packageDir = $vendorDir . '/nowo-tech/composer-update-helper';
+        $binDir = $packageDir . '/bin';
+        mkdir($binDir, 0777, true);
+
+        file_put_contents($binDir . '/generate-composer-require.yaml', '# YAML config');
+
+        $config = $this->createMock(Config::class);
+        $config->method('get')
+            ->with('vendor-dir')
+            ->willReturn($vendorDir);
+
+        $composer = $this->createMock(Composer::class);
+        $composer->method('getConfig')
+            ->willReturn($config);
+
+        $io = $this->createMock(IOInterface::class);
+
+        $plugin = new Plugin();
+        $plugin->activate($composer, $io);
+
+        // Use reflection to call private isYamlEmptyOrTemplate method
+        $reflection = new \ReflectionClass($plugin);
+        $method = $reflection->getMethod('isYamlEmptyOrTemplate');
+        $method->setAccessible(true);
+
+        // Test with YAML that has only include section (should be considered empty for migration)
+        $yamlFile = $tempDir . '/generate-composer-require.yaml';
+        file_put_contents($yamlFile, "ignore:\n  # - package1\ninclude:\n  # - package2\n");
+        $result = $method->invoke($plugin, $yamlFile, $binDir . '/generate-composer-require.yaml');
+        $this->assertTrue($result, 'YAML with only commented packages should be considered empty');
+
+        // Test with YAML that has packages in include section (should NOT be considered empty)
+        file_put_contents($yamlFile, "ignore:\n  # - package1\ninclude:\n  - included/package\n");
+        $result = $method->invoke($plugin, $yamlFile, $binDir . '/generate-composer-require.yaml');
+        $this->assertFalse($result, 'YAML with packages in include section should NOT be considered empty');
+
+        // Test with YAML that has packages in ignore section (should NOT be considered empty)
+        file_put_contents($yamlFile, "ignore:\n  - ignored/package\ninclude:\n  # - package2\n");
+        $result = $method->invoke($plugin, $yamlFile, $binDir . '/generate-composer-require.yaml');
+        $this->assertFalse($result, 'YAML with packages in ignore section should NOT be considered empty');
+
+        // Cleanup
+        @unlink($tempDir . '/generate-composer-require.yaml');
+        @unlink($binDir . '/generate-composer-require.yaml');
+        @rmdir($binDir);
+        @rmdir($packageDir);
+        @rmdir($vendorDir . '/nowo-tech');
+        @rmdir($vendorDir);
+        @rmdir($tempDir);
+    }
 }
