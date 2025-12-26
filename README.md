@@ -137,7 +137,7 @@ ignore:
 
 # List of packages to force include during update
 # Included packages will be added to the composer require commands even if they are
-# in the ignore list or if they are not direct dependencies.
+# in the ignore list.
 # The include section has priority over the ignore section.
 include:
   - some/package
@@ -156,7 +156,7 @@ Packages listed in the `ignore` section will:
 Packages listed in the `include` section will:
 - **Always** be included in the `composer require` commands
 - Override the `ignore` list (if a package is in both, it will be included)
-- Be processed even if they are not direct dependencies
+- Be processed even if they are also listed in the `ignore` section
 
 **Example use case**: You might want to ignore most Symfony packages but force include a specific one:
 
@@ -177,12 +177,12 @@ If you have an old `generate-composer-require.ignore.txt` file, it will be autom
 The script automatically fetches release information from GitHub for outdated packages:
 
 - **Automatic detection**: Extracts GitHub repository URL from Packagist
-- **Default mode**: Shows summary with release link and changelog link
+- **Default mode** (enabled by default): Shows summary with release link and changelog link
 - **Detailed mode** (`--release-detail`): Shows full release name and complete changelog
-- **Skip option** (`--no-release-info`): Omits all release information
+- **Skip option** (`--no-release-info`): Omits all release information (no API calls are made)
 - **Graceful fallback**: Silently handles API failures or network issues
 
-Release information is only fetched for packages with specific version constraints (not wildcards like `^1.0` or `~2.0`) to avoid unnecessary API calls.
+**Note:** Release information is only fetched for packages with specific version constraints (not wildcards like `^1.0` or `~2.0`) to avoid unnecessary API calls. When using `--no-release-info`, no API calls are made, improving performance.
 
 ### Release Information Options
 

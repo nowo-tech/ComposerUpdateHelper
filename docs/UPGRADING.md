@@ -18,6 +18,18 @@ This guide will help you upgrade Composer Update Helper to newer versions.
 
 ## Version-Specific Upgrade Notes
 
+### Upgrading to 2.0.6+
+
+#### Added
+- **Verification documentation**: New `docs/VERIFICATION.md` file with complete verification documentation
+- **Utility scripts**: New utility scripts in `tests/` directory for development and testing
+
+#### Changed
+- **Documentation improvements**: Enhanced README.md with better release information documentation
+- **YAML template**: Updated comments for clarity
+
+**No action required**: This is a documentation and utility scripts release. No configuration changes needed.
+
 ### Upgrading to 2.0.5+
 
 #### New Feature

@@ -17,8 +17,8 @@ ignore:
   # - slim/slim
 
 # List of packages to force include during update
-# Included packages will be added to the composer require commands even if they are in the ignore list
-# or if they are not direct dependencies
+# Included packages will be added to the composer require commands even if they are in the ignore list.
+# The include section has priority over the ignore section.
 include:
   # Add packages to force include (uncomment and add more as needed)
   # - some/package
