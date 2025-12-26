@@ -42,16 +42,6 @@ This guide will help you upgrade Composer Update Helper to newer versions.
   - Now, the script is compared using MD5 hash and updated if content differs on both `composer install` and `composer update`
   - This ensures you always have the latest version of the script
 
-#### Migration Notes
-- **No action required**: The script will be automatically updated on your next `composer update`
-- If you have custom modifications to the script, they will be overwritten
-- Consider committing your customizations to a separate script or fork if needed
-
-#### Breaking Changes
-- None
-
-### Upgrading to 2.0.9+
-
 #### Changed
 - **Refactored architecture**: The script has been split into a lightweight wrapper and a PHP processor
   - The script in your repo is now lighter (~396 lines vs ~971 lines, 59% reduction)
@@ -60,8 +50,10 @@ This guide will help you upgrade Composer Update Helper to newer versions.
   - No manual configuration needed
 
 #### Migration Notes
-- **No action required**: The refactoring is transparent to users
-- The script automatically detects the PHP processor in vendor
+- **No action required**: The script will be automatically updated on your next `composer update`
+- If you have custom modifications to the script, they will be overwritten
+- Consider committing your customizations to a separate script or fork if needed
+- The refactoring is transparent to users - the script automatically detects the PHP processor in vendor
 - If you encounter issues, ensure `composer install` has been run
 - The script will show a clear error message if the PHP processor is not found
 

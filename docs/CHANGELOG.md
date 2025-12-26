@@ -35,10 +35,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - **Improved update logic**: The Plugin now properly updates the script file when content changes, matching the behavior of the Installer class
   - Both `onPostInstall` and `onPostUpdate` now update the script if content differs
-
-## [2.0.9] - 2025-12-26
-
-### Changed
 - **Refactored architecture for better maintainability**: The script has been split into two parts:
   - **Lightweight wrapper script** (`generate-composer-require.sh`): ~396 lines in your repository
     - Handles command-line arguments, configuration file detection, and output formatting
