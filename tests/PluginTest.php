@@ -144,9 +144,9 @@ final class PluginTest extends TestCase
         $vendorDir = $tempDir . '/vendor';
         mkdir($vendorDir, 0777, true);
 
-        // Create .gitignore file
+        // Create .gitignore file with old entries that should be removed
         $gitignorePath = $tempDir . '/.gitignore';
-        file_put_contents($gitignorePath, 'vendor/');
+        file_put_contents($gitignorePath, "vendor/\ngenerate-composer-require.sh\ngenerate-composer-require.yaml\n");
 
         $config = $this->createMock(Config::class);
         $config->method('get')
@@ -160,7 +160,10 @@ final class PluginTest extends TestCase
         $io = $this->createMock(IOInterface::class);
         $io->expects($this->atLeastOnce())
             ->method('write')
-            ->with($this->stringContains('Updated .gitignore'));
+            ->with($this->logicalOr(
+                $this->stringContains('Updated .gitignore'),
+                $this->stringContains('Creating generate-composer-require.yaml')
+            ));
 
         $event = $this->createMock(Event::class);
         $event->method('getIO')
@@ -175,6 +178,8 @@ final class PluginTest extends TestCase
         // .sh and .yaml should NOT be in .gitignore (they should be committed)
         $this->assertStringNotContainsString('generate-composer-require.sh', $gitignoreContent);
         $this->assertStringNotContainsString('generate-composer-require.yaml', $gitignoreContent);
+        // But vendor/ should still be there
+        $this->assertStringContainsString('vendor/', $gitignoreContent);
 
         // Cleanup
         @unlink($gitignorePath);
@@ -563,6 +568,7 @@ final class PluginTest extends TestCase
                 ->with($this->logicalOr(
                     $this->stringContains('Updating'),
                     $this->stringContains('Creating generate-composer-require.ignore.txt'),
+                    $this->stringContains('Creating generate-composer-require.yaml'),
                     $this->stringContains('Updated .gitignore')
                 ));
 
