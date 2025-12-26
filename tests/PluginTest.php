@@ -1118,7 +1118,7 @@ final class PluginTest extends TestCase
         // Verify only .sh and .yaml are copied
         $this->assertFileExists($tempDir . '/generate-composer-require.sh');
         $this->assertFileExists($tempDir . '/generate-composer-require.yaml');
-        
+
         // Verify process-updates.php is NOT copied (stays in vendor)
         $this->assertFileDoesNotExist($tempDir . '/process-updates.php');
         $this->assertFileExists($binDir . '/process-updates.php');
