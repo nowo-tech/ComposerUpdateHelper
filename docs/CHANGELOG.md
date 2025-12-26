@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.11] - 2025-12-26
+
+### Changed
+- **Refactored output formatting**: Moved all output formatting logic from shell script to PHP processor
+  - PHP now generates fully formatted output (emojis, formatting, sections, etc.)
+  - Shell script simplified from 396 to 283 lines (28.5% reduction)
+  - Shell script now only displays PHP output and extracts commands for `--run` flag
+  - Commands are extracted between `---COMMANDS_START---` and `---COMMANDS_END---` markers
+  - All parsing and formatting logic centralized in PHP for better maintainability
+
+### Benefits
+- **Lighter shell script**: 28.5% reduction in lines (396 → 283)
+- **Better maintainability**: All formatting logic in one place (PHP)
+- **Cleaner architecture**: Clear separation between display (shell) and formatting (PHP)
+- **Same functionality**: All features work exactly the same, just better organized
+
 ## [2.0.10] - 2025-12-26
 
 ### Fixed

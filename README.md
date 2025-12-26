@@ -50,18 +50,20 @@ After installation, two files will be copied to your project root:
 
 The script uses a lightweight architecture for better maintainability:
 
-- **`generate-composer-require.sh`** (in your repo): A lightweight wrapper script (~396 lines) that handles:
+- **`generate-composer-require.sh`** (in your repo): A lightweight wrapper script (~283 lines) that handles:
   - Command-line argument parsing
   - Configuration file detection
   - Executing `composer outdated`
   - Calling the PHP processor
-  - Formatting and displaying output
+  - Displaying formatted output from PHP
+  - Extracting and executing commands for `--run` flag
 
-- **`process-updates.php`** (in vendor): Contains all the complex logic (~622 lines) including:
+- **`process-updates.php`** (in vendor): Contains all the complex logic (~710 lines) including:
   - Package processing and filtering
   - Framework detection and version constraints
   - Release information fetching
   - Command generation
+  - **Output formatting** (emojis, sections, formatting, etc.)
 
 The script automatically detects `process-updates.php` in `vendor/nowo-tech/composer-update-helper/bin/` and uses it. This architecture ensures:
 - ✅ **Lightweight script in your repo**: Easy to read and understand

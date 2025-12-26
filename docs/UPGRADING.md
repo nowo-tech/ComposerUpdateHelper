@@ -18,6 +18,22 @@ This guide will help you upgrade Composer Update Helper to newer versions.
 
 ## Version-Specific Upgrade Notes
 
+### Upgrading to 2.0.11+
+
+#### Changed
+- **Output formatting refactored**: All output formatting is now done in PHP processor
+  - Shell script is now even lighter (283 lines vs 396 lines)
+  - All formatting logic centralized in PHP for better maintainability
+  - Same output and functionality, just better organized
+
+#### Migration Notes
+- **No action required**: The refactoring is transparent to users
+- Output format remains exactly the same
+- All features work identically
+
+#### Breaking Changes
+- None
+
 ### Upgrading to 2.0.10+
 
 #### Fixed
