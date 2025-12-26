@@ -114,8 +114,9 @@ Example output (detailed mode):
 You can combine options:
 
 ```bash
-./generate-composer-require.sh --run --release-detail    # Execute and show full details
-./generate-composer-require.sh --run --no-release-info   # Execute without release info
+./generate-composer-require.sh --run                    # Execute (no release info by default)
+./generate-composer-require.sh --run --release-info     # Execute with release info
+./generate-composer-require.sh --run --release-detail   # Execute with full changelog
 ```
 
 ## Package Configuration
@@ -177,20 +178,22 @@ If you have an old `generate-composer-require.ignore.txt` file, it will be autom
 The script automatically fetches release information from GitHub for outdated packages:
 
 - **Automatic detection**: Extracts GitHub repository URL from Packagist
-- **Default mode** (enabled by default): Shows summary with release link and changelog link
+- **Default mode** (disabled by default): No release information is shown (no API calls are made)
+- **Summary mode** (`--release-info`): Shows summary with release link and changelog link
 - **Detailed mode** (`--release-detail`): Shows full release name and complete changelog
-- **Skip option** (`--no-release-info`): Omits all release information (no API calls are made)
+- **Skip option** (`--no-release-info`): Explicitly omits all release information (default behavior)
 - **Graceful fallback**: Silently handles API failures or network issues
 
-**Note:** Release information is only fetched for packages with specific version constraints (not wildcards like `^1.0` or `~2.0`) to avoid unnecessary API calls. When using `--no-release-info`, no API calls are made, improving performance.
+**Note:** Release information is only fetched for packages with specific version constraints (not wildcards like `^1.0` or `~2.0`) to avoid unnecessary API calls. By default, no API calls are made, improving performance. Use `--release-info` or `--release-detail` to enable release information.
 
 ### Release Information Options
 
 | Option | Description |
 |--------|-------------|
-| Default (no option) | Shows summary: package name, release link, changelog link |
+| Default (no option) | No release information shown (no API calls, better performance) |
+| `--release-info` | Shows summary: package name, release link, changelog link |
 | `--release-detail` | Shows full release details including complete changelog |
-| `--no-release-info` | Skips all release information |
+| `--no-release-info` | Explicitly skips all release information (default behavior) |
 | `--run` | Executes suggested commands (can be combined with other options) |
 | `--help` or `-h` | Shows comprehensive usage information and examples |
 
