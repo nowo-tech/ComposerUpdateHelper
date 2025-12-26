@@ -28,6 +28,7 @@ Generates `composer require` commands from outdated dependencies. Works with any
 - ✅ **Verbose and Debug modes**: `-v, --verbose` and `--debug` options for troubleshooting and detailed information
 - ✅ **Multiple file extensions**: Supports both `.yaml` and `.yml` extensions for configuration files
 - ✅ **Performance optimized**: Emojis and common elements are optimized for better performance
+- ✅ **Lightweight architecture**: Script delegates complex logic to PHP in vendor, keeping the repo script lightweight and maintainable
 
 ## Installation
 
@@ -38,10 +39,33 @@ composer require --dev nowo-tech/composer-update-helper
 > 💡 **Tip**: We also recommend installing [Code Review Guardian](https://github.com/nowo-tech/CodeReviewGuardian) for a complete code quality workflow. See [Related Packages](#related-packages) section below.
 
 After installation, two files will be copied to your project root:
-- `generate-composer-require.sh` - The main script
+- `generate-composer-require.sh` - The lightweight wrapper script (delegates complex logic to PHP in vendor)
 - `generate-composer-require.yaml` - Configuration file for ignored and included packages (only created if doesn't exist)
 
 **Note:** These files should be committed to your repository so they're available to all team members. The plugin will remove any old `.ignore.txt` entries from `.gitignore` if they exist.
+
+### Architecture
+
+The script uses a lightweight architecture for better maintainability:
+
+- **`generate-composer-require.sh`** (in your repo): A lightweight wrapper script (~396 lines) that handles:
+  - Command-line argument parsing
+  - Configuration file detection
+  - Executing `composer outdated`
+  - Calling the PHP processor
+  - Formatting and displaying output
+
+- **`process-updates.php`** (in vendor): Contains all the complex logic (~622 lines) including:
+  - Package processing and filtering
+  - Framework detection and version constraints
+  - Release information fetching
+  - Command generation
+
+The script automatically detects `process-updates.php` in `vendor/nowo-tech/composer-update-helper/bin/` and uses it. This architecture ensures:
+- ✅ **Lightweight script in your repo**: Easy to read and understand
+- ✅ **Complex logic in vendor**: Automatically updated with `composer update`
+- ✅ **Better maintainability**: Clear separation of concerns
+- ✅ **Automatic detection**: No configuration needed
 
 ## Usage
 

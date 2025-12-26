@@ -7,6 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.10] - 2025-12-26
+
+### Fixed
+- **Script auto-update on package update**: Fixed issue where `generate-composer-require.sh` was not automatically updated when the package was updated
+  - The script now compares MD5 hashes and updates if content differs
+  - Ensures users always get the latest script version when running `composer update`
+  - Previously, the script was only installed on first installation, not updated on subsequent updates
+
+### Changed
+- **Improved update logic**: The Plugin now properly updates the script file when content changes, matching the behavior of the Installer class
+
+## [2.0.9] - 2025-12-26
+
+### Changed
+- **Refactored architecture for better maintainability**: The script has been split into two parts:
+  - **Lightweight wrapper script** (`generate-composer-require.sh`): ~396 lines in your repository
+    - Handles command-line arguments, configuration file detection, and output formatting
+    - Automatically detects and calls the PHP processor in vendor
+  - **PHP processor** (`process-updates.php`): ~622 lines in vendor
+    - Contains all complex logic (package processing, framework detection, release info, YAML parsing, etc.)
+    - Automatically updated with `composer update`
+  - **Benefits**:
+    - Script in repo is now 59% lighter (~396 lines vs ~971 lines)
+    - Complex logic is automatically updated via Composer
+    - Better separation of concerns and maintainability
+    - Automatic detection of PHP processor (no configuration needed)
+
+### Technical Details
+- The script automatically detects `process-updates.php` in `vendor/nowo-tech/composer-update-helper/bin/`
+- Falls back to script directory for development mode
+- Clear error message if PHP processor is not found
+
 ## [2.0.8] - 2025-12-26
 
 ### Changed

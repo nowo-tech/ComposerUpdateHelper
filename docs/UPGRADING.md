@@ -18,6 +18,40 @@ This guide will help you upgrade Composer Update Helper to newer versions.
 
 ## Version-Specific Upgrade Notes
 
+### Upgrading to 2.0.10+
+
+#### Fixed
+- **Script auto-update**: The `generate-composer-require.sh` script is now automatically updated when you run `composer update`
+  - Previously, the script was only installed on first installation
+  - Now, the script is compared using MD5 hash and updated if content differs
+  - This ensures you always have the latest version of the script
+
+#### Migration Notes
+- **No action required**: The script will be automatically updated on your next `composer update`
+- If you have custom modifications to the script, they will be overwritten
+- Consider committing your customizations to a separate script or fork if needed
+
+#### Breaking Changes
+- None
+
+### Upgrading to 2.0.9+
+
+#### Changed
+- **Refactored architecture**: The script has been split into a lightweight wrapper and a PHP processor
+  - The script in your repo is now lighter (~396 lines vs ~971 lines, 59% reduction)
+  - Complex logic is now in `vendor/nowo-tech/composer-update-helper/bin/process-updates.php` (~622 lines)
+  - The script automatically detects and uses the PHP processor
+  - No manual configuration needed
+
+#### Migration Notes
+- **No action required**: The refactoring is transparent to users
+- The script automatically detects the PHP processor in vendor
+- If you encounter issues, ensure `composer install` has been run
+- The script will show a clear error message if the PHP processor is not found
+
+#### Breaking Changes
+- None - fully backward compatible
+
 ### Upgrading to 2.0.8+
 
 #### Changed

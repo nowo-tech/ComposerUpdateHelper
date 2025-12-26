@@ -98,6 +98,8 @@ final class PluginTest extends TestCase
         // Create source file in temporary package directory (not in real project)
         $sourceFile = $binDir . '/generate-composer-require.sh';
         file_put_contents($sourceFile, '#!/bin/sh\necho "test"');
+        // Also create process-updates.php in vendor (should NOT be copied)
+        file_put_contents($binDir . '/process-updates.php', '<?php echo "test";');
 
         $config = $this->createMock(Config::class);
         $config->method('get')
@@ -126,11 +128,15 @@ final class PluginTest extends TestCase
         $plugin->onPostInstall($event);
 
         $this->assertFileExists($tempDir . '/generate-composer-require.sh');
+        // Verify process-updates.php is NOT copied (stays in vendor)
+        $this->assertFileDoesNotExist($tempDir . '/process-updates.php');
+        $this->assertFileExists($binDir . '/process-updates.php');
 
         // Cleanup
         @unlink($tempDir . '/generate-composer-require.sh');
         @unlink($tempDir . '/generate-composer-require.yaml');
         @unlink($sourceFile);
+        @unlink($binDir . '/process-updates.php');
         @rmdir($binDir);
         @rmdir($packageDir);
         @rmdir($vendorDir . '/nowo-tech');
@@ -372,6 +378,8 @@ final class PluginTest extends TestCase
 
         file_put_contents($binDir . '/generate-composer-require.sh', '#!/bin/sh');
         file_put_contents($binDir . '/generate-composer-require.yaml', '# YAML config file');
+        // process-updates.php should NOT be copied
+        file_put_contents($binDir . '/process-updates.php', '<?php echo "processor";');
 
         $config = $this->createMock(Config::class);
         $config->method('get')
@@ -400,12 +408,16 @@ final class PluginTest extends TestCase
         $plugin->onPostInstall($event);
 
         $this->assertFileExists($tempDir . '/generate-composer-require.yaml');
+        // Verify process-updates.php is NOT copied (stays in vendor)
+        $this->assertFileDoesNotExist($tempDir . '/process-updates.php');
+        $this->assertFileExists($binDir . '/process-updates.php');
 
         // Cleanup
         @unlink($tempDir . '/generate-composer-require.sh');
         @unlink($tempDir . '/generate-composer-require.yaml');
         @unlink($binDir . '/generate-composer-require.sh');
         @unlink($binDir . '/generate-composer-require.yaml');
+        @unlink($binDir . '/process-updates.php');
         @rmdir($binDir);
         @rmdir($packageDir);
         @rmdir($vendorDir . '/nowo-tech');
@@ -572,6 +584,9 @@ final class PluginTest extends TestCase
                     $this->stringContains('Updated .gitignore')
                 ));
 
+            // Also create process-updates.php in vendor (should NOT be copied)
+            file_put_contents($binDir . '/process-updates.php', '<?php echo "processor";');
+
             $plugin = new Plugin();
             $plugin->activate($composer, $io);
 
@@ -584,6 +599,9 @@ final class PluginTest extends TestCase
             // File should be updated with new content
             $this->assertFileExists($tempDir . '/generate-composer-require.sh');
             $this->assertStringContainsString('new', (string) file_get_contents($tempDir . '/generate-composer-require.sh'));
+            // Verify process-updates.php is NOT copied (stays in vendor)
+            $this->assertFileDoesNotExist($tempDir . '/process-updates.php');
+            $this->assertFileExists($binDir . '/process-updates.php');
         } finally {
             // Restore original file
             if ($originalContent !== null) {
@@ -596,6 +614,8 @@ final class PluginTest extends TestCase
         // Cleanup
         @unlink($tempDir . '/generate-composer-require.sh');
         @unlink($tempDir . '/generate-composer-require.yaml');
+        @unlink($binDir . '/process-updates.php');
+        @rmdir($binDir);
         @rmdir($vendorDir);
         @rmdir($tempDir);
     }
@@ -1035,6 +1055,65 @@ final class PluginTest extends TestCase
         // Cleanup
         @unlink($tempDir . '/generate-composer-require.yaml');
         @unlink($binDir . '/generate-composer-require.yaml');
+        @rmdir($binDir);
+        @rmdir($packageDir);
+        @rmdir($vendorDir . '/nowo-tech');
+        @rmdir($vendorDir);
+        @rmdir($tempDir);
+    }
+
+    public function testInstallFilesDoesNotCopyProcessUpdatesPhp(): void
+    {
+        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir = $tempDir . '/vendor';
+        $packageDir = $vendorDir . '/nowo-tech/composer-update-helper';
+        $binDir = $packageDir . '/bin';
+        mkdir($binDir, 0777, true);
+
+        // Create all files in vendor
+        file_put_contents($binDir . '/generate-composer-require.sh', '#!/bin/sh');
+        file_put_contents($binDir . '/generate-composer-require.yaml', '# YAML config');
+        file_put_contents($binDir . '/process-updates.php', '<?php echo "processor";');
+
+        $config = $this->createMock(Config::class);
+        $config->method('get')
+            ->with('vendor-dir')
+            ->willReturn($vendorDir);
+
+        $composer = $this->createMock(Composer::class);
+        $composer->method('getConfig')
+            ->willReturn($config);
+
+        $io = $this->createMock(IOInterface::class);
+        $io->expects($this->atLeastOnce())
+            ->method('write')
+            ->with($this->logicalOr(
+                $this->stringContains('Installing'),
+                $this->stringContains('Creating generate-composer-require.yaml')
+            ));
+
+        $event = $this->createMock(Event::class);
+        $event->method('getIO')
+            ->willReturn($io);
+
+        $plugin = new Plugin();
+        $plugin->activate($composer, $io);
+        $plugin->onPostInstall($event);
+
+        // Verify only .sh and .yaml are copied
+        $this->assertFileExists($tempDir . '/generate-composer-require.sh');
+        $this->assertFileExists($tempDir . '/generate-composer-require.yaml');
+        
+        // Verify process-updates.php is NOT copied (stays in vendor)
+        $this->assertFileDoesNotExist($tempDir . '/process-updates.php');
+        $this->assertFileExists($binDir . '/process-updates.php');
+
+        // Cleanup
+        @unlink($tempDir . '/generate-composer-require.sh');
+        @unlink($tempDir . '/generate-composer-require.yaml');
+        @unlink($binDir . '/generate-composer-require.sh');
+        @unlink($binDir . '/generate-composer-require.yaml');
+        @unlink($binDir . '/process-updates.php');
         @rmdir($binDir);
         @rmdir($packageDir);
         @rmdir($vendorDir . '/nowo-tech');
