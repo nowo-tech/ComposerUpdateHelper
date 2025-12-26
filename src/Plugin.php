@@ -129,9 +129,10 @@ class Plugin implements PluginInterface, EventSubscriberInterface
             $packageDir = __DIR__ . '/..';
         }
 
-        $files = [
-            'bin/generate-composer-require.sh' => 'generate-composer-require.sh',
-        ];
+            $files = [
+                'bin/generate-composer-require.sh' => 'generate-composer-require.sh',
+                // Note: process-updates.php stays in vendor, not copied to project root
+            ];
 
         foreach ($files as $source => $dest) {
             $sourcePath = $packageDir . '/' . $source;
@@ -142,9 +143,14 @@ class Plugin implements PluginInterface, EventSubscriberInterface
                 continue;
             }
 
-            // Only install if file doesn't exist (first installation)
+            // Always update the script if content differs (even if file exists)
+            // This ensures users get the latest version when updating the package
             if (file_exists($destPath) && !$forceUpdate) {
-                continue;
+                // Check if content differs using MD5
+                if (md5_file($sourcePath) === md5_file($destPath)) {
+                    continue; // Same content, skip
+                }
+                // Content differs, will update below
             }
 
             if (file_exists($destPath)) {

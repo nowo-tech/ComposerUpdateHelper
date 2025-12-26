@@ -76,33 +76,31 @@ final class ScriptTest extends TestCase
             return;
         }
 
-        // Check for essential parts
+        // Check for essential parts in the lightweight script
         $this->assertStringContainsString('composer outdated', (string) $content);
-        $this->assertStringContainsString('IGNORED_PACKAGES', (string) $content);
-        $this->assertStringContainsString('INCLUDED_PACKAGES', (string) $content);
-        $this->assertStringContainsString('--with-all-dependencies', (string) $content);
+        $this->assertStringContainsString('CONFIG_FILE', (string) $content);
+        // Note: YAML parsing is now done in PHP processor, not in script
+        // The script should call the PHP processor
+        $this->assertStringContainsString('process-updates.php', (string) $content);
     }
 
     public function testScriptSupportsMultipleFrameworks(): void
     {
-        if (!file_exists($this->scriptPath)) {
-            $this->markTestSkipped('Script file does not exist (may not be installed in CI/CD)');
+        // Framework logic is now in process-updates.php, not in the script
+        // This test verifies the PHP processor contains framework support
+        $processorPath = dirname(__DIR__) . '/bin/process-updates.php';
+
+        if (!file_exists($processorPath)) {
+            $this->markTestSkipped('Processor PHP file does not exist');
         }
 
-        $content = file_get_contents($this->scriptPath);
+        $content = file_get_contents($processorPath);
 
         if ($content === false) {
-            $this->markTestSkipped('Could not read script file');
+            $this->markTestSkipped('Could not read processor PHP file');
         }
 
-        // Skip if script is not fully implemented
-        if (strlen($content) < 100) {
-            $this->markTestSkipped('Script file is not fully implemented');
-
-            return;
-        }
-
-        // Check for framework configurations
+        // Check for framework configurations in PHP processor
         $this->assertStringContainsString("'symfony'", (string) $content);
         $this->assertStringContainsString("'laravel'", (string) $content);
         $this->assertStringContainsString("'yii'", (string) $content);
@@ -114,24 +112,20 @@ final class ScriptTest extends TestCase
 
     public function testScriptDetectsFrameworkConstraints(): void
     {
-        if (!file_exists($this->scriptPath)) {
-            $this->markTestSkipped('Script file does not exist (may not be installed in CI/CD)');
+        // Framework detection logic is now in process-updates.php
+        $processorPath = dirname(__DIR__) . '/bin/process-updates.php';
+
+        if (!file_exists($processorPath)) {
+            $this->markTestSkipped('Processor PHP file does not exist');
         }
 
-        $content = file_get_contents($this->scriptPath);
+        $content = file_get_contents($processorPath);
 
         if ($content === false) {
-            $this->markTestSkipped('Could not read script file');
+            $this->markTestSkipped('Could not read processor PHP file');
         }
 
-        // Skip if script is not fully implemented
-        if (strlen($content) < 100) {
-            $this->markTestSkipped('Script file is not fully implemented');
-
-            return;
-        }
-
-        // Check for framework detection logic
+        // Check for framework detection logic in PHP processor
         $this->assertStringContainsString('frameworkConfigs', (string) $content);
         $this->assertStringContainsString('frameworkConstraints', (string) $content);
         $this->assertStringContainsString('getFrameworkConstraint', (string) $content);
@@ -139,24 +133,20 @@ final class ScriptTest extends TestCase
 
     public function testScriptSupportsLaravelIlluminatePackages(): void
     {
-        if (!file_exists($this->scriptPath)) {
-            $this->markTestSkipped('Script file does not exist (may not be installed in CI/CD)');
+        // Laravel/Illuminate logic is now in process-updates.php
+        $processorPath = dirname(__DIR__) . '/bin/process-updates.php';
+
+        if (!file_exists($processorPath)) {
+            $this->markTestSkipped('Processor PHP file does not exist');
         }
 
-        $content = file_get_contents($this->scriptPath);
+        $content = file_get_contents($processorPath);
 
         if ($content === false) {
-            $this->markTestSkipped('Could not read script file');
+            $this->markTestSkipped('Could not read processor PHP file');
         }
 
-        // Skip if script is not fully implemented
-        if (strlen($content) < 100) {
-            $this->markTestSkipped('Script file is not fully implemented');
-
-            return;
-        }
-
-        // Check Laravel also limits illuminate/* packages
+        // Check Laravel also limits illuminate/* packages in PHP processor
         $this->assertStringContainsString("'illuminate/'", (string) $content);
         $this->assertStringContainsString('laravel/framework', (string) $content);
     }
@@ -190,6 +180,33 @@ final class ScriptTest extends TestCase
         $this->assertStringContainsString('generate-composer-require.ignore.txt', (string) $content);
         // Script searches in current directory, not script directory
         $this->assertStringNotContainsString('$(dirname "$0")/generate-composer-require.yaml', (string) $content);
+    }
+
+    public function testScriptDetectsProcessorPhpInVendor(): void
+    {
+        if (!file_exists($this->scriptPath)) {
+            $this->markTestSkipped('Script file does not exist (may not be installed in CI/CD)');
+        }
+
+        $content = file_get_contents($this->scriptPath);
+
+        if ($content === false) {
+            $this->markTestSkipped('Could not read script file');
+        }
+
+        // Skip if script is not fully implemented
+        if (strlen($content) < 100) {
+            $this->markTestSkipped('Script file is not fully implemented');
+
+            return;
+        }
+
+        // Script should detect process-updates.php in vendor
+        $this->assertStringContainsString('process-updates.php', (string) $content);
+        $this->assertStringContainsString('PROCESSOR_PHP', (string) $content);
+        $this->assertStringContainsString('vendor/nowo-tech/composer-update-helper/bin/process-updates.php', (string) $content);
+        // Should have fallback to script directory
+        $this->assertStringContainsString('$(dirname "$0")/process-updates.php', (string) $content);
     }
 
     public function testScriptSupportsRunFlag(): void

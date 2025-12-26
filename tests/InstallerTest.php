@@ -49,10 +49,15 @@ final class InstallerTest extends TestCase
         $packageDir = $this->vendorDir . '/nowo-tech/composer-update-helper';
         mkdir($packageDir . '/bin', 0777, true);
         file_put_contents($packageDir . '/bin/generate-composer-require.sh', '#!/bin/sh\necho "test"');
+        // Also create process-updates.php in vendor (should NOT be copied)
+        file_put_contents($packageDir . '/bin/process-updates.php', '<?php echo "test";');
 
         Installer::install($event);
 
         $this->assertFileExists($this->tempDir . '/generate-composer-require.sh');
+        // Verify process-updates.php is NOT copied (stays in vendor)
+        $this->assertFileDoesNotExist($this->tempDir . '/process-updates.php');
+        $this->assertFileExists($packageDir . '/bin/process-updates.php');
     }
 
     public function testInstallCreatesYamlConfigFileIfNotExists(): void
@@ -63,10 +68,15 @@ final class InstallerTest extends TestCase
         mkdir($packageDir . '/bin', 0777, true);
         file_put_contents($packageDir . '/bin/generate-composer-require.sh', '#!/bin/sh');
         file_put_contents($packageDir . '/bin/generate-composer-require.yaml', '# YAML config file');
+        // process-updates.php should NOT be copied
+        file_put_contents($packageDir . '/bin/process-updates.php', '<?php echo "test";');
 
         Installer::install($event);
 
         $this->assertFileExists($this->tempDir . '/generate-composer-require.yaml');
+        // Verify process-updates.php is NOT copied (stays in vendor)
+        $this->assertFileDoesNotExist($this->tempDir . '/process-updates.php');
+        $this->assertFileExists($packageDir . '/bin/process-updates.php');
     }
 
     public function testInstallDoesNotOverwriteExistingYamlFile(): void
