@@ -216,7 +216,8 @@ class Plugin implements PluginInterface, EventSubscriberInterface
                 // YAML exists but is empty or just the template, safe to migrate
                 $shouldMigrate = true;
             } else {
-                // YAML exists and has content, check if TXT packages are already in ignore section
+                // YAML exists and has content (user-defined packages)
+                // Check if TXT packages are already in ignore section
                 $yamlContent = file_get_contents($newIgnoreYaml);
                 $yamlPackages = $this->extractPackagesFromYamlIgnoreSection($yamlContent);
 
@@ -230,8 +231,9 @@ class Plugin implements PluginInterface, EventSubscriberInterface
                     // Packages already migrated, just delete TXT
                     $shouldDeleteTxt = true;
                 } else {
-                    // Packages don't match, need to migrate (merge TXT into YAML)
-                    $shouldMigrate = true;
+                    // Packages don't match and YAML has user-defined packages
+                    // Do NOT migrate to preserve user's configuration
+                    // Leave TXT file for user to handle manually
                 }
             }
 
