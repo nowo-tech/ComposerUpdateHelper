@@ -131,10 +131,10 @@ class Plugin implements PluginInterface, EventSubscriberInterface
             $packageDir = __DIR__ . '/..';
         }
 
-            $files = [
-                'bin/generate-composer-require.sh' => 'generate-composer-require.sh',
-                // Note: process-updates.php stays in vendor, not copied to project root
-            ];
+        $files = [
+            'bin/generate-composer-require.sh' => 'generate-composer-require.sh',
+            // Note: process-updates.php stays in vendor, not copied to project root
+        ];
 
         foreach ($files as $source => $dest) {
             $sourcePath = $packageDir . '/' . $source;
