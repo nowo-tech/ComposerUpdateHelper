@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Refactored output formatting**: Moved all output formatting logic from shell script to PHP processor
   - PHP now generates fully formatted output (emojis, formatting, sections, etc.)
   - Shell script simplified from 396 to 283 lines (28.5% reduction)
+  - PHP processor increased from 622 to 710 lines (includes all formatting logic)
   - Shell script now only displays PHP output and extracts commands for `--run` flag
   - Commands are extracted between `---COMMANDS_START---` and `---COMMANDS_END---` markers
   - All parsing and formatting logic centralized in PHP for better maintainability
@@ -37,10 +38,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Both `onPostInstall` and `onPostUpdate` now update the script if content differs
 - **Refactored architecture for better maintainability**: The script has been split into two parts:
   - **Lightweight wrapper script** (`generate-composer-require.sh`): ~396 lines in your repository
-    - Handles command-line arguments, configuration file detection, and output formatting
+    - Handles command-line arguments, configuration file detection, and calls the PHP processor
     - Automatically detects and calls the PHP processor in vendor
   - **PHP processor** (`process-updates.php`): ~622 lines in vendor
-    - Contains all complex logic (package processing, framework detection, release info, YAML parsing, etc.)
+    - Contains all complex logic (package processing, framework detection, release info, YAML parsing, output formatting, etc.)
     - Automatically updated with `composer update`
   - **Benefits**:
     - Script in repo is now 59% lighter (~396 lines vs ~971 lines)
