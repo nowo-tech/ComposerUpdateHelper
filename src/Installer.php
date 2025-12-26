@@ -124,11 +124,11 @@ class Installer
                 if ($txtPackagesSorted === $yamlPackagesSorted) {
                     // Packages already migrated, just delete TXT
                     $shouldDeleteTxt = true;
-                } else {
-                    // Packages don't match and YAML has user-defined packages
-                    // Do NOT migrate to preserve user's configuration
-                    // Leave TXT file for user to handle manually
                 }
+                // Packages don't match and YAML has user-defined packages
+                // Do NOT migrate to preserve user's configuration
+                // Leave TXT file for user to handle manually
+
             }
 
             if ($shouldMigrate) {
