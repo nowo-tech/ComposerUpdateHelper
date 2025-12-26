@@ -354,6 +354,26 @@ Please see [docs/CHANGELOG.md](docs/CHANGELOG.md) for version history.
 
 Please see [docs/UPGRADING.md](docs/UPGRADING.md) for upgrade instructions and migration notes.
 
+## Related Packages
+
+### Code Review Guardian
+
+Looking for a complete code review solution? Check out **[Code Review Guardian](https://github.com/nowo-tech/code-review-guardian)** - a provider-agnostic code review guardian that works perfectly with Composer Update Helper:
+
+- ✅ **Provider-agnostic**: Works with GitHub, GitLab, Bitbucket, and any Git provider
+- ✅ **Multi-framework support**: Automatic framework detection (Symfony, Laravel, etc.)
+- ✅ **Code quality checks**: PHP-CS-Fixer, PHPStan, PHPUnit, Security checks
+- ✅ **Easy integration**: Simple YAML configuration
+- ✅ **Framework-specific configs**: Optimized configurations for each framework
+
+```bash
+composer require --dev nowo-tech/code-review-guardian
+```
+
+Together with Composer Update Helper, you get a complete workflow:
+1. **Composer Update Helper** keeps your dependencies up to date
+2. **Code Review Guardian** ensures code quality in your pull requests
+
 ## Author
 
 Created by [Héctor Franco Aceituno](https://github.com/HecFranco) at [Nowo.tech](https://nowo.tech)
