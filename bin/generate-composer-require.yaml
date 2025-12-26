@@ -1,5 +1,5 @@
 # Composer Update Helper Configuration
-# Configuration file for ignored packages during composer update suggestions
+# Configuration file for ignored and included packages during composer update suggestions
 
 # List of packages to ignore during update
 # Ignored packages will still be displayed in the output with their available versions,
@@ -15,4 +15,12 @@ ignore:
   # - cakephp/cakephp
   # - codeigniter4/framework
   # - slim/slim
+
+# List of packages to force include during update
+# Included packages will be added to the composer require commands even if they are in the ignore list
+# or if they are not direct dependencies
+include:
+  # Add packages to force include (uncomment and add more as needed)
+  # - some/package
+  # - another/package
 

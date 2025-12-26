@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.5] - 2025-12-26
+
+### Added
+- **Package inclusion feature**: New `include` section in YAML configuration
+  - Force include packages even if they are in the `ignore` list
+  - Override ignore list for specific packages
+  - Useful for scenarios where you want to ignore most packages but force include specific ones
+  - Example: Ignore all Symfony packages but force include `symfony/security-bundle`
+
+### Changed
+- **Improved YAML parsing**: Enhanced reading of YAML configuration files
+  - Better handling of inline comments
+  - Support for different indentation levels
+  - More robust section detection (ignore and include)
+  - Improved handling of empty lines and comment-only lines
+  - Both `ignore` and `include` sections are now properly read and processed
+
+### Fixed
+- **YAML reading logic**: Fixed issues with reading packages from YAML files
+  - Now correctly extracts packages from both `ignore` and `include` sections
+  - Improved detection of section boundaries
+  - Better handling of edge cases (comments, empty lines, different indentations)
+
 ## [2.0.4] - 2025-12-26
 
 ### Changed
