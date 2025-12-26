@@ -191,7 +191,7 @@ class Installer
         if (file_exists($yamlPath)) {
             $yamlContent = file_get_contents($yamlPath);
             $existingIgnorePackages = self::extractPackagesFromYamlIgnoreSection($yamlContent);
-            
+
             // Merge packages (avoid duplicates)
             $allPackages = array_unique(array_merge($existingIgnorePackages, $packages));
             sort($allPackages);
@@ -253,10 +253,10 @@ class Installer
                     }
                 }
                 array_splice($newYamlLines, $insertPos, 0, [
-                    "# List of packages to ignore during update",
-                    "# Ignored packages will still be displayed in the output with their available versions,",
+                    '# List of packages to ignore during update',
+                    '# Ignored packages will still be displayed in the output with their available versions,',
                     "# but won't be included in the composer require commands.",
-                    "ignore:"
+                    'ignore:',
                 ]);
                 foreach ($allPackages as $pkg) {
                     array_splice($newYamlLines, $insertPos + 4, 0, "  - {$pkg}");
