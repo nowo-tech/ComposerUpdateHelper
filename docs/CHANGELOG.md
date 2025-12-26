@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.2] - 2025-12-26
+
+### Fixed
+- **Improved migration logic**: Migration now works even if YAML file already exists
+  - Previously, migration only occurred if YAML didn't exist
+  - Now migrates if YAML exists but is empty or contains only template (no user packages)
+  - Prevents data loss: won't overwrite YAML files with user-defined packages
+  - Ensures TXT files are migrated even after initial update
+
 ## [2.0.1] - 2025-12-26
 
 ### Fixed
