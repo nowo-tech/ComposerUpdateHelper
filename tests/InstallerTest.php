@@ -236,8 +236,9 @@ final class InstallerTest extends TestCase
         Installer::install($event);
 
         $gitignoreContent = file_get_contents($gitignorePath);
-        $this->assertStringContainsString('generate-composer-require.sh', $gitignoreContent);
-        $this->assertStringContainsString('generate-composer-require.yaml', $gitignoreContent);
+        // .sh and .yaml should NOT be in .gitignore (they should be committed)
+        $this->assertStringNotContainsString('generate-composer-require.sh', $gitignoreContent);
+        $this->assertStringNotContainsString('generate-composer-require.yaml', $gitignoreContent);
     }
 
     public function testInstallUpdatesGitignoreWhenExistsWithContent(): void
@@ -256,8 +257,9 @@ final class InstallerTest extends TestCase
         Installer::install($event);
 
         $gitignoreContent = file_get_contents($gitignorePath);
-        $this->assertStringContainsString('generate-composer-require.sh', $gitignoreContent);
-        $this->assertStringContainsString('generate-composer-require.yaml', $gitignoreContent);
+        // .sh and .yaml should NOT be in .gitignore (they should be committed)
+        $this->assertStringNotContainsString('generate-composer-require.sh', $gitignoreContent);
+        $this->assertStringNotContainsString('generate-composer-require.yaml', $gitignoreContent);
     }
 
     public function testInstallMigratesTxtToYamlAndDeletesTxt(): void
