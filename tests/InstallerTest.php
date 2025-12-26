@@ -394,4 +394,77 @@ final class InstallerTest extends TestCase
 
         rmdir($dir);
     }
+
+    public function testIsYamlEmptyOrTemplateDetectsIncludeSection(): void
+    {
+        $event = $this->createMockEvent();
+
+        $packageDir = $this->vendorDir . '/nowo-tech/composer-update-helper';
+        mkdir($packageDir . '/bin', 0777, true);
+        file_put_contents($packageDir . '/bin/generate-composer-require.yaml', '# YAML config');
+
+        // Use reflection to call private isYamlEmptyOrTemplate method
+        $reflection = new \ReflectionClass(Installer::class);
+        $method = $reflection->getMethod('isYamlEmptyOrTemplate');
+        $method->setAccessible(true);
+
+        // Test with YAML that has only include section (should be considered empty for migration)
+        $yamlFile = $this->tempDir . '/generate-composer-require.yaml';
+        file_put_contents($yamlFile, "ignore:\n  # - package1\ninclude:\n  # - package2\n");
+        $result = $method->invoke(null, $yamlFile, $packageDir . '/bin/generate-composer-require.yaml');
+        $this->assertTrue($result, 'YAML with only commented packages should be considered empty');
+
+        // Test with YAML that has packages in include section (should NOT be considered empty)
+        file_put_contents($yamlFile, "ignore:\n  # - package1\ninclude:\n  - included/package\n");
+        $result = $method->invoke(null, $yamlFile, $packageDir . '/bin/generate-composer-require.yaml');
+        $this->assertFalse($result, 'YAML with packages in include section should NOT be considered empty');
+
+        // Test with YAML that has packages in ignore section (should NOT be considered empty)
+        file_put_contents($yamlFile, "ignore:\n  - ignored/package\ninclude:\n  # - package2\n");
+        $result = $method->invoke(null, $yamlFile, $packageDir . '/bin/generate-composer-require.yaml');
+        $this->assertFalse($result, 'YAML with packages in ignore section should NOT be considered empty');
+
+        // Cleanup
+        @unlink($yamlFile);
+        @unlink($packageDir . '/bin/generate-composer-require.yaml');
+        @rmdir($packageDir . '/bin');
+        @rmdir($packageDir);
+    }
+
+    public function testMigrationReadsIncludeSectionFromYaml(): void
+    {
+        $event = $this->createMockEvent();
+
+        // Create old TXT file with packages
+        $oldTxtFile = $this->tempDir . '/generate-composer-require.ignore.txt';
+        file_put_contents($oldTxtFile, "package1/one\npackage2/two\n");
+
+        // Create YAML file with both ignore and include sections
+        $yamlFile = $this->tempDir . '/generate-composer-require.yaml';
+        file_put_contents($yamlFile, "ignore:\n  - package1/one\n  - package2/two\ninclude:\n  - included1/one\n  - included2/two\n");
+
+        $packageDir = $this->vendorDir . '/nowo-tech/composer-update-helper';
+        mkdir($packageDir . '/bin', 0777, true);
+        file_put_contents($packageDir . '/bin/generate-composer-require.sh', '#!/bin/sh');
+        file_put_contents($packageDir . '/bin/generate-composer-require.yaml', '# YAML config');
+
+        Installer::install($event);
+
+        // Verify YAML file still has include section after migration
+        $this->assertFileExists($yamlFile);
+        $yamlContent = file_get_contents($yamlFile);
+        // Migration should preserve include section
+        $this->assertStringContainsString('included1/one', $yamlContent);
+        $this->assertStringContainsString('included2/two', $yamlContent);
+
+        // Verify old TXT file was deleted
+        $this->assertFileDoesNotExist($oldTxtFile);
+
+        // Cleanup
+        @unlink($yamlFile);
+        @unlink($packageDir . '/bin/generate-composer-require.sh');
+        @unlink($packageDir . '/bin/generate-composer-require.yaml');
+        @rmdir($packageDir . '/bin');
+        @rmdir($packageDir);
+    }
 }
