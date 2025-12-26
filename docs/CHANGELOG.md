@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0] - 2025-12-XX
+
+### Changed
+- **BREAKING**: Configuration file format changed from TXT to YAML
+  - Old format: `generate-composer-require.ignore.txt` (still supported for backward compatibility)
+  - New format: `generate-composer-require.yaml`
+  - Automatic migration: The plugin automatically migrates old TXT files to YAML format on update
+- **Improved configuration format**: YAML format provides better structure and extensibility
+  - Packages are now listed under `ignore:` key as a YAML array
+  - More intuitive and maintainable configuration format
+
+### Added
+- **Automatic migration**: When updating from v1.x, existing `.ignore.txt` files are automatically migrated to `.yaml` format
+- **Backward compatibility**: The script still supports reading old `.ignore.txt` format if YAML file doesn't exist
+- **YAML configuration file**: New `generate-composer-require.yaml` configuration file with structured format
+
+### Migration Notes
+- No manual action required: The migration happens automatically when you update the package
+- Your existing ignore list will be preserved during migration
+- The old `.ignore.txt` file will remain (not deleted) but the script will use the new `.yaml` file
+
 ## [1.3.4] - 2025-12-14
 
 ### Added
@@ -43,8 +64,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - **Fixed test suite issues**:
-  - Fixed `testInstallFilesCreatesIgnoreFileIfNotExists` to use temporary directories instead of real project directory
-  - Tests no longer delete `bin/generate-composer-require.ignore.txt` from the actual project during cleanup
+  - Fixed `testInstallFilesCreatesYamlConfigFileIfNotExists` to use temporary directories instead of real project directory
+  - Tests no longer delete `bin/generate-composer-require.yaml` from the actual project during cleanup
   - Improved `ScriptTest` to handle cases where script is not available in CI/CD environments
   - All script-related tests now properly skip when script file doesn't exist instead of failing
 - Fixed test coverage to achieve 100% code coverage

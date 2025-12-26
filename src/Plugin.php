@@ -105,7 +105,9 @@ class Plugin implements PluginInterface, EventSubscriberInterface
      */
     public function onPostUpdate(Event $event): void
     {
-        // Only update .gitignore on updates, don't regenerate files
+        // Check for migration and update .gitignore on updates
+        // Also check if YAML config needs to be created
+        $this->handleConfigMigration($event->getIO());
         $this->updateGitignoreOnUpdate($event->getIO());
     }
 
@@ -155,17 +157,45 @@ class Plugin implements PluginInterface, EventSubscriberInterface
             chmod($destPath, $this->getChmodMode());
         }
 
-        // Create ignore file only if it doesn't exist (don't overwrite user's config)
-        $ignoreSource = $packageDir . '/bin/generate-composer-require.ignore.txt';
-        $ignoreDest = $projectDir . '/generate-composer-require.ignore.txt';
-
-        if (!file_exists($ignoreDest) && file_exists($ignoreSource)) {
-            $io->write('<info>Creating generate-composer-require.ignore.txt</info>');
-            copy($ignoreSource, $ignoreDest);
-        }
+        // Handle configuration migration and creation
+        $this->handleConfigMigration($io);
 
         // Update .gitignore to exclude installed files
         $this->updateGitignore($projectDir, $io);
+    }
+
+    /**
+     * Handle configuration migration (TXT to YAML) and creation of YAML config.
+     *
+     * @param IOInterface $io The IO interface
+     */
+    private function handleConfigMigration(IOInterface $io): void
+    {
+        $vendorDir = $this->composer->getConfig()->get('vendor-dir');
+        $projectDir = dirname((string) $vendorDir);
+        $packageDir = $vendorDir . '/nowo-tech/composer-update-helper';
+
+        // If package is not in vendor (development mode), use current directory
+        if (!is_dir($packageDir)) {
+            $packageDir = __DIR__ . '/..';
+        }
+
+        $oldIgnoreTxt = $projectDir . '/generate-composer-require.ignore.txt';
+        $newIgnoreYaml = $projectDir . '/generate-composer-require.yaml';
+
+        // Migrate old TXT file to YAML if it exists and YAML doesn't exist
+        if (file_exists($oldIgnoreTxt) && !file_exists($newIgnoreYaml)) {
+            $io->write('<info>Migrating configuration from TXT to YAML format</info>');
+            $this->migrateTxtToYaml($oldIgnoreTxt, $newIgnoreYaml, $io);
+        }
+
+        // Create YAML config file only if it doesn't exist (don't overwrite user's config)
+        $yamlSource = $packageDir . '/bin/generate-composer-require.yaml';
+
+        if (!file_exists($newIgnoreYaml) && file_exists($yamlSource)) {
+            $io->write('<info>Creating generate-composer-require.yaml</info>');
+            copy($yamlSource, $newIgnoreYaml);
+        }
     }
 
     /**
@@ -181,6 +211,54 @@ class Plugin implements PluginInterface, EventSubscriberInterface
     }
 
     /**
+     * Migrate old TXT configuration file to YAML format.
+     *
+     * @param string      $txtPath Path to the old TXT file
+     * @param string      $yamlPath Path to the new YAML file
+     * @param IOInterface $io The IO interface
+     */
+    private function migrateTxtToYaml(string $txtPath, string $yamlPath, IOInterface $io): void
+    {
+        $content = file_get_contents($txtPath);
+        $lines = explode("\n", $content);
+
+        $packages = [];
+        foreach ($lines as $line) {
+            $line = trim($line);
+            // Skip comments and empty lines
+            if (empty($line) || strpos($line, '#') === 0) {
+                continue;
+            }
+            // Add package to ignore list
+            if (!empty($line)) {
+                $packages[] = $line;
+            }
+        }
+
+        // Create YAML content
+        $yamlContent = "# Composer Update Helper Configuration\n";
+        $yamlContent .= "# Configuration file for ignored packages during composer update suggestions\n";
+        $yamlContent .= "# Migrated from generate-composer-require.ignore.txt\n\n";
+        $yamlContent .= "# List of packages to ignore during update\n";
+        $yamlContent .= "# Ignored packages will still be displayed in the output with their available versions,\n";
+        $yamlContent .= "# but won't be included in the composer require commands.\n";
+        $yamlContent .= "ignore:\n";
+
+        if (empty($packages)) {
+            $yamlContent .= "  # Add packages to ignore (one per line)\n";
+            $yamlContent .= "  # - doctrine/orm\n";
+            $yamlContent .= "  # - symfony/security-bundle\n";
+        } else {
+            foreach ($packages as $package) {
+                $yamlContent .= "  - {$package}\n";
+            }
+        }
+
+        file_put_contents($yamlPath, $yamlContent);
+        $io->write(sprintf('<info>Configuration migrated to %s</info>', basename($yamlPath)));
+    }
+
+    /**
      * Update .gitignore to exclude Composer Update Helper files.
      *
      * @param string      $projectDir The project root directory
@@ -191,6 +269,11 @@ class Plugin implements PluginInterface, EventSubscriberInterface
         $gitignorePath = $projectDir . '/.gitignore';
         $entriesToAdd = [
             'generate-composer-require.sh',
+            'generate-composer-require.yaml',
+        ];
+
+        // Also remove old TXT entry if it exists (for migration)
+        $entriesToRemove = [
             'generate-composer-require.ignore.txt',
         ];
 
@@ -205,6 +288,17 @@ class Plugin implements PluginInterface, EventSubscriberInterface
         $updated = false;
         $existingEntries = array_map('trim', $lines);
 
+        // Remove old TXT entry if it exists
+        foreach ($entriesToRemove as $entry) {
+            $key = array_search($entry, $existingEntries, true);
+            if ($key !== false) {
+                unset($lines[$key]);
+                $existingEntries = array_map('trim', $lines);
+                $updated = true;
+            }
+        }
+
+        // Add new entries
         foreach ($entriesToAdd as $entry) {
             if (!in_array($entry, $existingEntries, true)) {
                 // Add a comment if this is the first entry and file exists
@@ -241,7 +335,7 @@ class Plugin implements PluginInterface, EventSubscriberInterface
 
         $files = [
             'generate-composer-require.sh',
-            // Note: We don't remove the ignore file as it may contain user configuration
+            // Note: We don't remove the config file as it may contain user configuration
         ];
 
         foreach ($files as $file) {

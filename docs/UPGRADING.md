@@ -18,6 +18,69 @@ This guide will help you upgrade Composer Update Helper to newer versions.
 
 ## Version-Specific Upgrade Notes
 
+### Upgrading to 2.0.0+
+
+#### Breaking Changes
+
+- **Configuration file format changed from TXT to YAML**
+  - Old format: `generate-composer-require.ignore.txt`
+  - New format: `generate-composer-require.yaml`
+  - This is a **breaking change** in format, but migration is automatic
+
+#### New Features
+
+- **YAML configuration format**: More structured and extensible configuration file
+- **Automatic migration**: Existing `.ignore.txt` files are automatically migrated to `.yaml` format
+- **Backward compatibility**: The script still supports reading old TXT format if YAML doesn't exist
+
+#### Migration Steps
+
+1. Update the package:
+   ```bash
+   composer update nowo-tech/composer-update-helper
+   ```
+
+2. **Automatic migration**: If you have an existing `generate-composer-require.ignore.txt` file, it will be automatically migrated to `generate-composer-require.yaml` during the update.
+
+3. Verify the migration:
+   ```bash
+   # Check that the new YAML file exists
+   cat generate-composer-require.yaml
+   ```
+
+4. **Optional**: Remove the old TXT file after verifying the migration:
+   ```bash
+   # The old file is no longer used, but kept for safety
+   rm generate-composer-require.ignore.txt  # Optional
+   ```
+
+5. The script will now use the YAML file automatically. No changes needed to your workflow.
+
+#### Configuration Format
+
+**Old format (TXT)**:
+```txt
+# Packages to ignore
+doctrine/orm
+symfony/security-bundle
+```
+
+**New format (YAML)**:
+```yaml
+# Composer Update Helper Configuration
+ignore:
+  - doctrine/orm
+  - symfony/security-bundle
+```
+
+#### What Happens During Migration
+
+- Your existing ignore list is preserved
+- The old `.ignore.txt` file remains (not deleted) for safety
+- The new `.yaml` file is created with your packages migrated
+- The script automatically uses the YAML file if it exists
+- `.gitignore` is updated to include the new YAML file
+
 ### Upgrading to 1.3.4+
 
 #### New Features

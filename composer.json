@@ -54,7 +54,7 @@
     "extra": {
         "class": "NowoTech\\ComposerUpdateHelper\\Plugin",
         "branch-alias": {
-            "dev-main": "1.0-dev"
+            "dev-main": "2.0-dev"
         }
     },
     "scripts": {
