@@ -116,9 +116,9 @@ class Installer
     /**
      * Migrate old TXT configuration file to YAML format.
      *
-     * @param string      $txtPath Path to the old TXT file
+     * @param string      $txtPath  Path to the old TXT file
      * @param string      $yamlPath Path to the new YAML file
-     * @param IOInterface $io The IO interface
+     * @param IOInterface $io       The IO interface
      */
     private static function migrateTxtToYaml(string $txtPath, string $yamlPath, IOInterface $io): void
     {
