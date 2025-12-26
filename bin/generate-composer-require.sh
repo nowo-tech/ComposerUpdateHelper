@@ -268,8 +268,15 @@ fi
 
 # Run composer with forced timezone to avoid warnings
 # and filter any line starting with "Warning:" just in case.
+# Show loading indicator while checking outdated packages
+if [ "$DEBUG" != "true" ]; then
+  echo -n "⏳ Checking for outdated packages... " >&2
+fi
 OUTDATED_JSON="$("$PHP_BIN" -d date.timezone=UTC "$COMPOSER_BIN" outdated --direct --format=json 2>&1 \
   | grep -v '^Warning:' || true)"
+if [ "$DEBUG" != "true" ]; then
+  echo "✅" >&2
+fi
 
 if [ "$DEBUG" = "true" ]; then
   echo "🔍 DEBUG: Composer outdated command executed" >&2
@@ -290,6 +297,8 @@ if [ "$DEBUG" = "true" ]; then
   echo "   - IGNORED_PACKAGES: ${IGNORED_PACKAGES:-none}" >&2
   echo "   - INCLUDED_PACKAGES: ${INCLUDED_PACKAGES:-none}" >&2
   echo "   - SHOW_RELEASE_INFO: $SHOW_RELEASE_INFO" >&2
+elif [ "$VERBOSE" != "true" ]; then
+  echo -n "⏳ Processing packages... " >&2
 fi
 
 OUTPUT="$(OUTDATED_JSON="$OUTDATED_JSON" COMPOSER_BIN="$COMPOSER_BIN" PHP_BIN="$PHP_BIN" IGNORED_PACKAGES="$IGNORED_PACKAGES" INCLUDED_PACKAGES="$INCLUDED_PACKAGES" SHOW_RELEASE_INFO="$SHOW_RELEASE_INFO" DEBUG="$DEBUG" "$PHP_BIN" -d date.timezone=UTC <<'PHP'
@@ -727,17 +736,22 @@ foreach ($report['installed'] as $pkg) {
         }
     }
 
-    // Get release information for this package (only for specific versions, not wildcards)
-    if ($showReleaseInfo && strpos($constraint, '*') === false && strpos($constraint, '^') === false && strpos($constraint, '~') === false) {
-        // Only fetch release info for specific versions to avoid unnecessary API calls
-        $githubRepo = getGitHubRepoFromPackagist($name);
-        if ($githubRepo) {
-            $release = getReleaseInfo($githubRepo, $latest);
-            if ($release) {
-                $releaseInfo[$name] = $release;
-            }
-        }
-    }
+          // Get release information for this package (only for specific versions, not wildcards)
+          if ($showReleaseInfo && strpos($constraint, '*') === false && strpos($constraint, '^') === false && strpos($constraint, '~') === false) {
+              // Only fetch release info for specific versions to avoid unnecessary API calls
+              // Show progress indicator (only if not in debug mode, as debug shows everything)
+              if (!$debug && !isset($releaseInfoShown)) {
+                  error_log("⏳ Fetching release information...");
+                  $releaseInfoShown = true;
+              }
+              $githubRepo = getGitHubRepoFromPackagist($name);
+              if ($githubRepo) {
+                  $release = getReleaseInfo($githubRepo, $latest);
+                  if ($release) {
+                      $releaseInfo[$name] = $release;
+                  }
+              }
+          }
 
     if (isset($devSet[$name])) {
         $dev[] = $name . ':' . $constraint;
@@ -815,6 +829,18 @@ OUTPUT="$(printf "%s\n" "$OUTPUT" | grep -v '^Warning:' || true)"
 if [ "$DEBUG" = "true" ]; then
   echo "🔍 DEBUG: PHP script output length: ${#OUTPUT} characters" >&2
   echo "🔍 DEBUG: Parsing structured output..." >&2
+elif [ "$VERBOSE" != "true" ]; then
+  echo "✅" >&2
+fi
+
+# Show completion message if release info was fetched
+if [ "$SHOW_RELEASE_INFO" = "true" ] && [ "$DEBUG" != "true" ]; then
+  if printf "%s\n" "$OUTPUT" | grep -q "^---RELEASES---"; then
+    releaseCount=$(printf "%s\n" "$OUTPUT" | sed -n '/^---RELEASES---$/,/^$/p' | grep -v '^---' | grep -v '^$' | wc -l)
+    if [ "$releaseCount" -gt 0 ] 2>/dev/null; then
+      echo "✅ Release information fetched for $releaseCount package(s)" >&2
+    fi
+  fi
 fi
 
 # Parse the structured output
