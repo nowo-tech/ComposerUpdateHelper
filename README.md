@@ -38,7 +38,7 @@ After installation, two files will be copied to your project root:
 - `generate-composer-require.sh` - The main script
 - `generate-composer-require.yaml` - Configuration file for ignored packages (only created if doesn't exist)
 
-**Note:** These files are automatically added to your `.gitignore` during installation to prevent them from being committed to your repository.
+**Note:** These files should be committed to your repository so they're available to all team members. The plugin will remove any old `.ignore.txt` entries from `.gitignore` if they exist.
 
 ## Usage
 

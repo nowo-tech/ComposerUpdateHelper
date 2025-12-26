@@ -101,10 +101,55 @@ class Installer
             if ($shouldMigrate) {
                 $io->write('<info>Migrating configuration from TXT to YAML format</info>');
                 self::migrateTxtToYaml($oldIgnoreTxt, $yamlDest, $io);
-                // Delete the old TXT file after successful migration
+                
+                // Verify migration was successful before deleting TXT
                 if (file_exists($yamlDest)) {
-                    unlink($oldIgnoreTxt);
-                    $io->write('<info>Removed old generate-composer-require.ignore.txt file</info>');
+                    // Read both files to verify migration
+                    $txtContent = file_get_contents($oldIgnoreTxt);
+                    $yamlContent = file_get_contents($yamlDest);
+                    
+                    // Extract packages from TXT
+                    $txtLines = explode("\n", $txtContent);
+                    $txtPackages = [];
+                    foreach ($txtLines as $line) {
+                        $line = trim($line);
+                        if (!empty($line) && strpos($line, '#') !== 0) {
+                            $txtPackages[] = $line;
+                        }
+                    }
+                    
+                    // Extract packages from YAML
+                    $yamlPackages = [];
+                    if (preg_match('/^ignore:\s*$/m', $yamlContent)) {
+                        $yamlLines = explode("\n", $yamlContent);
+                        $inIgnore = false;
+                        foreach ($yamlLines as $line) {
+                            if (preg_match('/^ignore:\s*$/', trim($line))) {
+                                $inIgnore = true;
+                                continue;
+                            }
+                            if ($inIgnore && preg_match('/^\s*-\s+([^#]+)/', $line, $matches)) {
+                                $yamlPackages[] = trim($matches[1]);
+                            }
+                            if ($inIgnore && preg_match('/^\s*[^#\s-]/', $line)) {
+                                break; // End of ignore section
+                            }
+                        }
+                    }
+                    
+                    // Verify packages match (order doesn't matter)
+                    $txtPackagesSorted = array_unique(array_filter($txtPackages));
+                    $yamlPackagesSorted = array_unique(array_filter($yamlPackages));
+                    sort($txtPackagesSorted);
+                    sort($yamlPackagesSorted);
+                    
+                    if ($txtPackagesSorted === $yamlPackagesSorted) {
+                        // Migration verified, safe to delete TXT
+                        unlink($oldIgnoreTxt);
+                        $io->write('<info>Removed old generate-composer-require.ignore.txt file</info>');
+                    } else {
+                        $io->writeError('<warning>Migration verification failed. TXT file preserved for safety.</warning>');
+                    }
                 }
             }
         }
@@ -206,7 +251,8 @@ class Installer
     }
 
     /**
-     * Update .gitignore to exclude Composer Update Helper files.
+     * Update .gitignore to remove old TXT entry (if exists).
+     * Note: .sh and .yaml files should NOT be in .gitignore as they should be committed to the repository.
      *
      * @param string      $projectDir The project root directory
      * @param IOInterface $io         The IO interface
@@ -214,26 +260,27 @@ class Installer
     private static function updateGitignore(string $projectDir, IOInterface $io): void
     {
         $gitignorePath = $projectDir . '/.gitignore';
-        $entriesToAdd = [
-            'generate-composer-require.sh',
-            'generate-composer-require.yaml',
-        ];
 
-        // Also remove old TXT entry if it exists (for migration)
+        // Only remove old TXT entry if it exists (for migration cleanup)
+        // Do NOT add .sh or .yaml to .gitignore - these files should be in the repository
         $entriesToRemove = [
             'generate-composer-require.ignore.txt',
         ];
 
-        $content = '';
-        $lines = [];
+        // Also remove .sh and .yaml if they were previously added (cleanup)
+        $entriesToRemoveAlso = [
+            'generate-composer-require.sh',
+            'generate-composer-require.yaml',
+        ];
 
-        if (file_exists($gitignorePath)) {
-            $content = file_get_contents($gitignorePath);
-            $lines = explode("\n", $content);
+        if (!file_exists($gitignorePath)) {
+            return; // No .gitignore file, nothing to do
         }
 
-        $updated = false;
+        $content = file_get_contents($gitignorePath);
+        $lines = explode("\n", $content);
         $existingEntries = array_map('trim', $lines);
+        $updated = false;
 
         // Remove old TXT entry if it exists
         foreach ($entriesToRemove as $entry) {
@@ -245,28 +292,19 @@ class Installer
             }
         }
 
-        // Add new entries
-        foreach ($entriesToAdd as $entry) {
-            if (!in_array($entry, $existingEntries, true)) {
-                // Add a comment if this is the first entry and file exists
-                if (!$updated && file_exists($gitignorePath) && !empty($content)) {
-                    $trimmedContent = trim($content);
-                    if ($trimmedContent !== '' && substr($trimmedContent, -1) !== "\n") {
-                        $lines[] = '';
-                    }
-                }
-                // Add comment header if this is the first Composer Update Helper entry
-                if (!$updated && !in_array('# Composer Update Helper', $existingEntries, true)) {
-                    $lines[] = '# Composer Update Helper';
-                }
-                $lines[] = $entry;
+        // Remove .sh and .yaml entries if they exist (they shouldn't be ignored)
+        foreach ($entriesToRemoveAlso as $entry) {
+            $key = array_search($entry, $existingEntries, true);
+            if ($key !== false) {
+                unset($lines[$key]);
+                $existingEntries = array_map('trim', $lines);
                 $updated = true;
             }
         }
 
         if ($updated) {
             file_put_contents($gitignorePath, implode("\n", $lines) . "\n");
-            $io->write('<info>Updated .gitignore to exclude Composer Update Helper files</info>');
+            $io->write('<info>Updated .gitignore to remove old Composer Update Helper entries</info>');
         }
     }
 

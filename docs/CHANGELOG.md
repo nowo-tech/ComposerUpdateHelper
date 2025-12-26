@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.4] - 2025-12-26
+
+### Changed
+- **Migration verification**: Migration now verifies that packages were correctly migrated before deleting the old `.ignore.txt` file
+  - Compares packages from TXT and YAML files
+  - Only deletes TXT file if migration is verified as correct
+  - Shows warning if verification fails and preserves TXT file for safety
+
+### Fixed
+- **`.gitignore` behavior**: `.sh` and `.yaml` files are no longer added to `.gitignore`
+  - These files should be committed to the repository for team collaboration
+  - Plugin now removes old `.ignore.txt` entries from `.gitignore` if they exist
+  - Plugin also removes `.sh` and `.yaml` entries if they were previously added (cleanup)
+
 ## [2.0.3] - 2025-12-26
 
 ### Changed

@@ -170,10 +170,11 @@ final class PluginTest extends TestCase
         $plugin->activate($composer, $io);
         $plugin->onPostUpdate($event);
 
-        // Verify .gitignore was updated
+        // Verify .gitignore was updated (should remove old entries, not add new ones)
         $gitignoreContent = file_get_contents($gitignorePath);
-        $this->assertStringContainsString('generate-composer-require.sh', $gitignoreContent);
-        $this->assertStringContainsString('generate-composer-require.yaml', $gitignoreContent);
+        // .sh and .yaml should NOT be in .gitignore (they should be committed)
+        $this->assertStringNotContainsString('generate-composer-require.sh', $gitignoreContent);
+        $this->assertStringNotContainsString('generate-composer-require.yaml', $gitignoreContent);
 
         // Cleanup
         @unlink($gitignorePath);
@@ -270,9 +271,9 @@ final class PluginTest extends TestCase
         $sourceFile = $binDir . '/generate-composer-require.sh';
         file_put_contents($sourceFile, $content);
 
-        // Create .gitignore with entries already present to avoid update message
+        // Create .gitignore without entries (they shouldn't be there anyway)
         $gitignorePath = $tempDir . '/.gitignore';
-        file_put_contents($gitignorePath, "# Composer Update Helper\ngenerate-composer-require.sh\ngenerate-composer-require.yaml\n");
+        file_put_contents($gitignorePath, "vendor/\n");
 
         $config = $this->createMock(Config::class);
         $config->method('get')
@@ -284,8 +285,7 @@ final class PluginTest extends TestCase
             ->willReturn($config);
 
         $io = $this->createMock(IOInterface::class);
-        // Since .gitignore already has the entries, no update message should be shown
-        // and since file content matches, no installation/update messages should be shown
+        // Since file content matches and no .gitignore updates needed, no messages should be shown
         $io->expects($this->never())
             ->method('write');
 
@@ -446,14 +446,13 @@ final class PluginTest extends TestCase
         $plugin->activate($composer, $io);
         $plugin->onPostInstall($event);
 
-        // Verify .gitignore was created/updated
+        // Verify .sh and .yaml are NOT in .gitignore (they should be committed to repo)
         $gitignorePath = $tempDir . '/.gitignore';
-        $this->assertFileExists($gitignorePath);
-
-        $gitignoreContent = file_get_contents($gitignorePath);
-        $this->assertStringContainsString('generate-composer-require.sh', $gitignoreContent);
-        $this->assertStringContainsString('generate-composer-require.yaml', $gitignoreContent);
-        $this->assertStringContainsString('# Composer Update Helper', $gitignoreContent);
+        if (file_exists($gitignorePath)) {
+            $gitignoreContent = file_get_contents($gitignorePath);
+            $this->assertStringNotContainsString('generate-composer-require.sh', $gitignoreContent);
+            $this->assertStringNotContainsString('generate-composer-require.yaml', $gitignoreContent);
+        }
 
         // Cleanup
         @unlink($tempDir . '/generate-composer-require.sh');
@@ -474,9 +473,9 @@ final class PluginTest extends TestCase
         $binDir = $packageDir . '/bin';
         mkdir($binDir, 0777, true);
 
-        // Create existing .gitignore with entries
+        // Create existing .gitignore with old entries (should be removed)
         $gitignorePath = $tempDir . '/.gitignore';
-        file_put_contents($gitignorePath, "# Existing entries\ngenerate-composer-require.sh\nvendor/\n");
+        file_put_contents($gitignorePath, "# Existing entries\ngenerate-composer-require.sh\ngenerate-composer-require.yaml\nvendor/\n");
 
         // Create source file in temporary package directory (not in real project)
         $sourceFile = $binDir . '/generate-composer-require.sh';
@@ -501,14 +500,13 @@ final class PluginTest extends TestCase
         $plugin->activate($composer, $io);
         $plugin->onPostInstall($event);
 
-        // Verify .gitignore was updated but entries are not duplicated
+        // Verify .gitignore was updated - old entries should be removed
         $gitignoreContent = file_get_contents($gitignorePath);
-        $this->assertStringContainsString('generate-composer-require.sh', $gitignoreContent);
-        $this->assertStringContainsString('generate-composer-require.yaml', $gitignoreContent);
-
-        // Count occurrences - should be only one of each
-        $this->assertEquals(1, substr_count($gitignoreContent, 'generate-composer-require.sh'));
-        $this->assertEquals(1, substr_count($gitignoreContent, 'generate-composer-require.yaml'));
+        // .sh and .yaml should NOT be in .gitignore (they should be committed)
+        $this->assertStringNotContainsString('generate-composer-require.sh', $gitignoreContent);
+        $this->assertStringNotContainsString('generate-composer-require.yaml', $gitignoreContent);
+        // But vendor/ should still be there
+        $this->assertStringContainsString('vendor/', $gitignoreContent);
 
         // Cleanup
         @unlink($tempDir . '/generate-composer-require.sh');
