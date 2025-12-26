@@ -212,68 +212,50 @@ final class PluginTest extends TestCase
     {
         $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
         $vendorDir = $tempDir . '/vendor';
-        $packageDir = __DIR__ . '/..';
-        mkdir($vendorDir, 0777, true);
+        $packageDir = $vendorDir . '/nowo-tech/composer-update-helper';
+        $binDir = $packageDir . '/bin';
+        mkdir($binDir, 0777, true);
 
         // Create existing file with different content
         $existingContent = '#!/bin/sh\necho "old"';
         file_put_contents($tempDir . '/generate-composer-require.sh', $existingContent);
 
         // Create source file in package with new content
-        $binDir = $packageDir . '/bin';
-
-        if (!is_dir($binDir)) {
-            mkdir($binDir, 0777, true);
-        }
-
         $sourceFile = $binDir . '/generate-composer-require.sh';
+        file_put_contents($sourceFile, '#!/bin/sh\necho "new"');
 
-        // Backup original file if it exists
-        $originalContent = null;
+        $config = $this->createMock(Config::class);
+        $config->method('get')
+            ->with('vendor-dir')
+            ->willReturn($vendorDir);
 
-        if (file_exists($sourceFile)) {
-            $originalContent = file_get_contents($sourceFile);
-        }
+        $composer = $this->createMock(Composer::class);
+        $composer->method('getConfig')
+            ->willReturn($config);
 
-        try {
-            file_put_contents($sourceFile, '#!/bin/sh\necho "new"');
+        $io = $this->createMock(IOInterface::class);
+        // When content differs, file should be updated
+        // Allow any of these messages (at least one must appear)
+        $io->expects($this->atLeastOnce())
+            ->method('write')
+            ->with($this->logicalOr(
+                $this->stringContains('Updating generate-composer-require.sh'),
+                $this->stringContains('Creating generate-composer-require.yaml'),
+                $this->stringContains('Updated .gitignore'),
+                $this->stringContains('updated .gitignore')
+            ));
 
-            $config = $this->createMock(Config::class);
-            $config->method('get')
-                ->with('vendor-dir')
-                ->willReturn($vendorDir);
+        $event = $this->createMock(Event::class);
+        $event->method('getIO')
+            ->willReturn($io);
 
-            $composer = $this->createMock(Composer::class);
-            $composer->method('getConfig')
-                ->willReturn($config);
+        $plugin = new Plugin();
+        $plugin->activate($composer, $io);
+        $plugin->onPostInstall($event);
 
-            $io = $this->createMock(IOInterface::class);
-            $io->expects($this->atLeastOnce())
-                ->method('write')
-                ->with($this->logicalOr(
-                    $this->stringContains('Creating generate-composer-require.yaml'),
-                    $this->stringContains('Updated .gitignore')
-                ));
-
-            $event = $this->createMock(Event::class);
-            $event->method('getIO')
-                ->willReturn($io);
-
-            $plugin = new Plugin();
-            $plugin->activate($composer, $io);
-            $plugin->onPostInstall($event);
-
-            // File should still exist with original content (not updated)
-            $this->assertFileExists($tempDir . '/generate-composer-require.sh');
-            $this->assertStringContainsString('old', (string) file_get_contents($tempDir . '/generate-composer-require.sh'));
-        } finally {
-            // Restore original file
-            if ($originalContent !== null) {
-                file_put_contents($sourceFile, $originalContent);
-            } elseif (file_exists($sourceFile)) {
-                @unlink($sourceFile);
-            }
-        }
+        // File should be updated with new content
+        $this->assertFileExists($tempDir . '/generate-composer-require.sh');
+        $this->assertStringContainsString('new', (string) file_get_contents($tempDir . '/generate-composer-require.sh'));
 
         // Cleanup
         @unlink($tempDir . '/generate-composer-require.sh');
