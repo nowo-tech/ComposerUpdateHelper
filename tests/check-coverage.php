@@ -1,10 +1,11 @@
 #!/usr/bin/env php
 <?php
+
+declare(strict_types=1);
 /**
  * Script to validate code coverage is 100%
  * Same logic as CI/CD pipeline
  */
-
 $coverageFile = __DIR__ . '/../coverage.xml';
 if (!file_exists($coverageFile)) {
     echo "ERROR: coverage.xml file was not generated\n";
@@ -19,8 +20,8 @@ if ($coverage === false) {
 }
 
 $metrics = $coverage->project->metrics;
-$elements = (float)$metrics['elements'];
-$coveredElements = (float)$metrics['coveredelements'];
+$elements = (float) $metrics['elements'];
+$coveredElements = (float) $metrics['coveredelements'];
 
 if ($elements == 0) {
     echo "No elements to cover\n";
@@ -32,23 +33,24 @@ $percentage = ($coveredElements / $elements) * 100;
 echo "Coverage: {$coveredElements}/{$elements} (" . number_format($percentage, 2) . "%)\n";
 
 if ($percentage < 100) {
-    echo "ERROR: Coverage must be 100%. Current: " . number_format($percentage, 2) . "%\n";
+    echo 'ERROR: Coverage must be 100%. Current: ' . number_format($percentage, 2) . "%\n";
 
     // Show which files are not fully covered
     echo "\n📋 Files with incomplete coverage:\n";
     foreach ($coverage->project->file as $file) {
         $fileMetrics = $file->metrics;
-        $fileElements = (float)$fileMetrics['elements'];
-        $fileCovered = (float)$fileMetrics['coveredelements'];
+        $fileElements = (float) $fileMetrics['elements'];
+        $fileCovered = (float) $fileMetrics['coveredelements'];
 
         if ($fileElements > 0) {
             $filePercentage = ($fileCovered / $fileElements) * 100;
             if ($filePercentage < 100) {
-                echo sprintf("  - %s: %.2f%% (%d/%d)\n",
+                echo sprintf(
+                    "  - %s: %.2f%% (%d/%d)\n",
                     $file['name'],
                     $filePercentage,
-                    (int)$fileCovered,
-                    (int)$fileElements
+                    (int) $fileCovered,
+                    (int) $fileElements
                 );
             }
         }
@@ -59,4 +61,3 @@ if ($percentage < 100) {
 
 echo "✅ 100% coverage confirmed\n";
 exit(0);
-
