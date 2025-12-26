@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.3] - 2025-12-26
+
+### Changed
+- **Documentation and tests**: Complete test coverage for improved migration logic
+  - Added tests for migration when YAML exists but is empty
+  - Added tests for migration when YAML contains only template
+  - Added tests to verify migration is skipped when YAML has user packages
+  - Updated all documentation to reflect v2.0.2 improvements
+
 ## [2.0.2] - 2025-12-26
 
 ### Fixed
