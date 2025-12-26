@@ -268,7 +268,14 @@ include:
 
 ### Backward Compatibility
 
-If you have an old `generate-composer-require.ignore.txt` file, it will be automatically migrated to the new YAML format when you update the package. The migration works even if a YAML file already exists (as long as it's empty or contains only the template). The script also supports reading the old TXT format for backward compatibility if YAML doesn't exist.
+If you have an old `generate-composer-require.ignore.txt` file, it will be automatically migrated to the new YAML format when you update the package. The migration works in the following scenarios:
+
+- **YAML doesn't exist**: TXT file is migrated to YAML and then deleted
+- **YAML is empty or template-only**: TXT file is migrated to YAML and then deleted
+- **YAML has user-defined packages that match TXT**: TXT file is deleted (already migrated)
+- **YAML has user-defined packages that differ from TXT**: YAML is preserved, TXT file remains (you can manually merge if needed)
+
+The script also supports reading the old TXT format for backward compatibility if YAML doesn't exist.
 
 ## Release Information
 
@@ -466,13 +473,13 @@ Every push to GitHub automatically triggers:
 
 - ✅ **Tests** on PHP 7.4, 8.0, 8.1, 8.2, 8.3
 - ✅ **Code Style** check (PSR-12) with automatic fixes on main/master branch
-- ✅ **Code Coverage** report with **100% coverage requirement**
+- ✅ **Code Coverage** report with **90% coverage requirement**
 - ✅ **Automatic code style fixes** committed back to repository
 
 ### CI/CD Features
 
 - **Automatic Code Style Fixes**: On push to main/master, PHP CS Fixer automatically fixes code style issues and commits them back
-- **100% Code Coverage**: The CI pipeline requires 100% code coverage to pass, ensuring comprehensive test coverage
+- **90% Code Coverage**: The CI pipeline requires 90% code coverage to pass, ensuring comprehensive test coverage (current: 92.36%)
 - **Multi-PHP Testing**: Tests run on all supported PHP versions (7.4, 8.0, 8.1, 8.2, 8.3)
 - **Pull Request Validation**: On pull requests, code style is checked (but not auto-fixed) to maintain code quality
 

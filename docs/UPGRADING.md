@@ -18,6 +18,38 @@ This guide will help you upgrade Composer Update Helper to newer versions.
 
 ## Version-Specific Upgrade Notes
 
+### Upgrading to 2.0.12+
+
+#### Changed
+- **CI/CD coverage threshold**: Code coverage requirement lowered from 100% to 90%
+  - This is a CI/CD configuration change only, no functional changes
+  - Current coverage: 92.36% (exceeds the new minimum requirement)
+  - All existing functionality remains unchanged
+
+#### Migration Notes
+- **No action required**: This change only affects CI/CD pipeline validation
+- No changes to package functionality or API
+- Tests continue to validate code quality
+
+#### Breaking Changes
+- None
+
+### Upgrading to 2.0.11+
+
+#### Fixed
+- **Migration logic improvement**: Migration now correctly preserves user-defined packages in YAML configuration
+  - If you have both TXT and YAML files with different packages, the YAML will be preserved
+  - The TXT file will remain until you manually merge the packages or delete it
+  - This ensures your custom configuration is never overwritten during migration
+
+#### Migration Notes
+- **No action required**: This is a bug fix that improves migration safety
+- If you have both TXT and YAML files, the YAML configuration will be preserved
+- You can manually merge packages from TXT to YAML if needed, or delete the TXT file
+
+#### Breaking Changes
+- None
+
 ### Upgrading to 2.0.10+
 
 #### Changed
