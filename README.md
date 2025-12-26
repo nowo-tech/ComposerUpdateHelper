@@ -44,6 +44,8 @@ After installation, two files will be copied to your project root:
 
 **Note:** These files should be committed to your repository so they're available to all team members. The plugin will remove any old `.ignore.txt` entries from `.gitignore` if they exist.
 
+**Auto-update:** The `generate-composer-require.sh` script is automatically updated when you run `composer update` if the content differs from the version in vendor. This ensures you always have the latest version of the script.
+
 ### Architecture
 
 The script uses a lightweight architecture for better maintainability:

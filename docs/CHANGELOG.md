@@ -11,12 +11,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - **Script auto-update on package update**: Fixed issue where `generate-composer-require.sh` was not automatically updated when the package was updated
+  - The `onPostUpdate` method now calls `installFiles` to update the script when content differs
   - The script now compares MD5 hashes and updates if content differs
   - Ensures users always get the latest script version when running `composer update`
-  - Previously, the script was only installed on first installation, not updated on subsequent updates
+  - Previously, the script was only installed on first installation (`composer install`), not updated on subsequent updates (`composer update`)
 
 ### Changed
 - **Improved update logic**: The Plugin now properly updates the script file when content changes, matching the behavior of the Installer class
+  - Both `onPostInstall` and `onPostUpdate` now update the script if content differs
 
 ## [2.0.9] - 2025-12-26
 
