@@ -18,6 +18,25 @@ This guide will help you upgrade Composer Update Helper to newer versions.
 
 ## Version-Specific Upgrade Notes
 
+### Upgrading to 2.0.7+
+
+#### Changed
+- **Release information default behavior**: Release information is now **disabled by default**
+  - If you were relying on release information being shown automatically, you now need to use `--release-info` or `--release-detail`
+  - This improves performance by default (no API calls are made)
+  - Use `--release-info` to show summary with release and changelog links
+  - Use `--release-detail` to show full release changelog
+
+#### Fixed
+- **Migration verification**: Fixed issue where migration verification failed when YAML had packages in `include` section
+  - Migration now correctly compares only `ignore` section with TXT content
+  - TXT file is now properly deleted after successful migration
+
+#### Action Required
+- **If you use release information**: Add `--release-info` or `--release-detail` flag to your commands
+  - Example: `./generate-composer-require.sh --release-info`
+  - Example: `./generate-composer-require.sh --run --release-detail`
+
 ### Upgrading to 2.0.6+
 
 #### Added

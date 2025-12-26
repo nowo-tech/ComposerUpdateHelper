@@ -45,15 +45,16 @@ Works with any PHP project (Symfony, Laravel, Yii, CodeIgniter, CakePHP, Laminas
 
 OPTIONS:
     --run                    Execute the suggested commands automatically
+    --release-info           Show release information (summary with links)
     --release-detail         Show full release changelog for each package
-    --no-release-info        Skip release information section
+    --no-release-info        Skip release information section (default)
     -h, --help               Show this help message
 
 EXAMPLES:
-    $0                                    # Show suggested commands
+    $0                                    # Show suggested commands (no release info)
     $0 --run                              # Execute suggested commands
-    $0 --release-detail                   # Show full changelogs
-    $0 --no-release-info                  # Skip release information
+    $0 --release-info                     # Show release information summary
+    $0 --release-detail                    # Show full changelogs
     $0 --run --release-detail             # Execute and show full changelogs
 
 FRAMEWORK SUPPORT:
@@ -72,13 +73,15 @@ IGNORED PACKAGES:
     Comments starting with # are ignored.
 
 RELEASE INFORMATION:
-    By default, the script shows a summary with:
+    By default, release information is NOT shown (no API calls are made).
+    
+    Use --release-info to show a summary with:
     - Package name
     - Release URL
     - Changelog URL
-
+    
     Use --release-detail to see the full release changelog.
-    Use --no-release-info to skip release information entirely.
+    Use --no-release-info to explicitly skip release information (default behavior).
 
 EOF
 }
@@ -86,7 +89,7 @@ EOF
 # Parse command line arguments
 RUN_FLAG=""
 SHOW_RELEASE_DETAIL=false
-SHOW_RELEASE_INFO=true
+SHOW_RELEASE_INFO=false
 
 for arg in "$@"; do
     case "$arg" in
@@ -97,7 +100,11 @@ for arg in "$@"; do
         --run)
             RUN_FLAG="--run"
             ;;
+        --release-info|--releases)
+            SHOW_RELEASE_INFO=true
+            ;;
         --release-detail|--release-full|--detail)
+            SHOW_RELEASE_INFO=true
             SHOW_RELEASE_DETAIL=true
             ;;
         --no-release-info|--skip-releases|--no-releases)

@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.7] - 2025-12-26
+
+### Fixed
+- **Migration verification**: Fixed migration verification to only compare packages from the `ignore` section with TXT content
+  - Previously, verification included packages from both `ignore` and `include` sections
+  - This caused migration to fail when YAML had packages in `include` section that weren't in TXT
+  - Now only `ignore` section is compared, allowing TXT file to be deleted correctly
+  - Fixes test failures in `testMigrationReadsIncludeSectionFromYaml`
+
+### Changed
+- **Release information default behavior**: Release information is now **disabled by default**
+  - Previously, release information was shown by default (required API calls)
+  - Now, release information is only shown when explicitly requested
+  - Improves performance by default (no API calls are made)
+  - Use `--release-info` to enable release information summary
+  - Use `--release-detail` to enable full release changelog
+  - Use `--no-release-info` to explicitly disable (default behavior)
+
+### Added
+- **New flag `--release-info`**: Enables release information summary (release link and changelog link)
+  - Complements `--release-detail` which shows full changelog
+  - Both flags enable release information (previously only `--release-detail` existed)
+
+### Documentation
+- Updated help text to reflect new default behavior
+- Updated README.md with correct release information options
+- Updated examples to show new flags and default behavior
+
 ## [2.0.6] - 2025-12-26
 
 ### Added

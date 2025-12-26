@@ -118,11 +118,11 @@ class Installer
                         }
                     }
 
-                    // Extract packages from YAML (both ignore and include sections)
+                    // Extract packages from YAML (ONLY from ignore section for verification)
+                    // Include section should not be compared with TXT content
                     $yamlPackages = [];
                     $yamlLines = explode("\n", $yamlContent);
                     $inIgnore = false;
-                    $inInclude = false;
                     foreach ($yamlLines as $line) {
                         $trimmedLine = trim($line);
                         $originalLine = $line;
@@ -135,16 +135,15 @@ class Installer
                         // Check for section headers (must be at start of line or with minimal indentation)
                         if (preg_match('/^ignore:\s*$/', $trimmedLine)) {
                             $inIgnore = true;
-                            $inInclude = false;
                             continue;
                         }
                         if (preg_match('/^include:\s*$/', $trimmedLine)) {
-                            $inInclude = true;
+                            // Stop reading when we hit include section (we only care about ignore for verification)
                             $inIgnore = false;
                             continue;
                         }
 
-                        // Extract packages from ignore section
+                        // Extract packages from ignore section only
                         if ($inIgnore && preg_match('/^\s*-\s+([^#]+)/', $originalLine, $matches)) {
                             $package = trim($matches[1]);
                             if (!empty($package)) {
@@ -153,19 +152,9 @@ class Installer
                             continue;
                         }
 
-                        // Extract packages from include section
-                        if ($inInclude && preg_match('/^\s*-\s+([^#]+)/', $originalLine, $matches)) {
-                            $package = trim($matches[1]);
-                            if (!empty($package)) {
-                                $yamlPackages[] = $package;
-                            }
-                            continue;
-                        }
-
                         // End of section: new top-level key (starts at beginning or with minimal spaces, not a list item)
-                        if (($inIgnore || $inInclude) && preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*:\s*$/', $trimmedLine)) {
+                        if ($inIgnore && preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*:\s*$/', $trimmedLine)) {
                             $inIgnore = false;
-                            $inInclude = false;
                         }
                     }
 
