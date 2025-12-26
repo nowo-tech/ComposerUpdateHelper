@@ -10,7 +10,8 @@
 #   ./generate-composer-require.sh --no-release-info         # skip release information
 #   ./generate-composer-require.sh --run --release-detail    # execute and show full changelog
 #
-# Packages listed in generate-composer-require.yaml (or .ignore.txt for backward compatibility) will be skipped.
+# Packages listed in the "ignore" section of generate-composer-require.yaml (or .ignore.txt for backward compatibility) will be skipped.
+# Packages listed in the "include" section will be forced to be included, even if they are in the ignore list.
 #
 # Framework support:
 #   - Symfony: respects "extra.symfony.require" constraint
@@ -125,16 +126,41 @@ if [ ! -f composer.json ]; then
   exit 1
 fi
 
-# Load ignored packages from YAML file (if exists)
+# Load ignored and included packages from YAML file (if exists)
 # Fallback to old TXT file for backward compatibility
 IGNORE_FILE_YAML="$(dirname "$0")/generate-composer-require.yaml"
 IGNORE_FILE_TXT="$(dirname "$0")/generate-composer-require.ignore.txt"
 IGNORED_PACKAGES=""
+INCLUDED_PACKAGES=""
 
 if [ -f "$IGNORE_FILE_YAML" ]; then
   # Read YAML file and extract packages from ignore array
-  # Simple YAML parsing: extract lines starting with "  - " after "ignore:"
-  IGNORED_PACKAGES="$(awk '/^ignore:/{flag=1; next} flag && /^  - /{gsub(/^  - /, ""); print} flag && /^[^ ]/{flag=0}' "$IGNORE_FILE_YAML" | tr '\n' '|' | sed 's/|$//' || true)"
+  # Improved YAML parsing: extract lines starting with "  - " or "    - " after "ignore:"
+  # Handles different indentation levels and inline comments
+  IGNORED_PACKAGES="$(awk '
+    /^ignore:/{flag=1; next}
+    flag && /^[^ ]/{flag=0}
+    flag && /^\s*-\s+([^#]+)/{
+      gsub(/^\s*-\s+/, "");
+      gsub(/\s*#.*$/, "");
+      gsub(/^\s+|\s+$/, "");
+      if ($0 != "") print
+    }
+  ' "$IGNORE_FILE_YAML" | tr '\n' '|' | sed 's/|$//' || true)"
+
+  # Read YAML file and extract packages from include array (if exists)
+  # Improved YAML parsing: extract lines starting with "  - " or "    - " after "include:"
+  # Handles different indentation levels and inline comments
+  INCLUDED_PACKAGES="$(awk '
+    /^include:/{flag=1; next}
+    flag && /^[^ ]/{flag=0}
+    flag && /^\s*-\s+([^#]+)/{
+      gsub(/^\s*-\s+/, "");
+      gsub(/\s*#.*$/, "");
+      gsub(/^\s+|\s+$/, "");
+      if ($0 != "") print
+    }
+  ' "$IGNORE_FILE_YAML" | tr '\n' '|' | sed 's/|$//' || true)"
 elif [ -f "$IGNORE_FILE_TXT" ]; then
   # Fallback to old TXT format for backward compatibility
   IGNORED_PACKAGES="$(grep -v '^\s*#' "$IGNORE_FILE_TXT" | grep -v '^\s*$' | tr '\n' '|' | sed 's/|$//' || true)"
@@ -151,7 +177,7 @@ if [ -z "${OUTDATED_JSON}" ]; then
 fi
 
 # Process JSON with PHP (also with forced timezone)
-OUTPUT="$(OUTDATED_JSON="$OUTDATED_JSON" COMPOSER_BIN="$COMPOSER_BIN" PHP_BIN="$PHP_BIN" IGNORED_PACKAGES="$IGNORED_PACKAGES" SHOW_RELEASE_INFO="$SHOW_RELEASE_INFO" "$PHP_BIN" -d date.timezone=UTC <<'PHP'
+OUTPUT="$(OUTDATED_JSON="$OUTDATED_JSON" COMPOSER_BIN="$COMPOSER_BIN" PHP_BIN="$PHP_BIN" IGNORED_PACKAGES="$IGNORED_PACKAGES" INCLUDED_PACKAGES="$INCLUDED_PACKAGES" SHOW_RELEASE_INFO="$SHOW_RELEASE_INFO" "$PHP_BIN" -d date.timezone=UTC <<'PHP'
 <?php
 $raw = getenv('OUTDATED_JSON') ?: '';
 // In case some noise got in, try to isolate the first valid JSON:
@@ -178,6 +204,13 @@ $ignoredPackagesRaw = getenv('IGNORED_PACKAGES') ?: '';
 $ignoredPackages = [];
 if ($ignoredPackagesRaw) {
     $ignoredPackages = array_flip(explode('|', $ignoredPackagesRaw));
+}
+
+// Load included packages from environment (force include even if ignored)
+$includedPackagesRaw = getenv('INCLUDED_PACKAGES') ?: '';
+$includedPackages = [];
+if ($includedPackagesRaw) {
+    $includedPackages = array_flip(explode('|', $includedPackagesRaw));
 }
 
 // Check if release info should be skipped
@@ -475,8 +508,11 @@ foreach ($report['installed'] as $pkg) {
     $installed = $pkg['version'] ?? null;
     $latest = $pkg['latest'] ?? null;
 
-    // Check if package is ignored
-    if (isset($ignoredPackages[$name])) {
+    // Check if package is included (force include even if ignored)
+    $isIncluded = isset($includedPackages[$name]);
+
+    // Check if package is ignored (unless it's explicitly included)
+    if (isset($ignoredPackages[$name]) && !$isIncluded) {
         if ($latest) {
             $normalized = ltrim($latest, 'v');
             if (isset($devSet[$name])) {

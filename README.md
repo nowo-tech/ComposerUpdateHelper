@@ -11,6 +11,7 @@ Generates `composer require` commands from outdated dependencies. Works with any
 - ✅ Works with any PHP project
 - ✅ Separates production and development dependencies
 - ✅ Shows ignored packages with available versions
+- ✅ **Force include packages**: Override ignore list to force specific packages to be included
 - ✅ **Multi-framework support** with version constraints:
   - **Symfony**: respects `extra.symfony.require`
   - **Laravel**: respects `laravel/framework` + `illuminate/*` versions
@@ -36,7 +37,7 @@ composer require --dev nowo-tech/composer-update-helper
 
 After installation, two files will be copied to your project root:
 - `generate-composer-require.sh` - The main script
-- `generate-composer-require.yaml` - Configuration file for ignored packages (only created if doesn't exist)
+- `generate-composer-require.yaml` - Configuration file for ignored and included packages (only created if doesn't exist)
 
 **Note:** These files should be committed to your repository so they're available to all team members. The plugin will remove any old `.ignore.txt` entries from `.gitignore` if they exist.
 
@@ -117,22 +118,55 @@ You can combine options:
 ./generate-composer-require.sh --run --no-release-info   # Execute without release info
 ```
 
-## Ignoring Packages
+## Package Configuration
 
-Edit `generate-composer-require.yaml` to exclude packages from updates:
+Edit `generate-composer-require.yaml` to configure which packages to ignore or force include during updates:
 
 ```yaml
 # Composer Update Helper Configuration
-# Configuration file for ignored packages during composer update suggestions
+# Configuration file for ignored and included packages during composer update suggestions
 
 # List of packages to ignore during update
+# Ignored packages will still be displayed in the output with their available versions,
+# but won't be included in the composer require commands.
 ignore:
   - doctrine/orm
   - symfony/security-bundle
   - laravel/framework
+  # - package/name  # You can add inline comments
+
+# List of packages to force include during update
+# Included packages will be added to the composer require commands even if they are
+# in the ignore list or if they are not direct dependencies.
+# The include section has priority over the ignore section.
+include:
+  - some/package
+  - another/package
 ```
 
-Ignored packages will still be displayed in the output with their available versions, but won't be included in the `composer require` commands.
+### Ignoring Packages
+
+Packages listed in the `ignore` section will:
+- Still be displayed in the output with their available versions
+- **Not** be included in the `composer require` commands
+- Appear in the "Ignored" section of the output
+
+### Forcing Package Inclusion
+
+Packages listed in the `include` section will:
+- **Always** be included in the `composer require` commands
+- Override the `ignore` list (if a package is in both, it will be included)
+- Be processed even if they are not direct dependencies
+
+**Example use case**: You might want to ignore most Symfony packages but force include a specific one:
+
+```yaml
+ignore:
+  - symfony/*  # Ignore all Symfony packages
+
+include:
+  - symfony/security-bundle  # But force include this one
+```
 
 ### Backward Compatibility
 

@@ -200,13 +200,13 @@ class Plugin implements PluginInterface, EventSubscriberInterface
             if ($shouldMigrate) {
                 $io->write('<info>Migrating configuration from TXT to YAML format</info>');
                 $this->migrateTxtToYaml($oldIgnoreTxt, $newIgnoreYaml, $io);
-                
+
                 // Verify migration was successful before deleting TXT
                 if (file_exists($newIgnoreYaml)) {
                     // Read both files to verify migration
                     $txtContent = file_get_contents($oldIgnoreTxt);
                     $yamlContent = file_get_contents($newIgnoreYaml);
-                    
+
                     // Extract packages from TXT
                     $txtLines = explode("\n", $txtContent);
                     $txtPackages = [];
@@ -216,32 +216,64 @@ class Plugin implements PluginInterface, EventSubscriberInterface
                             $txtPackages[] = $line;
                         }
                     }
-                    
-                    // Extract packages from YAML
+
+                    // Extract packages from YAML (both ignore and include sections)
                     $yamlPackages = [];
-                    if (preg_match('/^ignore:\s*$/m', $yamlContent)) {
-                        $yamlLines = explode("\n", $yamlContent);
-                        $inIgnore = false;
-                        foreach ($yamlLines as $line) {
-                            if (preg_match('/^ignore:\s*$/', trim($line))) {
-                                $inIgnore = true;
-                                continue;
+                    $yamlLines = explode("\n", $yamlContent);
+                    $inIgnore = false;
+                    $inInclude = false;
+                    foreach ($yamlLines as $line) {
+                        $trimmedLine = trim($line);
+                        $originalLine = $line;
+
+                        // Skip empty lines and pure comment lines
+                        if (empty($trimmedLine) || strpos($trimmedLine, '#') === 0) {
+                            continue;
+                        }
+
+                        // Check for section headers (must be at start of line or with minimal indentation)
+                        if (preg_match('/^ignore:\s*$/', $trimmedLine)) {
+                            $inIgnore = true;
+                            $inInclude = false;
+                            continue;
+                        }
+                        if (preg_match('/^include:\s*$/', $trimmedLine)) {
+                            $inInclude = true;
+                            $inIgnore = false;
+                            continue;
+                        }
+
+                        // Extract packages from ignore section
+                        if ($inIgnore && preg_match('/^\s*-\s+([^#]+)/', $originalLine, $matches)) {
+                            $package = trim($matches[1]);
+                            if (!empty($package)) {
+                                $yamlPackages[] = $package;
                             }
-                            if ($inIgnore && preg_match('/^\s*-\s+([^#]+)/', $line, $matches)) {
-                                $yamlPackages[] = trim($matches[1]);
+                            continue;
+                        }
+
+                        // Extract packages from include section
+                        if ($inInclude && preg_match('/^\s*-\s+([^#]+)/', $originalLine, $matches)) {
+                            $package = trim($matches[1]);
+                            if (!empty($package)) {
+                                $yamlPackages[] = $package;
                             }
-                            if ($inIgnore && preg_match('/^\s*[^#\s-]/', $line)) {
-                                break; // End of ignore section
-                            }
+                            continue;
+                        }
+
+                        // End of section: new top-level key (starts at beginning or with minimal spaces, not a list item)
+                        if (($inIgnore || $inInclude) && preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*:\s*$/', $trimmedLine)) {
+                            $inIgnore = false;
+                            $inInclude = false;
                         }
                     }
-                    
+
                     // Verify packages match (order doesn't matter)
                     $txtPackagesSorted = array_unique(array_filter($txtPackages));
                     $yamlPackagesSorted = array_unique(array_filter($yamlPackages));
                     sort($txtPackagesSorted);
                     sort($yamlPackagesSorted);
-                    
+
                     if ($txtPackagesSorted === $yamlPackagesSorted) {
                         // Migration verified, safe to delete TXT
                         unlink($oldIgnoreTxt);
@@ -283,20 +315,46 @@ class Plugin implements PluginInterface, EventSubscriberInterface
         }
 
         // Check if YAML has any actual packages (not just comments)
-        // Look for lines with "  - " that are not commented out
+        // Look for lines with "  - " that are not commented out in both ignore and include sections
         $lines = explode("\n", $yamlContent);
         $hasPackages = false;
+        $inIgnore = false;
+        $inInclude = false;
 
         foreach ($lines as $line) {
-            $line = trim($line);
-            // Skip empty lines and comments
-            if (empty($line) || strpos($line, '#') === 0) {
+            $trimmedLine = trim($line);
+            $originalLine = $line;
+
+            // Skip empty lines and pure comment lines
+            if (empty($trimmedLine) || strpos($trimmedLine, '#') === 0) {
                 continue;
             }
+
+            // Check for section headers
+            if (preg_match('/^ignore:\s*$/', $trimmedLine)) {
+                $inIgnore = true;
+                $inInclude = false;
+                continue;
+            }
+            if (preg_match('/^include:\s*$/', $trimmedLine)) {
+                $inInclude = true;
+                $inIgnore = false;
+                continue;
+            }
+
             // If we find a line starting with "- " (package entry), it has content
-            if (preg_match('/^\s*-\s+[^#]+$/', $line)) {
-                $hasPackages = true;
-                break;
+            if (($inIgnore || $inInclude) && preg_match('/^\s*-\s+([^#]+)/', $originalLine, $matches)) {
+                $package = trim($matches[1]);
+                if (!empty($package)) {
+                    $hasPackages = true;
+                    break;
+                }
+            }
+
+            // End of section: new top-level key
+            if (($inIgnore || $inInclude) && preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*:\s*$/', $trimmedLine)) {
+                $inIgnore = false;
+                $inInclude = false;
             }
         }
 

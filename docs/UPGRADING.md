@@ -18,6 +18,32 @@ This guide will help you upgrade Composer Update Helper to newer versions.
 
 ## Version-Specific Upgrade Notes
 
+### Upgrading to 2.0.5+
+
+#### New Feature
+- **Package inclusion**: New `include` section in `generate-composer-require.yaml`
+  - You can now force include packages even if they are in the `ignore` list
+  - The `include` section has priority over the `ignore` section
+  - Useful for fine-grained control over which packages to update
+
+**Example configuration:**
+```yaml
+ignore:
+  - symfony/*  # Ignore all Symfony packages
+
+include:
+  - symfony/security-bundle  # But force include this one
+```
+
+#### Improved
+- **YAML parsing**: Enhanced reading of YAML configuration files
+  - Better handling of inline comments (e.g., `- package/name  # comment`)
+  - Support for different indentation levels
+  - More robust section detection
+  - Improved handling of empty lines and comment-only lines
+
+**No action required**: Existing configurations will continue to work. The new `include` section is optional.
+
 ### Upgrading to 2.0.4+
 
 #### Changed
