@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.1] - 2025-12-26
+
+### Fixed
+- **Migration now deletes old TXT file**: When migrating from `generate-composer-require.ignore.txt` to `generate-composer-require.yaml`, the old TXT file is now automatically deleted after successful migration
+  - Previous behavior: TXT file remained after migration
+  - New behavior: TXT file is deleted after migration to YAML
+  - Ensures clean migration without leftover files
+
+### Changed
+- Improved migration process to automatically clean up old configuration files
+- Updated tests to verify TXT file deletion after migration
+
 ## [2.0.0] - 2025-12-26
 
 ### Changed
@@ -26,7 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Migration Notes
 - No manual action required: The migration happens automatically when you update the package
 - Your existing ignore list will be preserved during migration
-- The old `.ignore.txt` file will remain (not deleted) but the script will use the new `.yaml` file
+- The old `.ignore.txt` file will be automatically deleted after successful migration to `.yaml` format
 
 ## [1.3.4] - 2025-12-14
 
