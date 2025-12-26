@@ -22,8 +22,8 @@ This guide will help you upgrade Composer Update Helper to newer versions.
 
 #### Fixed
 - **Script auto-update**: The `generate-composer-require.sh` script is now automatically updated when you run `composer update`
-  - Previously, the script was only installed on first installation
-  - Now, the script is compared using MD5 hash and updated if content differs
+  - Previously, the script was only installed on first installation (`composer install`)
+  - Now, the script is compared using MD5 hash and updated if content differs on both `composer install` and `composer update`
   - This ensures you always have the latest version of the script
 
 #### Migration Notes

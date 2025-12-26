@@ -148,7 +148,12 @@ final class PluginTest extends TestCase
     {
         $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
         $vendorDir = $tempDir . '/vendor';
-        mkdir($vendorDir, 0777, true);
+        $packageDir = $vendorDir . '/nowo-tech/composer-update-helper';
+        $binDir = $packageDir . '/bin';
+        mkdir($binDir, 0777, true);
+
+        // Create source script in vendor
+        file_put_contents($binDir . '/generate-composer-require.sh', '#!/bin/sh\necho "updated"');
 
         // Create .gitignore file with old entries that should be removed
         $gitignorePath = $tempDir . '/.gitignore';
@@ -168,7 +173,9 @@ final class PluginTest extends TestCase
             ->method('write')
             ->with($this->logicalOr(
                 $this->stringContains('Updated .gitignore'),
-                $this->stringContains('Creating generate-composer-require.yaml')
+                $this->stringContains('Creating generate-composer-require.yaml'),
+                $this->stringContains('Installing'),
+                $this->stringContains('Updating')
             ));
 
         $event = $this->createMock(Event::class);
@@ -178,6 +185,9 @@ final class PluginTest extends TestCase
         $plugin = new Plugin();
         $plugin->activate($composer, $io);
         $plugin->onPostUpdate($event);
+
+        // Verify script was installed/updated
+        $this->assertFileExists($tempDir . '/generate-composer-require.sh');
 
         // Verify .gitignore was updated (should remove old entries, not add new ones)
         $gitignoreContent = file_get_contents($gitignorePath);
@@ -189,6 +199,11 @@ final class PluginTest extends TestCase
 
         // Cleanup
         @unlink($gitignorePath);
+        @unlink($tempDir . '/generate-composer-require.sh');
+        @unlink($tempDir . '/generate-composer-require.yaml');
+        @unlink($binDir . '/generate-composer-require.sh');
+        @rmdir($binDir);
+        @rmdir($packageDir);
         @rmdir($vendorDir);
         @rmdir($tempDir);
     }

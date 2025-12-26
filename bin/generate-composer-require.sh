@@ -253,137 +253,24 @@ OUTPUT="$(printf "%s\n" "$OUTPUT" | grep -v '^Warning:' || true)"
 
 if [ "$DEBUG" = "true" ]; then
   echo "🔍 DEBUG: PHP script output length: ${#OUTPUT} characters" >&2
-  echo "🔍 DEBUG: Parsing structured output..." >&2
 elif [ "$VERBOSE" != "true" ]; then
   echo "✅" >&2
 fi
 
-# Show completion message if release info was fetched
-if [ "$SHOW_RELEASE_INFO" = "true" ] && [ "$DEBUG" != "true" ]; then
-  if printf "%s\n" "$OUTPUT" | grep -q "^---RELEASES---"; then
-    releaseCount=$(printf "%s\n" "$OUTPUT" | sed -n '/^---RELEASES---$/,/^$/p' | grep -v '^---' | grep -v '^$' | wc -l)
-    if [ "$releaseCount" -gt 0 ] 2>/dev/null; then
-      echo "✅ Release information fetched for $releaseCount package(s)" >&2
-    fi
-  fi
+# Extract commands for --run flag (between COMMANDS_START and COMMANDS_END markers)
+COMMANDS=""
+if printf "%s\n" "$OUTPUT" | grep -q "^---COMMANDS_START---"; then
+  COMMANDS="$(printf "%s\n" "$OUTPUT" | sed -n '/^---COMMANDS_START---$/,/^---COMMANDS_END---$/p' | grep -v '^---' || true)"
 fi
 
-# Parse the structured output
-FRAMEWORKS="$(printf "%s\n" "$OUTPUT" | sed -n '/^---FRAMEWORKS---$/,/^---COMMANDS---$/p' | grep -v '^---' || true)"
-COMMANDS="$(printf "%s\n" "$OUTPUT" | sed -n '/^---COMMANDS---$/,/^---IGNORED_PROD---$/p' | grep -v '^---' || true)"
-IGNORED_PROD="$(printf "%s\n" "$OUTPUT" | sed -n '/^---IGNORED_PROD---$/,/^---IGNORED_DEV---$/p' | grep -v '^---' || true)"
-IGNORED_DEV="$(printf "%s\n" "$OUTPUT" | sed -n '/^---IGNORED_DEV---$/,/^---RELEASES---$/p' | grep -v '^---' || true)"
-RELEASES="$(printf "%s\n" "$OUTPUT" | sed -n '/^---RELEASES---$/,$p' | grep -v '^---' || true)"
+# Remove command markers from output before displaying
+OUTPUT="$(printf "%s\n" "$OUTPUT" | grep -v '^---COMMANDS_START---$' | grep -v '^---COMMANDS_END---$' || true)"
 
-# Check if there's anything to show
-if [ -z "$COMMANDS" ] && [ -z "$IGNORED_PROD" ] && [ -z "$IGNORED_DEV" ]; then
-  if [ "$VERBOSE" = "true" ] || [ "$DEBUG" = "true" ]; then
-    echo "ℹ️  No outdated direct dependencies found." >&2
-  fi
-  echo "$E_OK  No outdated direct dependencies."
-  exit 0
-fi
+# Display the formatted output from PHP
+printf "%s\n" "$OUTPUT"
 
-if [ "$DEBUG" = "true" ]; then
-  echo "🔍 DEBUG: Parsed output:" >&2
-  echo "   - FRAMEWORKS: ${FRAMEWORKS:-none}" >&2
-  echo "   - COMMANDS: ${COMMANDS:-none}" >&2
-  echo "   - IGNORED_PROD: ${IGNORED_PROD:-none}" >&2
-  echo "   - IGNORED_DEV: ${IGNORED_DEV:-none}" >&2
-  echo "   - RELEASES: ${RELEASES:-none}" >&2
-fi
-
-# Show detected frameworks
-if [ -n "$FRAMEWORKS" ]; then
-  echo "$E_WRENCH  Detected framework constraints:"
-  printf "%s\n" "$FRAMEWORKS" | tr ' ' '\n' | while read -r fw; do
-    [ -n "$fw" ] && echo "  - $fw"
-  done
-  echo ""
-fi
-
-# Show ignored packages if any (prod)
-if [ -n "$IGNORED_PROD" ]; then
-  echo "$E_SKIP   Ignored packages (prod):"
-  printf "%s\n" "$IGNORED_PROD" | tr ' ' '\n' | while read -r pkg; do
-    [ -n "$pkg" ] && echo "  - $pkg"
-  done
-  echo ""
-fi
-
-# Show ignored packages if any (dev)
-if [ -n "$IGNORED_DEV" ]; then
-  echo "$E_SKIP   Ignored packages (dev):"
-  printf "%s\n" "$IGNORED_DEV" | tr ' ' '\n' | while read -r pkg; do
-    [ -n "$pkg" ] && echo "  - $pkg"
-  done
-  echo ""
-fi
-
-if [ -z "$COMMANDS" ]; then
-  echo "$E_OK  No packages to update (all outdated packages are ignored)."
-  exit 0
-fi
-
-echo "$E_WRENCH  Suggested commands:"
-printf "%s\n" "$COMMANDS" | sed 's/^/  /'
-
-# Show release information if available
-if [ -n "$RELEASES" ] && [ "$SHOW_RELEASE_INFO" = "true" ]; then
-  echo ""
-  echo "$E_CLIPBOARD  Release information:"
-  printf "%s\n" "$RELEASES" | while IFS= read -r line; do
-    [ -z "$line" ] && continue
-    # Parse the line: pkgName|url|nameB64|bodyB64|publishedAt
-    pkgName=$(printf "%s" "$line" | cut -d'|' -f1)
-    releaseUrl=$(printf "%s" "$line" | cut -d'|' -f2)
-    releaseNameB64=$(printf "%s" "$line" | cut -d'|' -f3)
-    releaseBodyB64=$(printf "%s" "$line" | cut -d'|' -f4)
-
-    [ -z "$pkgName" ] && continue
-
-    releaseName=""
-    if [ -n "$releaseNameB64" ]; then
-      releaseName=$(printf "%s" "$releaseNameB64" | base64 -d 2>/dev/null || echo "")
-    fi
-
-    releaseBody=""
-    if [ -n "$releaseBodyB64" ]; then
-      releaseBody=$(printf "%s" "$releaseBodyB64" | base64 -d 2>/dev/null || echo "")
-    fi
-
-    # Extract changelog link (GitHub releases page)
-    changelogUrl=""
-    if [ -n "$releaseUrl" ]; then
-      # Convert release tag URL to releases page URL
-      changelogUrl=$(printf "%s" "$releaseUrl" | sed 's|/releases/tag/|/releases|')
-    fi
-
-    echo "  $E_PACKAGE  $pkgName"
-    if [ -n "$releaseUrl" ]; then
-      echo "     $E_LINK  Release: $releaseUrl"
-    fi
-    if [ -n "$changelogUrl" ] && [ "$changelogUrl" != "$releaseUrl" ]; then
-      echo "     $E_MEMO  Changelog: $changelogUrl"
-    fi
-
-    # Show detailed information if --release-detail flag is set
-    if [ "$SHOW_RELEASE_DETAIL" = "true" ]; then
-      if [ -n "$releaseName" ] && [ "$releaseName" != "$pkgName" ] && [ "$releaseName" != "" ]; then
-        echo "     $E_CLIPBOARD  $releaseName"
-      fi
-      if [ -n "$releaseBody" ]; then
-        echo "     ──────────────────────────────────────"
-        printf "%s" "$releaseBody" | sed 's/^/     /'
-        echo ""
-        echo "     ──────────────────────────────────────"
-      fi
-    fi
-    echo ""
-  done
-fi
-
-if [ "$RUN_FLAG" = "--run" ]; then
+# Execute commands if --run flag is present
+if [ "$RUN_FLAG" = "--run" ] && [ -n "$COMMANDS" ]; then
   echo ""
   echo "$E_ROCKET  Running..."
   printf "%s\n" "$COMMANDS" | while IFS= read -r cmd; do

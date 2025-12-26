@@ -145,8 +145,21 @@ $ignoredPackages = array_flip($ignoredPackages);
 $includedPackages = array_flip($includedPackages);
 
 // Check if release info should be skipped
-$showReleaseInfo = getenv('SHOW_RELEASE_INFO') !== 'false';
+$showReleaseInfo = getenv('SHOW_RELEASE_INFO') === 'true';
+$showReleaseDetail = getenv('SHOW_RELEASE_DETAIL') === 'true';
 $debug = getenv('DEBUG') === 'true';
+$verbose = getenv('VERBOSE') === 'true';
+
+// Emoji constants for output formatting
+if (!defined('E_OK')) {
+    define('E_OK', '✅');
+    define('E_WRENCH', '🔧');
+    define('E_CLIPBOARD', '📋');
+    define('E_PACKAGE', '📦');
+    define('E_LINK', '🔗');
+    define('E_MEMO', '📝');
+    define('E_SKIP', '⏭️');
+}
 
 if ($debug) {
     error_log("DEBUG: showReleaseInfo = " . ($showReleaseInfo ? 'true' : 'false'));
@@ -574,48 +587,123 @@ foreach ($report['installed'] as $pkg) {
 }
 
 // ============================================================================
-// OUTPUT
+// OUTPUT FORMATTING
 // ============================================================================
+
+// Check if there's anything to show
+if (empty($prod) && empty($dev) && empty($ignoredProd) && empty($ignoredDev)) {
+    if ($verbose || $debug) {
+        error_log("ℹ️  No outdated direct dependencies found.");
+    }
+    echo E_OK . "  No outdated direct dependencies." . PHP_EOL;
+    exit(0);
+}
 
 $output = [];
 
-// Detected frameworks section
+// Show detected frameworks
 $detectedFrameworks = [];
 foreach ($frameworkConstraints as $prefix => $version) {
     $detectedFrameworks[] = rtrim($prefix, '/') . ' ' . $version . '.*';
 }
-$output[] = "---FRAMEWORKS---";
-$output[] = implode(' ', $detectedFrameworks);
+if (!empty($detectedFrameworks)) {
+    $output[] = E_WRENCH . "  Detected framework constraints:";
+    foreach ($detectedFrameworks as $fw) {
+        $output[] = "  - " . $fw;
+    }
+    $output[] = "";
+}
 
-// Commands section
-$commands = [];
-if ($prod) $commands[] = "composer require --with-all-dependencies " . implode(' ', $prod);
-if ($dev)  $commands[] = "composer require --dev --with-all-dependencies " . implode(' ', $dev);
-$output[] = "---COMMANDS---";
-$output[] = implode(PHP_EOL, $commands);
+// Show ignored packages (prod)
+if (!empty($ignoredProd)) {
+    $output[] = E_SKIP . "   Ignored packages (prod):";
+    foreach ($ignoredProd as $pkg) {
+        $output[] = "  - " . $pkg;
+    }
+    $output[] = "";
+}
+
+// Show ignored packages (dev)
+if (!empty($ignoredDev)) {
+    $output[] = E_SKIP . "   Ignored packages (dev):";
+    foreach ($ignoredDev as $pkg) {
+        $output[] = "  - " . $pkg;
+    }
+    $output[] = "";
+}
+
+// Commands section (with special markers for extraction)
+$commandsList = [];
+if (!empty($prod)) {
+    $commandsList[] = "composer require --with-all-dependencies " . implode(' ', $prod);
+}
+if (!empty($dev)) {
+    $commandsList[] = "composer require --dev --with-all-dependencies " . implode(' ', $dev);
+}
+
+if (empty($commandsList)) {
+    $output[] = E_OK . "  No packages to update (all outdated packages are ignored).";
+} else {
+    $output[] = E_WRENCH . "  Suggested commands:";
+    foreach ($commandsList as $cmd) {
+        $output[] = "  " . $cmd;
+    }
+
+    // Add special markers for command extraction (for --run flag)
+    $output[] = "---COMMANDS_START---";
+    foreach ($commandsList as $cmd) {
+        $output[] = $cmd;
+    }
+    $output[] = "---COMMANDS_END---";
+}
+
+// Release information section
+if ($showReleaseInfo && !empty($releaseInfo)) {
+    $output[] = "";
+    $output[] = E_CLIPBOARD . "  Release information:";
+
+    foreach ($releaseInfo as $pkgName => $info) {
+        $output[] = "  " . E_PACKAGE . "  " . $pkgName;
+
+        if (!empty($info['url'])) {
+            $output[] = "     " . E_LINK . "  Release: " . $info['url'];
+        }
+
+        // Extract changelog link (GitHub releases page)
+        $changelogUrl = "";
+        if (!empty($info['url'])) {
+            $changelogUrl = str_replace('/releases/tag/', '/releases', $info['url']);
+            if ($changelogUrl !== $info['url']) {
+                $output[] = "     " . E_MEMO . "  Changelog: " . $changelogUrl;
+            }
+        }
+
+        // Show detailed information if --release-detail flag is set
+        if ($showReleaseDetail) {
+            if (!empty($info['name']) && $info['name'] !== $pkgName) {
+                $output[] = "     " . E_CLIPBOARD . "  " . $info['name'];
+            }
+            if (!empty($info['body'])) {
+                $output[] = "     ──────────────────────────────────────";
+                $bodyLines = explode("\n", $info['body']);
+                foreach ($bodyLines as $line) {
+                    $output[] = "     " . $line;
+                }
+                $output[] = "";
+                $output[] = "     ──────────────────────────────────────";
+            }
+        }
+        $output[] = "";
+    }
+}
 
 if ($debug) {
-    error_log("DEBUG: Generated commands:");
+    error_log("DEBUG: Generated output:");
     error_log("DEBUG:   - Prod packages: " . count($prod) . " (" . implode(', ', $prod) . ")");
     error_log("DEBUG:   - Dev packages: " . count($dev) . " (" . implode(', ', $dev) . ")");
     error_log("DEBUG:   - Ignored prod: " . count($ignoredProd) . " (" . implode(', ', $ignoredProd) . ")");
     error_log("DEBUG:   - Ignored dev: " . count($ignoredDev) . " (" . implode(', ', $ignoredDev) . ")");
-}
-
-// Ignored packages section
-$output[] = "---IGNORED_PROD---";
-$output[] = implode(' ', $ignoredProd);
-$output[] = "---IGNORED_DEV---";
-$output[] = implode(' ', $ignoredDev);
-
-// Release information section
-$output[] = "---RELEASES---";
-$releaseData = [];
-foreach ($releaseInfo as $pkgName => $info) {
-    $releaseData[] = $pkgName . '|' . $info['url'] . '|' . base64_encode($info['name']) . '|' . base64_encode($info['body']) . '|' . ($info['published_at'] ?? '');
-}
-if (!empty($releaseData)) {
-    $output[] = implode(PHP_EOL, $releaseData);
+    error_log("DEBUG:   - Commands: " . count($commandsList));
 }
 
 echo implode(PHP_EOL, $output);

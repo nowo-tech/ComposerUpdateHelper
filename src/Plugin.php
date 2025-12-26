@@ -105,6 +105,8 @@ class Plugin implements PluginInterface, EventSubscriberInterface
      */
     public function onPostUpdate(Event $event): void
     {
+        // Update script files if content differs (auto-update on package update)
+        $this->installFiles($event->getIO(), false);
         // Check for migration and update .gitignore on updates
         // Also check if YAML config needs to be created
         $this->handleConfigMigration($event->getIO());
@@ -381,7 +383,7 @@ class Plugin implements PluginInterface, EventSubscriberInterface
         if (file_exists($yamlPath)) {
             $yamlContent = file_get_contents($yamlPath);
             $existingIgnorePackages = $this->extractPackagesFromYamlIgnoreSection($yamlContent);
-            
+
             // Merge packages (avoid duplicates)
             $allPackages = array_unique(array_merge($existingIgnorePackages, $packages));
             sort($allPackages);
