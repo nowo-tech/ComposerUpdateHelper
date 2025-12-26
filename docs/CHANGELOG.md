@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [2.0.11] - 2025-12-26
+## [2.0.10] - 2025-12-26
 
 ### Changed
 - **Refactored output formatting**: Moved all output formatting logic from shell script to PHP processor
@@ -23,7 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Cleaner architecture**: Clear separation between display (shell) and formatting (PHP)
 - **Same functionality**: All features work exactly the same, just better organized
 
-## [2.0.10] - 2025-12-26
+## [2.0.9] - 2025-12-26
 
 ### Fixed
 - **Script auto-update on package update**: Fixed issue where `generate-composer-require.sh` was not automatically updated when the package was updated

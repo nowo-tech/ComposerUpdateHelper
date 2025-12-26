@@ -18,7 +18,7 @@ This guide will help you upgrade Composer Update Helper to newer versions.
 
 ## Version-Specific Upgrade Notes
 
-### Upgrading to 2.0.11+
+### Upgrading to 2.0.10+
 
 #### Changed
 - **Output formatting refactored**: All output formatting is now done in PHP processor
@@ -34,7 +34,7 @@ This guide will help you upgrade Composer Update Helper to newer versions.
 #### Breaking Changes
 - None
 
-### Upgrading to 2.0.10+
+### Upgrading to 2.0.9+
 
 #### Fixed
 - **Script auto-update**: The `generate-composer-require.sh` script is now automatically updated when you run `composer update`
