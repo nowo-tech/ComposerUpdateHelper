@@ -365,12 +365,11 @@ class Installer
             return true;
         }
 
-        // Check if YAML has any actual packages (not just comments)
-        // Look for lines with "  - " that are not commented out in both ignore and include sections
+        // Check if YAML has any actual packages in the ignore section (not just comments)
+        // Only check ignore section - include section doesn't prevent migration
         $lines = explode("\n", $yamlContent);
-        $hasPackages = false;
+        $hasIgnorePackages = false;
         $inIgnore = false;
-        $inInclude = false;
 
         foreach ($lines as $line) {
             $trimmedLine = trim($line);
@@ -384,33 +383,30 @@ class Installer
             // Check for section headers
             if (preg_match('/^ignore:\s*$/', $trimmedLine)) {
                 $inIgnore = true;
-                $inInclude = false;
                 continue;
             }
             if (preg_match('/^include:\s*$/', $trimmedLine)) {
-                $inInclude = true;
                 $inIgnore = false;
                 continue;
             }
 
-            // If we find a line starting with "- " (package entry), it has content
-            if (($inIgnore || $inInclude) && preg_match('/^\s*-\s+([^#]+)/', $originalLine, $matches)) {
+            // If we find a line starting with "- " (package entry) in ignore section, it has content
+            if ($inIgnore && preg_match('/^\s*-\s+([^#]+)/', $originalLine, $matches)) {
                 $package = trim($matches[1]);
                 if (!empty($package)) {
-                    $hasPackages = true;
+                    $hasIgnorePackages = true;
                     break;
                 }
             }
 
             // End of section: new top-level key
-            if (($inIgnore || $inInclude) && preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*:\s*$/', $trimmedLine)) {
+            if ($inIgnore && preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*:\s*$/', $trimmedLine)) {
                 $inIgnore = false;
-                $inInclude = false;
             }
         }
 
-        // If no packages found, it's safe to migrate (it's just template/comments)
-        return !$hasPackages;
+        // If no packages found in ignore section, it's safe to migrate (it's just template/comments)
+        return !$hasIgnorePackages;
     }
 
     /**

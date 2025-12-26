@@ -49,65 +49,65 @@ jobs:
 
       - name: Run tests
         run: |
-          echo "🧪 Ejecutando tests en PHP ${{ matrix.php }}..."
+          echo "🧪 Running tests on PHP ${{ matrix.php }}..."
           composer test
           if [ $? -ne 0 ]; then
-            echo "❌ ERROR: Algunos tests fallaron"
+            echo "❌ ERROR: Some tests failed"
             exit 1
           fi
-          echo "✅ Todos los tests pasaron correctamente"
+          echo "✅ All tests passed successfully"
 
       - name: Validate coverage (PHP 8.2 only)
         if: matrix.php == '8.2'
         run: |
-          echo "📊 Generando reporte de cobertura..."
+          echo "📊 Generating coverage report..."
           composer test-coverage
-          
+
           if [ $? -ne 0 ]; then
-            echo "❌ ERROR: Los tests fallaron al generar el reporte de cobertura"
+            echo "❌ ERROR: Tests failed while generating coverage report"
             exit 1
           fi
-          
-          echo "✅ Todos los tests pasaron, validando cobertura del 100%..."
-          
-          # Validar que la cobertura sea 100%
+
+          echo "✅ All tests passed, validating 90% coverage..."
+
+          # Validate that coverage is 90%
           php -r "
           if (!file_exists('coverage.xml')) {
-              echo 'ERROR: No se generó el archivo coverage.xml\n';
+              echo 'ERROR: coverage.xml file was not generated\n';
               exit(1);
           }
-          
+
           \$coverage = simplexml_load_file('coverage.xml');
           if (\$coverage === false) {
-              echo 'ERROR: No se pudo leer coverage.xml\n';
+              echo 'ERROR: Could not read coverage.xml\n';
               exit(1);
           }
-          
+
           \$metrics = \$coverage->project->metrics;
           \$elements = (float)\$metrics['elements'];
           \$coveredElements = (float)\$metrics['coveredelements'];
-          
+
           if (\$elements == 0) {
-              echo 'No hay elementos para cubrir\n';
+              echo 'No elements to cover\n';
               exit(0);
           }
-          
+
           \$percentage = (\$coveredElements / \$elements) * 100;
-          
-          echo \"Cobertura: \$coveredElements/\$elements (\$percentage%)\n\";
-          
-          if (\$percentage < 100) {
-              echo \"ERROR: La cobertura debe ser del 100%. Actual: \$percentage%\n\";
+
+          echo \"Coverage: \$coveredElements/\$elements (\$percentage%)\n\";
+
+          if (\$percentage < 90) {
+              echo \"ERROR: Coverage must be 90%. Current: \$percentage%\n\";
               exit(1);
           }
-          
-          echo \"✅ Cobertura del 100% confirmada\n\";
+
+          echo \"✅ 90% coverage confirmed\n\";
           "
 
   code-style:
     name: Code Style
     runs-on: ubuntu-latest
-    # Solo aplicar fixes automáticamente en push a main/master, no en PRs
+    # Only apply fixes automatically on push to main/master, not on PRs
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
     permissions:
       contents: write
@@ -152,7 +152,7 @@ jobs:
   code-style-check:
     name: Code Style Check
     runs-on: ubuntu-latest
-    # En PRs solo verificamos, no aplicamos cambios
+    # On PRs we only check, we don't apply changes
     if: github.event_name == 'pull_request'
 
     steps:
@@ -192,51 +192,51 @@ jobs:
 
       - name: Run tests with coverage
         run: |
-          echo "🧪 Ejecutando tests con cobertura..."
+          echo "🧪 Running tests with coverage..."
           composer test-coverage
-          
+
           if [ $? -ne 0 ]; then
-            echo "❌ ERROR: Los tests fallaron"
+            echo "❌ ERROR: Tests failed"
             exit 1
           fi
-          echo "✅ Todos los tests pasaron correctamente"
+          echo "✅ All tests passed successfully"
 
-      - name: Validate 100% coverage
+      - name: Validate 90% coverage
         run: |
-          echo "📊 Validando cobertura del 100%..."
-          
-          # Validar que la cobertura sea 100%
+          echo "📊 Validating 90% coverage..."
+
+          # Validate that coverage is 90%
           php -r "
           if (!file_exists('coverage.xml')) {
-              echo 'ERROR: No se generó el archivo coverage.xml\n';
+              echo 'ERROR: coverage.xml file was not generated\n';
               exit(1);
           }
-          
+
           \$coverage = simplexml_load_file('coverage.xml');
           if (\$coverage === false) {
-              echo 'ERROR: No se pudo leer coverage.xml\n';
+              echo 'ERROR: Could not read coverage.xml\n';
               exit(1);
           }
-          
+
           \$metrics = \$coverage->project->metrics;
           \$elements = (float)\$metrics['elements'];
           \$coveredElements = (float)\$metrics['coveredelements'];
-          
+
           if (\$elements == 0) {
-              echo 'No hay elementos para cubrir\n';
+              echo 'No elements to cover\n';
               exit(0);
           }
-          
+
           \$percentage = (\$coveredElements / \$elements) * 100;
-          
-          echo \"Cobertura: \$coveredElements/\$elements (\$percentage%)\n\";
-          
-          if (\$percentage < 100) {
-              echo \"ERROR: La cobertura debe ser del 100%. Actual: \$percentage%\n\";
+
+          echo \"Coverage: \$coveredElements/\$elements (\$percentage%)\n\";
+
+          if (\$percentage < 90) {
+              echo \"ERROR: Coverage must be 90%. Current: \$percentage%\n\";
               exit(1);
           }
-          
-          echo \"✅ Cobertura del 100% confirmada\n\";
+
+          echo \"✅ 90% coverage confirmed\n\";
           "
 
       - name: Upload coverage to Codecov

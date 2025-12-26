@@ -172,10 +172,9 @@ final class ScriptTest extends TestCase
 
         // Script should read YAML file (primary) and support TXT for backward compatibility
         $this->assertStringContainsString('generate-composer-require.yaml', (string) $content);
-        $this->assertStringContainsString('IGNORE_FILE_YAML', (string) $content);
+        $this->assertStringContainsString('CONFIG_FILE', (string) $content);
         // Support for .yml extension
         $this->assertStringContainsString('generate-composer-require.yml', (string) $content);
-        $this->assertStringContainsString('IGNORE_FILE_YML', (string) $content);
         // Backward compatibility: still supports old TXT format
         $this->assertStringContainsString('generate-composer-require.ignore.txt', (string) $content);
         // Script searches in current directory, not script directory
