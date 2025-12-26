@@ -182,25 +182,81 @@ class Plugin implements PluginInterface, EventSubscriberInterface
 
         $oldIgnoreTxt = $projectDir . '/generate-composer-require.ignore.txt';
         $newIgnoreYaml = $projectDir . '/generate-composer-require.yaml';
+        $yamlSource = $packageDir . '/bin/generate-composer-require.yaml';
 
-        // Migrate old TXT file to YAML if it exists and YAML doesn't exist
-        if (file_exists($oldIgnoreTxt) && !file_exists($newIgnoreYaml)) {
-            $io->write('<info>Migrating configuration from TXT to YAML format</info>');
-            $this->migrateTxtToYaml($oldIgnoreTxt, $newIgnoreYaml, $io);
-            // Delete the old TXT file after successful migration
-            if (file_exists($newIgnoreYaml)) {
-                unlink($oldIgnoreTxt);
-                $io->write('<info>Removed old generate-composer-require.ignore.txt file</info>');
+        // Migrate old TXT file to YAML if it exists
+        // Migrate if: TXT exists AND (YAML doesn't exist OR YAML is empty/template only)
+        if (file_exists($oldIgnoreTxt)) {
+            $shouldMigrate = false;
+
+            if (!file_exists($newIgnoreYaml)) {
+                // YAML doesn't exist, migrate
+                $shouldMigrate = true;
+            } elseif ($this->isYamlEmptyOrTemplate($newIgnoreYaml, $yamlSource)) {
+                // YAML exists but is empty or just the template, safe to migrate
+                $shouldMigrate = true;
+            }
+
+            if ($shouldMigrate) {
+                $io->write('<info>Migrating configuration from TXT to YAML format</info>');
+                $this->migrateTxtToYaml($oldIgnoreTxt, $newIgnoreYaml, $io);
+                // Delete the old TXT file after successful migration
+                if (file_exists($newIgnoreYaml)) {
+                    unlink($oldIgnoreTxt);
+                    $io->write('<info>Removed old generate-composer-require.ignore.txt file</info>');
+                }
             }
         }
 
         // Create YAML config file only if it doesn't exist (don't overwrite user's config)
-        $yamlSource = $packageDir . '/bin/generate-composer-require.yaml';
-
         if (!file_exists($newIgnoreYaml) && file_exists($yamlSource)) {
             $io->write('<info>Creating generate-composer-require.yaml</info>');
             copy($yamlSource, $newIgnoreYaml);
         }
+    }
+
+    /**
+     * Check if YAML file is empty or contains only the template (no user packages).
+     *
+     * @param string $yamlPath     Path to the YAML file
+     * @param string $templatePath Path to the template YAML file
+     *
+     * @return bool True if YAML is empty or template-only
+     */
+    private function isYamlEmptyOrTemplate(string $yamlPath, string $templatePath): bool
+    {
+        if (!file_exists($yamlPath)) {
+            return true;
+        }
+
+        $yamlContent = file_get_contents($yamlPath);
+        $yamlContent = trim($yamlContent);
+
+        // If file is empty, it's safe to migrate
+        if (empty($yamlContent)) {
+            return true;
+        }
+
+        // Check if YAML has any actual packages (not just comments)
+        // Look for lines with "  - " that are not commented out
+        $lines = explode("\n", $yamlContent);
+        $hasPackages = false;
+
+        foreach ($lines as $line) {
+            $line = trim($line);
+            // Skip empty lines and comments
+            if (empty($line) || strpos($line, '#') === 0) {
+                continue;
+            }
+            // If we find a line starting with "- " (package entry), it has content
+            if (preg_match('/^\s*-\s+[^#]+$/', $line)) {
+                $hasPackages = true;
+                break;
+            }
+        }
+
+        // If no packages found, it's safe to migrate (it's just template/comments)
+        return !$hasPackages;
     }
 
     /**
