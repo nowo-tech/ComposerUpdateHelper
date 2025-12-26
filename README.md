@@ -25,6 +25,8 @@ Generates `composer require` commands from outdated dependencies. Works with any
 - ✅ Automatic installation via Composer plugin
 - ✅ **Release information and changelogs**: Shows GitHub release links and changelog previews for outdated packages
 - ✅ **Help option**: Built-in `--help` flag for comprehensive usage information
+- ✅ **Verbose and Debug modes**: `-v, --verbose` and `--debug` options for troubleshooting and detailed information
+- ✅ **Multiple file extensions**: Supports both `.yaml` and `.yml` extensions for configuration files
 - ✅ **Performance optimized**: Emojis and common elements are optimized for better performance
 
 ## Installation
@@ -49,7 +51,7 @@ After installation, two files will be copied to your project root:
 ./generate-composer-require.sh
 ```
 
-Example output (default mode - summary):
+Example output (default mode - no release info):
 
 ```
 ⏭️  Ignored packages (prod):
@@ -61,12 +63,9 @@ Example output (default mode - summary):
 🔧 Suggested commands:
   composer require --with-all-dependencies vendor/package:1.2.3 another/package:4.5.6
   composer require --dev --with-all-dependencies phpstan/phpstan:2.0.0
-
-📋 Release information:
-  📦 vendor/package
-     🔗 Release: https://github.com/vendor/package/releases/tag/v1.2.3
-     📝 Changelog: https://github.com/vendor/package/releases
 ```
+
+> **Note:** By default, release information is **not shown** (no API calls are made). Use `--release-info` or `--release-detail` to enable it.
 
 ### Show full release details
 
@@ -97,6 +96,51 @@ Example output (detailed mode):
 ./generate-composer-require.sh --no-release-info
 ```
 
+### Verbose mode
+
+Show detailed information about configuration files and packages:
+
+```bash
+./generate-composer-require.sh --verbose
+# or
+./generate-composer-require.sh -v
+```
+
+Example output:
+
+```
+📋 Found configuration file: generate-composer-require.yaml
+📋 Ignored packages: doctrine/orm, symfony/security-bundle
+📋 Included packages: monolog/monolog
+```
+
+### Debug mode
+
+Show very detailed debug information (includes verbose mode):
+
+```bash
+./generate-composer-require.sh --debug
+```
+
+Example output:
+
+```
+🔍 DEBUG: Current directory: /path/to/project
+🔍 DEBUG: Searching for configuration files:
+   - generate-composer-require.yaml
+   - generate-composer-require.yml
+   - generate-composer-require.ignore.txt
+📋 Found configuration file: generate-composer-require.yaml
+🔍 DEBUG: Processing YAML file: generate-composer-require.yaml
+🔍 DEBUG: File exists: yes
+🔍 DEBUG: File size: 512 bytes
+🔍 DEBUG: Ignored packages from YAML: doctrine/orm|symfony/security-bundle
+🔍 DEBUG: Ignored packages list:
+   - doctrine/orm
+   - symfony/security-bundle
+...
+```
+
 ### Show help
 
 ```bash
@@ -117,11 +161,20 @@ You can combine options:
 ./generate-composer-require.sh --run                    # Execute (no release info by default)
 ./generate-composer-require.sh --run --release-info     # Execute with release info
 ./generate-composer-require.sh --run --release-detail   # Execute with full changelog
+./generate-composer-require.sh --verbose --release-info # Verbose with release info
+./generate-composer-require.sh --debug                  # Debug mode (very detailed)
 ```
 
 ## Package Configuration
 
-Edit `generate-composer-require.yaml` to configure which packages to ignore or force include during updates:
+The script searches for configuration files in the current directory (where `composer.json` is located). It supports both `.yaml` and `.yml` extensions, with `.yaml` taking priority.
+
+**Supported configuration files (in order of priority):**
+1. `generate-composer-require.yaml` (preferred)
+2. `generate-composer-require.yml` (alternative)
+3. `generate-composer-require.ignore.txt` (backward compatibility)
+
+Edit `generate-composer-require.yaml` (or `.yml`) to configure which packages to ignore or force include during updates:
 
 ```yaml
 # Composer Update Helper Configuration
@@ -152,12 +205,28 @@ Packages listed in the `ignore` section will:
 - **Not** be included in the `composer require` commands
 - Appear in the "Ignored" section of the output
 
+**Important:** Only uncommented packages are read. Lines starting with `#` are ignored (they are comments). To ignore a package, it must be listed without the `#` prefix:
+
+```yaml
+ignore:
+  - doctrine/orm                    # ✅ This package will be ignored
+  # - symfony/security-bundle      # ❌ This is a comment, not read
+```
+
 ### Forcing Package Inclusion
 
 Packages listed in the `include` section will:
 - **Always** be included in the `composer require` commands
 - Override the `ignore` list (if a package is in both, it will be included)
 - Be processed even if they are also listed in the `ignore` section
+
+**Important:** Only uncommented packages are read. Lines starting with `#` are ignored (they are comments). To force include a package, it must be listed without the `#` prefix:
+
+```yaml
+include:
+  - monolog/monolog                 # ✅ This package will be force included
+  # - another/package               # ❌ This is a comment, not read
+```
 
 **Example use case**: You might want to ignore most Symfony packages but force include a specific one:
 
@@ -194,6 +263,8 @@ The script automatically fetches release information from GitHub for outdated pa
 | `--release-info` | Shows summary: package name, release link, changelog link |
 | `--release-detail` | Shows full release details including complete changelog |
 | `--no-release-info` | Explicitly skips all release information (default behavior) |
+| `-v, --verbose` | Shows detailed information about configuration files and packages |
+| `--debug` | Shows very detailed debug information (includes verbose mode) |
 | `--run` | Executes suggested commands (can be combined with other options) |
 | `--help` or `-h` | Shows comprehensive usage information and examples |
 

@@ -79,6 +79,7 @@ final class ScriptTest extends TestCase
         // Check for essential parts
         $this->assertStringContainsString('composer outdated', (string) $content);
         $this->assertStringContainsString('IGNORED_PACKAGES', (string) $content);
+        $this->assertStringContainsString('INCLUDED_PACKAGES', (string) $content);
         $this->assertStringContainsString('--with-all-dependencies', (string) $content);
     }
 
@@ -182,8 +183,13 @@ final class ScriptTest extends TestCase
         // Script should read YAML file (primary) and support TXT for backward compatibility
         $this->assertStringContainsString('generate-composer-require.yaml', (string) $content);
         $this->assertStringContainsString('IGNORE_FILE_YAML', (string) $content);
+        // Support for .yml extension
+        $this->assertStringContainsString('generate-composer-require.yml', (string) $content);
+        $this->assertStringContainsString('IGNORE_FILE_YML', (string) $content);
         // Backward compatibility: still supports old TXT format
         $this->assertStringContainsString('generate-composer-require.ignore.txt', (string) $content);
+        // Script searches in current directory, not script directory
+        $this->assertStringNotContainsString('$(dirname "$0")/generate-composer-require.yaml', (string) $content);
     }
 
     public function testScriptSupportsRunFlag(): void
@@ -242,5 +248,81 @@ final class ScriptTest extends TestCase
         if (strlen($content) > 20) {
             $this->assertStringContainsString('/', (string) $content);
         }
+    }
+
+    public function testScriptSupportsVerboseOption(): void
+    {
+        if (!file_exists($this->scriptPath)) {
+            $this->markTestSkipped('Script file does not exist (may not be installed in CI/CD)');
+        }
+
+        $content = file_get_contents($this->scriptPath);
+
+        if ($content === false) {
+            $this->markTestSkipped('Could not read script file');
+        }
+
+        // Skip if script is not fully implemented
+        if (strlen($content) < 100) {
+            $this->markTestSkipped('Script file is not fully implemented');
+
+            return;
+        }
+
+        // Check for verbose option
+        $this->assertStringContainsString('--verbose', (string) $content);
+        $this->assertStringContainsString('-v', (string) $content);
+        $this->assertStringContainsString('VERBOSE', (string) $content);
+    }
+
+    public function testScriptSupportsDebugOption(): void
+    {
+        if (!file_exists($this->scriptPath)) {
+            $this->markTestSkipped('Script file does not exist (may not be installed in CI/CD)');
+        }
+
+        $content = file_get_contents($this->scriptPath);
+
+        if ($content === false) {
+            $this->markTestSkipped('Could not read script file');
+        }
+
+        // Skip if script is not fully implemented
+        if (strlen($content) < 100) {
+            $this->markTestSkipped('Script file is not fully implemented');
+
+            return;
+        }
+
+        // Check for debug option
+        $this->assertStringContainsString('--debug', (string) $content);
+        $this->assertStringContainsString('DEBUG', (string) $content);
+        $this->assertStringContainsString('DEBUG:', (string) $content);
+    }
+
+    public function testScriptSearchesInCurrentDirectory(): void
+    {
+        if (!file_exists($this->scriptPath)) {
+            $this->markTestSkipped('Script file does not exist (may not be installed in CI/CD)');
+        }
+
+        $content = file_get_contents($this->scriptPath);
+
+        if ($content === false) {
+            $this->markTestSkipped('Could not read script file');
+        }
+
+        // Skip if script is not fully implemented
+        if (strlen($content) < 100) {
+            $this->markTestSkipped('Script file is not fully implemented');
+
+            return;
+        }
+
+        // Script should search in current directory, not script directory
+        $this->assertStringContainsString('generate-composer-require.yaml', (string) $content);
+        $this->assertStringNotContainsString('$(dirname "$0")/generate-composer-require.yaml', (string) $content);
+        // Should check files directly in current directory
+        $this->assertStringContainsString('[ -f "generate-composer-require.yaml" ]', (string) $content);
     }
 }
