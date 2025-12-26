@@ -187,6 +187,11 @@ class Plugin implements PluginInterface, EventSubscriberInterface
         if (file_exists($oldIgnoreTxt) && !file_exists($newIgnoreYaml)) {
             $io->write('<info>Migrating configuration from TXT to YAML format</info>');
             $this->migrateTxtToYaml($oldIgnoreTxt, $newIgnoreYaml, $io);
+            // Delete the old TXT file after successful migration
+            if (file_exists($newIgnoreYaml)) {
+                unlink($oldIgnoreTxt);
+                $io->write('<info>Removed old generate-composer-require.ignore.txt file</info>');
+            }
         }
 
         // Create YAML config file only if it doesn't exist (don't overwrite user's config)

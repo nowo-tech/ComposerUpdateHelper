@@ -18,6 +18,13 @@ This guide will help you upgrade Composer Update Helper to newer versions.
 
 ## Version-Specific Upgrade Notes
 
+### Upgrading to 2.0.1+
+
+#### Fixed
+- **Automatic cleanup**: The old `.ignore.txt` file is now automatically deleted after successful migration to `.yaml` format
+  - No manual cleanup required
+  - Ensures clean migration without leftover files
+
 ### Upgrading to 2.0.0+
 
 #### Breaking Changes
@@ -48,11 +55,7 @@ This guide will help you upgrade Composer Update Helper to newer versions.
    cat generate-composer-require.yaml
    ```
 
-4. **Optional**: Remove the old TXT file after verifying the migration:
-   ```bash
-   # The old file is no longer used, but kept for safety
-   rm generate-composer-require.ignore.txt  # Optional
-   ```
+4. **Automatic cleanup**: The old `.ignore.txt` file is automatically deleted after successful migration (in v2.0.1+)
 
 5. The script will now use the YAML file automatically. No changes needed to your workflow.
 
@@ -76,10 +79,10 @@ ignore:
 #### What Happens During Migration
 
 - Your existing ignore list is preserved
-- The old `.ignore.txt` file remains (not deleted) for safety
 - The new `.yaml` file is created with your packages migrated
+- The old `.ignore.txt` file is automatically deleted after successful migration (v2.0.1+)
 - The script automatically uses the YAML file if it exists
-- `.gitignore` is updated to include the new YAML file
+- `.gitignore` is updated to include the new YAML file and remove the old TXT entry
 
 ### Upgrading to 1.3.4+
 

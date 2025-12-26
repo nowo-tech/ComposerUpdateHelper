@@ -160,7 +160,7 @@ final class ScriptTest extends TestCase
         $this->assertStringContainsString('laravel/framework', (string) $content);
     }
 
-    public function testScriptHandlesIgnoreFile(): void
+    public function testScriptHandlesYamlConfigFile(): void
     {
         if (!file_exists($this->scriptPath)) {
             $this->markTestSkipped('Script file does not exist (may not be installed in CI/CD)');
@@ -179,8 +179,11 @@ final class ScriptTest extends TestCase
             return;
         }
 
+        // Script should read YAML file (primary) and support TXT for backward compatibility
+        $this->assertStringContainsString('generate-composer-require.yaml', (string) $content);
+        $this->assertStringContainsString('IGNORE_FILE_YAML', (string) $content);
+        // Backward compatibility: still supports old TXT format
         $this->assertStringContainsString('generate-composer-require.ignore.txt', (string) $content);
-        $this->assertStringContainsString('IGNORE_FILE', (string) $content);
     }
 
     public function testScriptSupportsRunFlag(): void

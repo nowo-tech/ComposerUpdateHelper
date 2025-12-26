@@ -55,37 +55,37 @@ final class InstallerTest extends TestCase
         $this->assertFileExists($this->tempDir . '/generate-composer-require.sh');
     }
 
-    public function testInstallCreatesIgnoreFileIfNotExists(): void
+    public function testInstallCreatesYamlConfigFileIfNotExists(): void
     {
         $event = $this->createMockEvent();
 
         $packageDir = $this->vendorDir . '/nowo-tech/composer-update-helper';
         mkdir($packageDir . '/bin', 0777, true);
         file_put_contents($packageDir . '/bin/generate-composer-require.sh', '#!/bin/sh');
-        file_put_contents($packageDir . '/bin/generate-composer-require.ignore.txt', '# Ignore file');
+        file_put_contents($packageDir . '/bin/generate-composer-require.yaml', '# YAML config file');
 
         Installer::install($event);
 
-        $this->assertFileExists($this->tempDir . '/generate-composer-require.ignore.txt');
+        $this->assertFileExists($this->tempDir . '/generate-composer-require.yaml');
     }
 
-    public function testInstallDoesNotOverwriteExistingIgnoreFile(): void
+    public function testInstallDoesNotOverwriteExistingYamlFile(): void
     {
         $event = $this->createMockEvent();
 
-        // Create existing ignore file with custom content
-        $customContent = "# My custom packages\nvendor/my-package";
-        file_put_contents($this->tempDir . '/generate-composer-require.ignore.txt', $customContent);
+        // Create existing YAML file with custom content
+        $customContent = "# My custom packages\nignore:\n  - vendor/my-package";
+        file_put_contents($this->tempDir . '/generate-composer-require.yaml', $customContent);
 
         $packageDir = $this->vendorDir . '/nowo-tech/composer-update-helper';
         mkdir($packageDir . '/bin', 0777, true);
         file_put_contents($packageDir . '/bin/generate-composer-require.sh', '#!/bin/sh');
-        file_put_contents($packageDir . '/bin/generate-composer-require.ignore.txt', '# Default ignore file');
+        file_put_contents($packageDir . '/bin/generate-composer-require.yaml', '# Default YAML config');
 
         Installer::install($event);
 
         // Verify the custom content was preserved
-        $this->assertStringContainsString('My custom packages', (string) file_get_contents($this->tempDir . '/generate-composer-require.ignore.txt'));
+        $this->assertStringContainsString('My custom packages', (string) file_get_contents($this->tempDir . '/generate-composer-require.yaml'));
     }
 
     public function testUninstallRemovesScript(): void
@@ -100,19 +100,19 @@ final class InstallerTest extends TestCase
         $this->assertFileDoesNotExist($this->tempDir . '/generate-composer-require.sh');
     }
 
-    public function testUninstallPreservesIgnoreFile(): void
+    public function testUninstallPreservesYamlConfigFile(): void
     {
         $event = $this->createMockEvent();
 
         // Create both files
         file_put_contents($this->tempDir . '/generate-composer-require.sh', '#!/bin/sh');
-        file_put_contents($this->tempDir . '/generate-composer-require.ignore.txt', '# Ignore file');
+        file_put_contents($this->tempDir . '/generate-composer-require.yaml', '# YAML config file');
 
         Installer::uninstall($event);
 
-        // Script should be removed, but ignore file should remain
+        // Script should be removed, but YAML config file should remain
         $this->assertFileDoesNotExist($this->tempDir . '/generate-composer-require.sh');
-        $this->assertFileExists($this->tempDir . '/generate-composer-require.ignore.txt');
+        $this->assertFileExists($this->tempDir . '/generate-composer-require.yaml');
     }
 
     public function testUninstallWhenFileDoesNotExist(): void
@@ -231,12 +231,13 @@ final class InstallerTest extends TestCase
         $packageDir = $this->vendorDir . '/nowo-tech/composer-update-helper';
         mkdir($packageDir . '/bin', 0777, true);
         file_put_contents($packageDir . '/bin/generate-composer-require.sh', '#!/bin/sh');
+        file_put_contents($packageDir . '/bin/generate-composer-require.yaml', '# YAML config');
 
         Installer::install($event);
 
         $gitignoreContent = file_get_contents($gitignorePath);
         $this->assertStringContainsString('generate-composer-require.sh', $gitignoreContent);
-        $this->assertStringContainsString('generate-composer-require.ignore.txt', $gitignoreContent);
+        $this->assertStringContainsString('generate-composer-require.yaml', $gitignoreContent);
     }
 
     public function testInstallUpdatesGitignoreWhenExistsWithContent(): void
@@ -250,12 +251,42 @@ final class InstallerTest extends TestCase
         $packageDir = $this->vendorDir . '/nowo-tech/composer-update-helper';
         mkdir($packageDir . '/bin', 0777, true);
         file_put_contents($packageDir . '/bin/generate-composer-require.sh', '#!/bin/sh');
+        file_put_contents($packageDir . '/bin/generate-composer-require.yaml', '# YAML config');
 
         Installer::install($event);
 
         $gitignoreContent = file_get_contents($gitignorePath);
         $this->assertStringContainsString('generate-composer-require.sh', $gitignoreContent);
-        $this->assertStringContainsString('generate-composer-require.ignore.txt', $gitignoreContent);
+        $this->assertStringContainsString('generate-composer-require.yaml', $gitignoreContent);
+    }
+
+    public function testInstallMigratesTxtToYamlAndDeletesTxt(): void
+    {
+        $event = $this->createMockEvent();
+
+        // Create old TXT file in project (simulating upgrade scenario)
+        $oldTxtFile = $this->tempDir . '/generate-composer-require.ignore.txt';
+        file_put_contents($oldTxtFile, "doctrine/orm\nsymfony/security-bundle\n# Comment line\n");
+
+        $packageDir = $this->vendorDir . '/nowo-tech/composer-update-helper';
+        mkdir($packageDir . '/bin', 0777, true);
+        file_put_contents($packageDir . '/bin/generate-composer-require.sh', '#!/bin/sh');
+        file_put_contents($packageDir . '/bin/generate-composer-require.yaml', '# YAML config');
+
+        Installer::install($event);
+
+        // Verify YAML file was created
+        $yamlFile = $this->tempDir . '/generate-composer-require.yaml';
+        $this->assertFileExists($yamlFile);
+
+        // Verify content was migrated correctly
+        $yamlContent = file_get_contents($yamlFile);
+        $this->assertStringContainsString('doctrine/orm', $yamlContent);
+        $this->assertStringContainsString('symfony/security-bundle', $yamlContent);
+        $this->assertStringContainsString('ignore:', $yamlContent);
+
+        // Verify old TXT file was deleted
+        $this->assertFileDoesNotExist($oldTxtFile);
     }
 
     /**

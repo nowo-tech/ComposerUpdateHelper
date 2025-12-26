@@ -628,6 +628,7 @@ final class PluginTest extends TestCase
                 $this->stringContains('Installing'),
                 $this->stringContains('Migrating configuration from TXT to YAML format'),
                 $this->stringContains('Configuration migrated to'),
+                $this->stringContains('Removed old generate-composer-require.ignore.txt file'),
                 $this->stringContains('Updated .gitignore')
             ));
 
@@ -650,8 +651,8 @@ final class PluginTest extends TestCase
         $this->assertStringContainsString('ignore:', $yamlContent);
         $this->assertStringContainsString('Migrated from generate-composer-require.ignore.txt', $yamlContent);
 
-        // Verify old TXT file still exists (not deleted)
-        $this->assertFileExists($oldTxtFile);
+        // Verify old TXT file was deleted after migration
+        $this->assertFileDoesNotExist($oldTxtFile);
 
         // Cleanup
         @unlink($tempDir . '/generate-composer-require.sh');
@@ -694,6 +695,8 @@ final class PluginTest extends TestCase
             ->method('write')
             ->with($this->logicalOr(
                 $this->stringContains('Migrating configuration from TXT to YAML format'),
+                $this->stringContains('Configuration migrated to'),
+                $this->stringContains('Removed old generate-composer-require.ignore.txt file'),
                 $this->stringContains('Updated .gitignore')
             ));
 
@@ -709,9 +712,11 @@ final class PluginTest extends TestCase
         $yamlFile = $tempDir . '/generate-composer-require.yaml';
         $this->assertFileExists($yamlFile);
 
+        // Verify old TXT file was deleted after migration
+        $this->assertFileDoesNotExist($oldTxtFile);
+
         // Cleanup
         @unlink($tempDir . '/generate-composer-require.yaml');
-        @unlink($oldTxtFile);
         @unlink($binDir . '/generate-composer-require.yaml');
         @rmdir($binDir);
         @rmdir($packageDir);
