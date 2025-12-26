@@ -724,4 +724,196 @@ final class PluginTest extends TestCase
         @rmdir($vendorDir);
         @rmdir($tempDir);
     }
+
+    public function testMigratesTxtToYamlWhenYamlExistsButIsEmpty(): void
+    {
+        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir = $tempDir . '/vendor';
+        $packageDir = $vendorDir . '/nowo-tech/composer-update-helper';
+        $binDir = $packageDir . '/bin';
+        mkdir($binDir, 0777, true);
+
+        file_put_contents($binDir . '/generate-composer-require.yaml', '# YAML config');
+
+        // Create empty YAML file in project
+        $yamlFile = $tempDir . '/generate-composer-require.yaml';
+        file_put_contents($yamlFile, '');
+
+        // Create old TXT file with packages
+        $oldTxtFile = $tempDir . '/generate-composer-require.ignore.txt';
+        file_put_contents($oldTxtFile, "doctrine/orm\nsymfony/security-bundle\n");
+
+        $config = $this->createMock(Config::class);
+        $config->method('get')
+            ->with('vendor-dir')
+            ->willReturn($vendorDir);
+
+        $composer = $this->createMock(Composer::class);
+        $composer->method('getConfig')
+            ->willReturn($config);
+
+        $io = $this->createMock(IOInterface::class);
+        $io->expects($this->atLeastOnce())
+            ->method('write')
+            ->with($this->logicalOr(
+                $this->stringContains('Migrating configuration from TXT to YAML format'),
+                $this->stringContains('Configuration migrated to'),
+                $this->stringContains('Removed old generate-composer-require.ignore.txt file'),
+                $this->stringContains('Updated .gitignore')
+            ));
+
+        $event = $this->createMock(Event::class);
+        $event->method('getIO')
+            ->willReturn($io);
+
+        $plugin = new Plugin();
+        $plugin->activate($composer, $io);
+        $plugin->onPostUpdate($event);
+
+        // Verify YAML file was updated with migrated content
+        $this->assertFileExists($yamlFile);
+        $yamlContent = file_get_contents($yamlFile);
+        $this->assertStringContainsString('doctrine/orm', $yamlContent);
+        $this->assertStringContainsString('symfony/security-bundle', $yamlContent);
+        $this->assertStringContainsString('ignore:', $yamlContent);
+
+        // Verify old TXT file was deleted
+        $this->assertFileDoesNotExist($oldTxtFile);
+
+        // Cleanup
+        @unlink($tempDir . '/generate-composer-require.yaml');
+        @unlink($binDir . '/generate-composer-require.yaml');
+        @rmdir($binDir);
+        @rmdir($packageDir);
+        @rmdir($vendorDir . '/nowo-tech');
+        @rmdir($vendorDir);
+        @rmdir($tempDir);
+    }
+
+    public function testMigratesTxtToYamlWhenYamlExistsButIsTemplateOnly(): void
+    {
+        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir = $tempDir . '/vendor';
+        $packageDir = $vendorDir . '/nowo-tech/composer-update-helper';
+        $binDir = $packageDir . '/bin';
+        mkdir($binDir, 0777, true);
+
+        file_put_contents($binDir . '/generate-composer-require.yaml', '# YAML config');
+
+        // Create YAML file with only template (commented packages)
+        $yamlFile = $tempDir . '/generate-composer-require.yaml';
+        file_put_contents($yamlFile, "# Composer Update Helper Configuration\nignore:\n  # - doctrine/orm\n  # - symfony/security-bundle\n");
+
+        // Create old TXT file with packages
+        $oldTxtFile = $tempDir . '/generate-composer-require.ignore.txt';
+        file_put_contents($oldTxtFile, "doctrine/orm\nsymfony/security-bundle\n");
+
+        $config = $this->createMock(Config::class);
+        $config->method('get')
+            ->with('vendor-dir')
+            ->willReturn($vendorDir);
+
+        $composer = $this->createMock(Composer::class);
+        $composer->method('getConfig')
+            ->willReturn($config);
+
+        $io = $this->createMock(IOInterface::class);
+        $io->expects($this->atLeastOnce())
+            ->method('write')
+            ->with($this->logicalOr(
+                $this->stringContains('Migrating configuration from TXT to YAML format'),
+                $this->stringContains('Configuration migrated to'),
+                $this->stringContains('Removed old generate-composer-require.ignore.txt file'),
+                $this->stringContains('Updated .gitignore')
+            ));
+
+        $event = $this->createMock(Event::class);
+        $event->method('getIO')
+            ->willReturn($io);
+
+        $plugin = new Plugin();
+        $plugin->activate($composer, $io);
+        $plugin->onPostUpdate($event);
+
+        // Verify YAML file was updated with migrated content
+        $this->assertFileExists($yamlFile);
+        $yamlContent = file_get_contents($yamlFile);
+        $this->assertStringContainsString('doctrine/orm', $yamlContent);
+        $this->assertStringContainsString('symfony/security-bundle', $yamlContent);
+        $this->assertStringContainsString('ignore:', $yamlContent);
+
+        // Verify old TXT file was deleted
+        $this->assertFileDoesNotExist($oldTxtFile);
+
+        // Cleanup
+        @unlink($tempDir . '/generate-composer-require.yaml');
+        @unlink($binDir . '/generate-composer-require.yaml');
+        @rmdir($binDir);
+        @rmdir($packageDir);
+        @rmdir($vendorDir . '/nowo-tech');
+        @rmdir($vendorDir);
+        @rmdir($tempDir);
+    }
+
+    public function testDoesNotMigrateTxtWhenYamlHasUserPackages(): void
+    {
+        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir = $tempDir . '/vendor';
+        $packageDir = $vendorDir . '/nowo-tech/composer-update-helper';
+        $binDir = $packageDir . '/bin';
+        mkdir($binDir, 0777, true);
+
+        file_put_contents($binDir . '/generate-composer-require.yaml', '# YAML config');
+
+        // Create YAML file with user-defined packages (not just template)
+        $yamlFile = $tempDir . '/generate-composer-require.yaml';
+        file_put_contents($yamlFile, "# Composer Update Helper Configuration\nignore:\n  - existing/package\n  - another/package\n");
+
+        // Create old TXT file with different packages
+        $oldTxtFile = $tempDir . '/generate-composer-require.ignore.txt';
+        file_put_contents($oldTxtFile, "doctrine/orm\nsymfony/security-bundle\n");
+
+        $config = $this->createMock(Config::class);
+        $config->method('get')
+            ->with('vendor-dir')
+            ->willReturn($vendorDir);
+
+        $composer = $this->createMock(Composer::class);
+        $composer->method('getConfig')
+            ->willReturn($config);
+
+        $io = $this->createMock(IOInterface::class);
+        // Should NOT show migration messages
+        $io->expects($this->never())
+            ->method('write')
+            ->with($this->stringContains('Migrating configuration from TXT to YAML format'));
+
+        $event = $this->createMock(Event::class);
+        $event->method('getIO')
+            ->willReturn($io);
+
+        $plugin = new Plugin();
+        $plugin->activate($composer, $io);
+        $plugin->onPostUpdate($event);
+
+        // Verify YAML file was NOT changed (preserves user packages)
+        $yamlContent = file_get_contents($yamlFile);
+        $this->assertStringContainsString('existing/package', $yamlContent);
+        $this->assertStringContainsString('another/package', $yamlContent);
+        $this->assertStringNotContainsString('doctrine/orm', $yamlContent);
+        $this->assertStringNotContainsString('symfony/security-bundle', $yamlContent);
+
+        // Verify old TXT file still exists (not migrated)
+        $this->assertFileExists($oldTxtFile);
+
+        // Cleanup
+        @unlink($tempDir . '/generate-composer-require.yaml');
+        @unlink($oldTxtFile);
+        @unlink($binDir . '/generate-composer-require.yaml');
+        @rmdir($binDir);
+        @rmdir($packageDir);
+        @rmdir($vendorDir . '/nowo-tech');
+        @rmdir($vendorDir);
+        @rmdir($tempDir);
+    }
 }

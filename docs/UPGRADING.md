@@ -18,6 +18,20 @@ This guide will help you upgrade Composer Update Helper to newer versions.
 
 ## Version-Specific Upgrade Notes
 
+### Upgrading to 2.0.2+
+
+#### Fixed
+- **Improved migration logic**: Migration now works even if YAML file already exists
+  - Previously, migration only occurred if YAML didn't exist
+  - Now migrates if YAML exists but is empty or contains only template (no user packages)
+  - Prevents data loss: won't overwrite YAML files with user-defined packages
+  - If you updated to v2.0.1 and migration didn't occur, updating to v2.0.2 will trigger migration
+
+#### Migration Behavior
+- **Safe migration**: The plugin detects if YAML is empty or template-only before migrating
+- **Data protection**: If YAML has user-defined packages, migration is skipped to prevent data loss
+- **Automatic retry**: If migration didn't happen in v2.0.1, it will work in v2.0.2
+
 ### Upgrading to 2.0.1+
 
 #### Fixed
@@ -48,6 +62,8 @@ This guide will help you upgrade Composer Update Helper to newer versions.
    ```
 
 2. **Automatic migration**: If you have an existing `generate-composer-require.ignore.txt` file, it will be automatically migrated to `generate-composer-require.yaml` during the update.
+   - **v2.0.2+**: Migration works even if YAML already exists (if YAML is empty or template-only)
+   - Migration is skipped if YAML has user-defined packages (to prevent data loss)
 
 3. Verify the migration:
    ```bash
@@ -79,10 +95,11 @@ ignore:
 #### What Happens During Migration
 
 - Your existing ignore list is preserved
-- The new `.yaml` file is created with your packages migrated
+- The new `.yaml` file is created with your packages migrated (or updated if empty/template-only)
 - The old `.ignore.txt` file is automatically deleted after successful migration (v2.0.1+)
 - The script automatically uses the YAML file if it exists
 - `.gitignore` is updated to include the new YAML file and remove the old TXT entry
+- **v2.0.2+**: Migration works even if YAML exists, but only if YAML is empty or template-only (protects user data)
 
 ### Upgrading to 1.3.4+
 

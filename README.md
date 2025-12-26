@@ -134,7 +134,7 @@ Ignored packages will still be displayed in the output with their available vers
 
 ### Backward Compatibility
 
-If you have an old `generate-composer-require.ignore.txt` file, it will be automatically migrated to the new YAML format when you update the package. The script also supports reading the old TXT format for backward compatibility.
+If you have an old `generate-composer-require.ignore.txt` file, it will be automatically migrated to the new YAML format when you update the package. The migration works even if a YAML file already exists (as long as it's empty or contains only the template). The script also supports reading the old TXT format for backward compatibility if YAML doesn't exist.
 
 ## Release Information
 
