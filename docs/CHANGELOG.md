@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.13] - 2025-12-26
+
+### Fixed
+- **Duplicate command output**: Fixed issue where suggested composer commands appeared twice in the output
+  - Commands between `---COMMANDS_START---` and `---COMMANDS_END---` markers were not being properly filtered from display
+  - Updated shell script to use `sed` to remove the entire command extraction block before displaying output
+  - Commands now appear only once in the suggested commands section
+  - Command extraction for `--run` flag continues to work correctly
+
+### Migration Notes
+- **No action required**: This is a bug fix that improves output clarity
+- Existing functionality remains unchanged
+- The `--run` flag continues to work as expected
+
+### Breaking Changes
+- None
+
 ## [2.0.12] - 2025-12-26
 
 ### Changed

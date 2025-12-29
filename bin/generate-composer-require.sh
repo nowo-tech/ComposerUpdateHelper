@@ -263,8 +263,8 @@ if printf "%s\n" "$OUTPUT" | grep -q "^---COMMANDS_START---"; then
   COMMANDS="$(printf "%s\n" "$OUTPUT" | sed -n '/^---COMMANDS_START---$/,/^---COMMANDS_END---$/p' | grep -v '^---' || true)"
 fi
 
-# Remove command markers from output before displaying
-OUTPUT="$(printf "%s\n" "$OUTPUT" | grep -v '^---COMMANDS_START---$' | grep -v '^---COMMANDS_END---$' || true)"
+# Remove command markers and their content from output before displaying
+OUTPUT="$(printf "%s\n" "$OUTPUT" | sed '/^---COMMANDS_START---$/,/^---COMMANDS_END---$/d' || true)"
 
 # Display the formatted output from PHP
 printf "%s\n" "$OUTPUT"
