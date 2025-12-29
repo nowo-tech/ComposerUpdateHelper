@@ -18,6 +18,21 @@ This guide will help you upgrade Composer Update Helper to newer versions.
 
 ## Version-Specific Upgrade Notes
 
+### Upgrading to 2.0.13+
+
+#### Fixed
+- **Duplicate command output**: Fixed issue where suggested composer commands appeared twice in the output
+  - Commands now appear only once in the suggested commands section
+  - This improves output clarity and readability
+
+#### Migration Notes
+- **No action required**: This is a bug fix that improves output clarity
+- Existing functionality remains unchanged
+- The `--run` flag continues to work as expected
+
+#### Breaking Changes
+- None
+
 ### Upgrading to 2.0.12+
 
 #### Changed
