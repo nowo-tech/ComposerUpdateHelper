@@ -1248,7 +1248,7 @@ final class PluginTest extends TestCase
 
         // Create empty TXT file
         $oldTxtFile = $tempDir . '/generate-composer-require.ignore.txt';
-        file_put_contents($oldTxtFile, "");
+        file_put_contents($oldTxtFile, '');
 
         $config = $this->createMock(Config::class);
         $config->method('get')

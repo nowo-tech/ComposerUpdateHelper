@@ -617,7 +617,7 @@ final class InstallerTest extends TestCase
 
         // Create empty TXT file
         $oldTxtFile = $this->tempDir . '/generate-composer-require.ignore.txt';
-        file_put_contents($oldTxtFile, "");
+        file_put_contents($oldTxtFile, '');
 
         $packageDir = $this->vendorDir . '/nowo-tech/composer-update-helper';
         mkdir($packageDir . '/bin', 0777, true);
@@ -862,7 +862,7 @@ final class InstallerTest extends TestCase
         $this->assertStringContainsString('package2/two', $yamlContent);
         $this->assertStringContainsString('include:', $yamlContent);
         $this->assertStringContainsString('included/package', $yamlContent);
-        
+
         // Verify ignore section comes before include section
         $ignorePos = strpos($yamlContent, 'ignore:');
         $includePos = strpos($yamlContent, 'include:');
