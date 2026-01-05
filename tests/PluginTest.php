@@ -1819,7 +1819,6 @@ final class PluginTest extends TestCase
         @rmdir($tempDir);
     }
 
-
     public function testIsYamlEmptyOrTemplateHandlesEndOfSectionDetection(): void
     {
         $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
@@ -2113,6 +2112,7 @@ final class PluginTest extends TestCase
 
         if (!is_dir($devBinDir) || !file_exists($devBinDir . '/generate-composer-require.sh')) {
             $this->markTestSkipped('Development bin directory or script does not exist');
+
             return;
         }
 
@@ -2165,6 +2165,7 @@ final class PluginTest extends TestCase
 
         if (!is_dir($devBinDir) || !file_exists($devBinDir . '/generate-composer-require.yaml')) {
             $this->markTestSkipped('Development bin directory or YAML config does not exist');
+
             return;
         }
 

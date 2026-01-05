@@ -196,14 +196,14 @@ final class InstallerTest extends TestCase
         // Create a scenario where package is not in vendor (development mode)
         // by using a vendor path that doesn't contain the package
         $nonExistentVendor = $this->tempDir . '/non-existent-vendor';
-        $composer = $this->createMock(\Composer\Composer::class);
-        $config = $this->createMock(\Composer\Config::class);
+        $composer = $this->createMock(Composer::class);
+        $config = $this->createMock(Config::class);
         $config->method('get')->with('vendor-dir')->willReturn($nonExistentVendor);
         $composer->method('getConfig')->willReturn($config);
-        $io = $this->createMock(\Composer\IO\IOInterface::class);
+        $io = $this->createMock(IOInterface::class);
         $io->expects($this->atLeastOnce())->method('write');
 
-        $event = $this->createMock(\Composer\Script\Event::class);
+        $event = $this->createMock(Event::class);
         $event->method('getIO')->willReturn($io);
         $event->method('getComposer')->willReturn($composer);
 
@@ -218,6 +218,7 @@ final class InstallerTest extends TestCase
 
         if (!is_dir($devBinDir) || !file_exists($devBinDir . '/generate-composer-require.sh')) {
             $this->markTestSkipped('Development bin directory or script does not exist');
+
             return;
         }
 

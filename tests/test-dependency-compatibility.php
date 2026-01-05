@@ -7,7 +7,6 @@ declare(strict_types=1);
  * Test script for dependency compatibility checking.
  * Simulates the scheb/2fa-bundle and scheb/2fa-email conflict scenario.
  */
-
 $tempDir = sys_get_temp_dir() . '/composer-update-helper-compat-test-' . uniqid();
 mkdir($tempDir, 0777, true);
 
@@ -55,7 +54,8 @@ file_put_contents($tempDir . '/composer.json', json_encode([
 ], JSON_PRETTY_PRINT));
 
 // Define functions manually for testing (extracted from process-updates.php)
-function versionSatisfiesConstraint($version, $constraint) {
+function versionSatisfiesConstraint($version, $constraint)
+{
     if (empty($constraint)) {
         return true;
     }
@@ -66,6 +66,7 @@ function versionSatisfiesConstraint($version, $constraint) {
     // Handle wildcard constraints (e.g., "8.1.*")
     if (preg_match('/^(\d+\.\d+)\.\*$/', $constraint, $matches)) {
         $baseVersion = $matches[1];
+
         return strpos($normalizedVersion, $baseVersion . '.') === 0;
     }
 
@@ -73,8 +74,9 @@ function versionSatisfiesConstraint($version, $constraint) {
     if (preg_match('/^\^(\d+\.\d+\.\d+)/', $constraint, $matches)) {
         $minVersion = $matches[1];
         $parts = explode('.', $minVersion);
-        $nextMajor = (int)$parts[0] + 1;
+        $nextMajor = (int) $parts[0] + 1;
         $maxVersion = $nextMajor . '.0.0';
+
         return version_compare($normalizedVersion, $minVersion, '>=') &&
                version_compare($normalizedVersion, $maxVersion, '<');
     }
@@ -83,8 +85,9 @@ function versionSatisfiesConstraint($version, $constraint) {
     if (preg_match('/^~(\d+\.\d+\.\d+)/', $constraint, $matches)) {
         $minVersion = $matches[1];
         $parts = explode('.', $minVersion);
-        $nextMinor = (int)$parts[1] + 1;
+        $nextMinor = (int) $parts[1] + 1;
         $maxVersion = $parts[0] . '.' . $nextMinor . '.0';
+
         return version_compare($normalizedVersion, $minVersion, '>=') &&
                version_compare($normalizedVersion, $maxVersion, '<');
     }
@@ -98,6 +101,7 @@ function versionSatisfiesConstraint($version, $constraint) {
                 return true;
             }
         }
+
         return false;
     }
 
@@ -110,6 +114,7 @@ function versionSatisfiesConstraint($version, $constraint) {
                 return false;
             }
         }
+
         return true;
     }
 
@@ -133,13 +138,15 @@ function versionSatisfiesConstraint($version, $constraint) {
     // Handle base version (e.g., "8.1" means "8.1.*")
     if (preg_match('/^(\d+\.\d+)$/', $constraint, $matches)) {
         $baseVersion = $matches[1];
+
         return strpos($normalizedVersion, $baseVersion . '.') === 0;
     }
 
     return false;
 }
 
-function getPackageConstraintsFromLock($packageName) {
+function getPackageConstraintsFromLock($packageName)
+{
     if (!file_exists('composer.lock')) {
         return [];
     }
@@ -171,7 +178,7 @@ function getPackageConstraintsFromLock($packageName) {
 // Run tests
 echo "Test 1: Reading constraints from composer.lock\n";
 $constraints = getPackageConstraintsFromLock('scheb/2fa-bundle');
-echo "   Found " . count($constraints) . " dependent package(s)\n";
+echo '   Found ' . count($constraints) . " dependent package(s)\n";
 foreach ($constraints as $pkg => $constraint) {
     echo "   - {$pkg} requires scheb/2fa-bundle: {$constraint}\n";
 }
@@ -227,13 +234,14 @@ foreach ($testCases as [$version, $constraint, $expected]) {
     if ($result !== $expected) {
         $allPassed = false;
     }
-    echo "   {$status} {$version} vs '{$constraint}' (expected: " . ($expected ? 'true' : 'false') . ", got: " . ($result ? 'true' : 'false') . ")\n";
+    echo "   {$status} {$version} vs '{$constraint}' (expected: " . ($expected ? 'true' : 'false') . ', got: ' . ($result ? 'true' : 'false') . ")\n";
 }
 
 chdir($originalDir);
 
 // Cleanup
-function removeDirectory($dir) {
+function removeDirectory($dir)
+{
     if (!is_dir($dir)) {
         return;
     }
@@ -254,8 +262,6 @@ echo "\n";
 if ($allPassed) {
     echo "✅ All tests passed!\n";
     exit(0);
-} else {
-    echo "❌ Some tests failed\n";
-    exit(1);
 }
-
+echo "❌ Some tests failed\n";
+exit(1);
