@@ -282,6 +282,7 @@ final class DependencyCompatibilityTest extends TestCase
         // Handle wildcard constraints (e.g., "8.1.*")
         if (preg_match('/^(\d+\.\d+)\.\*$/', $constraint, $matches)) {
             $baseVersion = $matches[1];
+
             return strpos($normalizedVersion, $baseVersion . '.') === 0;
         }
 
@@ -303,16 +304,17 @@ final class DependencyCompatibilityTest extends TestCase
                     return true;
                 }
             }
+
             return false;
         }
 
         // Handle caret constraints (e.g., "^8.1.0" or "^v7.1.0")
         // Also handle "^v7.1.0" which should be treated as "^7.1.0" (ignore the 'v' prefix)
         if (preg_match('/^\^v?(\d+)(?:\.(\d+))?(?:\.(\d+))?/', $constraint, $matches)) {
-            $major = (int)$matches[1];
+            $major = (int) $matches[1];
             // Check if minor and patch are captured (not just empty strings)
-            $minor = (isset($matches[2]) && $matches[2] !== '') ? (int)$matches[2] : 0;
-            $patch = (isset($matches[3]) && $matches[3] !== '') ? (int)$matches[3] : 0;
+            $minor = (isset($matches[2]) && $matches[2] !== '') ? (int) $matches[2] : 0;
+            $patch = (isset($matches[3]) && $matches[3] !== '') ? (int) $matches[3] : 0;
 
             $minVersion = $major . '.' . $minor . '.' . $patch;
             $nextMajor = $major + 1;
@@ -325,9 +327,9 @@ final class DependencyCompatibilityTest extends TestCase
         // Handle tilde constraints (e.g., "~8.1.0" or "~v7.1.0")
         // Also handle "~v7.1.0" which should be treated as "~7.1.0" (ignore the 'v' prefix)
         if (preg_match('/^~v?(\d+)(?:\.(\d+))?(?:\.(\d+))?/', $constraint, $matches)) {
-            $major = (int)$matches[1];
-            $minor = isset($matches[2]) && $matches[2] !== '' ? (int)$matches[2] : 0;
-            $patch = isset($matches[3]) && $matches[3] !== '' ? (int)$matches[3] : 0;
+            $major = (int) $matches[1];
+            $minor = isset($matches[2]) && $matches[2] !== '' ? (int) $matches[2] : 0;
+            $patch = isset($matches[3]) && $matches[3] !== '' ? (int) $matches[3] : 0;
 
             $minVersion = $major . '.' . $minor . '.' . $patch;
 
@@ -364,6 +366,7 @@ final class DependencyCompatibilityTest extends TestCase
                     return false;
                 }
             }
+
             return true;
         }
 
@@ -387,6 +390,7 @@ final class DependencyCompatibilityTest extends TestCase
         // Handle base version (e.g., "8.1" means "8.1.*")
         if (preg_match('/^(\d+\.\d+)$/', $constraint, $matches)) {
             $baseVersion = $matches[1];
+
             return strpos($normalizedVersion, $baseVersion . '.') === 0;
         }
 
@@ -431,14 +435,14 @@ final class DependencyCompatibilityTest extends TestCase
         // Create a test YAML file
         $yamlFile = $this->tempDir . '/test-config.yaml';
         $yamlContent = <<<'YAML'
-# Test configuration
-check-dependencies: true
-some-number: 42
-some-string: hello world
-another-boolean: false
-# Commented value
-# ignored-value: test
-YAML;
+            # Test configuration
+            check-dependencies: true
+            some-number: 42
+            some-string: hello world
+            another-boolean: false
+            # Commented value
+            # ignored-value: test
+            YAML;
         file_put_contents($yamlFile, $yamlContent);
 
         // Test reading boolean true
@@ -498,6 +502,7 @@ YAML;
                 if (is_numeric($value)) {
                     return $value + 0; // Convert to int or float
                 }
+
                 // Return as string
                 return $value;
             }
@@ -506,4 +511,3 @@ YAML;
         return $default;
     }
 }
-
