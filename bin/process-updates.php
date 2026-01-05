@@ -80,6 +80,50 @@ function readPackagesFromYaml(string $yamlPath, string $section): array
     return $packages;
 }
 
+// Function to read a configuration value from YAML file
+function readConfigValue(string $yamlPath, string $key, $default = null)
+{
+    if (!file_exists($yamlPath)) {
+        return $default;
+    }
+
+    $content = file_get_contents($yamlPath);
+    if ($content === false) {
+        return $default;
+    }
+
+    $lines = explode("\n", $content);
+
+    foreach ($lines as $line) {
+        $trimmedLine = trim($line);
+
+        // Skip empty lines and pure comment lines
+        if (empty($trimmedLine) || strpos($trimmedLine, '#') === 0) {
+            continue;
+        }
+
+        // Check for key: value pattern
+        if (preg_match('/^' . preg_quote($key, '/') . ':\s*(.+)$/', $trimmedLine, $matches)) {
+            $value = trim($matches[1]);
+            // Handle boolean values
+            if (strtolower($value) === 'true') {
+                return true;
+            }
+            if (strtolower($value) === 'false') {
+                return false;
+            }
+            // Handle numeric values
+            if (is_numeric($value)) {
+                return $value + 0; // Convert to int or float
+            }
+            // Return as string
+            return $value;
+        }
+    }
+
+    return $default;
+}
+
 // Function to read packages from TXT file (backward compatibility)
 function readPackagesFromTxt(string $txtPath): array
 {
@@ -113,12 +157,14 @@ function readPackagesFromTxt(string $txtPath): array
 $configFile = getenv('CONFIG_FILE') ?: '';
 $ignoredPackages = [];
 $includedPackages = [];
+$checkDependencies = true; // Default: enabled
 
 if ($configFile) {
     // YAML file provided
     if (strpos($configFile, '.yaml') !== false || strpos($configFile, '.yml') !== false) {
         $ignoredPackages = readPackagesFromYaml($configFile, 'ignore');
         $includedPackages = readPackagesFromYaml($configFile, 'include');
+        $checkDependencies = readConfigValue($configFile, 'check-dependencies', true);
     } elseif (strpos($configFile, '.txt') !== false) {
         // TXT file (backward compatibility)
         $ignoredPackages = readPackagesFromTxt($configFile);
@@ -137,6 +183,7 @@ if ($configFile) {
     if ($yamlFile) {
         $ignoredPackages = readPackagesFromYaml($yamlFile, 'ignore');
         $includedPackages = readPackagesFromYaml($yamlFile, 'include');
+        $checkDependencies = readConfigValue($yamlFile, 'check-dependencies', true);
     }
 }
 
@@ -163,6 +210,7 @@ if (!defined('E_OK')) {
 
 if ($debug) {
     error_log("DEBUG: showReleaseInfo = " . ($showReleaseInfo ? 'true' : 'false'));
+    error_log("DEBUG: checkDependencies = " . ($checkDependencies ? 'true' : 'false'));
     error_log("DEBUG: ignoredPackages count = " . count($ignoredPackages));
     error_log("DEBUG: includedPackages count = " . count($includedPackages));
     if (count($ignoredPackages) > 0) {
@@ -322,6 +370,535 @@ function shouldLimitVersion($packageName, $latestVersion, $frameworkConstraints)
     return false;
 }
 
+// Function to get packages that depend on a given package
+function getDependentPackages($packageName) {
+    $composerBin = getenv('COMPOSER_BIN') ?: 'composer';
+    $phpBin = getenv('PHP_BIN') ?: 'php';
+
+    // Run composer why to get dependent packages
+    $cmd = escapeshellarg($phpBin) . ' -d date.timezone=UTC ' . escapeshellarg($composerBin) .
+           ' why ' . escapeshellarg($packageName) . ' 2>/dev/null';
+
+    $output = shell_exec($cmd);
+    if (!$output) {
+        return [];
+    }
+
+    $dependents = [];
+    $lines = explode("\n", trim($output));
+
+    foreach ($lines as $line) {
+        // Parse lines like "package/name  version  requires  target-package (constraint)"
+        if (preg_match('/^([a-z0-9\-_]+\/[a-z0-9\-_]+)\s+/i', $line, $matches)) {
+            $dependentPackage = $matches[1];
+            // Extract version constraint if present
+            if (preg_match('/requires\s+' . preg_quote($packageName, '/') . '\s+\(([^)]+)\)/', $line, $constraintMatches)) {
+                $dependents[$dependentPackage] = $constraintMatches[1];
+            } else {
+                $dependents[$dependentPackage] = null;
+            }
+        }
+    }
+
+    return $dependents;
+}
+
+// Function to get version constraints from composer.lock for a package
+function getPackageConstraintsFromLock($packageName) {
+    if (!file_exists('composer.lock')) {
+        return [];
+    }
+
+    $lock = json_decode(file_get_contents('composer.lock'), true);
+    if (!$lock || !isset($lock['packages']) && !isset($lock['packages-dev'])) {
+        return [];
+    }
+
+    $allPackages = array_merge(
+        $lock['packages'] ?? [],
+        $lock['packages-dev'] ?? []
+    );
+
+    $constraints = [];
+    foreach ($allPackages as $pkg) {
+        if (!isset($pkg['name']) || !isset($pkg['require'])) {
+            continue;
+        }
+
+        // Check if this package requires our target package
+        if (isset($pkg['require'][$packageName])) {
+            $constraints[$pkg['name']] = $pkg['require'][$packageName];
+        }
+    }
+
+    return $constraints;
+}
+
+// Function to check if a version satisfies a constraint
+function versionSatisfiesConstraint($version, $constraint) {
+    if (empty($constraint)) {
+        return true;
+    }
+
+    // Normalize version
+    $normalizedVersion = ltrim($version, 'v');
+    $constraint = trim($constraint);
+
+    // Handle constraints that start with 'v' followed by version (e.g., "v8.2.0" means exactly "8.2.0")
+    if (preg_match('/^v(\d+\.\d+\.\d+)$/', $constraint, $matches)) {
+        return version_compare($normalizedVersion, $matches[1], '==');
+    }
+
+    // Handle wildcard constraints (e.g., "8.1.*")
+    if (preg_match('/^(\d+\.\d+)\.\*$/', $constraint, $matches)) {
+        $baseVersion = $matches[1];
+        // Check if version starts with base version (e.g., "8.1.0", "8.1.5" match "8.1.*")
+        return strpos($normalizedVersion, $baseVersion . '.') === 0;
+    }
+
+    // Handle range constraints with comma (AND) or pipe (OR)
+    // Note: Composer uses both single | and double || for OR
+    // IMPORTANT: This must be checked BEFORE caret/tilde constraints because
+    // constraints like "^2.5|^3" need to be split first
+    if (strpos($constraint, '||') !== false || strpos($constraint, '|') !== false) {
+        // OR operator: any range must be satisfied
+        // Split by || first, then by | to handle both formats
+        $ranges = preg_split('/\s*\|\|\s*|\s*\|\s*/', $constraint);
+        foreach ($ranges as $range) {
+            $range = trim($range);
+            if (empty($range)) {
+                continue;
+            }
+            // Recursively check each range
+            if (versionSatisfiesConstraint($version, $range)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // Handle caret constraints (e.g., "^8.1.0" means >=8.1.0 <9.0.0, "^2.0" means >=2.0.0 <3.0.0, "^3" means >=3.0.0 <4.0.0)
+    // Also handle "^v7.1.0" which should be treated as "^7.1.0" (ignore the 'v' prefix)
+    // Also handle "^3.0" which means >=3.0.0 <4.0.0
+    if (preg_match('/^\^v?(\d+)(?:\.(\d+))?(?:\.(\d+))?/', $constraint, $matches)) {
+        $major = (int)$matches[1];
+        // Check if minor and patch are captured (not just empty strings)
+        $minor = (isset($matches[2]) && $matches[2] !== '') ? (int)$matches[2] : 0;
+        $patch = (isset($matches[3]) && $matches[3] !== '') ? (int)$matches[3] : 0;
+
+        $minVersion = $major . '.' . $minor . '.' . $patch;
+        $nextMajor = $major + 1;
+        $maxVersion = $nextMajor . '.0.0';
+
+        $result = version_compare($normalizedVersion, $minVersion, '>=') &&
+                  version_compare($normalizedVersion, $maxVersion, '<');
+
+        return $result;
+    }
+
+    // Handle tilde constraints (e.g., "~8.1.0" means >=8.1.0 <8.2.0, "~1.0" means >=1.0.0 <2.0.0)
+    // Also handle "~v7.1.0" which should be treated as "~7.1.0" (ignore the 'v' prefix)
+    if (preg_match('/^~v?(\d+)(?:\.(\d+))?(?:\.(\d+))?/', $constraint, $matches)) {
+        $major = (int)$matches[1];
+        $minor = isset($matches[2]) && $matches[2] !== '' ? (int)$matches[2] : 0;
+        $patch = isset($matches[3]) && $matches[3] !== '' ? (int)$matches[3] : 0;
+
+        $minVersion = $major . '.' . $minor . '.' . $patch;
+
+        // If only major version specified (e.g., "~1"), next version is major+1.0.0
+        // If major.minor specified (e.g., "~1.0"), next version is major.minor+1.0
+        // If major.minor.patch specified (e.g., "~1.0.0"), next version is major.minor+1.0
+        if (!isset($matches[2]) || $matches[2] === '') {
+            // Only major: ~1 means >=1.0.0 <2.0.0
+            $nextMajor = $major + 1;
+            $maxVersion = $nextMajor . '.0.0';
+        } else {
+            // Major.minor or major.minor.patch: ~1.0 means >=1.0.0 <2.0.0, ~1.0.0 means >=1.0.0 <1.1.0
+            if (!isset($matches[3]) || $matches[3] === '') {
+                // Major.minor: ~1.0 means >=1.0.0 <2.0.0
+                $nextMajor = $major + 1;
+                $maxVersion = $nextMajor . '.0.0';
+            } else {
+                // Major.minor.patch: ~1.0.0 means >=1.0.0 <1.1.0
+                $nextMinor = $minor + 1;
+                $maxVersion = $major . '.' . $nextMinor . '.0';
+            }
+        }
+
+        return version_compare($normalizedVersion, $minVersion, '>=') &&
+               version_compare($normalizedVersion, $maxVersion, '<');
+    }
+
+    if (strpos($constraint, ',') !== false) {
+        // AND operator: all ranges must be satisfied
+        $ranges = explode(',', $constraint);
+        foreach ($ranges as $range) {
+            $range = trim($range);
+            if (!versionSatisfiesConstraint($version, $range)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // Handle simple comparison operators (>=, <=, >, <, ==, !=)
+    if (preg_match('/^(>=|<=|>|<|==|!=)\s*(.+)$/', $constraint, $matches)) {
+        $operator = $matches[1];
+        $targetVersion = ltrim($matches[2], 'v');
+
+        // Handle != operator
+        if ($operator === '!=') {
+            return version_compare($normalizedVersion, $targetVersion, '!=');
+        }
+
+        return version_compare($normalizedVersion, $targetVersion, $operator);
+    }
+
+    // Handle exact version match (e.g., "8.1.0")
+    $constraintNormalized = ltrim($constraint, 'v');
+    if (preg_match('/^\d+\.\d+\.\d+/', $constraintNormalized)) {
+        return version_compare($normalizedVersion, $constraintNormalized, '==');
+    }
+
+    // Default: try to use Composer's constraint parser if available
+    // For now, fallback to simple comparison
+    // This handles cases like "8.1" which might mean "8.1.*"
+    if (preg_match('/^(\d+\.\d+)$/', $constraint, $matches)) {
+        $baseVersion = $matches[1];
+        return strpos($normalizedVersion, $baseVersion . '.') === 0;
+    }
+
+    return false;
+}
+
+// Function to get package requirements from Packagist
+function getPackageRequirements($packageName, $version) {
+    $url = "https://packagist.org/packages/{$packageName}.json";
+    $context = stream_context_create([
+        'http' => [
+            'timeout' => 5,
+            'user_agent' => 'Composer Update Helper',
+        ]
+    ]);
+
+    $json = @file_get_contents($url, false, $context);
+    if (!$json) {
+        // Fallback: try composer show
+        return getPackageRequirementsFromComposer($packageName, $version);
+    }
+
+    $data = json_decode($json, true);
+    if (!$data || !isset($data['package']['versions'])) {
+        // Fallback: try composer show
+        return getPackageRequirementsFromComposer($packageName, $version);
+    }
+
+    // Normalize version (remove 'v' prefix)
+    $normalizedVersion = ltrim($version, 'v');
+
+    // Find the version in the package data
+    foreach ($data['package']['versions'] as $versionKey => $versionData) {
+        $versionKeyNormalized = ltrim($versionKey, 'v');
+        if ($versionKeyNormalized === $normalizedVersion && isset($versionData['require'])) {
+            return $versionData['require'];
+        }
+    }
+
+    // Version not found in Packagist data, try composer show as fallback
+    return getPackageRequirementsFromComposer($packageName, $version);
+}
+
+// Function to get package requirements from composer show (fallback)
+function getPackageRequirementsFromComposer($packageName, $version) {
+    $composerBin = getenv('COMPOSER_BIN') ?: 'composer';
+    $phpBin = getenv('PHP_BIN') ?: 'php';
+
+    // Try to get package info for the specific version
+    $normalizedVersion = ltrim($version, 'v');
+    $cmd = escapeshellarg($phpBin) . ' -d date.timezone=UTC ' . escapeshellarg($composerBin) .
+           ' show ' . escapeshellarg($packageName . ':' . $normalizedVersion) . ' --format=json 2>/dev/null';
+
+    $output = shell_exec($cmd);
+    if (!$output) {
+        return [];
+    }
+
+    $data = json_decode($output, true);
+    if (!$data || !isset($data['requires'])) {
+        return [];
+    }
+
+    return $data['requires'];
+}
+
+// Function to get installed package version from composer.json or composer.lock
+function getInstalledPackageVersion($packageName) {
+    // First try composer.lock (more accurate)
+    if (file_exists('composer.lock')) {
+        $lock = json_decode(file_get_contents('composer.lock'), true);
+        if ($lock) {
+            $allPackages = array_merge(
+                $lock['packages'] ?? [],
+                $lock['packages-dev'] ?? []
+            );
+
+            foreach ($allPackages as $pkg) {
+                if (isset($pkg['name']) && $pkg['name'] === $packageName) {
+                    $version = $pkg['version'] ?? '';
+                    // Remove 'v' prefix if present
+                    $version = ltrim($version, 'v');
+                    // composer.lock may have versions like "3.6.0.0" (with extra patch), normalize to x.y.z
+                    if (preg_match('/^(\d+\.\d+\.\d+)/', $version, $matches)) {
+                        return $matches[1];
+                    }
+                    return $version;
+                }
+            }
+        }
+    }
+
+    // Fallback to composer.json (less accurate, but better than nothing)
+    // Note: composer.json has constraints, not exact versions
+    // We'll try to extract a version from the constraint if possible
+    if (file_exists('composer.json')) {
+        $composer = json_decode(file_get_contents('composer.json'), true);
+        $require = $composer['require'] ?? [];
+        $requireDev = $composer['require-dev'] ?? [];
+        $allDeps = array_merge($require, $requireDev);
+
+        if (isset($allDeps[$packageName])) {
+            $constraint = $allDeps[$packageName];
+            // Try to extract version from constraint (e.g., "8.1.0" from "8.1.0" or "^8.1.0")
+            if (preg_match('/(\d+\.\d+\.\d+)/', $constraint, $matches)) {
+                return $matches[1];
+            }
+            // If no exact version found, return null to skip this check
+            return null;
+        }
+    }
+
+    return null;
+}
+
+// Function to find the highest compatible version considering dependent packages
+function findCompatibleVersion($packageName, $proposedVersion, $debug = false, $checkDependencies = true) {
+    // If dependency checking is disabled, return proposed version without verification
+    if (!$checkDependencies) {
+        if ($debug) {
+            error_log("DEBUG: Dependency checking is disabled, using proposed version: {$proposedVersion}");
+        }
+        return $proposedVersion;
+    }
+
+    // Get dependent packages and their constraints
+    $dependentConstraints = getPackageConstraintsFromLock($packageName);
+
+    // Get requirements of the proposed package version
+    $packageRequirements = getPackageRequirements($packageName, $proposedVersion);
+
+    if ($debug && !empty($packageRequirements)) {
+        error_log("DEBUG: Package {$packageName} {$proposedVersion} requires:");
+        foreach ($packageRequirements as $req => $constraint) {
+            error_log("DEBUG:   - {$req}: {$constraint}");
+        }
+    }
+
+    // Check if the proposed package's requirements are compatible with installed versions
+    foreach ($packageRequirements as $requiredPackage => $requiredConstraint) {
+        // Skip php and php-* requirements
+        if ($requiredPackage === 'php' || strpos($requiredPackage, 'php-') === 0) {
+            continue;
+        }
+
+        // Skip ext-* requirements
+        if (strpos($requiredPackage, 'ext-') === 0) {
+            continue;
+        }
+
+        // Handle "self.version" constraint (package requires same version as itself)
+        if ($requiredConstraint === 'self.version' || $requiredConstraint === '@self') {
+            // This means the required package must be the same version as the proposing package
+            // For example, scheb/2fa-google-authenticator 8.2.0 requires scheb/2fa-bundle: self.version
+            // means it requires scheb/2fa-bundle 8.2.0
+            $normalizedProposed = ltrim($proposedVersion, 'v');
+            $requiredVersion = $normalizedProposed;
+
+            // Get installed version of the required package
+            $installedVersion = getInstalledPackageVersion($requiredPackage);
+            if ($installedVersion === null) {
+                // Package not installed, skip check (it will be installed if needed)
+                continue;
+            }
+
+            $normalizedInstalled = ltrim($installedVersion, 'v');
+            if ($normalizedInstalled !== $requiredVersion) {
+                if ($debug) {
+                    error_log("DEBUG: Proposed package {$packageName} {$proposedVersion} requires {$requiredPackage}: {$requiredConstraint} (which means {$requiredVersion}), but installed version {$normalizedInstalled} does NOT match");
+                }
+                // Conflict detected: self.version constraint requires exact version match
+                return null;
+            }
+            // Version matches, continue to next requirement
+            continue;
+        }
+
+        // Get installed version of the required package
+        $installedVersion = getInstalledPackageVersion($requiredPackage);
+
+        if ($installedVersion === null) {
+            // Package not installed, skip check (it will be installed if needed)
+            continue;
+        }
+
+        // Check if installed version satisfies the required constraint
+        $satisfies = versionSatisfiesConstraint($installedVersion, $requiredConstraint);
+        if ($debug) {
+            error_log("DEBUG: Checking if installed version {$installedVersion} satisfies constraint {$requiredConstraint} for {$requiredPackage}: " . ($satisfies ? 'YES' : 'NO'));
+        }
+
+        if (!$satisfies) {
+            if ($debug) {
+                error_log("DEBUG: Proposed package {$packageName} {$proposedVersion} requires {$requiredPackage}: {$requiredConstraint}, but installed version {$installedVersion} does NOT satisfy it");
+            }
+            // Conflict detected: proposed package requires a version incompatible with installed version
+            return null;
+        }
+    }
+
+    if (empty($dependentConstraints)) {
+        // No dependents, and requirements are compatible, safe to use proposed version
+        if ($debug) {
+            error_log("DEBUG: No dependent packages found for {$packageName}, and requirements are compatible, using proposed version: {$proposedVersion}");
+        }
+        return $proposedVersion;
+    }
+
+    if ($debug) {
+        error_log("DEBUG: Found " . count($dependentConstraints) . " dependent packages for {$packageName}:");
+        foreach ($dependentConstraints as $dep => $constraint) {
+            error_log("DEBUG:   - {$dep} requires {$packageName}: {$constraint}");
+        }
+    }
+
+    // Check if proposed version satisfies all constraints
+    $allSatisfied = true;
+    foreach ($dependentConstraints as $depPackage => $constraint) {
+        if (!versionSatisfiesConstraint($proposedVersion, $constraint)) {
+            $allSatisfied = false;
+            if ($debug) {
+                error_log("DEBUG: Proposed version {$proposedVersion} does NOT satisfy constraint '{$constraint}' from {$depPackage}");
+            }
+            break;
+        }
+    }
+
+    if ($allSatisfied) {
+        // All dependent constraints are satisfied, and package requirements are compatible
+        if ($debug) {
+            error_log("DEBUG: Proposed version {$proposedVersion} satisfies all dependent constraints and requirements are compatible");
+        }
+        return $proposedVersion;
+    }
+
+    // Need to find a compatible version
+    // Get all available versions
+    $composerBin = getenv('COMPOSER_BIN') ?: 'composer';
+    $phpBin = getenv('PHP_BIN') ?: 'php';
+
+    $cmd = escapeshellarg($phpBin) . ' -d date.timezone=UTC ' . escapeshellarg($composerBin) .
+           ' show ' . escapeshellarg($packageName) . ' --all --format=json 2>/dev/null';
+
+    $output = shell_exec($cmd);
+    if (!$output) {
+        if ($debug) {
+            error_log("DEBUG: Could not get available versions for {$packageName}, skipping compatibility check");
+        }
+        return null; // Can't verify, skip this update
+    }
+
+    $data = json_decode($output, true);
+    if (!$data || !isset($data['versions'])) {
+        if ($debug) {
+            error_log("DEBUG: No versions found for {$packageName}, skipping compatibility check");
+        }
+        return null;
+    }
+
+    // Filter stable versions and sort them
+    $stableVersions = [];
+    foreach ($data['versions'] as $version) {
+        $normalized = ltrim($version, 'v');
+        // Exclude dev/alpha/beta/RC versions
+        if (!preg_match('/(dev|alpha|beta|rc)/i', $version)) {
+            $stableVersions[] = $normalized;
+        }
+    }
+
+    if (empty($stableVersions)) {
+        if ($debug) {
+            error_log("DEBUG: No stable versions found for {$packageName}");
+        }
+        return null;
+    }
+
+    // Sort versions descending
+    usort($stableVersions, function($a, $b) {
+        return version_compare($b, $a); // Descending order
+    });
+
+    // Find the highest version that satisfies all constraints and requirements
+    foreach ($stableVersions as $version) {
+        $satisfiesAll = true;
+
+        // Check dependent constraints
+        foreach ($dependentConstraints as $depPackage => $constraint) {
+            if (!versionSatisfiesConstraint($version, $constraint)) {
+                $satisfiesAll = false;
+                break;
+            }
+        }
+
+        if (!$satisfiesAll) {
+            continue;
+        }
+
+        // Check package requirements for this version
+        $versionRequirements = getPackageRequirements($packageName, $version);
+        foreach ($versionRequirements as $requiredPackage => $requiredConstraint) {
+            // Skip php and ext-* requirements
+            if ($requiredPackage === 'php' || strpos($requiredPackage, 'php-') === 0 || strpos($requiredPackage, 'ext-') === 0) {
+                continue;
+            }
+
+            $installedVersion = getInstalledPackageVersion($requiredPackage);
+            if ($installedVersion === null) {
+                continue; // Package not installed, will be installed if needed
+            }
+
+            if (!versionSatisfiesConstraint($installedVersion, $requiredConstraint)) {
+                $satisfiesAll = false;
+                break;
+            }
+        }
+
+        if ($satisfiesAll) {
+            if ($debug) {
+                error_log("DEBUG: Found compatible version {$version} for {$packageName} (proposed was {$proposedVersion})");
+            }
+            return $version;
+        }
+    }
+
+    // No compatible version found
+    if ($debug) {
+        error_log("DEBUG: No compatible version found for {$packageName} (proposed: {$proposedVersion})");
+        foreach ($dependentConstraints as $depPackage => $constraint) {
+            error_log("DEBUG:   - {$depPackage} requires: {$constraint}");
+        }
+    }
+    return null; // No compatible version, skip this update
+}
+
 // Function to get the latest specific version that meets a constraint
 function getLatestVersionInConstraint($packageName, $baseVersion) {
     $composerBin = getenv('COMPOSER_BIN') ?: 'composer';
@@ -471,6 +1048,12 @@ $ignoredProd = [];
 $ignoredDev  = [];
 $releaseInfo = []; // Store release information for packages
 
+// Track all outdated packages (before dependency checking) for debug output
+$allOutdatedProd = [];
+$allOutdatedDev  = [];
+$filteredByDependenciesProd = [];
+$filteredByDependenciesDev  = [];
+
 foreach ($report['installed'] as $pkg) {
     if (!isset($pkg['name'])) continue;
     $name   = $pkg['name'];
@@ -535,6 +1118,7 @@ foreach ($report['installed'] as $pkg) {
     }
 
     // Compare installed version with the proposed one: only include if there's really an update
+    $needsUpdate = false;
     if ($installedNormalized) {
         $constraintNormalized = $constraint;
         // If it's a wildcard constraint, we can't compare directly, so we include it
@@ -551,8 +1135,49 @@ foreach ($report['installed'] as $pkg) {
                 }
                 continue;
             }
+            $needsUpdate = true;
         } elseif ($debug) {
             error_log("DEBUG:   - Wildcard constraint, including for update");
+            $needsUpdate = true;
+        }
+    } else {
+        $needsUpdate = true;
+    }
+
+    // Track all outdated packages (before dependency checking) for comparison
+    // Only track if it actually needs an update
+    if ($needsUpdate) {
+        $packageString = $name . ':' . $constraint;
+        if (isset($devSet[$name])) {
+            $allOutdatedDev[] = $packageString;
+        } else {
+            $allOutdatedProd[] = $packageString;
+        }
+    }
+
+    // Check dependency compatibility before suggesting update
+    // Only check for specific versions (not wildcards) and if dependency checking is enabled
+    if ($needsUpdate && $checkDependencies && strpos($constraint, '*') === false && strpos($constraint, '^') === false && strpos($constraint, '~') === false) {
+        $compatibleVersion = findCompatibleVersion($name, $constraint, $debug, $checkDependencies);
+        if ($compatibleVersion === null) {
+            // No compatible version found, skip this update
+            if ($debug) {
+                error_log("DEBUG:   - Action: SKIPPED (no compatible version found due to dependency constraints)");
+            }
+            // Track filtered packages
+            if (isset($devSet[$name])) {
+                $filteredByDependenciesDev[] = $packageString;
+            } else {
+                $filteredByDependenciesProd[] = $packageString;
+            }
+            continue;
+        }
+        if ($compatibleVersion !== $constraint) {
+            // Found a compatible version that's different from proposed
+            if ($debug) {
+                error_log("DEBUG:   - Compatible version found: {$compatibleVersion} (proposed was {$constraint})");
+            }
+            $constraint = $compatibleVersion;
         }
     }
 
@@ -607,6 +1232,7 @@ foreach ($frameworkConstraints as $prefix => $version) {
     $detectedFrameworks[] = rtrim($prefix, '/') . ' ' . $version . '.*';
 }
 if (!empty($detectedFrameworks)) {
+    $output[] = "";
     $output[] = E_WRENCH . "  Detected framework constraints:";
     foreach ($detectedFrameworks as $fw) {
         $output[] = "  - " . $fw;
@@ -630,6 +1256,68 @@ if (!empty($ignoredDev)) {
         $output[] = "  - " . $pkg;
     }
     $output[] = "";
+}
+
+// Show dependency checking comparison when enabled
+if ($checkDependencies) {
+    $output[] = E_WRENCH . "  Dependency checking analysis:";
+
+    // Show all outdated packages (before checking)
+    if (!empty($allOutdatedProd) || !empty($allOutdatedDev)) {
+        $output[] = "  📋 All outdated packages (before dependency check):";
+        if (!empty($allOutdatedProd)) {
+            foreach ($allOutdatedProd as $pkg) {
+                $output[] = "     - " . $pkg . " (prod)";
+            }
+        }
+        if (!empty($allOutdatedDev)) {
+            foreach ($allOutdatedDev as $pkg) {
+                $output[] = "     - " . $pkg . " (dev)";
+            }
+        }
+        $output[] = "";
+    } else {
+        $output[] = "  📋 All outdated packages (before dependency check): (none)";
+        $output[] = "";
+    }
+
+    // Show filtered packages (conflicts detected)
+    if (!empty($filteredByDependenciesProd) || !empty($filteredByDependenciesDev)) {
+        $output[] = "  ⚠️  Filtered by dependency conflicts:";
+        if (!empty($filteredByDependenciesProd)) {
+            foreach ($filteredByDependenciesProd as $pkg) {
+                $output[] = "     - " . $pkg . " (prod)";
+            }
+        }
+        if (!empty($filteredByDependenciesDev)) {
+            foreach ($filteredByDependenciesDev as $pkg) {
+                $output[] = "     - " . $pkg . " (dev)";
+            }
+        }
+        $output[] = "";
+    } else {
+        $output[] = "  ⚠️  Filtered by dependency conflicts: (none)";
+        $output[] = "";
+    }
+
+    // Show packages that passed dependency check
+    if (!empty($prod) || !empty($dev)) {
+        $output[] = "  ✅ Packages that passed dependency check:";
+        if (!empty($prod)) {
+            foreach ($prod as $pkg) {
+                $output[] = "     - " . $pkg . " (prod)";
+            }
+        }
+        if (!empty($dev)) {
+            foreach ($dev as $pkg) {
+                $output[] = "     - " . $pkg . " (dev)";
+            }
+        }
+        $output[] = "";
+    } else {
+        $output[] = "  ✅ Packages that passed dependency check: (none)";
+        $output[] = "";
+    }
 }
 
 // Commands section (with special markers for extraction)

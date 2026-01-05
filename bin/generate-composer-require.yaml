@@ -1,6 +1,16 @@
 # Composer Update Helper Configuration
 # Configuration file for ignored and included packages during composer update suggestions
 
+# Enable detailed dependency compatibility checking
+# ⚠️  WARNING: This feature is currently in DEVELOPMENT MODE and is still being reviewed and refined.
+# While functional, it may not catch all edge cases and should be used with caution in production environments.
+# When enabled (true), the tool will check if proposed package versions are compatible
+# with currently installed dependencies, preventing conflicts before they occur.
+# When disabled (false), the tool will suggest all available updates without checking
+# dependency compatibility (faster but may suggest incompatible updates).
+# Default: true
+check-dependencies: true
+
 # List of packages to ignore during update
 # Ignored packages will still be displayed in the output with their available versions,
 # but won't be included in the composer require commands.

@@ -207,17 +207,46 @@ fi
 # YAML parsing is now done in PHP (process-updates.php)
 # We just pass the config file path as an environment variable
 
+# Function to show animated spinner while command runs
+show_spinner() {
+  local pid=$1
+  local message=$2
+  local spinstr='|/-\'
+  local temp
+
+  if [ "$DEBUG" = "true" ] || [ "$VERBOSE" = "true" ]; then
+    wait $pid
+    return $?
+  fi
+
+  echo -n "$message" >&2
+  while kill -0 $pid 2>/dev/null; do
+    temp=${spinstr#?}
+    printf "\b${spinstr:0:1}" >&2
+    spinstr=$temp${spinstr%"$temp"}
+    sleep 0.1
+  done
+  printf "\b✅\n" >&2
+  wait $pid
+  return $?
+}
+
 # Run composer with forced timezone to avoid warnings
 # and filter any line starting with "Warning:" just in case.
 # Show loading indicator while checking outdated packages
+# Run command in background and show spinner
+("$PHP_BIN" -d date.timezone=UTC "$COMPOSER_BIN" outdated --direct --format=json 2>&1 \
+  | grep -v '^Warning:' || true) > /tmp/composer-outdated-$$.json &
+OUTDATED_PID=$!
+
 if [ "$DEBUG" != "true" ]; then
-  echo -n "⏳ Checking for outdated packages... " >&2
+  show_spinner $OUTDATED_PID "⏳ Checking for outdated packages... "
+else
+  wait $OUTDATED_PID
 fi
-OUTDATED_JSON="$("$PHP_BIN" -d date.timezone=UTC "$COMPOSER_BIN" outdated --direct --format=json 2>&1 \
-  | grep -v '^Warning:' || true)"
-if [ "$DEBUG" != "true" ]; then
-  echo "✅" >&2
-fi
+
+OUTDATED_JSON="$(cat /tmp/composer-outdated-$$.json 2>/dev/null || true)"
+rm -f /tmp/composer-outdated-$$.json
 
 if [ "$DEBUG" = "true" ]; then
   echo "🔍 DEBUG: Composer outdated command executed" >&2
@@ -240,21 +269,28 @@ if [ "$DEBUG" = "true" ]; then
   echo "   - SHOW_RELEASE_INFO: $SHOW_RELEASE_INFO" >&2
   echo "   - DEBUG: $DEBUG" >&2
   echo "   - PROCESSOR_PHP: $PROCESSOR_PHP" >&2
-elif [ "$VERBOSE" != "true" ]; then
-  echo -n "⏳ Processing packages... " >&2
 fi
 
-# Call the PHP processor script
+# Call the PHP processor script in background and show spinner
 # PHP will read the YAML/TXT file directly from CONFIG_FILE
-OUTPUT="$(OUTDATED_JSON="$OUTDATED_JSON" COMPOSER_BIN="$COMPOSER_BIN" PHP_BIN="$PHP_BIN" CONFIG_FILE="$CONFIG_FILE" SHOW_RELEASE_INFO="$SHOW_RELEASE_INFO" DEBUG="$DEBUG" VERBOSE="$VERBOSE" "$PHP_BIN" -d date.timezone=UTC "$PROCESSOR_PHP" 2>&1)"
+(OUTDATED_JSON="$OUTDATED_JSON" COMPOSER_BIN="$COMPOSER_BIN" PHP_BIN="$PHP_BIN" CONFIG_FILE="$CONFIG_FILE" SHOW_RELEASE_INFO="$SHOW_RELEASE_INFO" DEBUG="$DEBUG" VERBOSE="$VERBOSE" "$PHP_BIN" -d date.timezone=UTC "$PROCESSOR_PHP" 2>&1 \
+  | grep -v '^Warning:' || true) > /tmp/composer-process-$$.out &
+PROCESS_PID=$!
+
+if [ "$DEBUG" != "true" ] && [ "$VERBOSE" != "true" ]; then
+  show_spinner $PROCESS_PID "⏳ Processing packages... "
+else
+  wait $PROCESS_PID
+fi
+
+OUTPUT="$(cat /tmp/composer-process-$$.out 2>/dev/null || true)"
+rm -f /tmp/composer-process-$$.out
 
 # Filter any "Warning:" that might have slipped in from PHP (double safety)
 OUTPUT="$(printf "%s\n" "$OUTPUT" | grep -v '^Warning:' || true)"
 
 if [ "$DEBUG" = "true" ]; then
   echo "🔍 DEBUG: PHP script output length: ${#OUTPUT} characters" >&2
-elif [ "$VERBOSE" != "true" ]; then
-  echo "✅" >&2
 fi
 
 # Extract commands for --run flag (between COMMANDS_START and COMMANDS_END markers)

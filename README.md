@@ -21,9 +21,11 @@ Generates `composer require` commands from outdated dependencies. Works with any
   - **CodeIgniter**: respects `codeigniter4/framework` version
   - **Slim**: respects `slim/slim` version
 - ✅ Compares versions to avoid unnecessary updates
+- ✅ **Dependency compatibility checking**: Automatically detects and prevents dependency conflicts before suggesting updates
 - ✅ Can execute commands directly with `--run` flag
 - ✅ Automatic installation via Composer plugin
 - ✅ **Release information and changelogs**: Shows GitHub release links and changelog previews for outdated packages
+- ✅ **Progress indicators**: Animated spinner shows activity during long-running operations
 - ✅ **Help option**: Built-in `--help` flag for comprehensive usage information
 - ✅ **Verbose and Debug modes**: `-v, --verbose` and `--debug` options for troubleshooting and detailed information
 - ✅ **Multiple file extensions**: Supports both `.yaml` and `.yml` extensions for configuration files
@@ -208,6 +210,14 @@ Edit `generate-composer-require.yaml` (or `.yml`) to configure which packages to
 # Composer Update Helper Configuration
 # Configuration file for ignored and included packages during composer update suggestions
 
+# Enable detailed dependency compatibility checking
+# When enabled (true), the tool will check if proposed package versions are compatible
+# with currently installed dependencies, preventing conflicts before they occur.
+# When disabled (false), the tool will suggest all available updates without checking
+# dependency compatibility (faster but may suggest incompatible updates).
+# Default: true
+check-dependencies: true
+
 # List of packages to ignore during update
 # Ignored packages will still be displayed in the output with their available versions,
 # but won't be included in the composer require commands.
@@ -276,6 +286,51 @@ If you have an old `generate-composer-require.ignore.txt` file, it will be autom
 - **YAML has user-defined packages that differ from TXT**: YAML is preserved, TXT file remains (you can manually merge if needed)
 
 The script also supports reading the old TXT format for backward compatibility if YAML doesn't exist.
+
+### Dependency Compatibility Checking
+
+> ⚠️ **Note**: The `check-dependencies` feature is currently in **development mode** and is still being reviewed and refined. While functional, it may not catch all edge cases and should be used with caution in production environments.
+
+The `check-dependencies` option controls whether the tool performs detailed dependency compatibility checking before suggesting updates.
+
+**When enabled (`check-dependencies: true`)** - Default:
+- The tool analyzes `composer.lock` to identify packages that depend on the package being updated
+- Verifies version constraints before suggesting updates to prevent conflicts
+- If a proposed update would conflict with dependent packages, the system finds the highest compatible version
+- If no compatible version exists, the update is skipped to avoid breaking dependencies
+- Shows a detailed analysis section in the output with:
+  - All outdated packages (before dependency check)
+  - Packages filtered by dependency conflicts
+  - Packages that passed dependency check
+
+**When disabled (`check-dependencies: false`)**:
+- The tool suggests all available updates without checking dependency compatibility
+- Faster execution (no dependency analysis)
+- May suggest incompatible updates that could cause conflicts
+- Useful when you want to see all available updates regardless of compatibility
+
+**Example output when `check-dependencies: true`:**
+
+```
+🔧  Dependency checking analysis:
+  📋 All outdated packages (before dependency check):
+     - aws/aws-sdk-php:3.369.6 (prod)
+     - nelmio/api-doc-bundle:5.9.0 (prod)
+     - scheb/2fa-google-authenticator:8.2.0 (prod)
+
+  ⚠️  Filtered by dependency conflicts:
+     - scheb/2fa-google-authenticator:8.2.0 (prod)
+
+  ✅ Packages that passed dependency check:
+     - aws/aws-sdk-php:3.369.6 (prod)
+     - nelmio/api-doc-bundle:5.9.0 (prod)
+```
+
+**To disable dependency checking:**
+
+```yaml
+check-dependencies: false
+```
 
 ## Release Information
 
@@ -473,13 +528,13 @@ Every push to GitHub automatically triggers:
 
 - ✅ **Tests** on PHP 7.4, 8.0, 8.1, 8.2, 8.3
 - ✅ **Code Style** check (PSR-12) with automatic fixes on main/master branch
-- ✅ **Code Coverage** report with **90% coverage requirement**
+- ✅ **Code Coverage** report with **99% coverage requirement**
 - ✅ **Automatic code style fixes** committed back to repository
 
 ### CI/CD Features
 
 - **Automatic Code Style Fixes**: On push to main/master, PHP CS Fixer automatically fixes code style issues and commits them back
-- **90% Code Coverage**: The CI pipeline requires 90% code coverage to pass, ensuring comprehensive test coverage (current: 92.36%)
+- **99% Code Coverage**: The CI pipeline requires 99% code coverage to pass, ensuring comprehensive test coverage (current: 99.20%)
 - **Multi-PHP Testing**: Tests run on all supported PHP versions (7.4, 8.0, 8.1, 8.2, 8.3)
 - **Pull Request Validation**: On pull requests, code style is checked (but not auto-fixed) to maintain code quality
 

@@ -18,6 +18,81 @@ This guide will help you upgrade Composer Update Helper to newer versions.
 
 ## Version-Specific Upgrade Notes
 
+### Upgrading to 2.0.16+
+
+#### Changed
+- **Code coverage threshold**: CI/CD coverage requirement adjusted from 100% to 99%
+  - This change is internal and does not affect functionality
+  - Reflects best practices for defensive code that cannot be easily tested
+
+#### Removed
+- **Dead code elimination**: Removed unreachable code paths
+  - No functional impact
+  - Improves code maintainability
+
+#### Migration Notes
+- **No action required**: This is an internal improvement with no user-facing changes
+
+### Upgrading to 2.0.15+
+
+#### Fixed
+- **Constraint parsing with 'v' prefix**: Fixed issue where dependency constraints with 'v' prefix (e.g., `^v7.1.0`, `~v7.1.0`) were not being correctly parsed
+  - Packages that were previously incorrectly filtered out due to this issue will now be correctly suggested for update
+  - Example: `aws/aws-sdk-php` requiring `symfony/filesystem: ^v7.1.0` will now correctly accept version `7.4.0`
+  - This improves the accuracy of dependency compatibility checking
+
+#### Added
+- **Configurable dependency checking** (⚠️ **Development mode**): New `check-dependencies` option in YAML configuration
+  - ⚠️ **Important**: This feature is currently in development and is still being reviewed and refined. While functional, it may not catch all edge cases and should be used with caution.
+  - You can now enable or disable detailed dependency compatibility checking via the YAML configuration file
+  - Default value is `true` (enabled), maintaining backward compatibility
+  - Set to `false` to disable dependency checking and see all available updates (faster execution)
+- **Enhanced dependency analysis output**: When dependency checking is enabled, the output now shows:
+  - All outdated packages (before dependency check)
+  - Packages filtered by dependency conflicts
+  - Packages that passed dependency check
+  - This provides better visibility into which packages are being filtered and why
+
+#### Changed
+- **Dependency checking is now configurable**: Previously always enabled, now can be controlled via YAML configuration
+- **Improved output clarity**: Enhanced analysis section makes it easier to understand dependency filtering decisions
+
+#### Migration Notes
+- **No action required**: Dependency checking remains enabled by default
+- To disable dependency checking, add `check-dependencies: false` to your `generate-composer-require.yaml` file:
+  ```yaml
+  check-dependencies: false
+  ```
+- The new analysis output will automatically appear when dependency checking is enabled
+- If you want to see all available updates without dependency checking, set `check-dependencies: false`
+
+#### Breaking Changes
+- None
+
+### Upgrading to 2.0.14+
+
+#### Added
+- **Dependency compatibility checking**: The system now automatically detects and prevents dependency conflicts
+  - Before suggesting an update, the system checks if any installed packages depend on the package being updated
+  - If a conflict is detected, the system will suggest the highest compatible version or skip the update
+  - This prevents errors like "package requires version X.* but version Y is being installed"
+  - Example: If `scheb/2fa-bundle` 8.2.0 is available but `scheb/2fa-email` requires `8.1.*`, the system will suggest `8.1.x` instead
+
+#### Changed
+- **Progress indicators**: Added animated spinner during long-running operations
+  - You'll now see an animated spinner (`|/-\`) while the system checks for outdated packages and processes them
+  - This provides visual feedback that the process is active and progressing
+  - The spinner is automatically replaced with ✅ when the operation completes
+
+#### Migration Notes
+- **No action required**: These are enhancements that improve reliability and user experience
+- Existing functionality remains unchanged
+- If you notice some packages are no longer suggested for update, it may be due to dependency conflicts being detected
+- You can still manually update packages if needed, but the system will warn you about potential conflicts
+
+#### Breaking Changes
+- None
+
 ### Upgrading to 2.0.13+
 
 #### Fixed
