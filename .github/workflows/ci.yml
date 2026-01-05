@@ -68,9 +68,9 @@ jobs:
             exit 1
           fi
 
-          echo "✅ All tests passed, validating 90% coverage..."
+          echo "✅ All tests passed, validating 99% coverage..."
 
-          # Validate that coverage is 90%
+          # Validate that coverage is 99%
           php -r "
           if (!file_exists('coverage.xml')) {
               echo 'ERROR: coverage.xml file was not generated\n';
@@ -96,12 +96,12 @@ jobs:
 
           echo \"Coverage: \$coveredElements/\$elements (\$percentage%)\n\";
 
-          if (\$percentage < 90) {
-              echo \"ERROR: Coverage must be 90%. Current: \$percentage%\n\";
+          if (\$percentage < 99) {
+              echo \"ERROR: Coverage must be 99%. Current: \$percentage%\n\";
               exit(1);
           }
 
-          echo \"✅ 90% coverage confirmed\n\";
+          echo \"✅ 99% coverage confirmed\n\";
           "
 
   code-style:
@@ -201,11 +201,11 @@ jobs:
           fi
           echo "✅ All tests passed successfully"
 
-      - name: Validate 90% coverage
+      - name: Validate 99% coverage
         run: |
-          echo "📊 Validating 90% coverage..."
+          echo "📊 Validating 99% coverage..."
 
-          # Validate that coverage is 90%
+          # Validate that coverage is 99%
           php -r "
           if (!file_exists('coverage.xml')) {
               echo 'ERROR: coverage.xml file was not generated\n';
@@ -231,12 +231,12 @@ jobs:
 
           echo \"Coverage: \$coveredElements/\$elements (\$percentage%)\n\";
 
-          if (\$percentage < 90) {
-              echo \"ERROR: Coverage must be 90%. Current: \$percentage%\n\";
+          if (\$percentage < 99) {
+              echo \"ERROR: Coverage must be 99%. Current: \$percentage%\n\";
               exit(1);
           }
 
-          echo \"✅ 90% coverage confirmed\n\";
+          echo \"✅ 99% coverage confirmed\n\";
           "
 
       - name: Upload coverage to Codecov

@@ -3,7 +3,7 @@
 
 declare(strict_types=1);
 /**
- * Script to validate code coverage is 90%
+ * Script to validate code coverage is 99%
  * Same logic as CI/CD pipeline
  */
 $coverageFile = __DIR__ . '/../coverage.xml';
@@ -32,8 +32,8 @@ $percentage = ($coveredElements / $elements) * 100;
 
 echo "Coverage: {$coveredElements}/{$elements} (" . number_format($percentage, 2) . "%)\n";
 
-if ($percentage < 90) {
-    echo 'ERROR: Coverage must be 90%. Current: ' . number_format($percentage, 2) . "%\n";
+if ($percentage < 99) {
+    echo 'ERROR: Coverage must be 99%. Current: ' . number_format($percentage, 2) . "%\n";
 
     // Show which files are not fully covered
     echo "\n📋 Files with incomplete coverage:\n";
@@ -44,7 +44,7 @@ if ($percentage < 90) {
 
         if ($fileElements > 0) {
             $filePercentage = ($fileCovered / $fileElements) * 100;
-            if ($filePercentage < 90) {
+            if ($filePercentage < 99) {
                 echo sprintf(
                     "  - %s: %.2f%% (%d/%d)\n",
                     $file['name'],
@@ -59,5 +59,5 @@ if ($percentage < 90) {
     exit(1);
 }
 
-echo "✅ 90% coverage confirmed\n";
+echo "✅ 99% coverage confirmed\n";
 exit(0);

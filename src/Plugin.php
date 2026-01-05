@@ -417,11 +417,6 @@ class Plugin implements PluginInterface, EventSubscriberInterface
                     continue;
                 }
 
-                // Skip old ignore entries (we've already added merged ones)
-                if ($inIgnore && !$ignoreSectionProcessed && preg_match('/^\s*-\s+([^#]+)/', $line)) {
-                    continue; // Skip old ignore entries
-                }
-
                 // Keep everything else (comments, include section, etc.)
                 $newYamlLines[] = $line;
 
