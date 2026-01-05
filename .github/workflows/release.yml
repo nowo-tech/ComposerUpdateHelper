@@ -51,14 +51,14 @@ jobs:
         run: |
           VERSION="${{ steps.version.outputs.VERSION }}"
           CHANGELOG_FILE="docs/CHANGELOG.md"
-          
+
           if [ -f "$CHANGELOG_FILE" ]; then
             # Search changelog section for this version
             # Match patterns like: ## [0.0.4] or ## 0.0.4
             # Escape dots in version for regex
             VERSION_ESCAPED=$(echo "$VERSION" | sed 's/\./\\./g')
             CHANGELOG_ENTRY=$(awk "/^## \[$VERSION_ESCAPED\]/ {flag=1; next} /^## \[?[0-9]/ {flag=0} flag" "$CHANGELOG_FILE" 2>/dev/null || echo "")
-            
+
             if [ -n "$CHANGELOG_ENTRY" ]; then
               # Preserve newlines using heredoc (no escaping needed)
               echo "HAS_CHANGELOG=true" >> $GITHUB_OUTPUT
@@ -82,16 +82,16 @@ jobs:
         with:
           script: |
             const tagName = '${{ steps.tag.outputs.TAG_NAME }}';
-            
+
             try {
               const { data: releases } = await github.rest.repos.listReleases({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 per_page: 100
               });
-              
+
               const existingRelease = releases.find(r => r.tag_name === tagName);
-              
+
               if (existingRelease) {
                 const hasChangelog = (existingRelease.body || '').includes('## Changelog');
                 core.setOutput('exists', 'true');
@@ -124,22 +124,28 @@ jobs:
             const changelogEntry = process.env.CHANGELOG_ENTRY || '';
             const hasChangelog = process.env.HAS_CHANGELOG === 'true';
             const isPrerelease = tagName.includes('-alpha') || tagName.includes('-beta') || tagName.includes('-rc');
-            
+
             // Build release body - always include changelog if available
             let releaseBody = tagMessage;
             if (hasChangelog && changelogEntry) {
               releaseBody = tagMessage + '\n\n## Changelog\n\n' + changelogEntry;
             }
-            
+
             try {
               await github.rest.repos.updateRelease({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 release_id: releaseId,
                 body: releaseBody,
-                prerelease: isPrerelease
+                prerelease: isPrerelease,
+                make_latest: !isPrerelease  // Mark as latest if not prerelease
               });
               console.log('✅ Updated release ' + tagName + ' with changelog');
+
+              // Verify latest status
+              if (!isPrerelease) {
+                console.log('✅ Release ' + tagName + ' marked as latest (make_latest: true)');
+              }
             } catch (error) {
               console.error('❌ Error updating release ' + tagName + ':', error.message);
               throw error;
@@ -160,15 +166,15 @@ jobs:
             const changelogEntry = process.env.CHANGELOG_ENTRY || '';
             const hasChangelog = process.env.HAS_CHANGELOG === 'true';
             const isPrerelease = tagName.includes('-alpha') || tagName.includes('-beta') || tagName.includes('-rc');
-            
+
             // Build release body
             let releaseBody = tagMessage;
             if (hasChangelog && changelogEntry) {
               releaseBody = tagMessage + '\n\n## Changelog\n\n' + changelogEntry;
             }
-            
+
             try {
-              await github.rest.repos.createRelease({
+              const { data: release } = await github.rest.repos.createRelease({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 tag_name: tagName,
@@ -176,9 +182,10 @@ jobs:
                 body: releaseBody,
                 draft: false,
                 prerelease: isPrerelease,
+                make_latest: !isPrerelease,  // Explicitly mark as latest if not prerelease
                 generate_release_notes: true
               });
-              console.log('✅ Created release ' + tagName + ' with changelog');
+              console.log('✅ Created release ' + tagName + ' with changelog' + (!isPrerelease ? ' (marked as latest)' : ''));
             } catch (error) {
               console.error('❌ Error creating release ' + tagName + ':', error.message);
               throw error;
