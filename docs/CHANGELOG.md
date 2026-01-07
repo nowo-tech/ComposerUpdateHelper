@@ -7,6 +7,52 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.17] - 2026-01-07
+
+### Added
+- **Transitive dependency update suggestions**: When packages are filtered due to dependency conflicts, the system now suggests updating the required transitive dependencies
+  - Example: If `scheb/2fa-google-authenticator:8.2.0` requires `spomky-labs/otphp:^11.4` but version `11.3.0` is installed, the system suggests updating `spomky-labs/otphp` to `11.4.1`
+  - The system detects conflicts with `self.version` constraints (e.g., `scheb/2fa-email` requiring `scheb/2fa-bundle: self.version`)
+  - Automatically generates composer commands that include both transitive dependencies and filtered packages in a single command
+  - This makes it easier to resolve dependency conflicts by updating all related packages together
+- **Automatic command generation for transitive dependencies**: Commands now include both the transitive dependencies and the packages that require them
+  - Example: `composer require --with-all-dependencies scheb/2fa-bundle:8.2.0 spomky-labs/otphp:11.4.1 scheb/2fa-email:8.2.0 scheb/2fa-google-authenticator:8.2.0 scheb/2fa-totp:8.2.0`
+  - Ensures all related packages are updated together, preventing partial update conflicts
+- **Enhanced output messages**: More precise messages explaining why no packages are available for update
+  - Differentiates between "all packages up to date", "all packages ignored", and "all packages have dependency conflicts"
+  - Provides actionable guidance when dependency conflicts are detected
+
+### Changed
+- **Improved dependency conflict detection**: Enhanced logic to collect all transitive dependencies before returning
+  - When a conflict with `self.version` is detected, the system continues checking other dependencies
+  - This ensures all required transitive dependencies are identified and suggested
+  - Previously, only the first conflict would be detected, potentially missing other required updates
+- **Code refactoring**: Improved code maintainability with helper functions
+  - Added `normalizeVersion()` function to centralize version normalization
+  - Added `formatPackageList()` function to format package lists consistently
+  - Added `buildComposerCommand()` function to construct composer commands
+  - Added `addPackageToArray()` function to handle prod/dev package categorization
+  - Added `debugLog()` function for consistent debug logging
+  - Extracted constants for repeated strings and emojis
+- **Shell script improvements**: Enhanced user experience with better loading indicators
+  - Loading indicators now appear in the same line as completion checkmarks
+  - Improved consistency in progress messages
+  - Refactored code to use variables for repeated messages and emojis
+
+### Fixed
+- **Command generation for filtered packages**: Fixed issue where commands for transitive dependencies didn't include the filtered packages that require them
+  - Commands now include both transitive dependencies and filtered packages together
+  - Prevents "package is locked" errors when trying to update only transitive dependencies
+  - Example: Previously suggested only `scheb/2fa-bundle:8.2.0 spomky-labs/otphp:11.4.1`, now includes all related packages
+
+### Migration Notes
+- **No action required**: These are enhancements that improve the dependency conflict resolution workflow
+- When dependency conflicts are detected, you'll now see suggested commands that include all necessary updates
+- The commands can be executed directly or using the `--run` flag
+
+### Breaking Changes
+- None
+
 ## [2.0.16] - 2026-01-05
 
 ### Changed

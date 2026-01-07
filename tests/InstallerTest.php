@@ -209,7 +209,9 @@ final class InstallerTest extends TestCase
 
         // Create project directory structure
         $projectDir = dirname($nonExistentVendor);
-        mkdir($projectDir, 0777, true);
+        if (!is_dir($projectDir)) {
+            mkdir($projectDir, 0777, true);
+        }
 
         // Create source file in development directory (parent of src)
         // Installer will use __DIR__ . '/..' when package is not in vendor

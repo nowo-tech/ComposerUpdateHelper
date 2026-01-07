@@ -18,6 +18,30 @@ This guide will help you upgrade Composer Update Helper to newer versions.
 
 ## Version-Specific Upgrade Notes
 
+### Upgrading to 2.0.17+
+
+#### Added
+- **Transitive dependency update suggestions**: When packages are filtered due to dependency conflicts, the system now automatically suggests updating the required transitive dependencies
+  - The system detects when a package requires a newer version of a transitive dependency (e.g., `spomky-labs/otphp:^11.4` when `11.3.0` is installed)
+  - The system also detects `self.version` constraints (e.g., `scheb/2fa-email` requiring `scheb/2fa-bundle: self.version`)
+  - Suggested commands now include both transitive dependencies and filtered packages in a single command
+  - This makes it much easier to resolve dependency conflicts
+- **Enhanced output messages**: More precise messages explaining why no packages are available for update
+
+#### Changed
+- **Improved dependency conflict resolution**: Commands now automatically include all related packages
+  - Previously, you might need to update transitive dependencies manually
+  - Now, the suggested commands include everything needed in one go
+- **Code improvements**: Internal refactoring for better maintainability (no user-facing changes)
+
+#### Migration Notes
+- **No action required**: These are enhancements that improve the dependency conflict resolution workflow
+- When you see dependency conflicts, you'll now get actionable commands that include all necessary updates
+- Simply run the suggested commands to resolve conflicts
+
+#### Breaking Changes
+- None
+
 ### Upgrading to 2.0.16+
 
 #### Changed

@@ -36,6 +36,35 @@ E_ROCKET="🚀"
 E_ERROR="❌"
 E_SKIP="⏭️"
 E_INFO="ℹ️"
+E_LOADING="⏳"
+E_DEBUG="🔍"
+E_CHECK="✅"
+
+# Message variables (to avoid repetition)
+MSG_LOADING_CONFIG="Loading configuration... "
+MSG_CHECKING_OUTDATED="Checking for outdated packages... "
+MSG_PROCESSING="Processing packages... "
+MSG_PROCESSING_PHP="Processing packages with PHP script... "
+MSG_RUNNING="Running..."
+MSG_UPDATE_COMPLETED="Update completed."
+MSG_NO_OUTDATED="No outdated direct dependencies."
+MSG_DEBUG_PREFIX="DEBUG: "
+MSG_FOUND_CONFIG="Found configuration file: "
+MSG_NO_CONFIG="No configuration file found (using defaults)"
+MSG_COMPOSER_NOT_FOUND="Composer is not installed or not in PATH."
+MSG_COMPOSER_JSON_NOT_FOUND="composer.json not found in the current directory."
+MSG_PROCESSOR_NOT_FOUND="Could not find process-updates.php in vendor or script directory."
+MSG_PLEASE_INSTALL="Please run: composer install"
+MSG_UNKNOWN_OPTION="Unknown option:"
+MSG_USE_HELP="Use --help or -h for usage information."
+MSG_DEBUG_CURRENT_DIR="Current directory:"
+MSG_DEBUG_SEARCHING_CONFIG="Searching for configuration files:"
+MSG_DEBUG_COMPOSER_EXECUTED="Composer outdated command executed"
+MSG_DEBUG_JSON_LENGTH="OUTDATED_JSON length:"
+MSG_DEBUG_EMPTY_JSON="Composer outdated returned empty JSON"
+MSG_DEBUG_PASSING_TO_PHP="Passing to PHP script:"
+MSG_DEBUG_OUTPUT_LENGTH="PHP script output length:"
+MSG_DEBUG_PROCESSOR_FOUND="Processor PHP found at:"
 
 # Show help function
 show_help() {
@@ -128,9 +157,9 @@ for arg in "$@"; do
             SHOW_RELEASE_INFO=false
             ;;
         *)
-            echo "$E_ERROR  Unknown option: $arg" >&2
+            echo "$E_ERROR  $MSG_UNKNOWN_OPTION $arg" >&2
             echo "" >&2
-            echo "Use --help or -h for usage information." >&2
+            echo "$MSG_USE_HELP" >&2
             exit 1
             ;;
     esac
@@ -141,12 +170,12 @@ PHP_BIN="${PHP_BIN:-php}"
 COMPOSER_BIN="$(command -v composer || true)"
 
 if [ -z "$COMPOSER_BIN" ]; then
-  echo "$E_ERROR  Composer is not installed or not in PATH." >&2
+  echo "$E_ERROR  $MSG_COMPOSER_NOT_FOUND" >&2
   exit 1
 fi
 
 if [ ! -f composer.json ]; then
-  echo "$E_ERROR  composer.json not found in the current directory." >&2
+  echo "$E_ERROR  $MSG_COMPOSER_JSON_NOT_FOUND" >&2
   exit 1
 fi
 
@@ -158,13 +187,13 @@ if [ -f "vendor/nowo-tech/composer-update-helper/bin/process-updates.php" ]; the
 elif [ -f "$(dirname "$0")/process-updates.php" ]; then
   PROCESSOR_PHP="$(dirname "$0")/process-updates.php"
 else
-  echo "$E_ERROR  Could not find process-updates.php in vendor or script directory." >&2
-  echo "   Please run: composer install" >&2
+  echo "$E_ERROR  $MSG_PROCESSOR_NOT_FOUND" >&2
+  echo "   $MSG_PLEASE_INSTALL" >&2
   exit 1
 fi
 
 if [ "$DEBUG" = "true" ]; then
-  echo "🔍 DEBUG: Processor PHP found at: $PROCESSOR_PHP" >&2
+  echo "$E_DEBUG $MSG_DEBUG_PREFIX$MSG_DEBUG_PROCESSOR_FOUND $PROCESSOR_PHP" >&2
 fi
 
 # Detect configuration file (YAML parsing is now done in PHP)
@@ -174,8 +203,8 @@ CONFIG_FILE=""
 
 # Debug: Show current directory and files being searched
 if [ "$DEBUG" = "true" ]; then
-  echo "🔍 DEBUG: Current directory: $(pwd)" >&2
-  echo "🔍 DEBUG: Searching for configuration files:" >&2
+  echo "$E_DEBUG $MSG_DEBUG_PREFIX$MSG_DEBUG_CURRENT_DIR $(pwd)" >&2
+  echo "$E_DEBUG $MSG_DEBUG_PREFIX$MSG_DEBUG_SEARCHING_CONFIG" >&2
   echo "   - generate-composer-require.yaml" >&2
   echo "   - generate-composer-require.yml" >&2
   echo "   - generate-composer-require.ignore.txt" >&2
@@ -184,23 +213,36 @@ fi
 # Check for .yaml first, then .yml, then .txt
 if [ -f "generate-composer-require.yaml" ]; then
   CONFIG_FILE="generate-composer-require.yaml"
-  if [ "$VERBOSE" = "true" ] || [ "$DEBUG" = "true" ]; then
-    echo "📋 Found configuration file: generate-composer-require.yaml" >&2
-  fi
+  CONFIG_FILE_DISPLAY="generate-composer-require.yaml"
+  CONFIG_FILE_SUFFIX=""
 elif [ -f "generate-composer-require.yml" ]; then
   CONFIG_FILE="generate-composer-require.yml"
-  if [ "$VERBOSE" = "true" ] || [ "$DEBUG" = "true" ]; then
-    echo "📋 Found configuration file: generate-composer-require.yml" >&2
-  fi
+  CONFIG_FILE_DISPLAY="generate-composer-require.yml"
+  CONFIG_FILE_SUFFIX=""
 elif [ -f "generate-composer-require.ignore.txt" ]; then
   # Fallback to old TXT format for backward compatibility
   CONFIG_FILE="generate-composer-require.ignore.txt"
+  CONFIG_FILE_DISPLAY="generate-composer-require.ignore.txt"
+  CONFIG_FILE_SUFFIX=" (old format)"
+else
+  CONFIG_FILE=""
+  CONFIG_FILE_DISPLAY=""
+  CONFIG_FILE_SUFFIX=""
+fi
+
+# Display configuration file info
+if [ -n "$CONFIG_FILE" ]; then
   if [ "$VERBOSE" = "true" ] || [ "$DEBUG" = "true" ]; then
-    echo "📋 Found configuration file: generate-composer-require.ignore.txt (old format)" >&2
+    echo "$E_CLIPBOARD $MSG_FOUND_CONFIG$CONFIG_FILE_DISPLAY$CONFIG_FILE_SUFFIX" >&2
+  fi
+  if [ "$DEBUG" != "true" ] && [ "$VERBOSE" != "true" ]; then
+    printf "$E_LOADING$MSG_LOADING_CONFIG$E_CHECK\n" >&2
+  elif [ "$DEBUG" = "true" ]; then
+    echo "$E_LOADING$MSG_LOADING_CONFIG" >&2
   fi
 else
   if [ "$VERBOSE" = "true" ] || [ "$DEBUG" = "true" ]; then
-    echo "ℹ️  No configuration file found (using defaults)" >&2
+    echo "$E_INFO  $MSG_NO_CONFIG" >&2
   fi
 fi
 
@@ -226,7 +268,7 @@ show_spinner() {
     spinstr=$temp${spinstr%"$temp"}
     sleep 0.1
   done
-  printf "\b✅\n" >&2
+  printf "\b$E_CHECK\n" >&2
   wait $pid
   return $?
 }
@@ -239,32 +281,37 @@ show_spinner() {
   | grep -v '^Warning:' || true) > /tmp/composer-outdated-$$.json &
 OUTDATED_PID=$!
 
-if [ "$DEBUG" != "true" ]; then
-  show_spinner $OUTDATED_PID "⏳ Checking for outdated packages... "
-else
+if [ "$DEBUG" != "true" ] && [ "$VERBOSE" != "true" ]; then
+  show_spinner $OUTDATED_PID "$E_LOADING $MSG_CHECKING_OUTDATED"
+elif [ "$DEBUG" = "true" ]; then
+  echo "$E_LOADING $MSG_CHECKING_OUTDATED" >&2
   wait $OUTDATED_PID
+else
+  echo "$E_LOADING $MSG_CHECKING_OUTDATED" >&2
+  wait $OUTDATED_PID
+  echo "$E_CHECK" >&2
 fi
 
 OUTDATED_JSON="$(cat /tmp/composer-outdated-$$.json 2>/dev/null || true)"
 rm -f /tmp/composer-outdated-$$.json
 
 if [ "$DEBUG" = "true" ]; then
-  echo "🔍 DEBUG: Composer outdated command executed" >&2
-  echo "🔍 DEBUG: OUTDATED_JSON length: ${#OUTDATED_JSON} characters" >&2
+  echo "$E_DEBUG $MSG_DEBUG_PREFIX$MSG_DEBUG_COMPOSER_EXECUTED" >&2
+  echo "$E_DEBUG $MSG_DEBUG_PREFIX$MSG_DEBUG_JSON_LENGTH ${#OUTDATED_JSON} characters" >&2
 fi
 
 if [ -z "${OUTDATED_JSON}" ]; then
   if [ "$DEBUG" = "true" ]; then
-    echo "🔍 DEBUG: Composer outdated returned empty JSON" >&2
+    echo "$E_DEBUG $MSG_DEBUG_PREFIX$MSG_DEBUG_EMPTY_JSON" >&2
   fi
-  echo "$E_OK  No outdated direct dependencies."
+  echo "$E_OK  $MSG_NO_OUTDATED"
   exit 0
 fi
 
 # Process JSON with PHP (also with forced timezone)
 # YAML parsing is now done in PHP, we just pass the config file path
 if [ "$DEBUG" = "true" ]; then
-  echo "🔍 DEBUG: Passing to PHP script:" >&2
+  echo "$E_DEBUG $MSG_DEBUG_PREFIX$MSG_DEBUG_PASSING_TO_PHP" >&2
   echo "   - CONFIG_FILE: ${CONFIG_FILE:-none}" >&2
   echo "   - SHOW_RELEASE_INFO: $SHOW_RELEASE_INFO" >&2
   echo "   - DEBUG: $DEBUG" >&2
@@ -278,9 +325,14 @@ fi
 PROCESS_PID=$!
 
 if [ "$DEBUG" != "true" ] && [ "$VERBOSE" != "true" ]; then
-  show_spinner $PROCESS_PID "⏳ Processing packages... "
-else
+  show_spinner $PROCESS_PID "$E_LOADING $MSG_PROCESSING"
+elif [ "$DEBUG" = "true" ]; then
+  echo "$E_LOADING $MSG_PROCESSING_PHP" >&2
   wait $PROCESS_PID
+else
+  echo "$E_LOADING $MSG_PROCESSING" >&2
+  wait $PROCESS_PID
+  echo "$E_CHECK" >&2
 fi
 
 OUTPUT="$(cat /tmp/composer-process-$$.out 2>/dev/null || true)"
@@ -290,7 +342,7 @@ rm -f /tmp/composer-process-$$.out
 OUTPUT="$(printf "%s\n" "$OUTPUT" | grep -v '^Warning:' || true)"
 
 if [ "$DEBUG" = "true" ]; then
-  echo "🔍 DEBUG: PHP script output length: ${#OUTPUT} characters" >&2
+  echo "$E_DEBUG $MSG_DEBUG_PREFIX$MSG_DEBUG_OUTPUT_LENGTH ${#OUTPUT} characters" >&2
 fi
 
 # Extract commands for --run flag (between COMMANDS_START and COMMANDS_END markers)
@@ -308,12 +360,12 @@ printf "%s\n" "$OUTPUT"
 # Execute commands if --run flag is present
 if [ "$RUN_FLAG" = "--run" ] && [ -n "$COMMANDS" ]; then
   echo ""
-  echo "$E_ROCKET  Running..."
+  echo "$E_ROCKET  $MSG_RUNNING"
   printf "%s\n" "$COMMANDS" | while IFS= read -r cmd; do
     [ -z "$cmd" ] && continue
     echo "→ $cmd"
     # Run each command with forced timezone to avoid warnings during installation
     sh -lc "$PHP_BIN -d date.timezone=UTC $COMPOSER_BIN $(printf '%s' "$cmd" | sed 's/^composer //')"
   done
-  echo "$E_OK  Update completed."
+  echo "$E_OK  $MSG_UPDATE_COMPLETED"
 fi

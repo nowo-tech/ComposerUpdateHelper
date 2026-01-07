@@ -22,6 +22,7 @@ Generates `composer require` commands from outdated dependencies. Works with any
   - **Slim**: respects `slim/slim` version
 - ✅ Compares versions to avoid unnecessary updates
 - ✅ **Dependency compatibility checking**: Automatically detects and prevents dependency conflicts before suggesting updates
+- ✅ **Transitive dependency suggestions**: When conflicts are detected, automatically suggests updating required transitive dependencies with ready-to-use commands
 - ✅ Can execute commands directly with `--run` flag
 - ✅ Automatic installation via Composer plugin
 - ✅ **Release information and changelogs**: Shows GitHub release links and changelog previews for outdated packages
@@ -298,9 +299,14 @@ The `check-dependencies` option controls whether the tool performs detailed depe
 - Verifies version constraints before suggesting updates to prevent conflicts
 - If a proposed update would conflict with dependent packages, the system finds the highest compatible version
 - If no compatible version exists, the update is skipped to avoid breaking dependencies
+- **Automatically suggests transitive dependency updates** when conflicts are detected:
+  - Detects when a package requires a newer version of a transitive dependency (e.g., `spomky-labs/otphp:^11.4` when `11.3.0` is installed)
+  - Detects `self.version` constraints (e.g., `scheb/2fa-email` requiring `scheb/2fa-bundle: self.version`)
+  - Generates commands that include both transitive dependencies and filtered packages together
 - Shows a detailed analysis section in the output with:
   - All outdated packages (before dependency check)
   - Packages filtered by dependency conflicts
+  - Suggested transitive dependency updates to resolve conflicts
   - Packages that passed dependency check
 
 **When disabled (`check-dependencies: false`)**:
@@ -321,9 +327,17 @@ The `check-dependencies` option controls whether the tool performs detailed depe
   ⚠️  Filtered by dependency conflicts:
      - scheb/2fa-google-authenticator:8.2.0 (prod)
 
+  💡 Suggested transitive dependency updates to resolve conflicts:
+     - scheb/2fa-bundle:8.2.0 (installed: 8.1.0, required by: scheb/2fa-email:8.2.0, scheb/2fa-google-authenticator:8.2.0)
+     - spomky-labs/otphp:11.4.1 (installed: 11.3.0, required by: scheb/2fa-google-authenticator:8.2.0)
+
   ✅ Packages that passed dependency check:
      - aws/aws-sdk-php:3.369.6 (prod)
      - nelmio/api-doc-bundle:5.9.0 (prod)
+
+🔧  Suggested commands to resolve dependency conflicts:
+  (Update these transitive dependencies first, then retry updating the filtered packages)
+  composer require --with-all-dependencies scheb/2fa-bundle:8.2.0 spomky-labs/otphp:11.4.1 scheb/2fa-email:8.2.0 scheb/2fa-google-authenticator:8.2.0 scheb/2fa-totp:8.2.0
 ```
 
 **To disable dependency checking:**
