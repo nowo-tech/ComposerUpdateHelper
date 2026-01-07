@@ -510,4 +510,123 @@ final class DependencyCompatibilityTest extends TestCase
 
         return $default;
     }
+
+    public function testNormalizeVersion(): void
+    {
+        // Test normalizeVersion function
+        $this->assertEquals('8.1.0', $this->normalizeVersion('8.1.0'));
+        $this->assertEquals('8.1.0', $this->normalizeVersion('v8.1.0'));
+        $this->assertEquals('7.4.0', $this->normalizeVersion('v7.4.0'));
+        $this->assertNull($this->normalizeVersion(null));
+        $this->assertEquals('1.0.0', $this->normalizeVersion('v1.0.0'));
+        $this->assertEquals('2.5.3', $this->normalizeVersion('2.5.3'));
+    }
+
+    public function testFormatPackageList(): void
+    {
+        // Test formatPackageList function
+        $packages = ['package1:1.0.0', 'package2:2.0.0'];
+        $result = $this->formatPackageList($packages, '(prod)');
+        
+        $this->assertCount(2, $result);
+        $this->assertEquals('     - package1:1.0.0 (prod)', $result[0]);
+        $this->assertEquals('     - package2:2.0.0 (prod)', $result[1]);
+        
+        // Test with custom indent
+        $result2 = $this->formatPackageList($packages, '(dev)', '  ');
+        $this->assertEquals('  - package1:1.0.0 (dev)', $result2[0]);
+    }
+
+    public function testBuildComposerCommand(): void
+    {
+        // Test buildComposerCommand function
+        $packages = ['package1:1.0.0', 'package2:2.0.0'];
+        
+        // Test prod command
+        $prodCommand = $this->buildComposerCommand($packages, false);
+        $this->assertNotNull($prodCommand);
+        $this->assertStringContainsString('composer require', $prodCommand);
+        $this->assertStringContainsString('--with-all-dependencies', $prodCommand);
+        $this->assertStringContainsString('package1:1.0.0', $prodCommand);
+        $this->assertStringNotContainsString('--dev', $prodCommand);
+        
+        // Test dev command
+        $devCommand = $this->buildComposerCommand($packages, true);
+        $this->assertNotNull($devCommand);
+        $this->assertStringContainsString('composer require --dev', $devCommand);
+        $this->assertStringContainsString('--with-all-dependencies', $devCommand);
+        
+        // Test empty array
+        $emptyCommand = $this->buildComposerCommand([], false);
+        $this->assertNull($emptyCommand);
+    }
+
+    public function testAddPackageToArray(): void
+    {
+        // Test addPackageToArray function
+        $prod = [];
+        $dev = [];
+        $devSet = ['dev-package' => true];
+        
+        // Add prod package
+        $this->addPackageToArray('prod-package', '1.0.0', $devSet, $prod, $dev, false);
+        $this->assertCount(1, $prod);
+        $this->assertCount(0, $dev);
+        $this->assertEquals('prod-package:1.0.0', $prod[0]);
+        
+        // Add dev package
+        $this->addPackageToArray('dev-package', '2.0.0', $devSet, $prod, $dev, false);
+        $this->assertCount(1, $prod);
+        $this->assertCount(1, $dev);
+        $this->assertEquals('dev-package:2.0.0', $dev[0]);
+    }
+
+    /**
+     * Copy of normalizeVersion from process-updates.php for testing.
+     */
+    private function normalizeVersion(?string $version): ?string
+    {
+        if ($version === null) {
+            return null;
+        }
+        return ltrim($version, 'v');
+    }
+
+    /**
+     * Copy of formatPackageList from process-updates.php for testing.
+     */
+    private function formatPackageList(array $packages, string $label, string $indent = '     '): array
+    {
+        $output = [];
+        foreach ($packages as $pkg) {
+            $output[] = $indent . '- ' . $pkg . ' ' . $label;
+        }
+        return $output;
+    }
+
+    /**
+     * Copy of buildComposerCommand from process-updates.php for testing.
+     */
+    private function buildComposerCommand(array $packages, bool $isDev = false): ?string
+    {
+        if (empty($packages)) {
+            return null;
+        }
+        
+        $baseCommand = $isDev ? 'composer require --dev' : 'composer require';
+        return $baseCommand . ' --with-all-dependencies ' . implode(' ', $packages);
+    }
+
+    /**
+     * Copy of addPackageToArray from process-updates.php for testing.
+     */
+    private function addPackageToArray(string $name, string $constraint, array $devSet, array &$prod, array &$dev, bool $debug = false): void
+    {
+        $packageString = $name . ':' . $constraint;
+        if (isset($devSet[$name])) {
+            $dev[] = $packageString;
+        } else {
+            $prod[] = $packageString;
+        }
+    }
 }

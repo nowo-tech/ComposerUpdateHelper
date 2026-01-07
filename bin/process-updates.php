@@ -206,22 +206,85 @@ if (!defined('E_OK')) {
     define('E_LINK', '🔗');
     define('E_MEMO', '📝');
     define('E_SKIP', '⏭️');
+    define('E_WARNING', '⚠️');
+    define('E_BULB', '💡');
+    define('E_INFO', 'ℹ️');
+}
+
+// String constants
+define('DEBUG_PREFIX', 'DEBUG: ');
+define('LABEL_PROD', '(prod)');
+define('LABEL_DEV', '(dev)');
+define('LABEL_NONE', '(none)');
+define('COMPOSER_REQUIRE', 'composer require');
+define('COMPOSER_REQUIRE_DEV', 'composer require --dev');
+define('COMPOSER_REQUIRE_FLAGS', '--with-all-dependencies');
+
+// Helper function for debug logging
+function debugLog(string $message, bool $debug = false): void
+{
+    if ($debug) {
+        error_log(DEBUG_PREFIX . $message);
+    }
+}
+
+// Helper function to normalize version (remove 'v' prefix)
+function normalizeVersion(?string $version): ?string
+{
+    if ($version === null) {
+        return null;
+    }
+    return ltrim($version, 'v');
+}
+
+// Helper function to format package list output
+function formatPackageList(array $packages, string $label, string $indent = '     '): array
+{
+    $output = [];
+    foreach ($packages as $pkg) {
+        $output[] = $indent . '- ' . $pkg . ' ' . $label;
+    }
+    return $output;
+}
+
+// Helper function to add packages to prod or dev arrays
+function addPackageToArray(string $name, string $constraint, array $devSet, array &$prod, array &$dev, bool $debug = false): void
+{
+    $packageString = $name . ':' . $constraint;
+    if (isset($devSet[$name])) {
+        $dev[] = $packageString;
+        debugLog("  - Action: ADDED to dev dependencies: {$packageString}", $debug);
+    } else {
+        $prod[] = $packageString;
+        debugLog("  - Action: ADDED to prod dependencies: {$packageString}", $debug);
+    }
+}
+
+// Helper function to build composer require command
+function buildComposerCommand(array $packages, bool $isDev = false): ?string
+{
+    if (empty($packages)) {
+        return null;
+    }
+
+    $baseCommand = $isDev ? COMPOSER_REQUIRE_DEV : COMPOSER_REQUIRE;
+    return $baseCommand . ' ' . COMPOSER_REQUIRE_FLAGS . ' ' . implode(' ', $packages);
 }
 
 if ($debug) {
-    error_log("DEBUG: showReleaseInfo = " . ($showReleaseInfo ? 'true' : 'false'));
-    error_log("DEBUG: checkDependencies = " . ($checkDependencies ? 'true' : 'false'));
-    error_log("DEBUG: ignoredPackages count = " . count($ignoredPackages));
-    error_log("DEBUG: includedPackages count = " . count($includedPackages));
+    debugLog("showReleaseInfo = " . ($showReleaseInfo ? 'true' : 'false'), $debug);
+    debugLog("checkDependencies = " . ($checkDependencies ? 'true' : 'false'), $debug);
+    debugLog("ignoredPackages count = " . count($ignoredPackages), $debug);
+    debugLog("includedPackages count = " . count($includedPackages), $debug);
     if (count($ignoredPackages) > 0) {
-        error_log("DEBUG: ignoredPackages list: " . implode(', ', array_keys($ignoredPackages)));
+        debugLog("ignoredPackages list: " . implode(', ', array_keys($ignoredPackages)), $debug);
     }
     if (count($includedPackages) > 0) {
-        error_log("DEBUG: includedPackages list: " . implode(', ', array_keys($includedPackages)));
+        debugLog("includedPackages list: " . implode(', ', array_keys($includedPackages)), $debug);
     }
-    error_log("DEBUG: Total outdated packages: " . count($report['installed']));
-    error_log("DEBUG: require packages: " . count($require));
-    error_log("DEBUG: require-dev packages: " . count($requireDev));
+    debugLog("Total outdated packages: " . count($report['installed']), $debug);
+    debugLog("require packages: " . count($require), $debug);
+    debugLog("require-dev packages: " . count($requireDev), $debug);
 }
 
 // ============================================================================
@@ -681,7 +744,7 @@ function getInstalledPackageVersion($packageName) {
 }
 
 // Function to find the highest compatible version considering dependent packages
-function findCompatibleVersion($packageName, $proposedVersion, $debug = false, $checkDependencies = true) {
+function findCompatibleVersion($packageName, $proposedVersion, $debug = false, $checkDependencies = true, &$requiredTransitiveUpdates = null) {
     // If dependency checking is disabled, return proposed version without verification
     if (!$checkDependencies) {
         if ($debug) {
@@ -704,6 +767,7 @@ function findCompatibleVersion($packageName, $proposedVersion, $debug = false, $
     }
 
     // Check if the proposed package's requirements are compatible with installed versions
+    $hasConflict = false;
     foreach ($packageRequirements as $requiredPackage => $requiredConstraint) {
         // Skip php and php-* requirements
         if ($requiredPackage === 'php' || strpos($requiredPackage, 'php-') === 0) {
@@ -736,7 +800,24 @@ function findCompatibleVersion($packageName, $proposedVersion, $debug = false, $
                     error_log("DEBUG: Proposed package {$packageName} {$proposedVersion} requires {$requiredPackage}: {$requiredConstraint} (which means {$requiredVersion}), but installed version {$normalizedInstalled} does NOT match");
                 }
                 // Conflict detected: self.version constraint requires exact version match
-                return null;
+                // Suggest updating the required package to the same version
+                if ($requiredTransitiveUpdates !== null) {
+                    if ($debug) {
+                        error_log("DEBUG: Adding {$requiredPackage}:{$requiredVersion} to transitive updates (required by {$packageName}:{$proposedVersion} via self.version)");
+                    }
+                    if (!isset($requiredTransitiveUpdates[$requiredPackage])) {
+                        $requiredTransitiveUpdates[$requiredPackage] = [
+                            'required_by' => [],
+                            'required_constraint' => $requiredConstraint . " (self.version = {$requiredVersion})",
+                            'installed_version' => $installedVersion,
+                            'suggested_version' => $requiredVersion
+                        ];
+                    }
+                    $requiredTransitiveUpdates[$requiredPackage]['required_by'][] = "{$packageName}:{$proposedVersion}";
+                }
+                $hasConflict = true;
+                // Continue checking other dependencies to collect all transitive updates
+                continue;
             }
             // Version matches, continue to next requirement
             continue;
@@ -761,8 +842,76 @@ function findCompatibleVersion($packageName, $proposedVersion, $debug = false, $
                 error_log("DEBUG: Proposed package {$packageName} {$proposedVersion} requires {$requiredPackage}: {$requiredConstraint}, but installed version {$installedVersion} does NOT satisfy it");
             }
             // Conflict detected: proposed package requires a version incompatible with installed version
-            return null;
+            // Check if there's an updated version of the transitive dependency that would satisfy the requirement
+            if ($requiredTransitiveUpdates !== null) {
+                if ($debug) {
+                    error_log("DEBUG: Checking for updated version of transitive dependency {$requiredPackage} to satisfy constraint {$requiredConstraint}");
+                }
+                $composerBin = getenv('COMPOSER_BIN') ?: 'composer';
+                $phpBin = getenv('PHP_BIN') ?: 'php';
+                $cmd = escapeshellarg($phpBin) . ' -d date.timezone=UTC ' . escapeshellarg($composerBin) .
+                       ' show ' . escapeshellarg($requiredPackage) . ' --all --format=json 2>/dev/null';
+                $output = shell_exec($cmd);
+                if ($output) {
+                    $data = json_decode($output, true);
+                    if ($data && isset($data['versions'])) {
+                        if ($debug) {
+                            error_log("DEBUG: Found " . count($data['versions']) . " versions for {$requiredPackage}");
+                        }
+                        // Find the latest version that satisfies the constraint
+                        $stableVersions = [];
+                        foreach ($data['versions'] as $version) {
+                            $normalized = ltrim($version, 'v');
+                            if (!preg_match('/(dev|alpha|beta|rc)/i', $version)) {
+                                $stableVersions[] = $normalized;
+                            }
+                        }
+                        if (!empty($stableVersions)) {
+                            usort($stableVersions, function($a, $b) {
+                                return version_compare($b, $a); // Descending order
+                            });
+                            if ($debug) {
+                                error_log("DEBUG: Checking " . count($stableVersions) . " stable versions for {$requiredPackage}");
+                            }
+                            foreach ($stableVersions as $version) {
+                                if (versionSatisfiesConstraint($version, $requiredConstraint)) {
+                                    // Found a compatible version, suggest updating the transitive dependency
+                                    if ($debug) {
+                                        error_log("DEBUG: Found compatible version {$version} for {$requiredPackage} (satisfies {$requiredConstraint})");
+                                    }
+                                    if (!isset($requiredTransitiveUpdates[$requiredPackage])) {
+                                        $requiredTransitiveUpdates[$requiredPackage] = [
+                                            'required_by' => [],
+                                            'required_constraint' => $requiredConstraint,
+                                            'installed_version' => $installedVersion,
+                                            'suggested_version' => $version
+                                        ];
+                                    }
+                                    $requiredTransitiveUpdates[$requiredPackage]['required_by'][] = "{$packageName}:{$proposedVersion}";
+                                    break;
+                                }
+                            }
+                            if ($debug && !isset($requiredTransitiveUpdates[$requiredPackage])) {
+                                error_log("DEBUG: No compatible version found for {$requiredPackage} that satisfies {$requiredConstraint}");
+                            }
+                        } elseif ($debug) {
+                            error_log("DEBUG: No stable versions found for {$requiredPackage}");
+                        }
+                    } elseif ($debug) {
+                        error_log("DEBUG: Could not parse version data for {$requiredPackage}");
+                    }
+                } elseif ($debug) {
+                    error_log("DEBUG: Could not get version information for {$requiredPackage}");
+                }
+            }
+            $hasConflict = true;
+            // Continue checking other dependencies to collect all transitive updates
         }
+    }
+
+    // Return null if any conflicts were detected
+    if ($hasConflict) {
+        return null;
     }
 
     if (empty($dependentConstraints)) {
@@ -876,6 +1025,71 @@ function findCompatibleVersion($packageName, $proposedVersion, $debug = false, $
             }
 
             if (!versionSatisfiesConstraint($installedVersion, $requiredConstraint)) {
+                if ($debug) {
+                    error_log("DEBUG: Version {$version} of {$packageName} requires {$requiredPackage}:{$requiredConstraint}, but installed version {$installedVersion} does NOT satisfy it");
+                }
+                // Check if there's an updated version of the transitive dependency that would satisfy the requirement
+                if ($requiredTransitiveUpdates !== null) {
+                    if ($debug) {
+                        error_log("DEBUG: Checking for updated version of transitive dependency {$requiredPackage} to satisfy constraint {$requiredConstraint}");
+                    }
+                    $composerBin = getenv('COMPOSER_BIN') ?: 'composer';
+                    $phpBin = getenv('PHP_BIN') ?: 'php';
+                    $cmd = escapeshellarg($phpBin) . ' -d date.timezone=UTC ' . escapeshellarg($composerBin) .
+                           ' show ' . escapeshellarg($requiredPackage) . ' --all --format=json 2>/dev/null';
+                    $output = shell_exec($cmd);
+                    if ($output) {
+                        $data = json_decode($output, true);
+                        if ($data && isset($data['versions'])) {
+                            if ($debug) {
+                                error_log("DEBUG: Found " . count($data['versions']) . " versions for {$requiredPackage}");
+                            }
+                            // Find the latest version that satisfies the constraint
+                            $stableVersions = [];
+                            foreach ($data['versions'] as $v) {
+                                $normalized = ltrim($v, 'v');
+                                if (!preg_match('/(dev|alpha|beta|rc)/i', $v)) {
+                                    $stableVersions[] = $normalized;
+                                }
+                            }
+                            if (!empty($stableVersions)) {
+                                usort($stableVersions, function($a, $b) {
+                                    return version_compare($b, $a); // Descending order
+                                });
+                                if ($debug) {
+                                    error_log("DEBUG: Checking " . count($stableVersions) . " stable versions for {$requiredPackage}");
+                                }
+                                foreach ($stableVersions as $v) {
+                                    if (versionSatisfiesConstraint($v, $requiredConstraint)) {
+                                        // Found a compatible version, suggest updating the transitive dependency
+                                        if ($debug) {
+                                            error_log("DEBUG: Found compatible version {$v} for {$requiredPackage} (satisfies {$requiredConstraint})");
+                                        }
+                                        if (!isset($requiredTransitiveUpdates[$requiredPackage])) {
+                                            $requiredTransitiveUpdates[$requiredPackage] = [
+                                                'required_by' => [],
+                                                'required_constraint' => $requiredConstraint,
+                                                'installed_version' => $installedVersion,
+                                                'suggested_version' => $v
+                                            ];
+                                        }
+                                        $requiredTransitiveUpdates[$requiredPackage]['required_by'][] = "{$packageName}:{$version}";
+                                        break;
+                                    }
+                                }
+                                if ($debug && !isset($requiredTransitiveUpdates[$requiredPackage])) {
+                                    error_log("DEBUG: No compatible version found for {$requiredPackage} that satisfies {$requiredConstraint}");
+                                }
+                            } elseif ($debug) {
+                                error_log("DEBUG: No stable versions found for {$requiredPackage}");
+                            }
+                        } elseif ($debug) {
+                            error_log("DEBUG: Could not parse version data for {$requiredPackage}");
+                        }
+                    } elseif ($debug) {
+                        error_log("DEBUG: Could not get version information for {$requiredPackage}");
+                    }
+                }
                 $satisfiesAll = false;
                 break;
             }
@@ -1053,6 +1267,8 @@ $allOutdatedProd = [];
 $allOutdatedDev  = [];
 $filteredByDependenciesProd = [];
 $filteredByDependenciesDev  = [];
+// Track transitive dependencies that need updates to resolve conflicts
+$requiredTransitiveUpdates = [];
 
 foreach ($report['installed'] as $pkg) {
     if (!isset($pkg['name'])) continue;
@@ -1079,7 +1295,7 @@ foreach ($report['installed'] as $pkg) {
             error_log("DEBUG:   - Action: IGNORED (in ignore list and not in include list)");
         }
         if ($latest) {
-            $normalized = ltrim($latest, 'v');
+            $normalized = normalizeVersion($latest);
             if (isset($devSet[$name])) {
                 $ignoredDev[] = $name . ':' . $normalized;
             } else {
@@ -1100,8 +1316,8 @@ foreach ($report['installed'] as $pkg) {
         continue;
     }
 
-    $normalized = ltrim($latest, 'v');
-    $installedNormalized = $installed ? ltrim($installed, 'v') : null;
+    $normalized = normalizeVersion($latest);
+    $installedNormalized = normalizeVersion($installed);
 
     // Check if this package belongs to a framework and should be limited
     if (shouldLimitVersion($name, $latest, $frameworkConstraints)) {
@@ -1158,7 +1374,7 @@ foreach ($report['installed'] as $pkg) {
     // Check dependency compatibility before suggesting update
     // Only check for specific versions (not wildcards) and if dependency checking is enabled
     if ($needsUpdate && $checkDependencies && strpos($constraint, '*') === false && strpos($constraint, '^') === false && strpos($constraint, '~') === false) {
-        $compatibleVersion = findCompatibleVersion($name, $constraint, $debug, $checkDependencies);
+        $compatibleVersion = findCompatibleVersion($name, $constraint, $debug, $checkDependencies, $requiredTransitiveUpdates);
         if ($compatibleVersion === null) {
             // No compatible version found, skip this update
             if ($debug) {
@@ -1198,17 +1414,7 @@ foreach ($report['installed'] as $pkg) {
         }
     }
 
-    if (isset($devSet[$name])) {
-        $dev[] = $name . ':' . $constraint;
-        if ($debug) {
-            error_log("DEBUG:   - Action: ADDED to dev dependencies: {$name}:{$constraint}");
-        }
-    } else {
-        $prod[] = $name . ':' . $constraint;
-        if ($debug) {
-            error_log("DEBUG:   - Action: ADDED to prod dependencies: {$name}:{$constraint}");
-        }
-    }
+    addPackageToArray($name, $constraint, $devSet, $prod, $dev, $debug);
 }
 
 // ============================================================================
@@ -1264,75 +1470,138 @@ if ($checkDependencies) {
 
     // Show all outdated packages (before checking)
     if (!empty($allOutdatedProd) || !empty($allOutdatedDev)) {
-        $output[] = "  📋 All outdated packages (before dependency check):";
-        if (!empty($allOutdatedProd)) {
-            foreach ($allOutdatedProd as $pkg) {
-                $output[] = "     - " . $pkg . " (prod)";
-            }
-        }
-        if (!empty($allOutdatedDev)) {
-            foreach ($allOutdatedDev as $pkg) {
-                $output[] = "     - " . $pkg . " (dev)";
-            }
-        }
+        $output[] = "  " . E_CLIPBOARD . " All outdated packages (before dependency check):";
+        $output = array_merge($output, formatPackageList($allOutdatedProd, LABEL_PROD));
+        $output = array_merge($output, formatPackageList($allOutdatedDev, LABEL_DEV));
         $output[] = "";
     } else {
-        $output[] = "  📋 All outdated packages (before dependency check): (none)";
+        $output[] = "  " . E_CLIPBOARD . " All outdated packages (before dependency check): " . LABEL_NONE;
         $output[] = "";
     }
 
     // Show filtered packages (conflicts detected)
     if (!empty($filteredByDependenciesProd) || !empty($filteredByDependenciesDev)) {
-        $output[] = "  ⚠️  Filtered by dependency conflicts:";
-        if (!empty($filteredByDependenciesProd)) {
-            foreach ($filteredByDependenciesProd as $pkg) {
-                $output[] = "     - " . $pkg . " (prod)";
-            }
-        }
-        if (!empty($filteredByDependenciesDev)) {
-            foreach ($filteredByDependenciesDev as $pkg) {
-                $output[] = "     - " . $pkg . " (dev)";
-            }
-        }
+        $output[] = "  " . E_WARNING . "  Filtered by dependency conflicts:";
+        $output = array_merge($output, formatPackageList($filteredByDependenciesProd, LABEL_PROD));
+        $output = array_merge($output, formatPackageList($filteredByDependenciesDev, LABEL_DEV));
         $output[] = "";
+
+        // Show transitive dependencies that need updates
+        if (!empty($requiredTransitiveUpdates)) {
+            $output[] = "  " . E_BULB . " Suggested transitive dependency updates to resolve conflicts:";
+            foreach ($requiredTransitiveUpdates as $transitivePkg => $info) {
+                $requiredByList = implode(', ', array_unique($info['required_by']));
+                $output[] = "     - {$transitivePkg}:{$info['suggested_version']} (installed: {$info['installed_version']}, required by: {$requiredByList})";
+            }
+            $output[] = "";
+        }
     } else {
-        $output[] = "  ⚠️  Filtered by dependency conflicts: (none)";
+        $output[] = "  " . E_WARNING . "  Filtered by dependency conflicts: " . LABEL_NONE;
         $output[] = "";
     }
 
     // Show packages that passed dependency check
     if (!empty($prod) || !empty($dev)) {
-        $output[] = "  ✅ Packages that passed dependency check:";
-        if (!empty($prod)) {
-            foreach ($prod as $pkg) {
-                $output[] = "     - " . $pkg . " (prod)";
-            }
-        }
-        if (!empty($dev)) {
-            foreach ($dev as $pkg) {
-                $output[] = "     - " . $pkg . " (dev)";
-            }
-        }
+        $output[] = "  " . E_OK . " Packages that passed dependency check:";
+        $output = array_merge($output, formatPackageList($prod, LABEL_PROD));
+        $output = array_merge($output, formatPackageList($dev, LABEL_DEV));
         $output[] = "";
     } else {
-        $output[] = "  ✅ Packages that passed dependency check: (none)";
+        $output[] = "  " . E_OK . " Packages that passed dependency check: " . LABEL_NONE;
         $output[] = "";
     }
 }
 
 // Commands section (with special markers for extraction)
 $commandsList = [];
-if (!empty($prod)) {
-    $commandsList[] = "composer require --with-all-dependencies " . implode(' ', $prod);
+$prodCommand = buildComposerCommand($prod, false);
+if ($prodCommand !== null) {
+    $commandsList[] = $prodCommand;
 }
-if (!empty($dev)) {
-    $commandsList[] = "composer require --dev --with-all-dependencies " . implode(' ', $dev);
+$devCommand = buildComposerCommand($dev, true);
+if ($devCommand !== null) {
+    $commandsList[] = $devCommand;
+}
+
+// Add commands for transitive dependencies if needed
+// When there are filtered packages and transitive dependencies, include both in the same command
+if (!empty($requiredTransitiveUpdates)) {
+    $transitiveProd = [];
+    $transitiveDev = [];
+
+    foreach ($requiredTransitiveUpdates as $transitivePkg => $info) {
+        $pkgString = $transitivePkg . ':' . $info['suggested_version'];
+        // Determine if it's a dev dependency by checking if it's in require-dev
+        if (isset($devSet[$transitivePkg])) {
+            $transitiveDev[] = $pkgString;
+        } else {
+            $transitiveProd[] = $pkgString;
+        }
+    }
+
+    // If there are filtered packages, include them in the same command as transitive dependencies
+    // This ensures all related packages are updated together
+    if (!empty($filteredByDependenciesProd) || !empty($filteredByDependenciesDev)) {
+        // Merge filtered packages with transitive dependencies and remove duplicates
+        $allProd = array_unique(array_merge($transitiveProd, $filteredByDependenciesProd));
+        $allDev = array_unique(array_merge($transitiveDev, $filteredByDependenciesDev));
+
+        if (!empty($allProd)) {
+            $commandsList[] = "composer require --with-all-dependencies " . implode(' ', $allProd);
+        }
+        if (!empty($allDev)) {
+            $commandsList[] = "composer require --dev --with-all-dependencies " . implode(' ', $allDev);
+        }
+    } else {
+        // No filtered packages, just add transitive dependencies
+    $transitiveProdCommand = buildComposerCommand($transitiveProd, false);
+    if ($transitiveProdCommand !== null) {
+        $commandsList[] = $transitiveProdCommand;
+    }
+    $transitiveDevCommand = buildComposerCommand($transitiveDev, true);
+    if ($transitiveDevCommand !== null) {
+        $commandsList[] = $transitiveDevCommand;
+    }
+    }
 }
 
 if (empty($commandsList)) {
-    $output[] = E_OK . "  No packages to update (all outdated packages are ignored).";
+    // Determine the reason why there are no packages to update
+    $hasOutdated = !empty($allOutdatedProd) || !empty($allOutdatedDev);
+    $hasFiltered = !empty($filteredByDependenciesProd) || !empty($filteredByDependenciesDev);
+    $hasIgnored = !empty($ignoredProd) || !empty($ignoredDev);
+
+    if (!$hasOutdated) {
+        // No outdated packages at all
+        $output[] = E_OK . "  No packages to update (all packages are up to date).";
+    } elseif ($hasFiltered && !$hasIgnored) {
+        // All outdated packages are filtered by dependency conflicts
+        $output[] = E_OK . "  No packages to update (all outdated packages have dependency conflicts).";
+    } elseif ($hasIgnored && !$hasFiltered) {
+        // All outdated packages are ignored
+        $output[] = E_OK . "  No packages to update (all outdated packages are ignored).";
+    } elseif ($hasFiltered && $hasIgnored) {
+        // Mix of filtered and ignored
+        $output[] = E_OK . "  No packages to update (all outdated packages are ignored or have dependency conflicts).";
+    } else {
+        // Fallback (shouldn't happen, but just in case)
+        $output[] = E_OK . "  No packages to update.";
+    }
 } else {
-    $output[] = E_WRENCH . "  Suggested commands:";
+    // Check if we only have transitive dependency commands
+    $hasDirectUpdates = !empty($prod) || !empty($dev);
+    $hasTransitiveUpdates = !empty($requiredTransitiveUpdates);
+
+    if ($hasDirectUpdates && $hasTransitiveUpdates) {
+        $output[] = E_WRENCH . "  Suggested commands:";
+        $output[] = "  (Includes transitive dependencies needed to resolve conflicts)";
+    } elseif ($hasTransitiveUpdates && !$hasDirectUpdates) {
+        $output[] = E_WRENCH . "  Suggested commands to resolve dependency conflicts:";
+        $output[] = "  (Update these transitive dependencies first, then retry updating the filtered packages)";
+    } else {
+        $output[] = E_WRENCH . "  Suggested commands:";
+    }
+
     foreach ($commandsList as $cmd) {
         $output[] = "  " . $cmd;
     }
