@@ -527,11 +527,11 @@ final class DependencyCompatibilityTest extends TestCase
         // Test formatPackageList function
         $packages = ['package1:1.0.0', 'package2:2.0.0'];
         $result = $this->formatPackageList($packages, '(prod)');
-        
+
         $this->assertCount(2, $result);
         $this->assertEquals('     - package1:1.0.0 (prod)', $result[0]);
         $this->assertEquals('     - package2:2.0.0 (prod)', $result[1]);
-        
+
         // Test with custom indent
         $result2 = $this->formatPackageList($packages, '(dev)', '  ');
         $this->assertEquals('  - package1:1.0.0 (dev)', $result2[0]);
@@ -541,7 +541,7 @@ final class DependencyCompatibilityTest extends TestCase
     {
         // Test buildComposerCommand function
         $packages = ['package1:1.0.0', 'package2:2.0.0'];
-        
+
         // Test prod command
         $prodCommand = $this->buildComposerCommand($packages, false);
         $this->assertNotNull($prodCommand);
@@ -549,13 +549,13 @@ final class DependencyCompatibilityTest extends TestCase
         $this->assertStringContainsString('--with-all-dependencies', $prodCommand);
         $this->assertStringContainsString('package1:1.0.0', $prodCommand);
         $this->assertStringNotContainsString('--dev', $prodCommand);
-        
+
         // Test dev command
         $devCommand = $this->buildComposerCommand($packages, true);
         $this->assertNotNull($devCommand);
         $this->assertStringContainsString('composer require --dev', $devCommand);
         $this->assertStringContainsString('--with-all-dependencies', $devCommand);
-        
+
         // Test empty array
         $emptyCommand = $this->buildComposerCommand([], false);
         $this->assertNull($emptyCommand);
@@ -567,13 +567,13 @@ final class DependencyCompatibilityTest extends TestCase
         $prod = [];
         $dev = [];
         $devSet = ['dev-package' => true];
-        
+
         // Add prod package
         $this->addPackageToArray('prod-package', '1.0.0', $devSet, $prod, $dev, false);
         $this->assertCount(1, $prod);
         $this->assertCount(0, $dev);
         $this->assertEquals('prod-package:1.0.0', $prod[0]);
-        
+
         // Add dev package
         $this->addPackageToArray('dev-package', '2.0.0', $devSet, $prod, $dev, false);
         $this->assertCount(1, $prod);
@@ -589,6 +589,7 @@ final class DependencyCompatibilityTest extends TestCase
         if ($version === null) {
             return null;
         }
+
         return ltrim($version, 'v');
     }
 
@@ -601,6 +602,7 @@ final class DependencyCompatibilityTest extends TestCase
         foreach ($packages as $pkg) {
             $output[] = $indent . '- ' . $pkg . ' ' . $label;
         }
+
         return $output;
     }
 
@@ -612,8 +614,9 @@ final class DependencyCompatibilityTest extends TestCase
         if (empty($packages)) {
             return null;
         }
-        
+
         $baseCommand = $isDev ? 'composer require --dev' : 'composer require';
+
         return $baseCommand . ' --with-all-dependencies ' . implode(' ', $packages);
     }
 
