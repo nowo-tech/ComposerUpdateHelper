@@ -163,12 +163,19 @@ function getPackageConstraintsFromLock($packageName)
 
     $constraints = [];
     foreach ($allPackages as $pkg) {
-        if (!isset($pkg['name']) || !isset($pkg['require'])) {
+        if (!isset($pkg['name'])) {
             continue;
         }
 
-        if (isset($pkg['require'][$packageName])) {
-            $constraints[$pkg['name']] = $pkg['require'][$packageName];
+        // Check if this package requires our target package
+        // Dependencies can be in 'require', 'require-dev', or both
+        $requires = array_merge(
+            $pkg['require'] ?? [],
+            $pkg['require-dev'] ?? []
+        );
+
+        if (isset($requires[$packageName])) {
+            $constraints[$pkg['name']] = $requires[$packageName];
         }
     }
 

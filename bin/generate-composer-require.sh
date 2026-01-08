@@ -236,9 +236,9 @@ if [ -n "$CONFIG_FILE" ]; then
     echo "$E_CLIPBOARD $MSG_FOUND_CONFIG$CONFIG_FILE_DISPLAY$CONFIG_FILE_SUFFIX" >&2
   fi
   if [ "$DEBUG" != "true" ] && [ "$VERBOSE" != "true" ]; then
-    printf "$E_LOADING$MSG_LOADING_CONFIG$E_CHECK\n" >&2
+    printf "$E_LOADING $MSG_LOADING_CONFIG$E_CHECK\n" >&2
   elif [ "$DEBUG" = "true" ]; then
-    echo "$E_LOADING$MSG_LOADING_CONFIG" >&2
+    echo "$E_LOADING $MSG_LOADING_CONFIG" >&2
   fi
 else
   if [ "$VERBOSE" = "true" ] || [ "$DEBUG" = "true" ]; then

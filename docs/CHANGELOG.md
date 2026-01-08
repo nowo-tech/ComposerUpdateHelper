@@ -7,6 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.18] - 2026-01-07
+
+### Fixed
+- **Dependency conflict detection order**: Fixed critical issue where dependency conflict detection was checking package requirements before dependent package constraints
+  - The system now correctly verifies dependent package constraints FIRST before checking package requirements
+  - This ensures that versions like `phpdocumentor/reflection-docblock:6.0.0` are correctly rejected when dependent packages require `^5.6` or `^5.0`
+  - Previously, the system would suggest incompatible updates that would fail during `composer require`
+  - Example: `phpdocumentor/reflection-docblock:6.0.0` is now correctly filtered when `a2lix/auto-form-bundle` requires `^5.6` and `nelmio/api-doc-bundle` requires `^5.0`
+- **Dependency detection in require-dev**: Fixed issue where dependencies in `require-dev` sections were not being detected
+  - `getPackageConstraintsFromLock` now searches in both `require` and `require-dev` sections
+  - This ensures all dependent packages are found, regardless of whether they're in production or development dependencies
+
+### Changed
+- **Enhanced conflict information**: Filtered packages now show which dependent packages cause the conflict
+  - Example: `phpdocumentor/reflection-docblock:6.0.0 (prod) (conflicts with: a2lix/auto-form-bundle (^5.6), nelmio/api-doc-bundle (^5.0))`
+  - This makes it easier to understand why a package is being filtered and what needs to be updated
+- **Output formatting improvements**: Multiple enhancements for better readability and consistency
+  - Standardized spacing before emojis throughout the output for consistent visual appearance
+  - Consistent indentation across all sections (framework constraints, ignored packages, dependency analysis)
+  - Visual enhancement: Package count in filtered conflicts now uses emoji numbers (1️⃣, 2️⃣, 3️⃣, etc.) for better visibility
+  - Example: `⚠️  2️⃣ Filtered by dependency conflicts:` instead of `⚠️  2 Filtered by dependency conflicts:`
+- **Debug logging improvements**: Added comprehensive debug messages for dependency conflict detection
+  - Shows when conflicts are detected with dependent packages
+  - Tracks conflicting dependents for each filtered package
+  - Provides detailed information about the conflict resolution process
+  - Includes debug messages for conflict tracking and output generation
+
+### Migration Notes
+- **No action required**: These are bug fixes and improvements that make dependency conflict detection more accurate
+- Packages that were previously incorrectly suggested will now be correctly filtered
+- The enhanced conflict information will help you understand why packages are being filtered
+
+### Breaking Changes
+- None
+
 ## [2.0.17] - 2026-01-07
 
 ### Added
