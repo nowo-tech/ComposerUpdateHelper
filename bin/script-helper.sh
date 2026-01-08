@@ -6,13 +6,27 @@
 # Function to detect language for help/config
 detect_language_for_script() {
     local lang="en"
-    
+
     # Try to get from config file first
     local config_file="${CONFIG_FILE:-}"
+
+    # If CONFIG_FILE is not set, try to detect it
+    if [ -z "$config_file" ]; then
+        # Check for .yaml first, then .yml, then .txt
+        if [ -f "generate-composer-require.yaml" ]; then
+            config_file="generate-composer-require.yaml"
+        elif [ -f "generate-composer-require.yml" ]; then
+            config_file="generate-composer-require.yml"
+        elif [ -f "generate-composer-require.ignore.txt" ]; then
+            config_file="generate-composer-require.ignore.txt"
+        fi
+    fi
+
+    # Read language from config file if it exists
     if [ -n "$config_file" ] && [ -f "$config_file" ]; then
         lang=$(grep -E "^language:" "$config_file" 2>/dev/null | sed 's/^language:[[:space:]]*//' | tr -d '[:space:]' || echo "")
     fi
-    
+
     # If not in config, detect from system
     if [ -z "$lang" ] && command -v detect_language >/dev/null 2>&1; then
         lang=$(detect_language)
@@ -25,7 +39,7 @@ detect_language_for_script() {
             lang="en"
         fi
     fi
-    
+
     echo "$lang"
 }
 
@@ -33,21 +47,21 @@ detect_language_for_script() {
 find_file_in_paths() {
     local paths="$1"
     local found_file=""
-    
+
     for path in $paths; do
         if [ -f "$path" ]; then
             found_file="$path"
             break
         fi
     done
-    
+
     echo "$found_file"
 }
 
 # Function to detect configuration file
 detect_config_file() {
     local debug="${DEBUG:-false}"
-    
+
     # Debug: Show current directory and files being searched
     if [ "$debug" = "true" ]; then
         echo "DEBUG: Current directory: $(pwd)" >&2
@@ -102,7 +116,7 @@ show_loading() {
 get_help_file_path() {
     local lang="$1"
     local script_dir="$2"
-    
+
     # Build paths to search
     local paths="
 ${script_dir}/i18n/help-${lang}.txt

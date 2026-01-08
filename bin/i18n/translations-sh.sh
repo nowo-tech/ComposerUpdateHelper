@@ -83,6 +83,19 @@ t() {
     if [ -z "$lang" ]; then
         # Try to get from config file first
         local config_file="${CONFIG_FILE:-}"
+        
+        # If CONFIG_FILE is not set, try to detect it
+        if [ -z "$config_file" ]; then
+            # Check for .yaml first, then .yml, then .txt
+            if [ -f "generate-composer-require.yaml" ]; then
+                config_file="generate-composer-require.yaml"
+            elif [ -f "generate-composer-require.yml" ]; then
+                config_file="generate-composer-require.yml"
+            elif [ -f "generate-composer-require.ignore.txt" ]; then
+                config_file="generate-composer-require.ignore.txt"
+            fi
+        fi
+        
         if [ -n "$config_file" ] && [ -f "$config_file" ]; then
             lang=$(grep -E "^language:" "$config_file" 2>/dev/null | sed 's/^language:[[:space:]]*//' | tr -d '[:space:]' || echo "")
         fi

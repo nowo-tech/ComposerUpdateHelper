@@ -160,6 +160,31 @@ CONFIG_FILE=$(echo "$config_info" | cut -d'|' -f1)
 CONFIG_FILE_DISPLAY=$(echo "$config_info" | cut -d'|' -f2)
 CONFIG_FILE_SUFFIX=$(echo "$config_info" | cut -d'|' -f3)
 
+# Initialize language for translations after detecting config file
+if command -v t >/dev/null 2>&1 && command -v load_translations_sh >/dev/null 2>&1; then
+    # Force re-detection of language now that CONFIG_FILE is set
+    detected_lang=$(detect_language_for_script)
+    # Initialize translations with detected language
+    if [ -n "$detected_lang" ]; then
+        # Find i18n directory
+        i18n_paths="
+vendor/nowo-tech/composer-update-helper/bin/i18n
+${SCRIPT_DIR}/i18n
+$(dirname "$(dirname "$SCRIPT_DIR")")/nowo-tech/composer-update-helper/bin/i18n
+"
+        i18n_dir=""
+        for path in $i18n_paths; do
+            if [ -f "${path}/en.sh" ] 2>/dev/null; then
+                i18n_dir="$path"
+                break
+            fi
+        done
+        if [ -n "$i18n_dir" ]; then
+            load_translations_sh "$detected_lang" "$i18n_dir"
+        fi
+    fi
+fi
+
 # Show config info
 if [ -n "$CONFIG_FILE" ]; then
     [ "$VERBOSE" = "true" ] || [ "$DEBUG" = "true" ] && echo "📋 $(get_msg found_config)$CONFIG_FILE_DISPLAY$CONFIG_FILE_SUFFIX" >&2
