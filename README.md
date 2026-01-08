@@ -1,6 +1,6 @@
 # Composer Update Helper
 
-[![CI](https://github.com/nowo-tech/composer-update-helper/actions/workflows/ci.yml/badge.svg)](https://github.com/nowo-tech/composer-update-helper/actions/workflows/ci.yml) [![Latest Stable Version](https://poser.pugx.org/nowo-tech/composer-update-helper/v)](https://packagist.org/packages/nowo-tech/composer-update-helper) [![License](https://poser.pugx.org/nowo-tech/composer-update-helper/license)](https://packagist.org/packages/nowo-tech/composer-update-helper) [![PHP Version Require](https://poser.pugx.org/nowo-tech/composer-update-helper/require/php)](https://packagist.org/packages/nowo-tech/composer-update-helper) [![GitHub stars](https://img.shields.io/github/stars/nowo-tech/composer-update-helper.svg?style=social&label=Star)](https://github.com/nowo-tech/composer-update-helper)
+[![CI](https://github.com/nowo-tech/ComposerUpdateHelper/actions/workflows/ci.yml/badge.svg)](https://github.com/nowo-tech/ComposerUpdateHelper/actions/workflows/ci.yml) [![Latest Stable Version](https://poser.pugx.org/nowo-tech/ComposerUpdateHelper/v)](https://packagist.org/packages/nowo-tech/ComposerUpdateHelper) [![License](https://poser.pugx.org/nowo-tech/ComposerUpdateHelper/license)](https://packagist.org/packages/nowo-tech/ComposerUpdateHelper) [![PHP Version Require](https://poser.pugx.org/nowo-tech/ComposerUpdateHelper/require/php)](https://packagist.org/packages/nowo-tech/ComposerUpdateHelper) [![GitHub stars](https://img.shields.io/github/stars/nowo-tech/ComposerUpdateHelper.svg?style=social&label=Star)](https://github.com/nowo-tech/ComposerUpdateHelper)
 
 > ⭐ **Found this project useful?** Give it a star on GitHub! It helps us maintain and improve the project.
 
@@ -488,8 +488,8 @@ If you have PHP and Composer installed locally:
 
 ```bash
 # Clone repository
-git clone https://github.com/nowo-tech/composer-update-helper.git
-cd composer-update-helper
+git clone https://github.com/nowo-tech/ComposerUpdateHelper.git
+cd ComposerUpdateHelper
 
 # Install dependencies
 composer install

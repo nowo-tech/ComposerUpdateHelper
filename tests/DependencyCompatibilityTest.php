@@ -418,12 +418,19 @@ final class DependencyCompatibilityTest extends TestCase
 
         $constraints = [];
         foreach ($allPackages as $pkg) {
-            if (!isset($pkg['name']) || !isset($pkg['require'])) {
+            if (!isset($pkg['name'])) {
                 continue;
             }
 
-            if (isset($pkg['require'][$packageName])) {
-                $constraints[$pkg['name']] = $pkg['require'][$packageName];
+            // Check if this package requires our target package
+            // Dependencies can be in 'require', 'require-dev', or both
+            $requires = array_merge(
+                $pkg['require'] ?? [],
+                $pkg['require-dev'] ?? []
+            );
+
+            if (isset($requires[$packageName])) {
+                $constraints[$pkg['name']] = $requires[$packageName];
             }
         }
 
@@ -627,6 +634,135 @@ final class DependencyCompatibilityTest extends TestCase
             $dev[] = $packageString;
         } else {
             $prod[] = $packageString;
+        }
+    }
+
+    public function testFindCompatibleVersionRejectsVersionNotSatisfyingDependentConstraints(): void
+    {
+        // Test the scenario where a proposed version doesn't satisfy dependent package constraints
+        // This is the case reported: phpdocumentor/reflection-docblock:6.0.0 doesn't satisfy ^5.6 and ^5.0
+        $lockData = [
+            'packages' => [
+                [
+                    'name' => 'a2lix/auto-form-bundle',
+                    'version' => '1.0.0',
+                    'require' => [
+                        'php' => '^7.4|^8.0',
+                        'phpdocumentor/reflection-docblock' => '^5.6',
+                    ],
+                ],
+                [
+                    'name' => 'nelmio/api-doc-bundle',
+                    'version' => '5.9.0',
+                    'require' => [
+                        'php' => '^7.4|^8.0',
+                        'phpdocumentor/reflection-docblock' => '^5.0',
+                    ],
+                ],
+                [
+                    'name' => 'phpdocumentor/reflection-docblock',
+                    'version' => '5.6.6',
+                    'require' => [
+                        'php' => '^7.4|^8.0',
+                    ],
+                ],
+            ],
+        ];
+
+        file_put_contents($this->tempDir . '/composer.lock', json_encode($lockData, JSON_PRETTY_PRINT));
+
+        // Create a mock composer.json
+        file_put_contents($this->tempDir . '/composer.json', json_encode([
+            'require' => [
+                'phpdocumentor/reflection-docblock' => '5.6.6',
+                'a2lix/auto-form-bundle' => '1.0.0',
+                'nelmio/api-doc-bundle' => '5.9.0',
+            ],
+        ], JSON_PRETTY_PRINT));
+
+        $originalDir = getcwd();
+        chdir($this->tempDir);
+
+        try {
+            // Test that getPackageConstraintsFromLock correctly finds dependent packages
+            $constraints = $this->getPackageConstraintsFromLock('phpdocumentor/reflection-docblock');
+            $this->assertArrayHasKey('a2lix/auto-form-bundle', $constraints);
+            $this->assertArrayHasKey('nelmio/api-doc-bundle', $constraints);
+            $this->assertEquals('^5.6', $constraints['a2lix/auto-form-bundle']);
+            $this->assertEquals('^5.0', $constraints['nelmio/api-doc-bundle']);
+
+            // Test that 6.0.0 does NOT satisfy ^5.6
+            $this->assertFalse($this->versionSatisfiesConstraint('6.0.0', '^5.6'));
+
+            // Test that 6.0.0 does NOT satisfy ^5.0
+            $this->assertFalse($this->versionSatisfiesConstraint('6.0.0', '^5.0'));
+
+            // Test that 5.6.6 DOES satisfy both ^5.6 and ^5.0
+            $this->assertTrue($this->versionSatisfiesConstraint('5.6.6', '^5.6'));
+            $this->assertTrue($this->versionSatisfiesConstraint('5.6.6', '^5.0'));
+
+            // Test that 5.9.0 DOES satisfy both ^5.6 and ^5.0
+            $this->assertTrue($this->versionSatisfiesConstraint('5.9.0', '^5.6'));
+            $this->assertTrue($this->versionSatisfiesConstraint('5.9.0', '^5.0'));
+        } finally {
+            chdir($originalDir);
+        }
+    }
+
+    public function testGetPackageConstraintsFromLockFindsRequireDev(): void
+    {
+        // Test that getPackageConstraintsFromLock also finds dependencies in require-dev
+        $lockData = [
+            'packages' => [
+                [
+                    'name' => 'some/prod-package',
+                    'version' => '1.0.0',
+                    'require' => [
+                        'php' => '^7.4|^8.0',
+                        'target/package' => '^2.0',
+                    ],
+                ],
+            ],
+            'packages-dev' => [
+                [
+                    'name' => 'some/dev-package',
+                    'version' => '1.0.0',
+                    'require' => [
+                        'php' => '^7.4|^8.0',
+                        'target/package' => '^3.0',
+                    ],
+                ],
+                [
+                    'name' => 'another/dev-package',
+                    'version' => '2.0.0',
+                    'require-dev' => [
+                        'target/package' => '^2.5',
+                    ],
+                ],
+            ],
+        ];
+
+        file_put_contents($this->tempDir . '/composer.lock', json_encode($lockData, JSON_PRETTY_PRINT));
+
+        $originalDir = getcwd();
+        chdir($this->tempDir);
+
+        try {
+            $constraints = $this->getPackageConstraintsFromLock('target/package');
+            
+            // Should find dependencies from both require and require-dev
+            $this->assertArrayHasKey('some/prod-package', $constraints);
+            $this->assertEquals('^2.0', $constraints['some/prod-package']);
+            
+            $this->assertArrayHasKey('some/dev-package', $constraints);
+            $this->assertEquals('^3.0', $constraints['some/dev-package']);
+            
+            $this->assertArrayHasKey('another/dev-package', $constraints);
+            $this->assertEquals('^2.5', $constraints['another/dev-package']);
+            
+            $this->assertCount(3, $constraints);
+        } finally {
+            chdir($originalDir);
         }
     }
 }

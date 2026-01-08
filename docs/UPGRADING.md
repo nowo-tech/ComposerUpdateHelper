@@ -18,6 +18,37 @@ This guide will help you upgrade Composer Update Helper to newer versions.
 
 ## Version-Specific Upgrade Notes
 
+### Upgrading to 2.0.18+
+
+#### Fixed
+- **Dependency conflict detection order**: Critical fix where the system now correctly verifies dependent package constraints before checking package requirements
+  - Versions that don't satisfy dependent package constraints are now correctly rejected
+  - This prevents suggesting incompatible updates that would fail during installation
+  - Example: `phpdocumentor/reflection-docblock:6.0.0` is now correctly filtered when dependent packages require `^5.6` or `^5.0`
+- **Dependency detection in require-dev**: Fixed issue where dependencies in `require-dev` sections were not being detected
+  - The system now finds all dependent packages, regardless of whether they're in production or development dependencies
+
+#### Changed
+- **Enhanced conflict information**: Filtered packages now show which dependent packages cause the conflict
+  - You'll now see messages like: `package:version (prod) (conflicts with: dependent1 (^1.0), dependent2 (^2.0))`
+  - This makes it much easier to understand why a package is being filtered
+- **Output formatting improvements**: Multiple enhancements for better readability
+  - Standardized spacing before emojis throughout the output
+  - Consistent indentation across all sections (framework constraints, ignored packages, dependency analysis)
+  - Visual enhancement: Package counts now use emoji numbers (1️⃣, 2️⃣, 3️⃣, etc.) for better visibility
+  - Example: `⚠️  2️⃣ Filtered by dependency conflicts:` makes it easier to quickly identify the number of filtered packages
+- **Debug logging**: Added comprehensive debug messages for better troubleshooting
+  - Includes detailed information about conflict detection and tracking
+  - Shows which dependent packages cause conflicts for each filtered package
+
+#### Migration Notes
+- **No action required**: These are bug fixes that improve accuracy
+- If you notice packages are now being filtered that weren't before, it's because the system is now correctly detecting conflicts
+- The enhanced conflict information will help you understand what needs to be updated
+
+#### Breaking Changes
+- None
+
 ### Upgrading to 2.0.17+
 
 #### Added
