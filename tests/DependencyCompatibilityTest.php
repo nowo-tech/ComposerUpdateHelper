@@ -752,17 +752,17 @@ final class DependencyCompatibilityTest extends TestCase
 
         try {
             $constraints = $this->getPackageConstraintsFromLock('target/package');
-            
+
             // Should find dependencies from both require and require-dev
             $this->assertArrayHasKey('some/prod-package', $constraints);
             $this->assertEquals('^2.0', $constraints['some/prod-package']);
-            
+
             $this->assertArrayHasKey('some/dev-package', $constraints);
             $this->assertEquals('^3.0', $constraints['some/dev-package']);
-            
+
             $this->assertArrayHasKey('another/dev-package', $constraints);
             $this->assertEquals('^2.5', $constraints['another/dev-package']);
-            
+
             $this->assertCount(3, $constraints);
         } finally {
             chdir($originalDir);
