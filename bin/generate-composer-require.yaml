@@ -1,11 +1,17 @@
 # Composer Update Helper Configuration
 # Configuration file for ignored and included packages during composer update suggestions
 
+# Language for output messages
+# Supported: en, es, pt, it, fr, de, pl, ru, ro, el, da, nl, cs, sv, no, fi, tr, zh, ja, ko, ar, hu, sk, uk, hr, bg, he, hi, vi, id, th (31 languages)
+# If not set, will auto-detect from system (LANG, LC_ALL, LC_MESSAGES)
+# Default: en (English)
+# ⚠️  WARNING: i18n feature is currently in DEVELOPMENT MODE
+#language: es
+
 # Enable detailed dependency compatibility checking
-# ⚠️  WARNING: This feature is currently in DEVELOPMENT MODE and is still being reviewed and refined.
-# While functional, it may not catch all edge cases and should be used with caution in production environments.
 # When enabled (true), the tool will check if proposed package versions are compatible
 # with currently installed dependencies, preventing conflicts before they occur.
+# This feature is production-ready and recommended for all users.
 # When disabled (false), the tool will suggest all available updates without checking
 # dependency compatibility (faster but may suggest incompatible updates).
 # Default: true

@@ -202,10 +202,10 @@ final class ScriptTest extends TestCase
 
         // Script should detect process-updates.php in vendor
         $this->assertStringContainsString('process-updates.php', (string) $content);
-        $this->assertStringContainsString('PROCESSOR_PHP', (string) $content);
+        $this->assertStringContainsString('PROCESSOR_PATHS', (string) $content);
         $this->assertStringContainsString('vendor/nowo-tech/composer-update-helper/bin/process-updates.php', (string) $content);
         // Should have fallback to script directory
-        $this->assertStringContainsString('$(dirname "$0")/process-updates.php', (string) $content);
+        $this->assertStringContainsString('${SCRIPT_DIR}/process-updates.php', (string) $content);
     }
 
     public function testScriptSupportsRunFlag(): void

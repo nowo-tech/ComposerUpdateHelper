@@ -1,0 +1,51 @@
+Penggunaan: %s [OPSI]
+
+Menghasilkan perintah composer require dari "composer outdated --direct".
+Bekerja dengan proyek PHP apa pun (Symfony, Laravel, Yii, CodeIgniter, CakePHP, Laminas, Slim, dll.)
+
+OPSI:
+    --run                    Menjalankan perintah yang disarankan secara otomatis
+    --release-info           Menampilkan informasi rilis (ringkasan dengan tautan)
+    --release-detail         Menampilkan catatan perubahan rilis lengkap untuk setiap paket (menyertakan --release-info)
+    --no-release-info        Melewatkan bagian informasi rilis (perilaku default)
+    -v, --verbose            Menampilkan output verbose (file konfigurasi, paket, dll.)
+    --debug                  Menampilkan informasi debug (sangat detail, termasuk jalur file, parsing, dll.)
+    -h, --help               Menampilkan pesan bantuan ini
+
+CONTOH:
+    %s                                    # Menampilkan perintah yang disarankan (tanpa informasi rilis secara default)
+    %s --run                              # Menjalankan perintah yang disarankan
+    %s --release-info                     # Menampilkan ringkasan informasi rilis
+    %s --release-detail                   # Menampilkan catatan perubahan lengkap (menyertakan --release-info)
+    %s --verbose                          # Menampilkan output verbose dengan detail konfigurasi
+    %s --debug                            # Menampilkan informasi debug detail
+    %s --run --release-detail             # Menjalankan dan menampilkan catatan perubahan lengkap
+    %s --verbose --release-info           # Verbose dengan informasi rilis
+    %s --debug                            # Mode debug (sangat detail)
+
+DUKUNGAN FRAMEWORK:
+    Skrip secara otomatis menghormati kendala versi framework:
+    - Symfony: menghormati kendala "extra.symfony.require"
+    - Laravel: menghormati versi laravel/framework major.minor
+    - Yii: menghormati versi yiisoft/yii2 major.minor
+    - CakePHP: menghormati versi cakephp/cakephp major.minor
+    - Laminas: menghormati versi laminas/* major.minor
+    - CodeIgniter: menghormati versi codeigniter4/framework major.minor
+    - Slim: menghormati versi slim/slim major.minor
+
+PAKET YANG DIABAIKAN:
+    Paket yang tercantum dalam generate-composer-require.yaml atau .yml akan dilewati.
+    Skrip mencari file konfigurasi di direktori saat ini (di mana composer.json berada).
+    Format lama (generate-composer-require.ignore.txt) masih didukung untuk kompatibilitas mundur.
+    Komentar yang dimulai dengan # diabaikan.
+
+INFORMASI RILIS:
+    Secara default, informasi rilis TIDAK ditampilkan (tidak ada panggilan API yang dilakukan).
+    Gunakan --release-info untuk menampilkan ringkasan dengan:
+    - Nama paket
+    - URL rilis
+    - URL catatan perubahan
+
+    Gunakan --release-detail untuk melihat catatan perubahan rilis lengkap.
+    Gunakan --no-release-info untuk secara eksplisit melewatkan informasi rilis (perilaku default).
+

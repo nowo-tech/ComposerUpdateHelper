@@ -1,0 +1,51 @@
+사용법: %s [옵션]
+
+"composer outdated --direct"에서 composer require 명령을 생성합니다.
+모든 PHP 프로젝트에서 작동합니다 (Symfony, Laravel, Yii, CodeIgniter, CakePHP, Laminas, Slim 등)
+
+옵션:
+    --run                    권장 명령을 자동으로 실행
+    --release-info           릴리스 정보 표시 (링크가 있는 요약)
+    --release-detail         각 패키지에 대한 전체 릴리스 변경 로그 표시 (--release-info 포함)
+    --no-release-info        릴리스 정보 섹션 건너뛰기 (기본 동작)
+    -v, --verbose            자세한 출력 표시 (구성 파일, 패키지 등)
+    --debug                  디버그 정보 표시 (매우 자세함, 파일 경로, 구문 분석 등 포함)
+    -h, --help               이 도움말 메시지 표시
+
+예제:
+    %s                                    # 권장 명령 표시 (기본적으로 릴리스 정보 없음)
+    %s --run                              # 권장 명령 실행
+    %s --release-info                     # 릴리스 정보 요약 표시
+    %s --release-detail                   # 전체 변경 로그 표시 (--release-info 포함)
+    %s --verbose                          # 구성 세부 정보가 있는 자세한 출력 표시
+    %s --debug                            # 자세한 디버그 정보 표시
+    %s --run --release-detail             # 실행하고 전체 변경 로그 표시
+    %s --verbose --release-info           # 릴리스 정보가 있는 자세한 출력
+    %s --debug                            # 디버그 모드 (매우 자세함)
+
+프레임워크 지원:
+    스크립트는 자동으로 프레임워크 버전 제약을 준수합니다:
+    - Symfony: "extra.symfony.require" 제약 준수
+    - Laravel: laravel/framework major.minor 버전 준수
+    - Yii: yiisoft/yii2 major.minor 버전 준수
+    - CakePHP: cakephp/cakephp major.minor 버전 준수
+    - Laminas: laminas/* major.minor 버전 준수
+    - CodeIgniter: codeigniter4/framework major.minor 버전 준수
+    - Slim: slim/slim major.minor 버전 준수
+
+무시된 패키지:
+    generate-composer-require.yaml 또는 .yml에 나열된 패키지는 건너뜁니다.
+    스크립트는 현재 디렉토리 (composer.json이 있는 위치)에서 구성 파일을 검색합니다.
+    이전 형식 (generate-composer-require.ignore.txt)은 하위 호환성을 위해 계속 지원됩니다.
+    #로 시작하는 주석은 무시됩니다.
+
+릴리스 정보:
+    기본적으로 릴리스 정보는 표시되지 않습니다 (API 호출이 수행되지 않음).
+    요약을 표시하려면 --release-info 사용:
+    - 패키지 이름
+    - 릴리스 URL
+    - 변경 로그 URL
+
+    전체 릴리스 변경 로그를 보려면 --release-detail 사용.
+    릴리스 정보를 명시적으로 건너뛰려면 --no-release-info 사용 (기본 동작).
+

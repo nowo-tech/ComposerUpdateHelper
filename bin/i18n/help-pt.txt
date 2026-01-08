@@ -1,0 +1,51 @@
+Uso: %s [OPÇÕES]
+
+Gera comandos composer require a partir de "composer outdated --direct".
+Funciona com qualquer projeto PHP (Symfony, Laravel, Yii, CodeIgniter, CakePHP, Laminas, Slim, etc.)
+
+OPÇÕES:
+    --run                    Executa os comandos sugeridos automaticamente
+    --release-info           Mostra informações de releases (resumo com links)
+    --release-detail         Mostra o changelog completo de cada pacote (implica --release-info)
+    --no-release-info        Omite a seção de informações de releases (comportamento padrão)
+    -v, --verbose            Mostra saída detalhada (arquivos de configuração, pacotes, etc.)
+    --debug                  Mostra informações de depuração (muito detalhado, inclui caminhos de arquivos, parsing, etc.)
+    -h, --help               Mostra esta mensagem de ajuda
+
+EXEMPLOS:
+    %s                                    # Mostra comandos sugeridos (sem informações de releases por padrão)
+    %s --run                              # Executa comandos sugeridos
+    %s --release-info                     # Mostra resumo de informações de releases
+    %s --release-detail                   # Mostra changelogs completos (implica --release-info)
+    %s --verbose                           # Mostra saída detalhada com detalhes de configuração
+    %s --debug                             # Mostra informações de depuração detalhadas
+    %s --run --release-detail             # Executa e mostra changelogs completos
+    %s --verbose --release-info # Detalhado com informações de releases
+    %s --debug                  # Modo depuração (muito detalhado)
+
+SUPORTE DE FRAMEWORKS:
+    O script respeita automaticamente as restrições de versão do framework:
+    - Symfony: respeita a restrição "extra.symfony.require"
+    - Laravel: respeita a versão major.minor de laravel/framework
+    - Yii: respeita a versão major.minor de yiisoft/yii2
+    - CakePHP: respeita a versão major.minor de cakephp/cakephp
+    - Laminas: respeita as versões major.minor de laminas/*
+    - CodeIgniter: respeita a versão major.minor de codeigniter4/framework
+    - Slim: respeita a versão major.minor de slim/slim
+
+PACOTES IGNORADOS:
+    Os pacotes listados em generate-composer-require.yaml ou .yml serão omitidos.
+    O script procura arquivos de configuração no diretório atual (onde composer.json está localizado).
+    O formato antigo (generate-composer-require.ignore.txt) ainda é suportado para compatibilidade retroativa.
+    Comentários que começam com # são ignorados.
+
+INFORMAÇÕES DE RELEASES:
+    Por padrão, as informações de releases NÃO são mostradas (nenhuma chamada de API é feita).
+    Use --release-info para mostrar um resumo com:
+    - Nome do pacote
+    - URL do release
+    - URL do changelog
+
+    Use --release-detail para ver o changelog completo do release.
+    Use --no-release-info para omitir explicitamente as informações de releases (comportamento padrão).
+

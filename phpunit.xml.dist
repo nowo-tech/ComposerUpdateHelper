@@ -12,15 +12,5 @@
             <directory>tests</directory>
         </testsuite>
     </testsuites>
-
-    <coverage>
-        <include>
-            <directory suffix=".php">src</directory>
-        </include>
-        <report>
-            <html outputDirectory="coverage"/>
-            <clover outputFile="coverage.xml"/>
-        </report>
-    </coverage>
 </phpunit>
 

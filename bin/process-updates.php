@@ -11,6 +11,36 @@ declare(strict_types=1);
  * @see    https://github.com/HecFranco
  */
 
+// Load i18n translation functions
+// Try multiple paths: vendor location, development location, and relative to this file
+$i18nLoaderPaths = [
+    __DIR__ . '/i18n/loader.php',  // Development or when in vendor/nowo-tech/composer-update-helper/bin/
+    dirname(__DIR__) . '/bin/i18n/loader.php',  // Alternative vendor path
+    dirname(dirname(__DIR__)) . '/nowo-tech/composer-update-helper/bin/i18n/loader.php',  // From project root
+];
+
+$i18nLoaderLoaded = false;
+foreach ($i18nLoaderPaths as $i18nLoaderPath) {
+    if (file_exists($i18nLoaderPath)) {
+        require_once $i18nLoaderPath;
+        $i18nLoaderLoaded = true;
+        break;
+    }
+}
+
+// Fallback: if loader not found, define a dummy t() function
+if (!$i18nLoaderLoaded && !function_exists('t')) {
+    function t(string $key, array $params = [], ?string $lang = null): string {
+        return $key;
+    }
+    function detectLanguage(): string {
+        return 'en';
+    }
+    function loadTranslations(string $lang): array {
+        return [];
+    }
+}
+
 $raw = getenv('OUTDATED_JSON') ?: '';
 // In case some noise got in, try to isolate the first valid JSON:
 $start = strpos($raw, '{');
@@ -81,7 +111,7 @@ function readPackagesFromYaml(string $yamlPath, string $section): array
 }
 
 // Function to read a configuration value from YAML file
-function readConfigValue(string $yamlPath, string $key, $default = null)
+function readConfigValue(string $yamlPath, string $key, mixed $default = null)
 {
     if (!file_exists($yamlPath)) {
         return $default;
@@ -196,6 +226,51 @@ $showReleaseInfo = getenv('SHOW_RELEASE_INFO') === 'true';
 $showReleaseDetail = getenv('SHOW_RELEASE_DETAIL') === 'true';
 $debug = getenv('DEBUG') === 'true';
 $verbose = getenv('VERBOSE') === 'true';
+
+// Detect and load language for translations
+$detectedLang = null;
+if (function_exists('detectLanguage')) {
+    // Try to get from config file first
+    $configFileForLang = $configFile ?: (file_exists('generate-composer-require.yaml') ? 'generate-composer-require.yaml' : (file_exists('generate-composer-require.yml') ? 'generate-composer-require.yml' : ''));
+    if ($configFileForLang && file_exists($configFileForLang)) {
+        $detectedLang = readConfigValue($configFileForLang, 'language');
+        if ($debug) {
+            error_log("DEBUG: i18n - Language from config file: " . ($detectedLang ?: 'not set'));
+        }
+    }
+
+    // If not in config, detect from system
+    if (empty($detectedLang)) {
+        $detectedLang = detectLanguage();
+        if ($debug) {
+            error_log("DEBUG: i18n - Language detected from system: " . $detectedLang);
+        }
+    }
+
+    if ($debug) {
+        error_log("DEBUG: i18n - Final detected language: " . ($detectedLang ?: 'not detected'));
+        error_log("DEBUG: i18n - Config file used: " . ($configFileForLang ?: 'not found'));
+        error_log("DEBUG: i18n - Translation function available: " . (function_exists('t') ? 'yes' : 'no'));
+        error_log("DEBUG: i18n - LoadTranslations function available: " . (function_exists('loadTranslations') ? 'yes' : 'no'));
+        error_log("DEBUG: i18n - i18n loader loaded: " . ($i18nLoaderLoaded ? 'yes' : 'no'));
+        if (function_exists('loadTranslations')) {
+            $testTranslations = loadTranslations($detectedLang ?: 'en');
+            error_log("DEBUG: i18n - Loaded translations count: " . count($testTranslations));
+            if (count($testTranslations) > 0) {
+                error_log("DEBUG: i18n - Sample translation keys: " . implode(', ', array_slice(array_keys($testTranslations), 0, 5)));
+                error_log("DEBUG: i18n - Test translation 'no_packages_update': " . t('no_packages_update', [], $detectedLang));
+                error_log("DEBUG: i18n - Test translation 'suggested_commands': " . t('suggested_commands', [], $detectedLang));
+            } else {
+                error_log("DEBUG: i18n - WARNING: No translations loaded! Check i18n file paths.");
+            }
+        }
+    }
+} else {
+    if ($debug) {
+        error_log("DEBUG: i18n - WARNING: detectLanguage() function not available! i18n loader may not have loaded correctly.");
+        error_log("DEBUG: i18n - Tried paths: " . implode(', ', $i18nLoaderPaths));
+    }
+}
 
 // Emoji constants for output formatting
 if (!defined('E_OK')) {
@@ -750,7 +825,7 @@ function getInstalledPackageVersion($packageName) {
 }
 
 // Function to find the highest compatible version considering dependent packages
-function findCompatibleVersion($packageName, $proposedVersion, $debug = false, $checkDependencies = true, &$requiredTransitiveUpdates = null, &$conflictingDependents = null) {
+function findCompatibleVersion($packageName, $proposedVersion, $debug = false, $checkDependencies = true, ?array &$requiredTransitiveUpdates = null, ?array &$conflictingDependents = null) {
     // If dependency checking is disabled, return proposed version without verification
     if (!$checkDependencies) {
         if ($debug) {
@@ -1495,8 +1570,11 @@ foreach ($frameworkConstraints as $prefix => $version) {
     $detectedFrameworks[] = rtrim($prefix, '/') . ' ' . $version . '.*';
 }
 if (!empty($detectedFrameworks)) {
-    $output[] = "";
-    $output[] = " " . E_WRENCH . "  Detected framework constraints:";
+    $msg = function_exists('t') ? t('detected_framework', [], $detectedLang) : 'Detected framework constraints:';
+    $output[] = " " . E_WRENCH . "  " . $msg;
+    if ($debug) {
+        error_log("DEBUG: i18n - Using translation for 'detected_framework': " . $msg);
+    }
     foreach ($detectedFrameworks as $fw) {
         $output[] = "  - " . $fw;
     }
@@ -1505,7 +1583,11 @@ if (!empty($detectedFrameworks)) {
 
 // Show ignored packages (prod)
 if (!empty($ignoredProd)) {
-    $output[] = " " . E_SKIP . "   Ignored packages (prod):";
+    $msg = function_exists('t') ? t('ignored_packages_prod', [], $detectedLang) : 'Ignored packages (prod):';
+    $output[] = " " . E_SKIP . "   " . $msg;
+    if ($debug) {
+        error_log("DEBUG: i18n - Using translation for 'ignored_packages_prod': " . $msg);
+    }
     foreach ($ignoredProd as $pkg) {
         $output[] = "  - " . $pkg;
     }
@@ -1514,7 +1596,11 @@ if (!empty($ignoredProd)) {
 
 // Show ignored packages (dev)
 if (!empty($ignoredDev)) {
-    $output[] = " " . E_SKIP . "   Ignored packages (dev):";
+    $msg = function_exists('t') ? t('ignored_packages_dev', [], $detectedLang) : 'Ignored packages (dev):';
+    $output[] = " " . E_SKIP . "   " . $msg;
+    if ($debug) {
+        error_log("DEBUG: i18n - Using translation for 'ignored_packages_dev': " . $msg);
+    }
     foreach ($ignoredDev as $pkg) {
         $output[] = "  - " . $pkg;
     }
@@ -1523,16 +1609,26 @@ if (!empty($ignoredDev)) {
 
 // Show dependency checking comparison when enabled
 if ($checkDependencies) {
-    $output[] = " " . E_WRENCH . "  Dependency checking analysis:";
+    $msg = function_exists('t') ? t('dependency_analysis', [], $detectedLang) : 'Dependency checking analysis:';
+    $output[] = " " . E_WRENCH . " " . $msg;
+    if ($debug) {
+        error_log("DEBUG: i18n - Using translation for 'dependency_analysis': " . $msg);
+    }
 
     // Show all outdated packages (before checking)
     if (!empty($allOutdatedProd) || !empty($allOutdatedDev)) {
-        $output[] = "  " . E_CLIPBOARD . " All outdated packages (before dependency check):";
+        $msg = function_exists('t') ? t('all_outdated_before', [], $detectedLang) : 'All outdated packages (before dependency check):';
+        $output[] = "  " . E_CLIPBOARD . " " . $msg;
         $output = array_merge($output, formatPackageList($allOutdatedProd, LABEL_PROD));
         $output = array_merge($output, formatPackageList($allOutdatedDev, LABEL_DEV));
         $output[] = "";
+        if ($debug) {
+            error_log("DEBUG: i18n - Using translation for 'all_outdated_before': " . $msg);
+        }
     } else {
-        $output[] = "  " . E_CLIPBOARD . " All outdated packages (before dependency check): " . LABEL_NONE;
+        $msg = function_exists('t') ? t('all_outdated_before', [], $detectedLang) : 'All outdated packages (before dependency check):';
+        $noneLabel = function_exists('t') ? t('none', [], $detectedLang) : LABEL_NONE;
+        $output[] = "  " . E_CLIPBOARD . " " . $msg . " " . $noneLabel;
         $output[] = "";
     }
 
@@ -1548,16 +1644,21 @@ if ($checkDependencies) {
         // Use emoji number for count to make it more visually appealing
         $numberEmojis = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'];
         $countEmoji = ($filteredCount > 0 && $filteredCount <= 10) ? $numberEmojis[$filteredCount - 1] : "🔢";
-        $output[] = "  " . E_WARNING . "  " . $countEmoji . " Filtered by dependency conflicts:";
+        $msg = function_exists('t') ? t('filtered_by_conflicts', [], $detectedLang) : 'Filtered by dependency conflicts:';
+        $output[] = "  " . E_WARNING . " " . $countEmoji . " " . $msg;
+        if ($debug) {
+            error_log("DEBUG: i18n - Using translation for 'filtered_by_conflicts': " . $msg);
+        }
         // Show prod packages with conflicts
         foreach ($filteredByDependenciesProd as $pkg) {
             $conflictInfo = "";
             if (isset($filteredPackageConflicts[$pkg]) && !empty($filteredPackageConflicts[$pkg])) {
+                $conflictCount = count($filteredPackageConflicts[$pkg]);
                 $conflictList = [];
                 foreach ($filteredPackageConflicts[$pkg] as $depPkg => $constraint) {
                     $conflictList[] = "{$depPkg} ({$constraint})";
                 }
-                $conflictInfo = " (conflicts with: " . implode(', ', $conflictList) . ")";
+                $conflictInfo = " (conflicts with " . $conflictCount . " package" . ($conflictCount > 1 ? "s" : "") . ": " . implode(', ', $conflictList) . ")";
                 if ($debug) {
                     error_log("DEBUG:   - {$pkg} conflicts with: " . implode(', ', array_keys($filteredPackageConflicts[$pkg])));
                 }
@@ -1570,11 +1671,12 @@ if ($checkDependencies) {
         foreach ($filteredByDependenciesDev as $pkg) {
             $conflictInfo = "";
             if (isset($filteredPackageConflicts[$pkg]) && !empty($filteredPackageConflicts[$pkg])) {
+                $conflictCount = count($filteredPackageConflicts[$pkg]);
                 $conflictList = [];
                 foreach ($filteredPackageConflicts[$pkg] as $depPkg => $constraint) {
                     $conflictList[] = "{$depPkg} ({$constraint})";
                 }
-                $conflictInfo = " (conflicts with: " . implode(', ', $conflictList) . ")";
+                $conflictInfo = " (conflicts with " . $conflictCount . " package" . ($conflictCount > 1 ? "s" : "") . ": " . implode(', ', $conflictList) . ")";
                 if ($debug) {
                     error_log("DEBUG:   - {$pkg} conflicts with: " . implode(', ', array_keys($filteredPackageConflicts[$pkg])));
                 }
@@ -1587,7 +1689,11 @@ if ($checkDependencies) {
 
         // Show transitive dependencies that need updates
         if (!empty($requiredTransitiveUpdates)) {
-            $output[] = "  " . E_BULB . " Suggested transitive dependency updates to resolve conflicts:";
+            $msg = function_exists('t') ? t('suggested_transitive', [], $detectedLang) : 'Suggested transitive dependency updates to resolve conflicts:';
+            $output[] = "  " . E_BULB . " " . $msg;
+            if ($debug) {
+                error_log("DEBUG: i18n - Using translation for 'suggested_transitive': " . $msg);
+            }
             foreach ($requiredTransitiveUpdates as $transitivePkg => $info) {
                 $requiredByList = implode(', ', array_unique($info['required_by']));
                 $output[] = "     - {$transitivePkg}:{$info['suggested_version']} (installed: {$info['installed_version']}, required by: {$requiredByList})";
@@ -1595,18 +1701,29 @@ if ($checkDependencies) {
             $output[] = "";
         }
     } else {
-        $output[] = "  " . E_WARNING . "  Filtered by dependency conflicts: " . LABEL_NONE;
+        $msg = function_exists('t') ? t('filtered_by_conflicts', [], $detectedLang) : 'Filtered by dependency conflicts:';
+        $noneLabel = function_exists('t') ? t('none', [], $detectedLang) : LABEL_NONE;
+        $output[] = "  " . E_WARNING . "  " . $msg . " " . $noneLabel;
+        if ($debug) {
+            error_log("DEBUG: i18n - Using translation for 'filtered_by_conflicts' (none): " . $msg);
+        }
         $output[] = "";
     }
 
     // Show packages that passed dependency check
     if (!empty($prod) || !empty($dev)) {
-        $output[] = "  " . E_OK . " Packages that passed dependency check:";
+        $msg = function_exists('t') ? t('packages_passed_check', [], $detectedLang) : 'Packages that passed dependency check:';
+        $output[] = "  " . E_OK . " " . $msg;
         $output = array_merge($output, formatPackageList($prod, LABEL_PROD));
         $output = array_merge($output, formatPackageList($dev, LABEL_DEV));
         $output[] = "";
+        if ($debug) {
+            error_log("DEBUG: i18n - Using translation for 'packages_passed_check': " . $msg);
+        }
     } else {
-        $output[] = "  " . E_OK . " Packages that passed dependency check: " . LABEL_NONE;
+        $msg = function_exists('t') ? t('packages_passed_check', [], $detectedLang) : 'Packages that passed dependency check:';
+        $noneLabel = function_exists('t') ? t('none', [], $detectedLang) : LABEL_NONE;
+        $output[] = "  " . E_OK . " " . $msg . " " . $noneLabel;
         $output[] = "";
     }
 }
@@ -1672,19 +1789,39 @@ if (empty($commandsList)) {
 
     if (!$hasOutdated) {
         // No outdated packages at all
-        $output[] = " " . E_OK . "  No packages to update (all packages are up to date).";
+        $msg = function_exists('t') ? t('no_packages_update', [], $detectedLang) . ' (' . t('all_up_to_date', [], $detectedLang) . ').' : 'No packages to update (all packages are up to date).';
+        $output[] = " " . E_OK . "  " . $msg;
+        if ($debug) {
+            error_log("DEBUG: i18n - Using translation for 'no_packages_update': " . ($msg));
+        }
     } elseif ($hasFiltered && !$hasIgnored) {
         // All outdated packages are filtered by dependency conflicts
-        $output[] = " " . E_OK . "  No packages to update (all outdated packages have dependency conflicts).";
+        $msg = function_exists('t') ? t('no_packages_update', [], $detectedLang) . ' (' . t('all_have_conflicts', [], $detectedLang) . ').' : 'No packages to update (all outdated packages have dependency conflicts).';
+        $output[] = " " . E_OK . "  " . $msg;
+        if ($debug) {
+            error_log("DEBUG: i18n - Using translation for 'all_have_conflicts': " . ($msg));
+        }
     } elseif ($hasIgnored && !$hasFiltered) {
         // All outdated packages are ignored
-        $output[] = " " . E_OK . "  No packages to update (all outdated packages are ignored).";
+        $msg = function_exists('t') ? t('no_packages_update', [], $detectedLang) . ' (' . t('all_ignored', [], $detectedLang) . ').' : 'No packages to update (all outdated packages are ignored).';
+        $output[] = " " . E_OK . "  " . $msg;
+        if ($debug) {
+            error_log("DEBUG: i18n - Using translation for 'all_ignored': " . ($msg));
+        }
     } elseif ($hasFiltered && $hasIgnored) {
         // Mix of filtered and ignored
-        $output[] = " " . E_OK . "  No packages to update (all outdated packages are ignored or have dependency conflicts).";
+        $msg = function_exists('t') ? t('no_packages_update', [], $detectedLang) . ' (' . t('all_ignored_or_conflicts', [], $detectedLang) . ').' : 'No packages to update (all outdated packages are ignored or have dependency conflicts).';
+        $output[] = " " . E_OK . "  " . $msg;
+        if ($debug) {
+            error_log("DEBUG: i18n - Using translation for 'all_ignored_or_conflicts': " . ($msg));
+        }
     } else {
         // Fallback (shouldn't happen, but just in case)
-        $output[] = " " . E_OK . "  No packages to update.";
+        $msg = function_exists('t') ? t('no_packages_update', [], $detectedLang) . '.' : 'No packages to update.';
+        $output[] = " " . E_OK . "  " . $msg;
+        if ($debug) {
+            error_log("DEBUG: i18n - Using translation for 'no_packages_update' (fallback): " . ($msg));
+        }
     }
 } else {
     // Check if we only have transitive dependency commands
@@ -1692,13 +1829,27 @@ if (empty($commandsList)) {
     $hasTransitiveUpdates = !empty($requiredTransitiveUpdates);
 
     if ($hasDirectUpdates && $hasTransitiveUpdates) {
-        $output[] = " " . E_WRENCH . "  Suggested commands:";
-        $output[] = "  (Includes transitive dependencies needed to resolve conflicts)";
+        $msg = function_exists('t') ? t('suggested_commands', [], $detectedLang) : 'Suggested commands:';
+        $output[] = " " . E_WRENCH . "  " . $msg;
+        $msg2 = function_exists('t') ? t('includes_transitive', [], $detectedLang) : '(Includes transitive dependencies needed to resolve conflicts)';
+        $output[] = "  " . $msg2;
+        if ($debug) {
+            error_log("DEBUG: i18n - Using translation for 'suggested_commands': " . $msg);
+        }
     } elseif ($hasTransitiveUpdates && !$hasDirectUpdates) {
-        $output[] = " " . E_WRENCH . "  Suggested commands to resolve dependency conflicts:";
-        $output[] = "  (Update these transitive dependencies first, then retry updating the filtered packages)";
+        $msg = function_exists('t') ? t('suggested_commands_conflicts', [], $detectedLang) : 'Suggested commands to resolve dependency conflicts:';
+        $output[] = " " . E_WRENCH . "  " . $msg;
+        $msg2 = function_exists('t') ? t('update_transitive_first', [], $detectedLang) : '(Update these transitive dependencies first, then retry updating the filtered packages)';
+        $output[] = "  " . $msg2;
+        if ($debug) {
+            error_log("DEBUG: i18n - Using translation for 'suggested_commands_conflicts': " . $msg);
+        }
     } else {
-        $output[] = " " . E_WRENCH . "  Suggested commands:";
+        $msg = function_exists('t') ? t('suggested_commands', [], $detectedLang) : 'Suggested commands:';
+        $output[] = " " . E_WRENCH . "  " . $msg;
+        if ($debug) {
+            error_log("DEBUG: i18n - Using translation for 'suggested_commands' (simple): " . $msg);
+        }
     }
 
     foreach ($commandsList as $cmd) {

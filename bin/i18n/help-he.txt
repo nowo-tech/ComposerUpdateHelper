@@ -1,0 +1,51 @@
+שימוש: %s [אפשרויות]
+
+יוצר פקודות composer require מ-"composer outdated --direct".
+עובד עם כל פרויקט PHP (Symfony, Laravel, Yii, CodeIgniter, CakePHP, Laminas, Slim, וכו')
+
+אפשרויות:
+    --run                    מבצע אוטומטית את הפקודות המומלצות
+    --release-info           מציג מידע על שחרור (סיכום עם קישורים)
+    --release-detail         מציג יומן שינויים מלא של שחרור עבור כל חבילה (כולל --release-info)
+    --no-release-info        מדלג על חלק מידע על שחרור (התנהגות ברירת מחדל)
+    -v, --verbose            מציג פלט מפורט (קבצי הגדרות, חבילות, וכו')
+    --debug                  מציג מידע לניפוי שגיאות (מאוד מפורט, כולל נתיבי קבצים, ניתוח, וכו')
+    -h, --help               מציג הודעת עזרה זו
+
+דוגמאות:
+    %s                                    # מציג פקודות מומלצות (ללא מידע על שחרור כברירת מחדל)
+    %s --run                              # מבצע פקודות מומלצות
+    %s --release-info                     # מציג סיכום מידע על שחרור
+    %s --release-detail                   # מציג יומני שינויים מלאים (כולל --release-info)
+    %s --verbose                          # מציג פלט מפורט עם פרטי הגדרות
+    %s --debug                            # מציג מידע מפורט לניפוי שגיאות
+    %s --run --release-detail             # מבצע ומציג יומני שינויים מלאים
+    %s --verbose --release-info           # מפורט עם מידע על שחרור
+    %s --debug                            # מצב ניפוי שגיאות (מאוד מפורט)
+
+תמיכה במסגרת:
+    הסקריפט מכבד אוטומטית הגבלות גרסת מסגרת:
+    - Symfony: מכבד הגבלה "extra.symfony.require"
+    - Laravel: מכבד גרסת laravel/framework major.minor
+    - Yii: מכבד גרסת yiisoft/yii2 major.minor
+    - CakePHP: מכבד גרסת cakephp/cakephp major.minor
+    - Laminas: מכבד גרסאות laminas/* major.minor
+    - CodeIgniter: מכבד גרסת codeigniter4/framework major.minor
+    - Slim: מכבד גרסת slim/slim major.minor
+
+חבילות שמתעלמים מהן:
+    חבילות המפורטות ב-generate-composer-require.yaml או .yml יידלגו.
+    הסקריפט מחפש קבצי הגדרות בתיקייה הנוכחית (היכן שנמצא composer.json).
+    פורמט ישן (generate-composer-require.ignore.txt) עדיין נתמך לתאימות לאחור.
+    הערות המתחילות ב-# מתעלמות.
+
+מידע על שחרור:
+    כברירת מחדל, מידע על שחרור לא מוצג (לא מבוצעות קריאות API).
+    השתמש ב---release-info להצגת סיכום עם:
+    - שם חבילה
+    - כתובת URL של שחרור
+    - כתובת URL של יומן שינויים
+
+    השתמש ב---release-detail לראות את יומן השינויים המלא של השחרור.
+    השתמש ב---no-release-info לדילוג מפורש על מידע על שחרור (התנהגות ברירת מחדל).
+

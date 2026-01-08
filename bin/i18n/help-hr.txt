@@ -1,0 +1,51 @@
+Korištenje: %s [OPCIJE]
+
+Generira composer require naredbe iz "composer outdated --direct".
+Radi s bilo kojim PHP projektom (Symfony, Laravel, Yii, CodeIgniter, CakePHP, Laminas, Slim, itd.)
+
+OPCIJE:
+    --run                    Automatski izvršava predložene naredbe
+    --release-info           Prikazuje informacije o izdanju (sažetak s poveznicama)
+    --release-detail         Prikazuje potpuni dnevnik promjena izdanja za svaki paket (uključuje --release-info)
+    --no-release-info        Preskače odjeljak informacija o izdanju (zadano ponašanje)
+    -v, --verbose            Prikazuje detaljni izlaz (konfiguracijske datoteke, paketi, itd.)
+    --debug                  Prikazuje informacije za debugiranje (vrlo detaljno, uključuje putanje datoteka, parsiranje, itd.)
+    -h, --help               Prikazuje ovu poruku pomoći
+
+PRIMJERI:
+    %s                                    # Prikazuje predložene naredbe (bez informacija o izdanju prema zadanim postavkama)
+    %s --run                              # Izvršava predložene naredbe
+    %s --release-info                     # Prikazuje sažetak informacija o izdanju
+    %s --release-detail                   # Prikazuje potpune dnevnike promjena (uključuje --release-info)
+    %s --verbose                          # Prikazuje detaljni izlaz s detaljima konfiguracije
+    %s --debug                            # Prikazuje detaljne informacije za debugiranje
+    %s --run --release-detail             # Izvršava i prikazuje potpune dnevnike promjena
+    %s --verbose --release-info           # Detaljno s informacijama o izdanju
+    %s --debug                            # Debug način rada (vrlo detaljno)
+
+PODRŠKA OKVIRA:
+    Skripta automatski poštuje ograničenja verzije okvira:
+    - Symfony: poštuje ograničenje "extra.symfony.require"
+    - Laravel: poštuje verziju laravel/framework major.minor
+    - Yii: poštuje verziju yiisoft/yii2 major.minor
+    - CakePHP: poštuje verziju cakephp/cakephp major.minor
+    - Laminas: poštuje verzije laminas/* major.minor
+    - CodeIgniter: poštuje verziju codeigniter4/framework major.minor
+    - Slim: poštuje verziju slim/slim major.minor
+
+IGNORIRANI PAKETI:
+    Paketi navedeni u generate-composer-require.yaml ili .yml bit će preskočeni.
+    Skripta traži konfiguracijske datoteke u trenutnom direktoriju (gdje se nalazi composer.json).
+    Stari format (generate-composer-require.ignore.txt) još uvijek je podržan radi povratne kompatibilnosti.
+    Komentari koji počinju s # se ignoriraju.
+
+INFORMACIJE O IZDANJU:
+    Prema zadanim postavkama, informacije o izdanju se NE prikazuju (ne izvršavaju se API pozivi).
+    Koristite --release-info za prikaz sažetka s:
+    - Nazivom paketa
+    - URL-om izdanja
+    - URL-om dnevnika promjena
+
+    Koristite --release-detail za pregled potpunog dnevnika promjena izdanja.
+    Koristite --no-release-info za eksplicitno preskakanje informacija o izdanju (zadano ponašanje).
+

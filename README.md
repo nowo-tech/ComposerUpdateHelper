@@ -32,6 +32,7 @@ Generates `composer require` commands from outdated dependencies. Works with any
 - ✅ **Multiple file extensions**: Supports both `.yaml` and `.yml` extensions for configuration files
 - ✅ **Performance optimized**: Emojis and common elements are optimized for better performance
 - ✅ **Lightweight architecture**: Script delegates complex logic to PHP in vendor, keeping the repo script lightweight and maintainable
+- ⚠️ **Internationalization (i18n)** (DEVELOPMENT MODE): Multi-language support for output messages with automatic language detection
 
 ## Installation
 
@@ -76,20 +77,24 @@ The script automatically detects `process-updates.php` in `vendor/nowo-tech/comp
 
 ## Usage
 
-### Show suggested update commands
+### Basic Usage
 
 ```bash
+# Show suggested update commands
 ./generate-composer-require.sh
+
+# Execute commands directly
+./generate-composer-require.sh --run
+
+# Show help
+./generate-composer-require.sh --help
 ```
 
-Example output (default mode - no release info):
+Example output:
 
 ```
 ⏭️  Ignored packages (prod):
   - doctrine/doctrine-bundle:2.13.2
-
-⏭️  Ignored packages (dev):
-  - phpunit/phpunit:11.0.0
 
 🔧 Suggested commands:
   composer require --with-all-dependencies vendor/package:1.2.3 another/package:4.5.6
@@ -98,114 +103,21 @@ Example output (default mode - no release info):
 
 > **Note:** By default, release information is **not shown** (no API calls are made). Use `--release-info` or `--release-detail` to enable it.
 
-### Show full release details
+**Available options:**
+- `--run` - Execute suggested commands
+- `--release-info` - Show release summary
+- `--release-detail` - Show full changelog
+- `-v, --verbose` - Show detailed information
+- `--debug` - Show debug information
+- `-h, --help` - Show help
 
-```bash
-./generate-composer-require.sh --release-detail
-```
+For detailed usage information, see [Usage Guide](docs/USAGE.md).
 
-Example output (detailed mode):
-
-```
-📋 Release information:
-  📦 vendor/package
-     🔗 Release: https://github.com/vendor/package/releases/tag/v1.2.3
-     📝 Changelog: https://github.com/vendor/package/releases
-     📋 Release Name v1.2.3
-     ──────────────────────────────────────
-     What's Changed
-     * Fix issue #123
-     * Improve performance
-     * Add new feature
-     [Complete changelog...]
-     ──────────────────────────────────────
-```
-
-### Skip release information
-
-```bash
-./generate-composer-require.sh --no-release-info
-```
-
-### Verbose mode
-
-Show detailed information about configuration files and packages:
-
-```bash
-./generate-composer-require.sh --verbose
-# or
-./generate-composer-require.sh -v
-```
-
-Example output:
-
-```
-📋 Found configuration file: generate-composer-require.yaml
-📋 Ignored packages: doctrine/orm, symfony/security-bundle
-📋 Included packages: monolog/monolog
-```
-
-### Debug mode
-
-Show very detailed debug information (includes verbose mode):
-
-```bash
-./generate-composer-require.sh --debug
-```
-
-Example output:
-
-```
-🔍 DEBUG: Current directory: /path/to/project
-🔍 DEBUG: Searching for configuration files:
-   - generate-composer-require.yaml
-   - generate-composer-require.yml
-   - generate-composer-require.ignore.txt
-📋 Found configuration file: generate-composer-require.yaml
-🔍 DEBUG: Processing YAML file: generate-composer-require.yaml
-🔍 DEBUG: File exists: yes
-🔍 DEBUG: File size: 512 bytes
-🔍 DEBUG: Ignored packages from YAML: doctrine/orm|symfony/security-bundle
-🔍 DEBUG: Ignored packages list:
-   - doctrine/orm
-   - symfony/security-bundle
-...
-```
-
-### Show help
-
-```bash
-./generate-composer-require.sh --help
-# or
-./generate-composer-require.sh -h
-```
-
-### Execute the update commands
-
-```bash
-./generate-composer-require.sh --run
-```
-
-You can combine options:
-
-```bash
-./generate-composer-require.sh --run                    # Execute (no release info by default)
-./generate-composer-require.sh --run --release-info     # Execute with release info
-./generate-composer-require.sh --run --release-detail   # Execute with full changelog
-./generate-composer-require.sh --verbose --release-info # Verbose with release info
-./generate-composer-require.sh --debug                  # Debug mode (very detailed)
-```
-
-## Package Configuration
+## Configuration
 
 The script searches for configuration files in the current directory (where `composer.json` is located). It supports both `.yaml` and `.yml` extensions, with `.yaml` taking priority.
 
-**Supported configuration files (in order of priority):**
-1. `generate-composer-require.yaml` (preferred)
-2. `generate-composer-require.yml` (alternative)
-3. `generate-composer-require.ignore.txt` (backward compatibility)
-
-Edit `generate-composer-require.yaml` (or `.yml`) to configure which packages to ignore or force include during updates:
+Edit `generate-composer-require.yaml` to configure which packages to ignore or force include during updates:
 
 ```yaml
 # Composer Update Helper Configuration
@@ -218,6 +130,13 @@ Edit `generate-composer-require.yaml` (or `.yml`) to configure which packages to
 # dependency compatibility (faster but may suggest incompatible updates).
 # Default: true
 check-dependencies: true
+
+# Language for output messages
+# Supported: en (English), es (Spanish), pt (Portuguese), it (Italian), fr (French), de (German), pl (Polish), ru (Russian), ro (Romanian), el (Greek), da (Danish)
+# If not set, will auto-detect from system (LANG, LC_ALL, LC_MESSAGES)
+# Default: en (English)
+# ⚠️  WARNING: i18n feature is currently in DEVELOPMENT MODE
+#language: es
 
 # List of packages to ignore during update
 # Ignored packages will still be displayed in the output with their available versions,
@@ -237,322 +156,33 @@ include:
   - another/package
 ```
 
-### Ignoring Packages
+For detailed configuration options including language settings, dependency checking, and backward compatibility, see [Configuration Guide](docs/CONFIGURATION.md).
 
-Packages listed in the `ignore` section will:
-- Still be displayed in the output with their available versions
-- **Not** be included in the `composer require` commands
-- Appear in the "Ignored" section of the output
-
-**Important:** Only uncommented packages are read. Lines starting with `#` are ignored (they are comments). To ignore a package, it must be listed without the `#` prefix:
-
-```yaml
-ignore:
-  - doctrine/orm                    # ✅ This package will be ignored
-  # - symfony/security-bundle      # ❌ This is a comment, not read
-```
-
-### Forcing Package Inclusion
-
-Packages listed in the `include` section will:
-- **Always** be included in the `composer require` commands
-- Override the `ignore` list (if a package is in both, it will be included)
-- Be processed even if they are also listed in the `ignore` section
-
-**Important:** Only uncommented packages are read. Lines starting with `#` are ignored (they are comments). To force include a package, it must be listed without the `#` prefix:
-
-```yaml
-include:
-  - monolog/monolog                 # ✅ This package will be force included
-  # - another/package               # ❌ This is a comment, not read
-```
-
-**Example use case**: You might want to ignore most Symfony packages but force include a specific one:
-
-```yaml
-ignore:
-  - symfony/*  # Ignore all Symfony packages
-
-include:
-  - symfony/security-bundle  # But force include this one
-```
-
-### Backward Compatibility
-
-If you have an old `generate-composer-require.ignore.txt` file, it will be automatically migrated to the new YAML format when you update the package. The migration works in the following scenarios:
-
-- **YAML doesn't exist**: TXT file is migrated to YAML and then deleted
-- **YAML is empty or template-only**: TXT file is migrated to YAML and then deleted
-- **YAML has user-defined packages that match TXT**: TXT file is deleted (already migrated)
-- **YAML has user-defined packages that differ from TXT**: YAML is preserved, TXT file remains (you can manually merge if needed)
-
-The script also supports reading the old TXT format for backward compatibility if YAML doesn't exist.
-
-### Dependency Compatibility Checking
-
-> ⚠️ **Note**: The `check-dependencies` feature is currently in **development mode** and is still being reviewed and refined. While functional, it may not catch all edge cases and should be used with caution in production environments.
-
-The `check-dependencies` option controls whether the tool performs detailed dependency compatibility checking before suggesting updates.
-
-**When enabled (`check-dependencies: true`)** - Default:
-- The tool analyzes `composer.lock` to identify packages that depend on the package being updated
-- Verifies version constraints before suggesting updates to prevent conflicts
-- If a proposed update would conflict with dependent packages, the system finds the highest compatible version
-- If no compatible version exists, the update is skipped to avoid breaking dependencies
-- **Automatically suggests transitive dependency updates** when conflicts are detected:
-  - Detects when a package requires a newer version of a transitive dependency (e.g., `spomky-labs/otphp:^11.4` when `11.3.0` is installed)
-  - Detects `self.version` constraints (e.g., `scheb/2fa-email` requiring `scheb/2fa-bundle: self.version`)
-  - Generates commands that include both transitive dependencies and filtered packages together
-- Shows a detailed analysis section in the output with:
-  - All outdated packages (before dependency check)
-  - Packages filtered by dependency conflicts
-  - Suggested transitive dependency updates to resolve conflicts
-  - Packages that passed dependency check
-
-**When disabled (`check-dependencies: false`)**:
-- The tool suggests all available updates without checking dependency compatibility
-- Faster execution (no dependency analysis)
-- May suggest incompatible updates that could cause conflicts
-- Useful when you want to see all available updates regardless of compatibility
-
-**Example output when `check-dependencies: true`:**
-
-```
-🔧  Dependency checking analysis:
-  📋 All outdated packages (before dependency check):
-     - aws/aws-sdk-php:3.369.6 (prod)
-     - nelmio/api-doc-bundle:5.9.0 (prod)
-     - scheb/2fa-google-authenticator:8.2.0 (prod)
-
-  ⚠️  Filtered by dependency conflicts:
-     - scheb/2fa-google-authenticator:8.2.0 (prod)
-
-  💡 Suggested transitive dependency updates to resolve conflicts:
-     - scheb/2fa-bundle:8.2.0 (installed: 8.1.0, required by: scheb/2fa-email:8.2.0, scheb/2fa-google-authenticator:8.2.0)
-     - spomky-labs/otphp:11.4.1 (installed: 11.3.0, required by: scheb/2fa-google-authenticator:8.2.0)
-
-  ✅ Packages that passed dependency check:
-     - aws/aws-sdk-php:3.369.6 (prod)
-     - nelmio/api-doc-bundle:5.9.0 (prod)
-
-🔧  Suggested commands to resolve dependency conflicts:
-  (Update these transitive dependencies first, then retry updating the filtered packages)
-  composer require --with-all-dependencies scheb/2fa-bundle:8.2.0 spomky-labs/otphp:11.4.1 scheb/2fa-email:8.2.0 scheb/2fa-google-authenticator:8.2.0 scheb/2fa-totp:8.2.0
-```
-
-**To disable dependency checking:**
-
-```yaml
-check-dependencies: false
-```
-
-## Release Information
-
-The script automatically fetches release information from GitHub for outdated packages:
-
-- **Automatic detection**: Extracts GitHub repository URL from Packagist
-- **Default mode** (disabled by default): No release information is shown (no API calls are made)
-- **Summary mode** (`--release-info`): Shows summary with release link and changelog link
-- **Detailed mode** (`--release-detail`): Shows full release name and complete changelog
-- **Skip option** (`--no-release-info`): Explicitly omits all release information (default behavior)
-- **Graceful fallback**: Silently handles API failures or network issues
-
-**Note:** Release information is only fetched for packages with specific version constraints (not wildcards like `^1.0` or `~2.0`) to avoid unnecessary API calls. By default, no API calls are made, improving performance. Use `--release-info` or `--release-detail` to enable release information.
-
-### Release Information Options
-
-| Option | Description |
-|--------|-------------|
-| Default (no option) | No release information shown (no API calls, better performance) |
-| `--release-info` | Shows summary: package name, release link, changelog link |
-| `--release-detail` | Shows full release details including complete changelog |
-| `--no-release-info` | Explicitly skips all release information (default behavior) |
-| `-v, --verbose` | Shows detailed information about configuration files and packages |
-| `--debug` | Shows very detailed debug information (includes verbose mode) |
-| `--run` | Executes suggested commands (can be combined with other options) |
-| `--help` or `-h` | Shows comprehensive usage information and examples |
-
-## Environment Variables
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `PHP_BIN` | Path to PHP binary | `php` |
-| `COMPOSER_BIN` | Path to Composer binary | Auto-detected |
-
-Example:
-
-```bash
-PHP_BIN=/usr/bin/php8.2 ./generate-composer-require.sh
-```
-
-## Framework Version Constraints
-
-The script automatically detects your framework and respects version constraints to prevent breaking updates.
-
-### Symfony
-
-Respects `extra.symfony.require` in `composer.json`:
-
-```json
-{
-    "extra": {
-        "symfony": {
-            "require": "8.0.*"
-        }
-    }
-}
-```
-
-### Laravel
-
-Automatically detects `laravel/framework` version and limits all `laravel/*` and `illuminate/*` packages:
-
-```json
-{
-    "require": {
-        "laravel/framework": "^12.0"
-    }
-}
-```
-
-### Other Frameworks
-
-| Framework | Core Package | Limited Packages |
-|-----------|--------------|------------------|
-| **Yii** | `yiisoft/yii2` | `yiisoft/*` |
-| **CakePHP** | `cakephp/cakephp` | `cakephp/*` |
-| **Laminas** | `laminas/laminas-mvc` | `laminas/*` |
-| **CodeIgniter** | `codeigniter4/framework` | `codeigniter4/*` |
-| **Slim** | `slim/slim` | `slim/*` |
-
-### Example Output
-
-```
-🔧 Detected framework constraints:
-  - symfony 8.0.*
-  - laravel 12.0.*
-
-⏭️  Ignored packages (prod):
-  - doctrine/orm:3.0.0
-
-🔧 Suggested commands:
-  composer require --with-all-dependencies symfony/console:7.1.8
-```
+For framework support details, see [Framework Support](docs/FRAMEWORKS.md).
 
 ## Requirements
 
 - PHP >= 7.4
 - Composer 2.x
 
-## Development
+## Documentation
 
-### Using Docker (Recommended)
+All documentation is available in the [`docs/`](docs/) directory:
 
-The project includes Docker configuration for easy development:
+### User Guides
+- **[Usage Guide](docs/USAGE.md)** - Complete usage instructions and options
+- **[Configuration Guide](docs/CONFIGURATION.md)** - Configuration options and settings
+- **[Framework Support](docs/FRAMEWORKS.md)** - Framework version constraints and support
 
-```bash
-# Start the container
-make up
-
-# Install dependencies
-make install
-
-# Run tests
-make test
-
-# Run tests with coverage
-make test-coverage
-
-# Check code style
-make cs-check
-
-# Fix code style
-make cs-fix
-
-# Run all QA checks
-make qa
-
-# Open shell in container
-make shell
-
-# Stop container
-make down
-
-# Clean build artifacts
-make clean
-```
-
-### Without Docker
-
-If you have PHP and Composer installed locally:
-
-```bash
-# Clone repository
-git clone https://github.com/nowo-tech/ComposerUpdateHelper.git
-cd ComposerUpdateHelper
-
-# Install dependencies
-composer install
-
-# Run tests
-composer test
-
-# Run tests with coverage
-composer test-coverage
-
-# Check code style
-composer cs-check
-
-# Fix code style
-composer cs-fix
-
-# Run all QA checks
-composer qa
-```
-
-### Available Make Commands
-
-| Command | Description |
-|---------|-------------|
-| `make up` | Start Docker container |
-| `make down` | Stop Docker container |
-| `make shell` | Open shell in container |
-| `make install` | Install Composer dependencies |
-| `make test` | Run PHPUnit tests |
-| `make test-coverage` | Run tests with code coverage |
-| `make cs-check` | Check code style (PSR-12) |
-| `make cs-fix` | Fix code style |
-| `make qa` | Run all QA checks |
-| `make clean` | Remove vendor and cache |
-| `make setup-hooks` | Install git pre-commit hooks |
-
-### Pre-commit Hooks (Optional)
-
-Install git hooks to automatically run CS-check and tests before each commit:
-
-```bash
-make setup-hooks
-```
-
-This ensures code quality checks run locally before pushing to GitHub.
-
-## Continuous Integration
-
-Every push to GitHub automatically triggers:
-
-- ✅ **Tests** on PHP 7.4, 8.0, 8.1, 8.2, 8.3
-- ✅ **Code Style** check (PSR-12) with automatic fixes on main/master branch
-- ✅ **Code Coverage** report with **99% coverage requirement**
-- ✅ **Automatic code style fixes** committed back to repository
-
-### CI/CD Features
-
-- **Automatic Code Style Fixes**: On push to main/master, PHP CS Fixer automatically fixes code style issues and commits them back
-- **99% Code Coverage**: The CI pipeline requires 99% code coverage to pass, ensuring comprehensive test coverage (current: 99.20%)
-- **Multi-PHP Testing**: Tests run on all supported PHP versions (7.4, 8.0, 8.1, 8.2, 8.3)
-- **Pull Request Validation**: On pull requests, code style is checked (but not auto-fixed) to maintain code quality
-
-See [GitHub Actions](https://github.com/nowo-tech/ComposerUpdateHelper/actions) for build status.
+### Project Documentation
+- **[CHANGELOG.md](docs/CHANGELOG.md)** - Version history and all notable changes
+- **[UPGRADING.md](docs/UPGRADING.md)** - Upgrade instructions and migration notes
+- **[Development Guide](docs/DEVELOPMENT.md)** - Development setup, testing, and CI/CD
+- **[CONTRIBUTING.md](docs/CONTRIBUTING.md)** - Guidelines for contributing to the project
+- **[BRANCHING.md](docs/BRANCHING.md)** - Branching strategy and workflow
+- **[I18N_STRATEGY.md](docs/I18N_STRATEGY.md)** - Internationalization (i18n) implementation strategy
+- **[LANGUAGES_PROPOSAL.md](docs/LANGUAGES_PROPOSAL.md)** - Additional languages proposal for future implementation
+- **[VERIFICATION.md](docs/VERIFICATION.md)** - Verification and testing documentation
 
 ## Contributing
 

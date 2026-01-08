@@ -18,6 +18,109 @@ This guide will help you upgrade Composer Update Helper to newer versions.
 
 ## Version-Specific Upgrade Notes
 
+### Upgrading to 2.0.19+ (Unreleased)
+
+#### Added
+- **Extended language support**: 20 additional languages are now fully implemented (10 high-priority + 10 medium-priority)
+  - **High-priority**: Dutch (nl), Czech (cs), Swedish (sv), Norwegian (no), Finnish (fi), Turkish (tr), Chinese (zh), Japanese (ja), Korean (ko), Arabic (ar)
+  - **Medium-priority**: Hungarian (hu), Slovak (sk), Ukrainian (uk), Croatian (hr), Bulgarian (bg), Hebrew (he), Hindi (hi), Vietnamese (vi), Indonesian (id), Thai (th)
+  - Complete translations for PHP scripts, Bash scripts, and help files
+  - All languages are ready for use in production
+  - Total of 31 fully supported languages: English (en) 🇬🇧 🇺🇸, Spanish (es) 🇪🇸, Portuguese (pt) 🇵🇹 🇧🇷, Italian (it) 🇮🇹, French (fr) 🇫🇷, German (de) 🇩🇪 🇦🇹, Polish (pl) 🇵🇱, Russian (ru) 🇷🇺, Romanian (ro) 🇷🇴, Greek (el) 🇬🇷, Danish (da) 🇩🇰, Dutch (nl) 🇳🇱 🇧🇪, Czech (cs) 🇨🇿, Swedish (sv) 🇸🇪, Norwegian (no) 🇳🇴, Finnish (fi) 🇫🇮, Turkish (tr) 🇹🇷, Chinese (zh) 🇨🇳 🇹🇼, Japanese (ja) 🇯🇵, Korean (ko) 🇰🇷, Arabic (ar) 🇸🇦 🇪🇬, Hungarian (hu) 🇭🇺, Slovak (sk) 🇸🇰, Ukrainian (uk) 🇺🇦, Croatian (hr) 🇭🇷, Bulgarian (bg) 🇧🇬, Hebrew (he) 🇮🇱, Hindi (hi) 🇮🇳, Vietnamese (vi) 🇻🇳, Indonesian (id) 🇮🇩, Thai (th) 🇹🇭
+
+#### Changed
+- **Dependency checking feature promoted to production**: The `check-dependencies` feature is now considered production-ready
+  - All "development mode" warnings have been removed
+  - Feature has been thoroughly tested and is stable
+  - Recommended for all users (enabled by default)
+  - Comprehensive dependency conflict detection, including transitive dependencies and `self.version` constraints
+  - Full support for both `require` and `require-dev` dependency detection
+- **Script architecture refactoring**: Main script is now more lightweight
+  - Created `script-helper.sh` in vendor to contain complex helper functions
+  - Reduced main script from ~502 lines to ~240 lines (52% reduction)
+  - All complex logic moved to vendor helper, keeping the main script minimal
+  - Helper script remains in vendor; only `generate-composer-require.sh` is copied to project root
+- **Improved output formatting**: Enhanced dependency conflict display
+  - Fixed double line break after "Processing packages" message
+  - Fixed spacing around emoji numbers in filtered packages section
+  - Enhanced conflict information: now shows the number of packages with conflicts (e.g., "conflicts with 1 package" or "conflicts with 2 packages")
+  - Better visual formatting for dependency conflict analysis section
+- **Documentation enhancements**: Improved visual presentation of language support
+  - Added country flag emojis to all language listings in documentation (README.md, CHANGELOG.md, UPGRADING.md, LANGUAGES_PROPOSAL.md)
+  - Languages with multiple countries now display all relevant flags (e.g., English 🇬🇧 🇺🇸 🇨🇦 🇦🇺, Spanish 🇪🇸 🇲🇽 🇦🇷 🇨🇴)
+  - Makes language selection more intuitive and visually appealing
+  - All 31 languages are now fully implemented and documented with their respective flags
+- **Documentation reorganization**: Improved README structure and organization
+  - Reduced README.md from ~700 to 240 lines (66% reduction) for better readability
+  - Created dedicated documentation files in `docs/` directory:
+    - `CONFIGURATION.md` - Complete configuration guide (package configuration, language settings, dependency checking)
+    - `USAGE.md` - Comprehensive usage guide (all options, release information, environment variables)
+    - `FRAMEWORKS.md` - Framework support details (Symfony, Laravel, Yii, CakePHP, Laminas, CodeIgniter, Slim)
+    - `DEVELOPMENT.md` - Development setup and CI/CD guide (Docker, testing, make commands)
+  - README.md now focuses on essential information with links to detailed documentation
+  - Better organization makes it easier to find specific information
+  - All documentation is now properly categorized and cross-referenced
+
+#### Fixed
+- **Test compatibility**: Updated `ScriptTest.php` to match refactored script structure
+  - Updated assertions to check for `PROCESSOR_PATHS` instead of `PROCESSOR_PHP`
+  - Updated path assertion to match new script structure
+- **Implicitly nullable parameters**: Fixed PHP deprecation warnings
+  - All nullable parameters are now explicitly declared using `?type` or `mixed`
+  - Improves compatibility with modern PHP static analysis tools
+  - Eliminates deprecation warnings in IDEs like VS Code with Intelephense
+- **PHPUnit configuration compatibility**: Fixed PHPUnit warnings for PHPUnit 10/11 compatibility
+  - Removed deprecated `<filter><whitelist>` element from `phpunit.xml.dist`
+  - Updated schema from PHPUnit 9.6 to PHPUnit 11.5
+  - **Separated PHPUnit configuration into two files**:
+    - `phpunit.xml.dist`: Main configuration without coverage section (used by `composer test`)
+    - `phpunit.coverage.xml.dist`: Configuration with coverage section (used by `composer test-coverage`)
+  - **PHPUnit 11 compatibility**: Updated coverage configuration to use modern PHPUnit 11 structure
+    - Moved `<include>` directive from `<coverage>` to `<source>` tag (PHPUnit 11 requirement)
+    - Removed deprecated `processUncoveredFiles` attribute from both configuration files
+  - Fixed "No filter is configured, code coverage will not be processed" warning
+  - Tests and coverage now run cleanly in Docker environment without warnings
+  - Verified: 132 tests passing, 99.58% line coverage (478/480 lines), 90.91% method coverage (20/22 methods)
+
+#### Changed
+- **Code coverage command**: Updated `composer test-coverage` to use dedicated configuration file
+  - Now uses `--configuration=phpunit.coverage.xml.dist` to load coverage-specific configuration
+  - Prevents PHPUnit warnings about missing filter configuration
+  - Ensures consistent coverage report generation
+  - Coverage configuration is now isolated in a separate file for better maintainability
+  - Verified in Docker: Coverage reports generate correctly with HTML and Clover XML formats
+- **Code quality**: Enhanced type safety and modern PHP standards compliance
+  - Better type hints throughout the codebase
+  - Improved static analysis compatibility
+
+#### Migration Notes
+- **No action required**: The feature remains enabled by default
+- If you previously disabled it due to development mode warnings, you can safely re-enable it
+- The feature is now fully supported and recommended for production use
+- **Language support**: All 31 languages are now fully available. You can use any of the supported languages by setting `language: {code}` in your `generate-composer-require.yaml` file.
+- **i18n usage**: To use translations, add `language: es` (or other supported code) to your `generate-composer-require.yaml`:
+  ```yaml
+  # Language for output messages
+  # Supported: en, es, pt, it, fr, de, pl, ru, ro, el, da, nl, cs, sv, no, fi, tr, zh, ja, ko, ar, hu, sk, uk, hr, bg, he, hi, vi, id, th (31 languages)
+  # If not set, will auto-detect from system (LANG, LC_ALL, LC_MESSAGES)
+  # Default: en (English)
+  # ⚠️  WARNING: i18n feature is currently in DEVELOPMENT MODE
+  language: es
+  ```
+- **Debug mode**: Use `--debug` flag to see detailed i18n information:
+  ```bash
+  ./generate-composer-require.sh --debug
+  ```
+  This will show:
+  - Detected language
+  - Translation function availability
+  - Loaded translations count
+  - Test translations
+- Code coverage remains at 99.20%
+
+#### Breaking Changes
+- None
+
 ### Upgrading to 2.0.18+
 
 #### Fixed
@@ -87,66 +190,6 @@ This guide will help you upgrade Composer Update Helper to newer versions.
 
 #### Migration Notes
 - **No action required**: This is an internal improvement with no user-facing changes
-
-### Upgrading to 2.0.15+
-
-#### Fixed
-- **Constraint parsing with 'v' prefix**: Fixed issue where dependency constraints with 'v' prefix (e.g., `^v7.1.0`, `~v7.1.0`) were not being correctly parsed
-  - Packages that were previously incorrectly filtered out due to this issue will now be correctly suggested for update
-  - Example: `aws/aws-sdk-php` requiring `symfony/filesystem: ^v7.1.0` will now correctly accept version `7.4.0`
-  - This improves the accuracy of dependency compatibility checking
-
-#### Added
-- **Configurable dependency checking** (⚠️ **Development mode**): New `check-dependencies` option in YAML configuration
-  - ⚠️ **Important**: This feature is currently in development and is still being reviewed and refined. While functional, it may not catch all edge cases and should be used with caution.
-  - You can now enable or disable detailed dependency compatibility checking via the YAML configuration file
-  - Default value is `true` (enabled), maintaining backward compatibility
-  - Set to `false` to disable dependency checking and see all available updates (faster execution)
-- **Enhanced dependency analysis output**: When dependency checking is enabled, the output now shows:
-  - All outdated packages (before dependency check)
-  - Packages filtered by dependency conflicts
-  - Packages that passed dependency check
-  - This provides better visibility into which packages are being filtered and why
-
-#### Changed
-- **Dependency checking is now configurable**: Previously always enabled, now can be controlled via YAML configuration
-- **Improved output clarity**: Enhanced analysis section makes it easier to understand dependency filtering decisions
-
-#### Migration Notes
-- **No action required**: Dependency checking remains enabled by default
-- To disable dependency checking, add `check-dependencies: false` to your `generate-composer-require.yaml` file:
-  ```yaml
-  check-dependencies: false
-  ```
-- The new analysis output will automatically appear when dependency checking is enabled
-- If you want to see all available updates without dependency checking, set `check-dependencies: false`
-
-#### Breaking Changes
-- None
-
-### Upgrading to 2.0.14+
-
-#### Added
-- **Dependency compatibility checking**: The system now automatically detects and prevents dependency conflicts
-  - Before suggesting an update, the system checks if any installed packages depend on the package being updated
-  - If a conflict is detected, the system will suggest the highest compatible version or skip the update
-  - This prevents errors like "package requires version X.* but version Y is being installed"
-  - Example: If `scheb/2fa-bundle` 8.2.0 is available but `scheb/2fa-email` requires `8.1.*`, the system will suggest `8.1.x` instead
-
-#### Changed
-- **Progress indicators**: Added animated spinner during long-running operations
-  - You'll now see an animated spinner (`|/-\`) while the system checks for outdated packages and processes them
-  - This provides visual feedback that the process is active and progressing
-  - The spinner is automatically replaced with ✅ when the operation completes
-
-#### Migration Notes
-- **No action required**: These are enhancements that improve reliability and user experience
-- Existing functionality remains unchanged
-- If you notice some packages are no longer suggested for update, it may be due to dependency conflicts being detected
-- You can still manually update packages if needed, but the system will warn you about potential conflicts
-
-#### Breaking Changes
-- None
 
 ### Upgrading to 2.0.13+
 
