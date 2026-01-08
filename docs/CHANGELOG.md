@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.19] - 2026-01-08
+
 ### Added
 - **Extended language support**: Added translations for 20 additional languages (10 high-priority + 10 medium-priority)
   - **High-priority languages**: Dutch (nl), Czech (cs), Swedish (sv), Norwegian (no), Finnish (fi), Turkish (tr), Chinese (zh), Japanese (ja), Korean (ko), Arabic (ar)
