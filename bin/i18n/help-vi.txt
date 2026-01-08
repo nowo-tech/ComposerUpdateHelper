@@ -1,0 +1,51 @@
+Sử dụng: %s [TÙY CHỌN]
+
+Tạo lệnh composer require từ "composer outdated --direct".
+Hoạt động với bất kỳ dự án PHP nào (Symfony, Laravel, Yii, CodeIgniter, CakePHP, Laminas, Slim, v.v.)
+
+TÙY CHỌN:
+    --run                    Tự động thực thi các lệnh được đề xuất
+    --release-info           Hiển thị thông tin phiên bản (tóm tắt với liên kết)
+    --release-detail         Hiển thị nhật ký thay đổi phiên bản đầy đủ cho mỗi gói (bao gồm --release-info)
+    --no-release-info        Bỏ qua phần thông tin phiên bản (hành vi mặc định)
+    -v, --verbose            Hiển thị đầu ra chi tiết (tệp cấu hình, gói, v.v.)
+    --debug                  Hiển thị thông tin gỡ lỗi (rất chi tiết, bao gồm đường dẫn tệp, phân tích cú pháp, v.v.)
+    -h, --help               Hiển thị thông báo trợ giúp này
+
+VÍ DỤ:
+    %s                                    # Hiển thị các lệnh được đề xuất (không có thông tin phiên bản theo mặc định)
+    %s --run                              # Thực thi các lệnh được đề xuất
+    %s --release-info                     # Hiển thị tóm tắt thông tin phiên bản
+    %s --release-detail                   # Hiển thị nhật ký thay đổi đầy đủ (bao gồm --release-info)
+    %s --verbose                          # Hiển thị đầu ra chi tiết với chi tiết cấu hình
+    %s --debug                            # Hiển thị thông tin gỡ lỗi chi tiết
+    %s --run --release-detail             # Thực thi và hiển thị nhật ký thay đổi đầy đủ
+    %s --verbose --release-info           # Chi tiết với thông tin phiên bản
+    %s --debug                            # Chế độ gỡ lỗi (rất chi tiết)
+
+HỖ TRỢ FRAMEWORK:
+    Script tự động tuân thủ các ràng buộc phiên bản framework:
+    - Symfony: tuân thủ ràng buộc "extra.symfony.require"
+    - Laravel: tuân thủ phiên bản laravel/framework major.minor
+    - Yii: tuân thủ phiên bản yiisoft/yii2 major.minor
+    - CakePHP: tuân thủ phiên bản cakephp/cakephp major.minor
+    - Laminas: tuân thủ các phiên bản laminas/* major.minor
+    - CodeIgniter: tuân thủ phiên bản codeigniter4/framework major.minor
+    - Slim: tuân thủ phiên bản slim/slim major.minor
+
+GÓI BỊ BỎ QUA:
+    Các gói được liệt kê trong generate-composer-require.yaml hoặc .yml sẽ bị bỏ qua.
+    Script tìm kiếm tệp cấu hình trong thư mục hiện tại (nơi có composer.json).
+    Định dạng cũ (generate-composer-require.ignore.txt) vẫn được hỗ trợ để tương thích ngược.
+    Các nhận xét bắt đầu bằng # bị bỏ qua.
+
+THÔNG TIN PHIÊN BẢN:
+    Theo mặc định, thông tin phiên bản KHÔNG được hiển thị (không có lệnh gọi API nào được thực hiện).
+    Sử dụng --release-info để hiển thị tóm tắt với:
+    - Tên gói
+    - URL phiên bản
+    - URL nhật ký thay đổi
+
+    Sử dụng --release-detail để xem nhật ký thay đổi phiên bản đầy đủ.
+    Sử dụng --no-release-info để bỏ qua thông tin phiên bản một cách rõ ràng (hành vi mặc định).
+

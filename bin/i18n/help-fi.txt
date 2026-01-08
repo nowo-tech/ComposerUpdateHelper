@@ -1,0 +1,51 @@
+Käyttö: %s [VALINNAT]
+
+Luo composer require -komennot "composer outdated --direct" -komennosta.
+Toimii minkä tahansa PHP-projektin kanssa (Symfony, Laravel, Yii, CodeIgniter, CakePHP, Laminas, Slim, jne.)
+
+VALINNAT:
+    --run                    Suorita ehdotetut komennot automaattisesti
+    --release-info           Näytä versiotiedot (yhteenveto linkeillä)
+    --release-detail         Näytä täydellinen versiomuutosloki jokaiselle paketille (sisältää --release-info)
+    --no-release-info        Ohita versiotiedot-osa (oletuskäyttäytyminen)
+    -v, --verbose            Näytä yksityiskohtainen tuloste (konfiguraatiotiedostot, paketit, jne.)
+    --debug                  Näytä debug-tiedot (erittäin yksityiskohtainen, sisältää tiedostopolut, jäsentämisen, jne.)
+    -h, --help               Näytä tämä ohjeteksti
+
+ESIMERKIT:
+    %s                                    # Näytä ehdotetut komennot (ei versiotietoja oletuksena)
+    %s --run                              # Suorita ehdotetut komennot
+    %s --release-info                     # Näytä versiotietojen yhteenveto
+    %s --release-detail                   # Näytä täydelliset muutoslogit (sisältää --release-info)
+    %s --verbose                          # Näytä yksityiskohtainen tuloste konfiguraatiotiedoilla
+    %s --debug                            # Näytä yksityiskohtaiset debug-tiedot
+    %s --run --release-detail             # Suorita ja näytä täydelliset muutoslogit
+    %s --verbose --release-info           # Yksityiskohtainen versiotiedoilla
+    %s --debug                            # Debug-tila (erittäin yksityiskohtainen)
+
+KEHYSTUEN:
+    Skripti kunnioittaa automaattisesti kehysversiorajoituksia:
+    - Symfony: kunnioittaa "extra.symfony.require" -rajoitusta
+    - Laravel: kunnioittaa laravel/framework major.minor -versiota
+    - Yii: kunnioittaa yiisoft/yii2 major.minor -versiota
+    - CakePHP: kunnioittaa cakephp/cakephp major.minor -versiota
+    - Laminas: kunnioittaa laminas/* major.minor -versioita
+    - CodeIgniter: kunnioittaa codeigniter4/framework major.minor -versiota
+    - Slim: kunnioittaa slim/slim major.minor -versiota
+
+OHITETUT PAKETIT:
+    Paketit, jotka on lueteltu generate-composer-require.yaml tai .yml -tiedostossa, ohitetaan.
+    Skripti etsii konfiguraatiotiedostoja nykyisestä hakemistosta (jossa composer.json sijaitsee).
+    Vanha muoto (generate-composer-require.ignore.txt) tuetaan edelleen taaksepäin yhteensopivuuden vuoksi.
+    Kommentit, jotka alkavat #:lla, ohitetaan.
+
+VERSIOTIEDOT:
+    Oletuksena versiotietoja EI näytetä (API-kutsuja ei tehdä).
+    Käytä --release-info näyttääksesi yhteenvedon:
+    - Paketin nimi
+    - Versio-URL
+    - Muutosloki-URL
+
+    Käytä --release-detail nähdäksesi täydellisen versiomuutosloggin.
+    Käytä --no-release-info ohittaaksesi versiotiedot nimenomaisesti (oletuskäyttäytyminen).
+

@@ -1,0 +1,51 @@
+Brug: %s [VALGMULIGHEDER]
+
+Genererer composer require kommandoer fra "composer outdated --direct".
+Virker med ethvert PHP-projekt (Symfony, Laravel, Yii, CodeIgniter, CakePHP, Laminas, Slim, osv.)
+
+VALGMULIGHEDER:
+    --run                    Udfører de foreslåede kommandoer automatisk
+    --release-info           Viser versionsinformationer (resumé med links)
+    --release-detail         Viser den fulde changelog for hvert pakke (medfører --release-info)
+    --no-release-info        Springer versionsinformationssektionen over (standardadfærd)
+    -v, --verbose            Viser detaljeret output (konfigurationsfiler, pakker, osv.)
+    --debug                  Viser debug-informationer (meget detaljeret, inkluderer filstier, parsing, osv.)
+    -h, --help               Viser denne hjælpbesked
+
+EKSEMPLER:
+    %s                                    # Viser foreslåede kommandoer (ingen versionsinfo som standard)
+    %s --run                              # Udfører foreslåede kommandoer
+    %s --release-info                     # Viser resumé af versionsinformationer
+    %s --release-detail                   # Viser fulde changelogs (medfører --release-info)
+    %s --verbose                           # Viser detaljeret output med konfigurationsdetaljer
+    %s --debug                             # Viser detaljerede debug-informationer
+    %s --run --release-detail             # Udfører og viser fulde changelogs
+    %s --verbose --release-info # Detaljeret med versionsinformationer
+    %s --debug                  # Debug-tilstand (meget detaljeret)
+
+FRAMEWORK-STØTTE:
+    Scriptet respekterer automatisk framework-versionsbegrænsninger:
+    - Symfony: respekterer "extra.symfony.require" begrænsningen
+    - Laravel: respekterer major.minor versionen af laravel/framework
+    - Yii: respekterer major.minor versionen af yiisoft/yii2
+    - CakePHP: respekterer major.minor versionen af cakephp/cakephp
+    - Laminas: respekterer major.minor versionerne af laminas/*
+    - CodeIgniter: respekterer major.minor versionen af codeigniter4/framework
+    - Slim: respekterer major.minor versionen af slim/slim
+
+IGNOREREDE PAKKER:
+    Pakker listet i generate-composer-require.yaml eller .yml vil blive sprunget over.
+    Scriptet søger efter konfigurationsfiler i den aktuelle mappe (hvor composer.json findes).
+    Det gamle format (generate-composer-require.ignore.txt) understøttes stadig for bagudkompatibilitet.
+    Kommentarer, der starter med #, ignoreres.
+
+VERSIONSINFORMATIONER:
+    Som standard vises versionsinformationer IKKE (ingen API-kald foretages).
+    Brug --release-info for at vise et resumé med:
+    - Pakkenavn
+    - Versions-URL
+    - Changelog-URL
+
+    Brug --release-detail for at se den fulde versions changelog.
+    Brug --no-release-info for eksplicit at springe versionsinformationer over (standardadfærd).
+

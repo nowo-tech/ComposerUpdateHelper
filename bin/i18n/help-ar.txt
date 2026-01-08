@@ -1,0 +1,51 @@
+الاستخدام: %s [خيارات]
+
+ينشئ أوامر composer require من "composer outdated --direct".
+يعمل مع أي مشروع PHP (Symfony, Laravel, Yii, CodeIgniter, CakePHP, Laminas, Slim، إلخ)
+
+خيارات:
+    --run                    تنفيذ الأوامر المقترحة تلقائياً
+    --release-info           عرض معلومات الإصدار (ملخص مع روابط)
+    --release-detail         عرض سجل تغييرات الإصدار الكامل لكل حزمة (يتضمن --release-info)
+    --no-release-info        تخطي قسم معلومات الإصدار (السلوك الافتراضي)
+    -v, --verbose            عرض الإخراج المفصل (ملفات الإعدادات، الحزم، إلخ)
+    --debug                  عرض معلومات التصحيح (مفصل جداً، يتضمن مسارات الملفات، التحليل، إلخ)
+    -h, --help               عرض رسالة المساعدة هذه
+
+أمثلة:
+    %s                                    # عرض الأوامر المقترحة (بدون معلومات الإصدار افتراضياً)
+    %s --run                              # تنفيذ الأوامر المقترحة
+    %s --release-info                     # عرض ملخص معلومات الإصدار
+    %s --release-detail                   # عرض سجلات التغيير الكاملة (يتضمن --release-info)
+    %s --verbose                          # عرض الإخراج المفصل مع تفاصيل الإعدادات
+    %s --debug                            # عرض معلومات التصحيح المفصلة
+    %s --run --release-detail             # تنفيذ وعرض سجلات التغيير الكاملة
+    %s --verbose --release-info           # مفصل مع معلومات الإصدار
+    %s --debug                            # وضع التصحيح (مفصل جداً)
+
+دعم الإطار:
+    يحترم السكريبت تلقائياً قيود إصدار الإطار:
+    - Symfony: يحترم قيد "extra.symfony.require"
+    - Laravel: يحترم إصدار laravel/framework major.minor
+    - Yii: يحترم إصدار yiisoft/yii2 major.minor
+    - CakePHP: يحترم إصدار cakephp/cakephp major.minor
+    - Laminas: يحترم إصدارات laminas/* major.minor
+    - CodeIgniter: يحترم إصدار codeigniter4/framework major.minor
+    - Slim: يحترم إصدار slim/slim major.minor
+
+الحزم المتجاهلة:
+    سيتم تخطي الحزم المدرجة في generate-composer-require.yaml أو .yml.
+    يبحث السكريبت عن ملفات الإعدادات في الدليل الحالي (حيث يوجد composer.json).
+    لا يزال يتم دعم التنسيق القديم (generate-composer-require.ignore.txt) للتوافق مع الإصدارات السابقة.
+    يتم تجاهل التعليقات التي تبدأ بـ #.
+
+معلومات الإصدار:
+    افتراضياً، لا يتم عرض معلومات الإصدار (لا يتم إجراء استدعاءات API).
+    استخدم --release-info لعرض ملخص مع:
+    - اسم الحزمة
+    - رابط الإصدار
+    - رابط سجل التغييرات
+
+    استخدم --release-detail لرؤية سجل تغييرات الإصدار الكامل.
+    استخدم --no-release-info لتخطي معلومات الإصدار صراحةً (السلوك الافتراضي).
+

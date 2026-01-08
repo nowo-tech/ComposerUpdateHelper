@@ -1,0 +1,51 @@
+Kullanım: %s [SEÇENEKLER]
+
+"composer outdated --direct" komutundan composer require komutları oluşturur.
+Herhangi bir PHP projesiyle çalışır (Symfony, Laravel, Yii, CodeIgniter, CakePHP, Laminas, Slim, vb.)
+
+SEÇENEKLER:
+    --run                    Önerilen komutları otomatik olarak çalıştır
+    --release-info           Sürüm bilgilerini göster (bağlantılarla özet)
+    --release-detail         Her paket için tam sürüm değişiklik günlüğünü göster (--release-info içerir)
+    --no-release-info        Sürüm bilgileri bölümünü atla (varsayılan davranış)
+    -v, --verbose            Ayrıntılı çıktı göster (yapılandırma dosyaları, paketler, vb.)
+    --debug                  Hata ayıklama bilgilerini göster (çok ayrıntılı, dosya yolları, ayrıştırma, vb. içerir)
+    -h, --help               Bu yardım mesajını göster
+
+ÖRNEKLER:
+    %s                                    # Önerilen komutları göster (varsayılan olarak sürüm bilgisi yok)
+    %s --run                              # Önerilen komutları çalıştır
+    %s --release-info                     # Sürüm bilgileri özetini göster
+    %s --release-detail                   # Tam değişiklik günlüklerini göster (--release-info içerir)
+    %s --verbose                          # Yapılandırma ayrıntılarıyla ayrıntılı çıktı göster
+    %s --debug                            # Ayrıntılı hata ayıklama bilgilerini göster
+    %s --run --release-detail             # Çalıştır ve tam değişiklik günlüklerini göster
+    %s --verbose --release-info           # Sürüm bilgileriyle ayrıntılı
+    %s --debug                            # Hata ayıklama modu (çok ayrıntılı)
+
+ÇERÇEVE DESTEĞİ:
+    Betik otomatik olarak çerçeve sürüm kısıtlamalarına saygı gösterir:
+    - Symfony: "extra.symfony.require" kısıtlamasına saygı gösterir
+    - Laravel: laravel/framework major.minor sürümüne saygı gösterir
+    - Yii: yiisoft/yii2 major.minor sürümüne saygı gösterir
+    - CakePHP: cakephp/cakephp major.minor sürümüne saygı gösterir
+    - Laminas: laminas/* major.minor sürümlerine saygı gösterir
+    - CodeIgniter: codeigniter4/framework major.minor sürümüne saygı gösterir
+    - Slim: slim/slim major.minor sürümüne saygı gösterir
+
+YOK SAYILAN PAKETLER:
+    generate-composer-require.yaml veya .yml dosyasında listelenen paketler atlanacaktır.
+    Betik mevcut dizinde (composer.json'un bulunduğu yerde) yapılandırma dosyalarını arar.
+    Eski format (generate-composer-require.ignore.txt) geriye dönük uyumluluk için hala desteklenmektedir.
+    # ile başlayan yorumlar yok sayılır.
+
+SÜRÜM BİLGİLERİ:
+    Varsayılan olarak sürüm bilgileri GÖSTERİLMEZ (API çağrıları yapılmaz).
+    Özet göstermek için --release-info kullanın:
+    - Paket adı
+    - Sürüm URL'si
+    - Değişiklik günlüğü URL'si
+
+    Tam sürüm değişiklik günlüğünü görmek için --release-detail kullanın.
+    Sürüm bilgilerini açıkça atlamak için --no-release-info kullanın (varsayılan davranış).
+

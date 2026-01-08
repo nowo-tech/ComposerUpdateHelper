@@ -474,7 +474,7 @@ final class DependencyCompatibilityTest extends TestCase
     /**
      * Copy of readConfigValue from process-updates.php for testing.
      */
-    private function readConfigValue(string $yamlPath, string $key, $default = null)
+    private function readConfigValue(string $yamlPath, string $key, mixed $default = null)
     {
         if (!file_exists($yamlPath)) {
             return $default;

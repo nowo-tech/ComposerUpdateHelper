@@ -1,0 +1,51 @@
+Uso: %s [OPZIONI]
+
+Genera comandi composer require da "composer outdated --direct".
+Funziona con qualsiasi progetto PHP (Symfony, Laravel, Yii, CodeIgniter, CakePHP, Laminas, Slim, ecc.)
+
+OPZIONI:
+    --run                    Esegue i comandi suggeriti automaticamente
+    --release-info           Mostra informazioni sulle release (riepilogo con link)
+    --release-detail         Mostra il changelog completo per ogni pacchetto (implica --release-info)
+    --no-release-info        Salta la sezione informazioni sulle release (comportamento predefinito)
+    -v, --verbose            Mostra output dettagliato (file di configurazione, pacchetti, ecc.)
+    --debug                  Mostra informazioni di debug (molto dettagliato, include percorsi file, parsing, ecc.)
+    -h, --help               Mostra questo messaggio di aiuto
+
+ESEMPI:
+    %s                                    # Mostra comandi suggeriti (nessuna info release per impostazione predefinita)
+    %s --run                              # Esegue comandi suggeriti
+    %s --release-info                     # Mostra riepilogo informazioni sulle release
+    %s --release-detail                   # Mostra changelog completi (implica --release-info)
+    %s --verbose                           # Mostra output dettagliato con dettagli di configurazione
+    %s --debug                             # Mostra informazioni di debug dettagliate
+    %s --run --release-detail             # Esegue e mostra changelog completi
+    %s --verbose --release-info # Dettagliato con informazioni sulle release
+    %s --debug                  # Modalità debug (molto dettagliato)
+
+SUPPORTO FRAMEWORK:
+    Lo script rispetta automaticamente i vincoli di versione del framework:
+    - Symfony: rispetta il vincolo "extra.symfony.require"
+    - Laravel: rispetta la versione major.minor di laravel/framework
+    - Yii: rispetta la versione major.minor di yiisoft/yii2
+    - CakePHP: rispetta la versione major.minor di cakephp/cakephp
+    - Laminas: rispetta le versioni major.minor di laminas/*
+    - CodeIgniter: rispetta la versione major.minor di codeigniter4/framework
+    - Slim: rispetta la versione major.minor di slim/slim
+
+PACCHETTI IGNORATI:
+    I pacchetti elencati in generate-composer-require.yaml o .yml verranno saltati.
+    Lo script cerca file di configurazione nella directory corrente (dove si trova composer.json).
+    Il formato vecchio (generate-composer-require.ignore.txt) è ancora supportato per compatibilità con le versioni precedenti.
+    I commenti che iniziano con # vengono ignorati.
+
+INFORMAZIONI SULLE RELEASE:
+    Per impostazione predefinita, le informazioni sulle release NON vengono mostrate (nessuna chiamata API viene effettuata).
+    Usa --release-info per mostrare un riepilogo con:
+    - Nome del pacchetto
+    - URL della release
+    - URL del changelog
+
+    Usa --release-detail per vedere il changelog completo della release.
+    Usa --no-release-info per saltare esplicitamente le informazioni sulle release (comportamento predefinito).
+

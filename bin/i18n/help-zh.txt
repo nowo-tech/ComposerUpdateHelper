@@ -1,0 +1,51 @@
+用法: %s [选项]
+
+从 "composer outdated --direct" 生成 composer require 命令。
+适用于任何 PHP 项目 (Symfony, Laravel, Yii, CodeIgniter, CakePHP, Laminas, Slim, 等)
+
+选项:
+    --run                    自动执行建议的命令
+    --release-info           显示版本信息 (带链接的摘要)
+    --release-detail         显示每个包的完整版本更新日志 (包含 --release-info)
+    --no-release-info        跳过版本信息部分 (默认行为)
+    -v, --verbose            显示详细输出 (配置文件, 包, 等)
+    --debug                  显示调试信息 (非常详细, 包括文件路径, 解析, 等)
+    -h, --help               显示此帮助消息
+
+示例:
+    %s                                    # 显示建议的命令 (默认不显示版本信息)
+    %s --run                              # 执行建议的命令
+    %s --release-info                     # 显示版本信息摘要
+    %s --release-detail                   # 显示完整的更新日志 (包含 --release-info)
+    %s --verbose                          # 显示带配置详情的详细输出
+    %s --debug                            # 显示详细的调试信息
+    %s --run --release-detail             # 执行并显示完整的更新日志
+    %s --verbose --release-info            # 带版本信息的详细输出
+    %s --debug                            # 调试模式 (非常详细)
+
+框架支持:
+    脚本自动遵守框架版本约束:
+    - Symfony: 遵守 "extra.symfony.require" 约束
+    - Laravel: 遵守 laravel/framework major.minor 版本
+    - Yii: 遵守 yiisoft/yii2 major.minor 版本
+    - CakePHP: 遵守 cakephp/cakephp major.minor 版本
+    - Laminas: 遵守 laminas/* major.minor 版本
+    - CodeIgniter: 遵守 codeigniter4/framework major.minor 版本
+    - Slim: 遵守 slim/slim major.minor 版本
+
+忽略的包:
+    在 generate-composer-require.yaml 或 .yml 中列出的包将被跳过。
+    脚本在当前目录 (composer.json 所在位置) 中搜索配置文件。
+    旧格式 (generate-composer-require.ignore.txt) 仍受支持以保持向后兼容。
+    以 # 开头的注释将被忽略。
+
+版本信息:
+    默认情况下不显示版本信息 (不进行 API 调用)。
+    使用 --release-info 显示摘要:
+    - 包名
+    - 版本 URL
+    - 更新日志 URL
+
+    使用 --release-detail 查看完整的版本更新日志。
+    使用 --no-release-info 明确跳过版本信息 (默认行为)。
+

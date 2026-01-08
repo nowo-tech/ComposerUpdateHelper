@@ -1,0 +1,51 @@
+Használat: %s [OPCIÓK]
+
+Generál composer require parancsokat a "composer outdated --direct" parancsból.
+Bármilyen PHP projekttel működik (Symfony, Laravel, Yii, CodeIgniter, CakePHP, Laminas, Slim, stb.)
+
+OPCIÓK:
+    --run                    Automatikusan végrehajtja a javasolt parancsokat
+    --release-info           Kiadás információ megjelenítése (összefoglaló linkekkel)
+    --release-detail         Teljes kiadás változásnapló megjelenítése minden csomaghoz (magában foglalja a --release-info-t)
+    --no-release-info        Kiadás információ szekció kihagyása (alapértelmezett viselkedés)
+    -v, --verbose            Részletes kimenet megjelenítése (konfigurációs fájlok, csomagok, stb.)
+    --debug                  Hibakeresési információk megjelenítése (nagyon részletes, fájl elérési utakat, elemzést, stb. tartalmaz)
+    -h, --help               Ez a súgó üzenet megjelenítése
+
+PÉLDÁK:
+    %s                                    # Javasolt parancsok megjelenítése (alapértelmezés szerint nincs kiadás információ)
+    %s --run                              # Javasolt parancsok végrehajtása
+    %s --release-info                     # Kiadás információ összefoglaló megjelenítése
+    %s --release-detail                   # Teljes változásnaplók megjelenítése (magában foglalja a --release-info-t)
+    %s --verbose                          # Részletes kimenet megjelenítése konfigurációs részletekkel
+    %s --debug                            # Részletes hibakeresési információk megjelenítése
+    %s --run --release-detail             # Végrehajtás és teljes változásnaplók megjelenítése
+    %s --verbose --release-info           # Részletes kiadás információval
+    %s --debug                            # Hibakeresési mód (nagyon részletes)
+
+KERETRENDSZER TÁMOGATÁS:
+    A szkript automatikusan tiszteletben tartja a keretrendszer verzió korlátozásokat:
+    - Symfony: tiszteletben tartja az "extra.symfony.require" korlátozást
+    - Laravel: tiszteletben tartja a laravel/framework major.minor verziót
+    - Yii: tiszteletben tartja a yiisoft/yii2 major.minor verziót
+    - CakePHP: tiszteletben tartja a cakephp/cakephp major.minor verziót
+    - Laminas: tiszteletben tartja a laminas/* major.minor verziókat
+    - CodeIgniter: tiszteletben tartja a codeigniter4/framework major.minor verziót
+    - Slim: tiszteletben tartja a slim/slim major.minor verziót
+
+FIGYELMEN KÍVÜL HAGYOTT CSOMAGOK:
+    A generate-composer-require.yaml vagy .yml fájlban felsorolt csomagok kihagyásra kerülnek.
+    A szkript az aktuális könyvtárban (ahol a composer.json található) keresi a konfigurációs fájlokat.
+    A régi formátum (generate-composer-require.ignore.txt) továbbra is támogatott a visszafelé kompatibilitás érdekében.
+    A # jellel kezdődő megjegyzések figyelmen kívül maradnak.
+
+KIADÁS INFORMÁCIÓ:
+    Alapértelmezés szerint a kiadás információ NEM jelenik meg (nincs API hívás).
+    Használja a --release-info opciót összefoglaló megjelenítéséhez:
+    - Csomag név
+    - Kiadás URL
+    - Változásnapló URL
+
+    Használja a --release-detail opciót a teljes kiadás változásnapló megtekintéséhez.
+    Használja a --no-release-info opciót a kiadás információk kifejezett kihagyásához (alapértelmezett viselkedés).
+

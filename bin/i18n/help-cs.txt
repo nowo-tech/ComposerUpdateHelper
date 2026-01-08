@@ -1,0 +1,51 @@
+Použití: %s [VOLBY]
+
+Generuje composer require příkazy z "composer outdated --direct".
+Funguje s jakýmkoli PHP projektem (Symfony, Laravel, Yii, CodeIgniter, CakePHP, Laminas, Slim, atd.)
+
+VOLBY:
+    --run                    Automaticky provede doporučené příkazy
+    --release-info           Zobrazí informace o verzi (souhrn s odkazy)
+    --release-detail         Zobrazí úplný seznam změn verze pro každý balíček (implikuje --release-info)
+    --no-release-info        Přeskočí sekci informací o verzi (výchozí chování)
+    -v, --verbose            Zobrazí podrobný výstup (konfigurační soubory, balíčky, atd.)
+    --debug                  Zobrazí debug informace (velmi podrobné, včetně cest k souborům, parsování, atd.)
+    -h, --help               Zobrazí tuto nápovědu
+
+PŘÍKLADY:
+    %s                                    # Zobrazí doporučené příkazy (bez informací o verzi ve výchozím nastavení)
+    %s --run                              # Provede doporučené příkazy
+    %s --release-info                     # Zobrazí souhrn informací o verzi
+    %s --release-detail                   # Zobrazí úplné seznamy změn (implikuje --release-info)
+    %s --verbose                          # Zobrazí podrobný výstup s konfiguračními detaily
+    %s --debug                            # Zobrazí podrobné debug informace
+    %s --run --release-detail             # Provede a zobrazí úplné seznamy změn
+    %s --verbose --release-info           # Podrobné s informacemi o verzi
+    %s --debug                            # Debug režim (velmi podrobný)
+
+PODPORA FRAMEWORKU:
+    Skript automaticky respektuje omezení verze frameworku:
+    - Symfony: respektuje omezení "extra.symfony.require"
+    - Laravel: respektuje major.minor verzi laravel/framework
+    - Yii: respektuje major.minor verzi yiisoft/yii2
+    - CakePHP: respektuje major.minor verzi cakephp/cakephp
+    - Laminas: respektuje major.minor verze laminas/*
+    - CodeIgniter: respektuje major.minor verzi codeigniter4/framework
+    - Slim: respektuje major.minor verzi slim/slim
+
+IGNOROVANÉ BALÍČKY:
+    Balíčky uvedené v generate-composer-require.yaml nebo .yml budou přeskočeny.
+    Skript hledá konfigurační soubory v aktuálním adresáři (kde se nachází composer.json).
+    Starý formát (generate-composer-require.ignore.txt) je stále podporován pro zpětnou kompatibilitu.
+    Komentáře začínající # jsou ignorovány.
+
+INFORMACE O VERZI:
+    Ve výchozím nastavení se informace o verzi NEZOBRAZUJÍ (nejsou prováděny žádné API volání).
+    Použijte --release-info pro zobrazení souhrnu s:
+    - Názvem balíčku
+    - URL verze
+    - URL seznamu změn
+
+    Použijte --release-detail pro zobrazení úplného seznamu změn verze.
+    Použijte --no-release-info pro explicitní přeskočení informací o verzi (výchozí chování).
+

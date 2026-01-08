@@ -1,0 +1,51 @@
+使用方法: %s [オプション]
+
+"composer outdated --direct" から composer require コマンドを生成します。
+任意の PHP プロジェクトで動作します (Symfony, Laravel, Yii, CodeIgniter, CakePHP, Laminas, Slim, など)
+
+オプション:
+    --run                    推奨コマンドを自動的に実行
+    --release-info           リリース情報を表示 (リンク付きの要約)
+    --release-detail         各パッケージの完全なリリース変更ログを表示 (--release-info を含む)
+    --no-release-info        リリース情報セクションをスキップ (デフォルトの動作)
+    -v, --verbose            詳細な出力を表示 (設定ファイル、パッケージなど)
+    --debug                  デバッグ情報を表示 (非常に詳細、ファイルパス、解析などを含む)
+    -h, --help               このヘルプメッセージを表示
+
+例:
+    %s                                    # 推奨コマンドを表示 (デフォルトではリリース情報なし)
+    %s --run                              # 推奨コマンドを実行
+    %s --release-info                     # リリース情報の要約を表示
+    %s --release-detail                   # 完全な変更ログを表示 (--release-info を含む)
+    %s --verbose                          # 設定の詳細を含む詳細な出力を表示
+    %s --debug                            # 詳細なデバッグ情報を表示
+    %s --run --release-detail             # 実行して完全な変更ログを表示
+    %s --verbose --release-info           # リリース情報付きの詳細
+    %s --debug                            # デバッグモード (非常に詳細)
+
+フレームワークサポート:
+    スクリプトは自動的にフレームワークのバージョン制約を尊重します:
+    - Symfony: "extra.symfony.require" 制約を尊重
+    - Laravel: laravel/framework major.minor バージョンを尊重
+    - Yii: yiisoft/yii2 major.minor バージョンを尊重
+    - CakePHP: cakephp/cakephp major.minor バージョンを尊重
+    - Laminas: laminas/* major.minor バージョンを尊重
+    - CodeIgniter: codeigniter4/framework major.minor バージョンを尊重
+    - Slim: slim/slim major.minor バージョンを尊重
+
+無視されるパッケージ:
+    generate-composer-require.yaml または .yml にリストされているパッケージはスキップされます。
+    スクリプトは現在のディレクトリ (composer.json がある場所) で設定ファイルを検索します。
+    古い形式 (generate-composer-require.ignore.txt) は後方互換性のために引き続きサポートされています。
+    # で始まるコメントは無視されます。
+
+リリース情報:
+    デフォルトでは、リリース情報は表示されません (API 呼び出しは行われません)。
+    要約を表示するには --release-info を使用:
+    - パッケージ名
+    - リリース URL
+    - 変更ログ URL
+
+    完全なリリース変更ログを表示するには --release-detail を使用。
+    リリース情報を明示的にスキップするには --no-release-info を使用 (デフォルトの動作)。
+

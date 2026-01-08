@@ -7,6 +7,109 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Extended language support**: Added translations for 20 additional languages (10 high-priority + 10 medium-priority)
+  - **High-priority languages**: Dutch (nl), Czech (cs), Swedish (sv), Norwegian (no), Finnish (fi), Turkish (tr), Chinese (zh), Japanese (ja), Korean (ko), Arabic (ar)
+  - **Medium-priority languages**: Hungarian (hu), Slovak (sk), Ukrainian (uk), Croatian (hr), Bulgarian (bg), Hebrew (he), Hindi (hi), Vietnamese (vi), Indonesian (id), Thai (th)
+  - All languages include complete translations for PHP, Bash, and help files
+  - Total of 31 fully supported languages: English (en) 🇬🇧 🇺🇸, Spanish (es) 🇪🇸, Portuguese (pt) 🇵🇹 🇧🇷, Italian (it) 🇮🇹, French (fr) 🇫🇷, German (de) 🇩🇪 🇦🇹, Polish (pl) 🇵🇱, Russian (ru) 🇷🇺, Romanian (ro) 🇷🇴, Greek (el) 🇬🇷, Danish (da) 🇩🇰, Dutch (nl) 🇳🇱 🇧🇪, Czech (cs) 🇨🇿, Swedish (sv) 🇸🇪, Norwegian (no) 🇳🇴, Finnish (fi) 🇫🇮, Turkish (tr) 🇹🇷, Chinese (zh) 🇨🇳 🇹🇼, Japanese (ja) 🇯🇵, Korean (ko) 🇰🇷, Arabic (ar) 🇸🇦 🇪🇬, Hungarian (hu) 🇭🇺, Slovak (sk) 🇸🇰, Ukrainian (uk) 🇺🇦, Croatian (hr) 🇭🇷, Bulgarian (bg) 🇧🇬, Hebrew (he) 🇮🇱, Hindi (hi) 🇮🇳, Vietnamese (vi) 🇻🇳, Indonesian (id) 🇮🇩, Thai (th) 🇹🇭
+- **Complete i18n integration with debug support**: Full internationalization implementation for both PHP and Bash scripts
+  - **PHP script (`process-updates.php`)**: All output messages now use translation function `t()`
+    - Integrated i18n loader with multiple path detection (vendor, development, project root)
+    - Comprehensive debug logging for i18n functionality
+    - Debug messages show: detected language, config file used, translation function availability, loaded translations count, and test translations
+    - All user-facing messages are now translatable: framework constraints, ignored packages, dependency analysis, filtered packages, suggested commands, etc.
+  - **Bash script (`generate-composer-require.sh`)**: Complete translation integration
+    - Integrated sh-compatible translation loader (`translations-sh.sh`)
+    - All `MSG_*` variables replaced with `get_msg()` function that uses translations
+    - Fallback to English hardcoded messages if translations are not available
+    - Debug support for i18n: shows detected language, loader status, and translation function availability
+    - All messages are now translatable: loading indicators, error messages, debug messages, etc.
+  - **Translation loader improvements**:
+    - Created `translations-sh.sh` for POSIX-compatible sh scripts (not just bash)
+    - Improved path detection for translation files in different environments
+    - Better error handling and fallback mechanisms
+- **Internationalization (i18n) support** (⚠️ DEVELOPMENT MODE): Added multi-language support for output messages
+  - Automatic language detection from system environment variables (`LANG`, `LC_ALL`, `LC_MESSAGES`)
+  - Manual language configuration via `language` option in `generate-composer-require.yaml`
+  - Supported languages: English (en) 🇬🇧 🇺🇸, Spanish (es) 🇪🇸, Portuguese (pt) 🇵🇹 🇧🇷, Italian (it) 🇮🇹, French (fr) 🇫🇷, German (de) 🇩🇪 🇦🇹, Polish (pl) 🇵🇱, Russian (ru) 🇷🇺, Romanian (ro) 🇷🇴, Greek (el) 🇬🇷, Danish (da) 🇩🇰, Dutch (nl) 🇳🇱 🇧🇪, Czech (cs) 🇨🇿, Swedish (sv) 🇸🇪, Norwegian (no) 🇳🇴, Finnish (fi) 🇫🇮, Turkish (tr) 🇹🇷, Chinese (zh) 🇨🇳 🇹🇼, Japanese (ja) 🇯🇵, Korean (ko) 🇰🇷, Arabic (ar) 🇸🇦 🇪🇬, Hungarian (hu) 🇭🇺, Slovak (sk) 🇸🇰, Ukrainian (uk) 🇺🇦, Croatian (hr) 🇭🇷, Bulgarian (bg) 🇧🇬, Hebrew (he) 🇮🇱, Hindi (hi) 🇮🇳, Vietnamese (vi) 🇻🇳, Indonesian (id) 🇮🇩, Thai (th) 🇹🇭 - Total: 31 languages
+  - Translations available for both PHP (`process-updates.php`) and Bash (`generate-composer-require.sh`) scripts
+  - Debug messages also support translations
+  - Translation files are stored in the package (`vendor/nowo-tech/composer-update-helper/bin/i18n/`) and not copied to project root
+  - Only `generate-composer-require.sh` is copied to project root; all other files remain in the package
+
+### Changed
+- **Dependency checking feature promoted to production**: The `check-dependencies` feature is now considered production-ready
+  - Removed all "development mode" warnings from documentation
+  - Feature has been thoroughly tested and refined
+  - All edge cases have been addressed and the feature is stable
+  - The feature is enabled by default (`check-dependencies: true`) and recommended for all users
+  - Comprehensive dependency conflict detection, including transitive dependencies and `self.version` constraints
+  - Full support for both `require` and `require-dev` dependency detection
+- **Script architecture refactoring**: Made the main script (`generate-composer-require.sh`) more lightweight
+  - Created `script-helper.sh` in vendor to contain complex helper functions
+  - Reduced main script from ~502 lines to ~240 lines (52% reduction)
+  - All complex logic (file detection, language detection, loading indicators) moved to vendor helper
+  - Main script now only contains essential wrapper logic, keeping it minimal and maintainable
+  - Helper script remains in vendor; only `generate-composer-require.sh` is copied to project root
+- **Improved output formatting for dependency conflicts**:
+  - Fixed double line break after "Processing packages" message
+  - Fixed spacing around emoji numbers in filtered packages section
+  - Enhanced conflict information: now shows the number of packages with conflicts (e.g., "conflicts with 1 package" or "conflicts with 2 packages")
+  - Better visual formatting for dependency conflict analysis section
+- **Documentation enhancements**: Improved visual presentation of language support
+  - Added country flag emojis to all language listings in documentation (README.md, CHANGELOG.md, UPGRADING.md, LANGUAGES_PROPOSAL.md)
+  - Languages with multiple countries now display all relevant flags (e.g., English 🇬🇧 🇺🇸 🇨🇦 🇦🇺, Spanish 🇪🇸 🇲🇽 🇦🇷 🇨🇴)
+  - Makes language selection more intuitive and visually appealing
+  - All 31 languages are now fully implemented and documented with their respective flags
+- **Documentation reorganization**: Improved README structure and organization
+  - Reduced README.md from ~700 to 240 lines (66% reduction) for better readability
+  - Created dedicated documentation files in `docs/` directory:
+    - `CONFIGURATION.md` - Complete configuration guide (package configuration, language settings, dependency checking)
+    - `USAGE.md` - Comprehensive usage guide (all options, release information, environment variables)
+    - `FRAMEWORKS.md` - Framework support details (Symfony, Laravel, Yii, CakePHP, Laminas, CodeIgniter, Slim)
+    - `DEVELOPMENT.md` - Development setup and CI/CD guide (Docker, testing, make commands)
+  - README.md now focuses on essential information with links to detailed documentation
+  - Better organization makes it easier to find specific information
+  - All documentation is now properly categorized and cross-referenced
+- **Code quality improvements**: Enhanced type safety and modern PHP compatibility
+  - All nullable parameters are now explicitly declared
+  - Better type hints throughout the codebase
+  - Improved compatibility with modern PHP static analysis tools
+- **Code coverage command**: Updated `composer test-coverage` to use dedicated configuration file
+  - Now uses `--configuration=phpunit.coverage.xml.dist` to load coverage-specific configuration
+  - Prevents PHPUnit warnings about missing filter configuration
+  - Ensures consistent coverage report generation
+  - Coverage configuration is now isolated in a separate file for better maintainability
+- **PHPUnit configuration for PHPUnit 11**: Updated coverage configuration to use modern PHPUnit 11 structure
+  - Moved `<include>` directive from `<coverage>` to `<source>` tag (PHPUnit 11 requirement)
+  - Removed deprecated `processUncoveredFiles` attribute
+  - Tests and coverage now run cleanly in Docker environment without warnings
+  - Verified 99.58% line coverage (478/480 lines) with 132 tests passing
+
+### Fixed
+- **PHPUnit configuration compatibility**: Fixed PHPUnit warnings for PHPUnit 10/11 compatibility
+  - Removed deprecated `<filter><whitelist>` element from `phpunit.xml.dist`
+  - Updated schema from PHPUnit 9.6 to PHPUnit 11.5
+  - **Separated PHPUnit configuration into two files**:
+    - `phpunit.xml.dist`: Main configuration without coverage section (used by `composer test`)
+    - `phpunit.coverage.xml.dist`: Configuration with coverage section (used by `composer test-coverage`)
+  - **PHPUnit 11 compatibility**: Updated coverage configuration to use modern PHPUnit 11 structure
+    - Moved `<include>` directive from `<coverage>` to `<source>` tag (PHPUnit 11 requirement)
+    - Removed deprecated `processUncoveredFiles` attribute from both configuration files
+  - Fixed "No filter is configured, code coverage will not be processed" warning
+  - Tests and coverage now run cleanly in Docker environment without warnings
+  - Verified: 132 tests passing, 99.58% line coverage (478/480 lines), 90.91% method coverage (20/22 methods)
+- **Implicitly nullable parameters**: Fixed PHP deprecation warnings for implicitly nullable parameters
+  - Updated `findCompatibleVersion` function parameters to explicitly use `?array` for nullable arrays
+  - Updated `readConfigValue` function parameter to use `mixed $default = null` instead of implicit nullable
+  - Updated `t()` function parameter in i18n loader to use `?string $lang = null`
+  - All code now adheres to modern PHP standards regarding nullable types
+  - Eliminates `Implicitly nullable parameters are deprecated.intelephense(P1078)` warnings
+- **Test compatibility**: Updated `ScriptTest.php` to match refactored script structure
+  - Updated assertions to check for `PROCESSOR_PATHS` instead of `PROCESSOR_PHP`
+  - Updated path assertion to match new script structure
+
 ## [2.0.18] - 2026-01-07
 
 ### Fixed
@@ -109,70 +212,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Migration Notes
 - **No action required**: This is an internal improvement with no user-facing changes
-
-### Breaking Changes
-- None
-
-## [2.0.15] - 2025-01-05
-
-### Fixed
-- **Constraint parsing with 'v' prefix**: Fixed issue where constraints with 'v' prefix in caret (`^v7.1.0`) or tilde (`~v7.1.0`) operators were not being correctly parsed
-  - Constraints like `^v7.1.0` are now correctly interpreted as `^7.1.0` (>= 7.1.0 < 8.0.0)
-  - This fixes cases where packages like `aws/aws-sdk-php` were incorrectly filtered out due to dependency conflicts
-  - Example: `symfony/filesystem: ^v7.1.0` now correctly accepts version `7.4.0`
-  - The fix applies to both caret (`^`) and tilde (`~`) constraints
-
-### Added
-- **Configurable dependency checking** (⚠️ **Development mode**): New `check-dependencies` option in YAML configuration file
-  - ⚠️ **Note**: This feature is currently in development and is still being reviewed and refined. While functional, it may not catch all edge cases.
-  - Allows users to enable or disable detailed dependency compatibility checking
-  - When enabled (default: `true`), performs full dependency analysis to prevent conflicts
-  - When disabled (`false`), suggests all available updates without checking compatibility (faster execution)
-  - Useful for users who want to see all available updates regardless of compatibility
-- **Dependency checking analysis output**: Enhanced output when dependency checking is enabled
-  - Shows all outdated packages (before dependency check)
-  - Lists packages filtered by dependency conflicts
-  - Displays packages that passed dependency check
-  - Provides clear visibility into which packages are being filtered and why
-  - Helps users understand why certain packages are not being suggested for update
-
-### Changed
-- **Dependency checking is now configurable**: Previously always enabled, now can be disabled via YAML configuration
-- **Enhanced debug output**: When `check-dependencies` is enabled, shows detailed analysis of dependency filtering
-
-### Migration Notes
-- **No action required**: Dependency checking remains enabled by default (`check-dependencies: true`)
-- To disable dependency checking, add `check-dependencies: false` to your `generate-composer-require.yaml` file
-- Existing functionality remains unchanged when dependency checking is enabled
-- The new analysis output provides better visibility into dependency filtering decisions
-
-### Breaking Changes
-- None
-
-## [2.0.14] - 2025-12-26
-
-### Added
-- **Dependency compatibility checking**: Automatic detection and prevention of dependency conflicts
-  - System now analyzes `composer.lock` to identify packages that depend on the package being updated
-  - Verifies version constraints before suggesting updates to prevent conflicts
-  - If a proposed update would conflict with dependent packages, the system finds the highest compatible version
-  - If no compatible version exists, the update is skipped to avoid breaking dependencies
-  - Example: If `scheb/2fa-bundle` 8.2.0 is available but `scheb/2fa-email` requires `8.1.*`, the system will suggest `8.1.x` instead or skip the update
-  - This prevents errors like "scheb/2fa-email requires scheb/2fa-bundle 8.1.* but 8.2.0 is being installed"
-
-### Changed
-- **Progress indicators**: Added animated spinner during long-running operations
-  - "Checking for outdated packages..." now shows an animated spinner (`|/-\`) while `composer outdated` runs
-  - "Processing packages..." now shows an animated spinner while packages are being processed
-  - Provides visual feedback that the process is active and progressing
-  - Spinner is automatically replaced with ✅ when the operation completes
-  - Spinner is disabled in `DEBUG` or `VERBOSE` mode for cleaner output
-
-### Migration Notes
-- **No action required**: These are enhancements that improve reliability and user experience
-- Existing functionality remains unchanged
-- The dependency compatibility check runs automatically and transparently
-- If you notice some packages are no longer suggested for update, it may be due to dependency conflicts being detected
 
 ### Breaking Changes
 - None

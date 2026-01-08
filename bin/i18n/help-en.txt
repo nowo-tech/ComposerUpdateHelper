@@ -1,0 +1,51 @@
+Usage: %s [OPTIONS]
+
+Generates composer require commands from "composer outdated --direct".
+Works with any PHP project (Symfony, Laravel, Yii, CodeIgniter, CakePHP, Laminas, Slim, etc.)
+
+OPTIONS:
+    --run                    Execute the suggested commands automatically
+    --release-info           Show release information (summary with links)
+    --release-detail         Show full release changelog for each package (implies --release-info)
+    --no-release-info        Skip release information section (default behavior)
+    -v, --verbose            Show verbose output (configuration files, packages, etc.)
+    --debug                  Show debug information (very detailed, includes file paths, parsing, etc.)
+    -h, --help               Show this help message
+
+EXAMPLES:
+    %s                                    # Show suggested commands (no release info by default)
+    %s --run                              # Execute suggested commands
+    %s --release-info                     # Show release information summary
+    %s --release-detail                   # Show full changelogs (implies --release-info)
+    %s --verbose                           # Show verbose output with configuration details
+    %s --debug                             # Show detailed debug information
+    %s --run --release-detail             # Execute and show full changelogs
+    %s --verbose --release-info # Verbose with release info
+    %s --debug                  # Debug mode (very detailed)
+
+FRAMEWORK SUPPORT:
+    The script automatically respects framework version constraints:
+    - Symfony: respects "extra.symfony.require" constraint
+    - Laravel: respects laravel/framework major.minor version
+    - Yii: respects yiisoft/yii2 major.minor version
+    - CakePHP: respects cakephp/cakephp major.minor version
+    - Laminas: respects laminas/* major.minor versions
+    - CodeIgniter: respects codeigniter4/framework major.minor version
+    - Slim: respects slim/slim major.minor version
+
+IGNORED PACKAGES:
+    Packages listed in generate-composer-require.yaml or .yml will be skipped.
+    The script searches for configuration files in the current directory (where composer.json is located).
+    Old format (generate-composer-require.ignore.txt) is still supported for backward compatibility.
+    Comments starting with # are ignored.
+
+RELEASE INFORMATION:
+    By default, release information is NOT shown (no API calls are made).
+    Use --release-info to show a summary with:
+    - Package name
+    - Release URL
+    - Changelog URL
+
+    Use --release-detail to see the full release changelog.
+    Use --no-release-info to explicitly skip release information (default behavior).
+

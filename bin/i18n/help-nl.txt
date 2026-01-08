@@ -1,0 +1,51 @@
+Gebruik: %s [OPTIES]
+
+Genereert composer require commando's van "composer outdated --direct".
+Werkt met elk PHP project (Symfony, Laravel, Yii, CodeIgniter, CakePHP, Laminas, Slim, etc.)
+
+OPTIES:
+    --run                    Voer de voorgestelde commando's automatisch uit
+    --release-info           Toon versie informatie (samenvatting met links)
+    --release-detail         Toon volledig versie wijzigingslogboek voor elk pakket (impliceert --release-info)
+    --no-release-info        Sla versie informatie sectie over (standaard gedrag)
+    -v, --verbose            Toon uitgebreide uitvoer (configuratiebestanden, pakketten, etc.)
+    --debug                  Toon debug informatie (zeer gedetailleerd, inclusief bestandspaden, parsing, etc.)
+    -h, --help               Toon dit help bericht
+
+VOORBEELDEN:
+    %s                                    # Toon voorgestelde commando's (geen versie info standaard)
+    %s --run                              # Voer voorgestelde commando's uit
+    %s --release-info                     # Toon versie informatie samenvatting
+    %s --release-detail                   # Toon volledige wijzigingslogboeken (impliceert --release-info)
+    %s --verbose                          # Toon uitgebreide uitvoer met configuratiedetails
+    %s --debug                            # Toon gedetailleerde debug informatie
+    %s --run --release-detail             # Voer uit en toon volledige wijzigingslogboeken
+    %s --verbose --release-info           # Uitgebreid met versie info
+    %s --debug                            # Debug modus (zeer gedetailleerd)
+
+FRAMEWORK ONDERSTEUNING:
+    Het script respecteert automatisch framework versie beperkingen:
+    - Symfony: respecteert "extra.symfony.require" beperking
+    - Laravel: respecteert laravel/framework major.minor versie
+    - Yii: respecteert yiisoft/yii2 major.minor versie
+    - CakePHP: respecteert cakephp/cakephp major.minor versie
+    - Laminas: respecteert laminas/* major.minor versies
+    - CodeIgniter: respecteert codeigniter4/framework major.minor versie
+    - Slim: respecteert slim/slim major.minor versie
+
+GENEGEERDE PAKKETTEN:
+    Pakketten vermeld in generate-composer-require.yaml of .yml worden overgeslagen.
+    Het script zoekt naar configuratiebestanden in de huidige directory (waar composer.json zich bevindt).
+    Oud formaat (generate-composer-require.ignore.txt) wordt nog steeds ondersteund voor achterwaartse compatibiliteit.
+    Commentaar beginnend met # wordt genegeerd.
+
+VERSIE INFORMATIE:
+    Standaard wordt versie informatie NIET getoond (geen API calls worden gemaakt).
+    Gebruik --release-info om een samenvatting te tonen met:
+    - Pakketnaam
+    - Versie URL
+    - Wijzigingslogboek URL
+
+    Gebruik --release-detail om het volledige versie wijzigingslogboek te zien.
+    Gebruik --no-release-info om expliciet versie informatie over te slaan (standaard gedrag).
+
