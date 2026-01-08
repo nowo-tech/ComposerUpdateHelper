@@ -138,14 +138,17 @@ jobs:
                 const changelog = fs.readFileSync('docs/CHANGELOG.md', 'utf-8');
                 const versionEscaped = version.replace(/\./g, '\\.');
                 const regexPattern = '^## \\[' + versionEscaped + '\\]([\\s\\S]*?)(?=^## \\[?[0-9]|$)';
-                const regex = new RegExp(regexPattern);
+                const regex = new RegExp(regexPattern, 'm');
                 const match = changelog.match(regex);
-                if (match) {
+                if (match && match[1]) {
                   changelogEntry = match[1].trim();
+                  console.log('📝 Found changelog entry for ' + tag + ' (' + changelogEntry.split('\n').length + ' lines)');
+                } else {
+                  console.log('⚠️  No changelog entry found for version ' + version);
                 }
               }
               
-              // Build release body
+              // Build release body - always include changelog if available
               let releaseBody = tagMessage;
               if (changelogEntry) {
                 releaseBody = tagMessage + '\n\n## Changelog\n\n' + changelogEntry;
@@ -166,7 +169,7 @@ jobs:
                     body: releaseBody,
                     draft: false,
                     prerelease: isPrerelease,
-                    generate_release_notes: true
+                    generate_release_notes: false  // Don't generate auto notes, we have our own changelog
                   });
                   console.log('✅ Created release for ' + tag);
                   
