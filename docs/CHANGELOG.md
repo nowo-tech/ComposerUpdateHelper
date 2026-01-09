@@ -111,6 +111,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Test compatibility**: Updated `ScriptTest.php` to match refactored script structure
   - Updated assertions to check for `PROCESSOR_PATHS` instead of `PROCESSOR_PHP`
   - Updated path assertion to match new script structure
+- **i18n synchronization fixes**: Fixed help messages and debug messages not synchronizing with language configuration
+  - Help messages (`--help`) now correctly detect and use the language defined in `generate-composer-require.yaml`
+  - Debug messages now correctly synchronize with the configured language
+  - `detect_language_for_script()` function now proactively detects configuration file if `CONFIG_FILE` is not yet defined
+  - `t()` function in `translations-sh.sh` now automatically detects config file if `TRANSLATIONS_LANG` is empty
+  - Translations are explicitly initialized after configuration file detection in `generate-composer-require.sh`
+  - Ensures consistent language usage across all script output (help, debug, regular messages)
 
 ## [2.0.18] - 2026-01-07
 

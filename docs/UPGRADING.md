@@ -62,6 +62,11 @@ This guide will help you upgrade Composer Update Helper to newer versions.
   - All documentation is now properly categorized and cross-referenced
 
 #### Fixed
+- **i18n synchronization**: Fixed help messages and debug messages not synchronizing with language configuration
+  - Help messages (`--help`) now correctly detect and use the language defined in `generate-composer-require.yaml`
+  - Debug messages now correctly synchronize with the configured language
+  - The system now detects the configuration file before initializing translations
+  - Ensures consistent language usage across all script output (help, debug, regular messages)
 - **Test compatibility**: Updated `ScriptTest.php` to match refactored script structure
   - Updated assertions to check for `PROCESSOR_PATHS` instead of `PROCESSOR_PHP`
   - Updated path assertion to match new script structure
@@ -116,7 +121,12 @@ This guide will help you upgrade Composer Update Helper to newer versions.
   - Translation function availability
   - Loaded translations count
   - Test translations
-- Code coverage remains at 99.20%
+- **i18n synchronization**: Help messages (`--help`) and debug messages now correctly synchronize with the language defined in `generate-composer-require.yaml`
+  - The system now detects the configuration file before initializing translations
+  - Help messages will display in the configured language
+  - Debug messages will use the configured language
+  - All script output is now consistently translated based on your configuration
+- Code coverage: 99.58% line coverage (478/480 lines), 90.91% method coverage (20/22 methods)
 
 #### Breaking Changes
 - None
