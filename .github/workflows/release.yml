@@ -46,6 +46,45 @@ jobs:
           VERSION=${TAG_NAME#v}
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
 
+      - name: Get previous tag
+        id: previous_tag
+        run: |
+          TAG_NAME=${GITHUB_REF#refs/tags/}
+          # Get the previous tag (excluding the current one)
+          PREVIOUS_TAG=$(git tag -l 'v*' | sort -V | grep -B1 "^$TAG_NAME$" | grep -v "^$TAG_NAME$" | tail -1 || echo "")
+          if [ -z "$PREVIOUS_TAG" ]; then
+            # If no previous tag found, use the first commit
+            PREVIOUS_TAG=$(git rev-list --max-parents=0 HEAD 2>/dev/null || echo "")
+          fi
+          echo "PREVIOUS_TAG=$PREVIOUS_TAG" >> $GITHUB_OUTPUT
+          echo "Previous tag: $PREVIOUS_TAG"
+
+      - name: Get commits between tags
+        id: commits
+        run: |
+          TAG_NAME=${GITHUB_REF#refs/tags/}
+          PREVIOUS_TAG="${{ steps.previous_tag.outputs.PREVIOUS_TAG }}"
+          
+          if [ -n "$PREVIOUS_TAG" ]; then
+            # Get commits between previous tag and current tag
+            COMMITS=$(git log --pretty=format:"- %s (%h)" "$PREVIOUS_TAG..$TAG_NAME" 2>/dev/null || echo "")
+            if [ -n "$COMMITS" ]; then
+              echo "HAS_COMMITS=true" >> $GITHUB_OUTPUT
+              {
+                echo "COMMITS<<EOF"
+                echo "$COMMITS"
+                echo "EOF"
+              } >> $GITHUB_OUTPUT
+              echo "Found $(echo "$COMMITS" | wc -l) commits between $PREVIOUS_TAG and $TAG_NAME"
+            else
+              echo "HAS_COMMITS=false" >> $GITHUB_OUTPUT
+              echo "No commits found between $PREVIOUS_TAG and $TAG_NAME"
+            fi
+          else
+            echo "HAS_COMMITS=false" >> $GITHUB_OUTPUT
+            echo "No previous tag found, skipping commits"
+          fi
+
       - name: Get changelog entry
         id: changelog
         run: |
@@ -114,7 +153,9 @@ jobs:
           TAG_NAME: ${{ steps.tag.outputs.TAG_NAME }}
           TAG_MESSAGE: ${{ steps.tag_message.outputs.MESSAGE }}
           CHANGELOG_ENTRY: ${{ steps.changelog.outputs.ENTRY }}
+          COMMITS: ${{ steps.commits.outputs.COMMITS }}
           HAS_CHANGELOG: ${{ steps.changelog.outputs.HAS_CHANGELOG }}
+          HAS_COMMITS: ${{ steps.commits.outputs.HAS_COMMITS }}
           RELEASE_ID: ${{ steps.check-existing.outputs.release_id }}
         with:
           script: |
@@ -122,16 +163,26 @@ jobs:
             const tagName = process.env.TAG_NAME;
             const tagMessage = process.env.TAG_MESSAGE || '';
             const changelogEntry = process.env.CHANGELOG_ENTRY || '';
+            const commits = process.env.COMMITS || '';
             const hasChangelog = process.env.HAS_CHANGELOG === 'true';
+            const hasCommits = process.env.HAS_COMMITS === 'true';
             const isPrerelease = tagName.includes('-alpha') || tagName.includes('-beta') || tagName.includes('-rc');
 
-            // Build release body - always include changelog if available, even if release already exists
+            // Build release body - include tag message, changelog, and commits
             let releaseBody = tagMessage;
+            
             if (hasChangelog && changelogEntry) {
-              releaseBody = tagMessage + '\n\n## Changelog\n\n' + changelogEntry;
-              console.log('📝 Changelog entry found (' + changelogEntry.split('\n').length + ' lines), will update release body');
+              releaseBody += '\n\n## Changelog\n\n' + changelogEntry;
+              console.log('📝 Changelog entry found (' + changelogEntry.split('\n').length + ' lines)');
             } else {
               console.log('⚠️  No changelog entry found for version ' + tagName);
+            }
+            
+            if (hasCommits && commits) {
+              releaseBody += '\n\n## Commits\n\n' + commits;
+              console.log('📝 Commits found (' + commits.split('\n').length + ' commits)');
+            } else {
+              console.log('ℹ️  No commits found between tags');
             }
 
             try {
@@ -165,22 +216,34 @@ jobs:
           TAG_NAME: ${{ steps.tag.outputs.TAG_NAME }}
           TAG_MESSAGE: ${{ steps.tag_message.outputs.MESSAGE }}
           CHANGELOG_ENTRY: ${{ steps.changelog.outputs.ENTRY }}
+          COMMITS: ${{ steps.commits.outputs.COMMITS }}
           HAS_CHANGELOG: ${{ steps.changelog.outputs.HAS_CHANGELOG }}
+          HAS_COMMITS: ${{ steps.commits.outputs.HAS_COMMITS }}
         with:
           script: |
             const tagName = process.env.TAG_NAME;
             const tagMessage = process.env.TAG_MESSAGE || '';
             const changelogEntry = process.env.CHANGELOG_ENTRY || '';
+            const commits = process.env.COMMITS || '';
             const hasChangelog = process.env.HAS_CHANGELOG === 'true';
+            const hasCommits = process.env.HAS_COMMITS === 'true';
             const isPrerelease = tagName.includes('-alpha') || tagName.includes('-beta') || tagName.includes('-rc');
 
-            // Build release body - always include changelog if available
+            // Build release body - include tag message, changelog, and commits
             let releaseBody = tagMessage;
+            
             if (hasChangelog && changelogEntry) {
-              releaseBody = tagMessage + '\n\n## Changelog\n\n' + changelogEntry;
+              releaseBody += '\n\n## Changelog\n\n' + changelogEntry;
               console.log('📝 Changelog entry found (' + changelogEntry.split('\n').length + ' lines), will include in release body');
             } else {
               console.log('⚠️  No changelog entry found for version ' + tagName);
+            }
+            
+            if (hasCommits && commits) {
+              releaseBody += '\n\n## Commits\n\n' + commits;
+              console.log('📝 Commits found (' + commits.split('\n').length + ' commits), will include in release body');
+            } else {
+              console.log('ℹ️  No commits found between tags');
             }
 
             try {
