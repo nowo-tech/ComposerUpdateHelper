@@ -18,6 +18,20 @@ This guide will help you upgrade Composer Update Helper to newer versions.
 
 ## Version-Specific Upgrade Notes
 
+### Upgrading to 2.0.20+
+
+#### Fixed
+- **Output alignment in dependency analysis section**: Fixed vertical alignment issue in the dependency conflict analysis output
+  - The "Filtered by dependency conflicts" and "Packages that passed dependency check" header lines now have consistent alignment
+  - Improved visual consistency across all output sections
+  - Better readability of dependency analysis results
+
+#### Migration Notes
+- **No action required**: This is a visual formatting fix with no functional changes
+
+#### Breaking Changes
+- None
+
 ### Upgrading to 2.0.19+ (Unreleased)
 
 #### Added
