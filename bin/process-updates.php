@@ -1640,12 +1640,8 @@ if ($checkDependencies) {
             error_log("DEBUG:   - Filtered dev packages: " . count($filteredByDependenciesDev));
             error_log("DEBUG:   - Packages with conflict info: " . count($filteredPackageConflicts));
         }
-        $filteredCount = count($filteredByDependenciesProd) + count($filteredByDependenciesDev);
-        // Use emoji number for count to make it more visually appealing
-        $numberEmojis = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'];
-        $countEmoji = ($filteredCount > 0 && $filteredCount <= 10) ? $numberEmojis[$filteredCount - 1] : "🔢";
         $msg = function_exists('t') ? t('filtered_by_conflicts', [], $detectedLang) : 'Filtered by dependency conflicts:';
-        $output[] = "  " . E_WARNING . " " . $countEmoji . " " . $msg;
+        $output[] = "  " . E_WARNING . " " . $msg;
         if ($debug) {
             error_log("DEBUG: i18n - Using translation for 'filtered_by_conflicts': " . $msg);
         }
@@ -1703,7 +1699,7 @@ if ($checkDependencies) {
     } else {
         $msg = function_exists('t') ? t('filtered_by_conflicts', [], $detectedLang) : 'Filtered by dependency conflicts:';
         $noneLabel = function_exists('t') ? t('none', [], $detectedLang) : LABEL_NONE;
-        $output[] = "  " . E_WARNING . "  " . $msg . " " . $noneLabel;
+        $output[] = "  " . E_WARNING . " " . $msg . " " . $noneLabel;
         if ($debug) {
             error_log("DEBUG: i18n - Using translation for 'filtered_by_conflicts' (none): " . $msg);
         }
