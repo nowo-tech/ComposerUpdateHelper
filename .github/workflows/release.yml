@@ -255,7 +255,6 @@ jobs:
                 body: releaseBody,
                 draft: false,
                 prerelease: isPrerelease,
-                make_latest: !isPrerelease,  // Explicitly mark as latest if not prerelease
                 generate_release_notes: false  // Don't generate auto notes, we have our own changelog
               });
               if (hasChangelog && changelogEntry) {
