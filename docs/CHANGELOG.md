@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.20] - 2026-01-11
+
+### Fixed
+- **Output alignment in dependency analysis section**: Fixed vertical alignment issue in the dependency conflict analysis output
+  - Removed emoji number indicator from "Filtered by dependency conflicts" header line to match the formatting of "Packages that passed dependency check" header
+  - Both header lines now have consistent alignment and indentation
+  - Fixed spacing inconsistency in the "none" variant of filtered packages message
+  - Output now displays correctly aligned sections for better readability
+
+### Migration Notes
+- **No action required**: This is a visual formatting fix that improves output readability
+- The functionality remains unchanged, only the visual presentation has been improved
+
+### Breaking Changes
+- None
+
 ## [2.0.19] - 2026-01-08
 
 ### Added
