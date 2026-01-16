@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.21] - 2026-01-15
+
+### Changed
+- **Improved dependency conflict messages**: Enhanced clarity of dependency conflict messages in the output
+  - Changed from: `(conflicts with 1 package: lexik/jwt-authentication-bundle (^1.2))`
+  - Changed to: `(conflicts with 1 package: lexik/jwt-authentication-bundle requires rector/rector ^1.2)`
+  - The new format explicitly shows which package requires which version constraint
+  - Makes it much clearer why a package update is being filtered
+  - Users can now easily understand what needs to be updated to resolve the conflict
+
+### Migration Notes
+- **No action required**: This is a documentation/UX improvement with no functional changes
+- The conflict detection logic remains the same, only the message format has been improved
+
+### Breaking Changes
+- None
+
 ## [2.0.20] - 2026-01-11
 
 ### Fixed
