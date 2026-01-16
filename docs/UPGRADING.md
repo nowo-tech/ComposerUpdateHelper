@@ -18,6 +18,21 @@ This guide will help you upgrade Composer Update Helper to newer versions.
 
 ## Version-Specific Upgrade Notes
 
+### Upgrading to 2.0.21+
+
+#### Changed
+- **Improved dependency conflict messages**: Enhanced clarity of dependency conflict messages
+  - Conflict messages now explicitly show which package requires which version constraint
+  - Example: Instead of `(conflicts with 1 package: lexik/jwt-authentication-bundle (^1.2))`, you'll now see `(conflicts with 1 package: lexik/jwt-authentication-bundle requires rector/rector ^1.2)`
+  - Makes it much easier to understand why a package update is being filtered and what needs to be updated
+
+#### Migration Notes
+- **No action required**: This is a UX improvement with no functional changes
+- The conflict detection logic remains the same, only the message format has been improved
+
+#### Breaking Changes
+- None
+
 ### Upgrading to 2.0.20+
 
 #### Fixed

@@ -1651,8 +1651,10 @@ if ($checkDependencies) {
             if (isset($filteredPackageConflicts[$pkg]) && !empty($filteredPackageConflicts[$pkg])) {
                 $conflictCount = count($filteredPackageConflicts[$pkg]);
                 $conflictList = [];
+                // Extract package name from pkg string (format: "package:version")
+                $pkgName = explode(':', $pkg)[0];
                 foreach ($filteredPackageConflicts[$pkg] as $depPkg => $constraint) {
-                    $conflictList[] = "{$depPkg} ({$constraint})";
+                    $conflictList[] = "{$depPkg} requires {$pkgName} {$constraint}";
                 }
                 $conflictInfo = " (conflicts with " . $conflictCount . " package" . ($conflictCount > 1 ? "s" : "") . ": " . implode(', ', $conflictList) . ")";
                 if ($debug) {
@@ -1669,8 +1671,10 @@ if ($checkDependencies) {
             if (isset($filteredPackageConflicts[$pkg]) && !empty($filteredPackageConflicts[$pkg])) {
                 $conflictCount = count($filteredPackageConflicts[$pkg]);
                 $conflictList = [];
+                // Extract package name from pkg string (format: "package:version")
+                $pkgName = explode(':', $pkg)[0];
                 foreach ($filteredPackageConflicts[$pkg] as $depPkg => $constraint) {
-                    $conflictList[] = "{$depPkg} ({$constraint})";
+                    $conflictList[] = "{$depPkg} requires {$pkgName} {$constraint}";
                 }
                 $conflictInfo = " (conflicts with " . $conflictCount . " package" . ($conflictCount > 1 ? "s" : "") . ": " . implode(', ', $conflictList) . ")";
                 if ($debug) {

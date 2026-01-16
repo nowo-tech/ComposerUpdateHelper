@@ -176,6 +176,8 @@ This will show:
 
 The `check-dependencies` option controls whether the tool performs detailed dependency compatibility checking before suggesting updates. This feature is production-ready and recommended for all users.
 
+> 📖 **For a comprehensive guide to all update scenarios, conflict detection, and use cases**, see [Update Cases and Scenarios](UPDATE_CASES.md).
+
 **When enabled (`check-dependencies: true`)** - Default:
 - The tool analyzes `composer.lock` to identify packages that depend on the package being updated
 - Verifies version constraints before suggesting updates to prevent conflicts

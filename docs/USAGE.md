@@ -150,6 +150,35 @@ The script automatically fetches release information from GitHub for outdated pa
 | `--run` | Executes suggested commands (can be combined with other options) |
 | `--help` or `-h` | Shows comprehensive usage information and examples |
 
+## Dependency Conflicts and Filtered Packages
+
+When dependency checking is enabled (default), the tool analyzes potential conflicts before suggesting updates. If a package update would conflict with existing dependencies, it will be filtered and shown in the output.
+
+**Example output with filtered packages:**
+
+```
+🔧 Análisis de verificación de dependencias:
+  📋 Todos los paquetes desactualizados (antes de la verificación de dependencias):
+     - doctrine/orm:3.6.1 (prod)
+     - phpdocumentor/reflection-docblock:6.0.0 (prod)
+
+  ⚠️  Filtrados por conflictos de dependencias:
+     - doctrine/orm:3.6.1 (prod) (conflicts with 1 package: symfonycasts/reset-password-bundle requires doctrine/orm ^2.13)
+     - phpdocumentor/reflection-docblock:6.0.0 (prod) (conflicts with 1 package: a2lix/auto-form-bundle requires phpdocumentor/reflection-docblock ^5.6)
+
+  ✅ Paquetes que pasaron la verificación de dependencias: (ninguno)
+```
+
+**Understanding the conflict message:**
+- The format `package-a requires package-b constraint` explicitly shows which package requires which version constraint
+- This helps you understand what needs to be updated to resolve the conflict
+- For example: `symfonycasts/reset-password-bundle requires doctrine/orm ^2.13` means that `symfonycasts/reset-password-bundle` requires `doctrine/orm` version 2.13.x, but you're trying to update to 3.6.1
+
+**Transitive dependency suggestions:**
+When conflicts are detected, the tool may suggest updating related packages together. See the [Dependency Compatibility Checking](CONFIGURATION.md#dependency-compatibility-checking) section for details.
+
+> 📖 **For a comprehensive guide to all update scenarios, conflict types, and how they are handled**, see [Update Cases and Scenarios](UPDATE_CASES.md). This document covers all 10+ supported cases, partially supported scenarios, and cases not yet implemented.
+
 ## Environment Variables
 
 | Variable | Description | Default |

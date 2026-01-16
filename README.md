@@ -173,6 +173,7 @@ All documentation is available in the [`docs/`](docs/) directory:
 - **[Usage Guide](docs/USAGE.md)** - Complete usage instructions and options
 - **[Configuration Guide](docs/CONFIGURATION.md)** - Configuration options and settings
 - **[Framework Support](docs/FRAMEWORKS.md)** - Framework version constraints and support
+- **[Update Cases and Scenarios](docs/UPDATE_CASES.md)** - Comprehensive guide to all supported update scenarios and use cases
 
 ### Project Documentation
 - **[CHANGELOG.md](docs/CHANGELOG.md)** - Version history and all notable changes
