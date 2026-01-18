@@ -31,6 +31,13 @@ return [
     'packages_passed_check' => 'निर्भरता जांच पास करने वाले पैकेज:',
     'none' => '(कोई नहीं)',
     'conflicts_with' => 'के साथ संघर्ष:',
+    'package_abandoned' => 'पैकेज परित्यक्त है',
+    'replaced_by' => 'द्वारा प्रतिस्थापित: %s',
+    'alternative_solutions' => 'वैकल्पिक समाधान:',
+    'compatible_with_conflicts' => 'संघर्ष निर्भरताओं के साथ संगत',
+    'alternative_packages' => 'वैकल्पिक पैकेज:',
+    'recommended_replacement' => 'अनुशंसित प्रतिस्थापन',
+    'similar_functionality' => 'समान कार्यक्षमता',
     
     // Debug messages
     'debug_show_release_info' => 'showReleaseInfo = %s',
@@ -52,5 +59,16 @@ return [
     'release_info' => 'रिलीज़ जानकारी',
     'release_changelog' => 'परिवर्तन लॉग',
     'release_view_on_github' => 'GitHub पर देखें',
+    
+    // Progress messages
+    'checking_dependency_conflicts' => '⏳ निर्भरता संघर्षों की जाँच कर रहा है...',
+    'checking_abandoned_packages' => '⏳ परित्यक्त पैकेजों की जाँच कर रहा है...',
+    'searching_fallback_versions' => '⏳ फ़ॉलबैक संस्करण खोज रहा है...',
+    'searching_alternative_packages' => '⏳ वैकल्पिक पैकेज खोज रहा है...',
+    'checking_maintainer_info' => '⏳ रखरखावकर्ता जानकारी की जाँच कर रहा है...',
+    
+    // Impact analysis
+    'impact_analysis' => 'प्रभाव विश्लेषण: {package} को {version} में अपडेट करने से प्रभावित होगा:',
+    'found_outdated_packages' => '%d पुराने पैकेज मिले',
 ];
 

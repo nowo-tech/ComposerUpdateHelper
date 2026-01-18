@@ -31,6 +31,13 @@ return [
     'packages_passed_check' => 'Gói đã vượt qua kiểm tra phụ thuộc:',
     'none' => '(không có)',
     'conflicts_with' => 'xung đột với:',
+    'package_abandoned' => 'Gói đã bị bỏ rơi',
+    'replaced_by' => 'được thay thế bởi: %s',
+    'alternative_solutions' => 'Giải pháp thay thế:',
+    'compatible_with_conflicts' => 'tương thích với các phụ thuộc xung đột',
+    'alternative_packages' => 'Gói thay thế:',
+    'recommended_replacement' => 'thay thế được khuyến nghị',
+    'similar_functionality' => 'chức năng tương tự',
     
     // Debug messages
     'debug_show_release_info' => 'showReleaseInfo = %s',
@@ -52,5 +59,16 @@ return [
     'release_info' => 'Thông tin phiên bản',
     'release_changelog' => 'Nhật ký thay đổi',
     'release_view_on_github' => 'Xem trên GitHub',
+    
+    // Progress messages
+    'checking_dependency_conflicts' => '⏳ Đang kiểm tra xung đột phụ thuộc...',
+    'checking_abandoned_packages' => '⏳ Đang kiểm tra các gói bị bỏ hoang...',
+    'searching_fallback_versions' => '⏳ Đang tìm kiếm phiên bản dự phòng...',
+    'searching_alternative_packages' => '⏳ Đang tìm kiếm các gói thay thế...',
+    'checking_maintainer_info' => '⏳ Đang kiểm tra thông tin người bảo trì...',
+    
+    // Impact analysis
+    'impact_analysis' => 'Phân tích tác động: Cập nhật {package} lên {version} sẽ ảnh hưởng đến:',
+    'found_outdated_packages' => 'Tìm thấy %d gói lỗi thời',
 ];
 

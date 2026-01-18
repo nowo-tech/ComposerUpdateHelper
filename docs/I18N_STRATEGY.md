@@ -24,10 +24,9 @@ bin/
 ### In `generate-composer-require.yaml`:
 ```yaml
 # Language for output messages
-# Supported: en, es, pt, it, fr, de
+# Supported: 31 languages (see CONFIGURATION.md for complete list)
 # If not set, will auto-detect from system (LANG, LC_ALL, LC_MESSAGES)
 # Default: en (English)
-# ⚠️  WARNING: i18n feature is currently in DEVELOPMENT MODE
 language: es
 ```
 

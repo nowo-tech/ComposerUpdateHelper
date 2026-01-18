@@ -31,6 +31,13 @@ return [
     'packages_passed_check' => 'Packages that passed dependency check:',
     'none' => '(none)',
     'conflicts_with' => 'conflicts with:',
+    'package_abandoned' => 'Package is abandoned',
+    'replaced_by' => 'replaced by: %s',
+    'alternative_solutions' => 'Alternative solutions:',
+    'compatible_with_conflicts' => 'compatible with conflicting dependencies',
+    'alternative_packages' => 'Alternative packages:',
+    'recommended_replacement' => 'recommended replacement',
+    'similar_functionality' => 'similar functionality',
     
     // Debug messages
     'debug_show_release_info' => 'showReleaseInfo = %s',
@@ -52,5 +59,18 @@ return [
     'release_info' => 'Release Information',
     'release_changelog' => 'Changelog',
     'release_view_on_github' => 'View on GitHub',
+    
+    // Progress messages
+    'checking_dependency_conflicts' => '⏳ Checking dependency conflicts...',
+    'checking_abandoned_packages' => '⏳ Checking for abandoned packages...',
+    'searching_fallback_versions' => '⏳ Searching for fallback versions...',
+    'searching_alternative_packages' => '⏳ Searching for alternative packages...',
+    'checking_maintainer_info' => '⏳ Checking maintainer information...',
+    
+    // Impact analysis
+    'impact_analysis' => 'Impact analysis: Updating {package} to {version} would affect:',
+    
+    // Package count
+    'found_outdated_packages' => 'Found %d outdated package(s)',
 ];
 

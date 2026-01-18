@@ -31,6 +31,13 @@ return [
     'packages_passed_check' => 'A függőség ellenőrzést átlépő csomagok:',
     'none' => '(nincs)',
     'conflicts_with' => 'konfliktus:',
+    'package_abandoned' => 'A csomag elhagyott',
+    'replaced_by' => 'lecserélve: %s',
+    'alternative_solutions' => 'Alternatív megoldások:',
+    'compatible_with_conflicts' => 'kompatibilis konfliktusos függőségekkel',
+    'alternative_packages' => 'Alternatív csomagok:',
+    'recommended_replacement' => 'ajánlott csere',
+    'similar_functionality' => 'hasonló funkcionalitás',
     
     // Debug messages
     'debug_show_release_info' => 'showReleaseInfo = %s',
@@ -52,5 +59,16 @@ return [
     'release_info' => 'Kiadás Információ',
     'release_changelog' => 'Változásnapló',
     'release_view_on_github' => 'Megtekintés a GitHubon',
+    
+    // Progress messages
+    'checking_dependency_conflicts' => '⏳ Függőségi konfliktusok ellenőrzése...',
+    'checking_abandoned_packages' => '⏳ Elhagyott csomagok ellenőrzése...',
+    'searching_fallback_versions' => '⏳ Tartalék verziók keresése...',
+    'searching_alternative_packages' => '⏳ Alternatív csomagok keresése...',
+    'checking_maintainer_info' => '⏳ Karbantartói információk ellenőrzése...',
+    
+    // Impact analysis
+    'impact_analysis' => 'Hatáselemzés: A {package} frissítése {version} verzióra befolyásolná:',
+    'found_outdated_packages' => '%d elavult csomag található',
 ];
 

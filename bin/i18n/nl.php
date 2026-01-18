@@ -31,6 +31,13 @@ return [
     'packages_passed_check' => 'Pakketten die de afhankelijkheidscontrole hebben doorstaan:',
     'none' => '(geen)',
     'conflicts_with' => 'conflicteert met:',
+    'package_abandoned' => 'Pakket is verlaten',
+    'replaced_by' => 'vervangen door: %s',
+    'alternative_solutions' => 'Alternatieve oplossingen:',
+    'compatible_with_conflicts' => 'compatibel met conflicterende afhankelijkheden',
+    'alternative_packages' => 'Alternatieve pakketten:',
+    'recommended_replacement' => 'aanbevolen vervanging',
+    'similar_functionality' => 'vergelijkbare functionaliteit',
     
     // Debug messages
     'debug_show_release_info' => 'showReleaseInfo = %s',
@@ -52,5 +59,16 @@ return [
     'release_info' => 'Versie Informatie',
     'release_changelog' => 'Wijzigingslogboek',
     'release_view_on_github' => 'Bekijk op GitHub',
+    
+    // Progress messages
+    'checking_dependency_conflicts' => '⏳ Controleren van afhankelijkheidsconflicten...',
+    'checking_abandoned_packages' => '⏳ Controleren op verlaten pakketten...',
+    'searching_fallback_versions' => '⏳ Zoeken naar fallback-versies...',
+    'searching_alternative_packages' => '⏳ Zoeken naar alternatieve pakketten...',
+    'checking_maintainer_info' => '⏳ Controleren van maintainer-informatie...',
+    
+    // Impact analysis
+    'impact_analysis' => 'Impactanalyse: Bijwerken van {package} naar {version} zou beïnvloeden:',
+    'found_outdated_packages' => '%d verouderde pakket(ten) gevonden',
 ];
 

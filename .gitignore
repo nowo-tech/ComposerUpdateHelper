@@ -32,3 +32,5 @@ coverage.xml
 .env.local
 .env.*.local
 
+# Impact analysis output
+composer-update-impact.txt

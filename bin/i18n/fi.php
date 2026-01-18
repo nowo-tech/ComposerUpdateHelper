@@ -31,6 +31,13 @@ return [
     'packages_passed_check' => 'Paketit, jotka läpäisivät riippuvuustarkistuksen:',
     'none' => '(ei mitään)',
     'conflicts_with' => 'konfliktoi:',
+    'package_abandoned' => 'Paketti on hylätty',
+    'replaced_by' => 'korvattu: %s',
+    'alternative_solutions' => 'Vaihtoehtoiset ratkaisut:',
+    'compatible_with_conflicts' => 'yhteensopiva ristiriitaisten riippuvuuksien kanssa',
+    'alternative_packages' => 'Vaihtoehtoiset paketit:',
+    'recommended_replacement' => 'suositeltu korvaava',
+    'similar_functionality' => 'samankaltainen toiminnallisuus',
     
     // Debug messages
     'debug_show_release_info' => 'showReleaseInfo = %s',
@@ -52,5 +59,16 @@ return [
     'release_info' => 'Versiotiedot',
     'release_changelog' => 'Muutosloki',
     'release_view_on_github' => 'Näytä GitHubissa',
+    
+    // Progress messages
+    'checking_dependency_conflicts' => '⏳ Tarkistetaan riippuvuuskonflikteja...',
+    'checking_abandoned_packages' => '⏳ Tarkistetaan hylättyjä paketteja...',
+    'searching_fallback_versions' => '⏳ Etsitään varaversioita...',
+    'searching_alternative_packages' => '⏳ Etsitään vaihtoehtoisia paketteja...',
+    'checking_maintainer_info' => '⏳ Tarkistetaan ylläpitäjätietoja...',
+    
+    // Impact analysis
+    'impact_analysis' => 'Vaikutusanalyysi: {package} päivittäminen versioon {version} vaikuttaisi:',
+    'found_outdated_packages' => 'Löydettiin %d vanhentunutta pakettia',
 ];
 

@@ -26,10 +26,10 @@ Edit `generate-composer-require.yaml` (or `.yml`) to configure which packages to
 check-dependencies: true
 
 # Language for output messages
-# Supported: en (English), es (Spanish), pt (Portuguese), it (Italian), fr (French), de (German), pl (Polish), ru (Russian), ro (Romanian), el (Greek), da (Danish)
+# Supported: 31 languages (en, es, pt, it, fr, de, pl, ru, ro, el, da, nl, cs, sv, no, fi, tr, zh, ja, ko, ar, hu, sk, uk, hr, bg, he, hi, vi, id, th)
+# See USAGE.md for complete list with country flags
 # If not set, will auto-detect from system (LANG, LC_ALL, LC_MESSAGES)
 # Default: en (English)
-# ⚠️  WARNING: i18n feature is currently in DEVELOPMENT MODE
 #language: es
 
 # List of packages to ignore during update
@@ -176,6 +176,12 @@ This will show:
 
 The `check-dependencies` option controls whether the tool performs detailed dependency compatibility checking before suggesting updates. This feature is production-ready and recommended for all users.
 
+**Automatic features enabled when `check-dependencies: true`:**
+- ✅ **Abandoned Package Detection**: Automatically detects abandoned packages via Packagist API and shows warnings with replacement suggestions
+- ✅ **Fallback Version Suggestions**: Automatically searches for compatible older versions when conflicts are detected
+
+These features require no additional configuration and work automatically. See [Usage Guide - Dependency Conflicts](USAGE.md#dependency-conflicts-and-filtered-packages) for output examples.
+
 > 📖 **For a comprehensive guide to all update scenarios, conflict detection, and use cases**, see [Update Cases and Scenarios](UPDATE_CASES.md).
 
 **When enabled (`check-dependencies: true`)** - Default:
@@ -187,11 +193,16 @@ The `check-dependencies` option controls whether the tool performs detailed depe
   - Detects when a package requires a newer version of a transitive dependency (e.g., `spomky-labs/otphp:^11.4` when `11.3.0` is installed)
   - Detects `self.version` constraints (e.g., `scheb/2fa-email` requiring `scheb/2fa-bundle: self.version`)
   - Generates commands that include both transitive dependencies and filtered packages together
+- **Automatically detects abandoned packages** when conflicts occur (see [Usage Guide](USAGE.md#dependency-conflicts-and-filtered-packages) for output examples)
+- **Automatically suggests fallback versions** when conflicts are detected (see [Usage Guide](USAGE.md#dependency-conflicts-and-filtered-packages) for output examples)
 - Shows a detailed analysis section in the output with:
   - All outdated packages (before dependency check)
   - Packages filtered by dependency conflicts
+  - Alternative solutions (fallback versions) when available
   - Suggested transitive dependency updates to resolve conflicts
   - Packages that passed dependency check
+
+For detailed output examples including abandoned package warnings and fallback version suggestions, see [Usage Guide - Dependency Conflicts](USAGE.md#dependency-conflicts-and-filtered-packages).
 
 **When disabled (`check-dependencies: false`)**:
 - The tool suggests all available updates without checking dependency compatibility
@@ -199,30 +210,7 @@ The `check-dependencies` option controls whether the tool performs detailed depe
 - May suggest incompatible updates that could cause conflicts
 - Useful when you want to see all available updates regardless of compatibility
 
-**Example output when `check-dependencies: true`:**
-
-```
-🔧  Dependency checking analysis:
-  📋 All outdated packages (before dependency check):
-     - aws/aws-sdk-php:3.369.6 (prod)
-     - nelmio/api-doc-bundle:5.9.0 (prod)
-     - scheb/2fa-google-authenticator:8.2.0 (prod)
-
-  ⚠️  Filtered by dependency conflicts:
-     - scheb/2fa-google-authenticator:8.2.0 (prod)
-
-  💡 Suggested transitive dependency updates to resolve conflicts:
-     - scheb/2fa-bundle:8.2.0 (installed: 8.1.0, required by: scheb/2fa-email:8.2.0, scheb/2fa-google-authenticator:8.2.0)
-     - spomky-labs/otphp:11.4.1 (installed: 11.3.0, required by: scheb/2fa-google-authenticator:8.2.0)
-
-  ✅ Packages that passed dependency check:
-     - aws/aws-sdk-php:3.369.6 (prod)
-     - nelmio/api-doc-bundle:5.9.0 (prod)
-
-🔧  Suggested commands to resolve dependency conflicts:
-  (Update these transitive dependencies first, then retry updating the filtered packages)
-  composer require --with-all-dependencies scheb/2fa-bundle:8.2.0 spomky-labs/otphp:11.4.1 scheb/2fa-email:8.2.0 scheb/2fa-google-authenticator:8.2.0 scheb/2fa-totp:8.2.0
-```
+For example output with dependency conflicts, abandoned package warnings, and fallback version suggestions, see [Usage Guide - Dependency Conflicts](USAGE.md#dependency-conflicts-and-filtered-packages).
 
 **To disable dependency checking:**
 

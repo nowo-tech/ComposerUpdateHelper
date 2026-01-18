@@ -31,6 +31,13 @@ return [
     'packages_passed_check' => 'الحزم التي اجتازت فحص التبعيات:',
     'none' => '(لا شيء)',
     'conflicts_with' => 'يتعارض مع:',
+    'package_abandoned' => 'الحزمة مهجورة',
+    'replaced_by' => 'استبدلت بـ: %s',
+    'alternative_solutions' => 'حلول بديلة:',
+    'compatible_with_conflicts' => 'متوافق مع التبعيات المتعارضة',
+    'alternative_packages' => 'الحزم البديلة:',
+    'recommended_replacement' => 'استبدال موصى به',
+    'similar_functionality' => 'وظائف مماثلة',
     
     // Debug messages
     'debug_show_release_info' => 'showReleaseInfo = %s',
@@ -52,5 +59,16 @@ return [
     'release_info' => 'معلومات الإصدار',
     'release_changelog' => 'سجل التغييرات',
     'release_view_on_github' => 'عرض على GitHub',
+    
+    // Progress messages
+    'checking_dependency_conflicts' => '⏳ التحقق من تعارضات التبعيات...',
+    'checking_abandoned_packages' => '⏳ التحقق من الحزم المهجورة...',
+    'searching_fallback_versions' => '⏳ البحث عن إصدارات احتياطية...',
+    'searching_alternative_packages' => '⏳ البحث عن حزم بديلة...',
+    'checking_maintainer_info' => '⏳ التحقق من معلومات المطور...',
+    
+    // Impact analysis
+    'impact_analysis' => 'تحليل التأثير: تحديث {package} إلى {version} سيؤثر على:',
+    'found_outdated_packages' => 'تم العثور على %d حزمة قديمة',
 ];
 

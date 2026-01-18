@@ -18,7 +18,51 @@ This guide will help you upgrade Composer Update Helper to newer versions.
 
 ## Version-Specific Upgrade Notes
 
+### Upgrading to 2.0.22+ (Unreleased)
+
+#### What's New
+This release adds several new features to help resolve dependency conflicts and provide better guidance when automatic solutions aren't available. See [CHANGELOG.md](CHANGELOG.md#unreleased) for complete details.
+
+**New Features:**
+- **Conflict Impact Analysis**: Analyzes which packages would be affected when updating conflicting packages
+  - Shows direct and transitive affected packages
+  - **Optional feature**: Use `--show-impact` or `--impact` flag to enable (disabled by default to reduce verbosity)
+  - **Save to file**: Use `--save-impact` flag to save analysis to `composer-update-impact.txt` (automatically added to `.gitignore`)
+  - Provides complete dependency chain visualization
+- **Outdated packages count**: Shows summary of total outdated packages found
+  - Displays: `✅ Found X outdated package(s)`
+  - Automatically shown when packages are found
+- **Abandoned Package Detection**: Automatically detects and warns about abandoned packages
+- **Fallback Version Suggestions**: Suggests compatible older versions when conflicts are detected
+- **Alternative Package Suggestions**: Suggests alternative packages when updates are blocked
+- **Maintainer Contact Suggestions**: Provides maintainer contact information when manual intervention is needed
+- **Modular Architecture**: Refactored code into modular classes for better maintainability
+
+#### Migration Notes
+- **No action required**: These are new features that enhance existing conflict detection
+- All new features are automatic and require no configuration (except impact analysis which requires `--show-impact` flag)
+- Abandoned package detection, fallback suggestions, and alternative packages appear automatically when conflicts are detected
+- **Impact analysis is optional**: By default, impact analysis is disabled to reduce output verbosity. Use `--show-impact` flag if you need detailed impact information
+- **Save impact to file**: Use `--save-impact` flag to save impact analysis to a text file for later review or documentation. The file `composer-update-impact.txt` is automatically added to `.gitignore`
+
+#### Breaking Changes
+- None
+
+> **Note**: For detailed information about all changes, see [CHANGELOG.md](CHANGELOG.md#unreleased).
+
 ### Upgrading to 2.0.21+
+
+#### Added
+- **Update Cases and Scenarios documentation**: New comprehensive documentation explaining all update scenarios
+  - Complete guide to all supported cases (see [UPDATE_CASES.md](UPDATE_CASES.md) for current count)
+  - Documentation of partially supported and not-yet-supported scenarios
+  - Manual intervention guidance for contacting package maintainers
+- **Implementation Roadmap**: Detailed action plan for implementing not-yet-supported features
+  - Prioritized implementation plan ordered by complexity and feasibility
+  - Complete timeline and effort estimates for future features
+  - Translation requirements for all 31 supported languages
+
+> **Note**: The number of fully supported cases has increased to 13 in version 2.0.22+ with the addition of Abandoned Package Detection, Alternative Package Suggestions, and Maintainer Contact Suggestions.
 
 #### Changed
 - **Improved dependency conflict messages**: Enhanced clarity of dependency conflict messages
@@ -75,7 +119,7 @@ This guide will help you upgrade Composer Update Helper to newer versions.
   - Enhanced conflict information: now shows the number of packages with conflicts (e.g., "conflicts with 1 package" or "conflicts with 2 packages")
   - Better visual formatting for dependency conflict analysis section
 - **Documentation enhancements**: Improved visual presentation of language support
-  - Added country flag emojis to all language listings in documentation (README.md, CHANGELOG.md, UPGRADING.md, LANGUAGES_PROPOSAL.md)
+  - Added country flag emojis to all language listings in documentation (README.md, CHANGELOG.md, UPGRADING.md, CONFIGURATION.md)
   - Languages with multiple countries now display all relevant flags (e.g., English 🇬🇧 🇺🇸 🇨🇦 🇦🇺, Spanish 🇪🇸 🇲🇽 🇦🇷 🇨🇴)
   - Makes language selection more intuitive and visually appealing
   - All 31 languages are now fully implemented and documented with their respective flags
@@ -376,7 +420,7 @@ This guide will help you upgrade Composer Update Helper to newer versions.
 ### Upgrading to 2.0.6+
 
 #### Added
-- **Verification documentation**: New `docs/VERIFICATION.md` file with complete verification documentation
+- **Verification**: Complete verification of YAML include/ignore functionality
 - **Utility scripts**: New utility scripts in `tests/` directory for development and testing
 
 #### Changed

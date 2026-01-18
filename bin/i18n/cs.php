@@ -31,6 +31,13 @@ return [
     'packages_passed_check' => 'Balíčky, které prošly kontrolou závislostí:',
     'none' => '(žádné)',
     'conflicts_with' => 'konfliktuje s:',
+    'package_abandoned' => 'Balíček je opuštěn',
+    'replaced_by' => 'nahrazen: %s',
+    'alternative_solutions' => 'Alternativní řešení:',
+    'compatible_with_conflicts' => 'kompatibilní s konfliktními závislostmi',
+    'alternative_packages' => 'Alternativní balíčky:',
+    'recommended_replacement' => 'doporučená náhrada',
+    'similar_functionality' => 'podobná funkcionalita',
     
     // Debug messages
     'debug_show_release_info' => 'showReleaseInfo = %s',
@@ -52,5 +59,16 @@ return [
     'release_info' => 'Informace o verzi',
     'release_changelog' => 'Seznam změn',
     'release_view_on_github' => 'Zobrazit na GitHubu',
+    
+    // Progress messages
+    'checking_dependency_conflicts' => '⏳ Kontrola konfliktů závislostí...',
+    'checking_abandoned_packages' => '⏳ Kontrola opuštěných balíčků...',
+    'searching_fallback_versions' => '⏳ Vyhledávání záložních verzí...',
+    'searching_alternative_packages' => '⏳ Vyhledávání alternativních balíčků...',
+    'checking_maintainer_info' => '⏳ Kontrola informací o správci...',
+    
+    // Impact analysis
+    'impact_analysis' => 'Analýza dopadu: Aktualizace {package} na {version} by ovlivnila:',
+    'found_outdated_packages' => 'Nalezeno %d zastaralých balíčků',
 ];
 

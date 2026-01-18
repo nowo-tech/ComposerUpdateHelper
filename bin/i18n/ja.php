@@ -31,6 +31,13 @@ return [
     'packages_passed_check' => '依存関係チェックを通過したパッケージ:',
     'none' => '(なし)',
     'conflicts_with' => 'と競合:',
+    'package_abandoned' => 'パッケージは放棄されました',
+    'replaced_by' => '置き換え: %s',
+    'alternative_solutions' => '代替ソリューション:',
+    'compatible_with_conflicts' => '競合する依存関係と互換性あり',
+    'alternative_packages' => '代替パッケージ:',
+    'recommended_replacement' => '推奨される置き換え',
+    'similar_functionality' => '類似機能',
     
     // Debug messages
     'debug_show_release_info' => 'showReleaseInfo = %s',
@@ -52,5 +59,16 @@ return [
     'release_info' => 'リリース情報',
     'release_changelog' => '変更ログ',
     'release_view_on_github' => 'GitHub で表示',
+    
+    // Progress messages
+    'checking_dependency_conflicts' => '⏳ 依存関係の競合を確認中...',
+    'checking_abandoned_packages' => '⏳ 廃止されたパッケージを確認中...',
+    'searching_fallback_versions' => '⏳ フォールバックバージョンを検索中...',
+    'searching_alternative_packages' => '⏳ 代替パッケージを検索中...',
+    'checking_maintainer_info' => '⏳ メンテナ情報を確認中...',
+    
+    // Impact analysis
+    'impact_analysis' => '影響分析：{package} を {version} に更新すると、以下に影響します：',
+    'found_outdated_packages' => '%d 個の古いパッケージが見つかりました',
 ];
 

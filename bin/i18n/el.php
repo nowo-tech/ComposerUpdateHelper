@@ -31,6 +31,13 @@ return [
     'packages_passed_check' => 'Πακέτα που πέρασαν τον έλεγχο εξαρτήσεων:',
     'none' => '(κανένα)',
     'conflicts_with' => 'σύγκρουση με:',
+    'package_abandoned' => 'Το πακέτο έχει εγκαταλειφθεί',
+    'replaced_by' => 'αντικαταστάθηκε από: %s',
+    'alternative_solutions' => 'Εναλλακτικές λύσεις:',
+    'compatible_with_conflicts' => 'συμβατό με συγκρουόμενες εξαρτήσεις',
+    'alternative_packages' => 'Εναλλακτικά πακέτα:',
+    'recommended_replacement' => 'συνιστώμενη αντικατάσταση',
+    'similar_functionality' => 'παρόμοια λειτουργικότητα',
     
     // Debug messages
     'debug_show_release_info' => 'showReleaseInfo = %s',
@@ -52,5 +59,16 @@ return [
     'release_info' => 'Πληροφορίες Έκδοσης',
     'release_changelog' => 'Αρχείο Αλλαγών',
     'release_view_on_github' => 'Προβολή στο GitHub',
+    
+    // Progress messages
+    'checking_dependency_conflicts' => '⏳ Έλεγχος συγκρούσεων εξαρτήσεων...',
+    'checking_abandoned_packages' => '⏳ Έλεγχος εγκαταλελειμμένων πακέτων...',
+    'searching_fallback_versions' => '⏳ Αναζήτηση εφεδρικών εκδόσεων...',
+    'searching_alternative_packages' => '⏳ Αναζήτηση εναλλακτικών πακέτων...',
+    'checking_maintainer_info' => '⏳ Έλεγχος πληροφοριών συντηρητή...',
+    
+    // Impact analysis
+    'impact_analysis' => 'Ανάλυση αντίκτυπου: Η ενημέρωση του {package} στην {version} θα επηρέαζε:',
+    'found_outdated_packages' => 'Βρέθηκαν %d ξεπερασμένα πακέτα',
 ];
 

@@ -120,7 +120,11 @@ You can combine options:
 ./generate-composer-require.sh --run                    # Execute (no release info by default)
 ./generate-composer-require.sh --run --release-info     # Execute with release info
 ./generate-composer-require.sh --run --release-detail   # Execute with full changelog
+./generate-composer-require.sh --show-impact            # Show impact analysis for conflicts
+./generate-composer-require.sh --save-impact            # Save impact analysis to file
 ./generate-composer-require.sh --verbose --release-info # Verbose with release info
+./generate-composer-require.sh --show-impact --verbose  # Impact analysis with verbose output
+./generate-composer-require.sh --save-impact --verbose  # Save impact to file with verbose output
 ./generate-composer-require.sh --debug                  # Debug mode (very detailed)
 ```
 
@@ -145,6 +149,8 @@ The script automatically fetches release information from GitHub for outdated pa
 | `--release-info` | Shows summary: package name, release link, changelog link |
 | `--release-detail` | Shows full release details including complete changelog |
 | `--no-release-info` | Explicitly skips all release information (default behavior) |
+| `--show-impact`, `--impact` | Shows impact analysis for conflicting packages (disabled by default) |
+| `--save-impact` | Saves impact analysis to `composer-update-impact.txt` file (implies --show-impact, automatically added to `.gitignore`) |
 | `-v, --verbose` | Shows detailed information about configuration files and packages |
 | `--debug` | Shows very detailed debug information (includes verbose mode) |
 | `--run` | Executes suggested commands (can be combined with other options) |
@@ -157,27 +163,50 @@ When dependency checking is enabled (default), the tool analyzes potential confl
 **Example output with filtered packages:**
 
 ```
-🔧 Análisis de verificación de dependencias:
-  📋 Todos los paquetes desactualizados (antes de la verificación de dependencias):
+🔧  Dependency checking analysis:
+  📋 All outdated packages (before dependency check):
      - doctrine/orm:3.6.1 (prod)
      - phpdocumentor/reflection-docblock:6.0.0 (prod)
+     - abandoned/package:2.0.0 (prod)
 
-  ⚠️  Filtrados por conflictos de dependencias:
+  ⚠️  Filtered by dependency conflicts:
      - doctrine/orm:3.6.1 (prod) (conflicts with 1 package: symfonycasts/reset-password-bundle requires doctrine/orm ^2.13)
      - phpdocumentor/reflection-docblock:6.0.0 (prod) (conflicts with 1 package: a2lix/auto-form-bundle requires phpdocumentor/reflection-docblock ^5.6)
+     - abandoned/package:2.0.0 (prod) (conflicts with 1 package: dependency-x requires abandoned/package ^1.5) (⚠️ Package is abandoned, replaced by: new-package/name)
 
-  ✅ Paquetes que pasaron la verificación de dependencias: (ninguno)
+  💡 Alternative solutions:
+     - package-a:1.9.5 (compatible with conflicting dependencies)
+
+  💡 Suggested transitive dependency updates to resolve conflicts:
+     - scheb/2fa-bundle:8.2.0 (installed: 8.1.0, required by: scheb/2fa-email:8.2.0)
+
+  ✅ Packages that passed dependency check: (none)
 ```
 
-**Understanding the conflict message:**
-- The format `package-a requires package-b constraint` explicitly shows which package requires which version constraint
-- This helps you understand what needs to be updated to resolve the conflict
-- For example: `symfonycasts/reset-password-bundle requires doctrine/orm ^2.13` means that `symfonycasts/reset-password-bundle` requires `doctrine/orm` version 2.13.x, but you're trying to update to 3.6.1
+**Understanding the output:**
 
-**Transitive dependency suggestions:**
-When conflicts are detected, the tool may suggest updating related packages together. See the [Dependency Compatibility Checking](CONFIGURATION.md#dependency-compatibility-checking) section for details.
+1. **Conflict messages**: The format `package-a requires package-b constraint` shows which package requires which version constraint. For example: `symfonycasts/reset-password-bundle requires doctrine/orm ^2.13` means that package requires `doctrine/orm` version 2.13.x, but you're trying to update to 3.6.1.
 
-> 📖 **For a comprehensive guide to all update scenarios, conflict types, and how they are handled**, see [Update Cases and Scenarios](UPDATE_CASES.md). This document covers all 10+ supported cases, partially supported scenarios, and cases not yet implemented.
+2. **Abandoned package warnings**: When a filtered package is abandoned, a warning is shown with the replacement package (if available). Example: `(⚠️ Package is abandoned, replaced by: new-package/name)`
+
+3. **Alternative solutions**: When fallback versions are found, they are shown as "Alternative solutions" with compatible versions that satisfy conflicting dependencies. Example: `💡 Alternative solutions: - package-a:1.9.5 (compatible with conflicting dependencies)`
+
+4. **Transitive dependency suggestions**: When conflicts are detected, the tool may suggest updating related packages together. See the [Configuration Guide - Dependency Compatibility Checking](CONFIGURATION.md#dependency-compatibility-checking) for details.
+
+5. **Impact analysis** (optional, use `--show-impact` flag): When enabled, shows which packages would be affected by updating conflicting packages. This includes:
+   - Direct affected packages: Packages that directly depend on the conflicting package
+   - Transitive affected packages: Packages that depend on directly affected packages
+   - Example output:
+     ```
+     📊 Impact analysis: Updating package-a to 2.0 would affect:
+        - dependent-package-1 (requires package-a:^1.5)
+        - dependent-package-2 (requires package-a:^1.5)
+        - transitive-package-1 (transitively depends on affected packages)
+     ```
+   - **Note**: Impact analysis is disabled by default to reduce output verbosity. Use `--show-impact` or `--impact` to enable it.
+   - **Save to file**: Use `--save-impact` flag to save the impact analysis to `composer-update-impact.txt` file for later review or documentation. The file is automatically added to `.gitignore` to prevent accidental commits.
+
+> 📖 **For a comprehensive guide to all update scenarios, conflict types, and how they are handled**, see [Update Cases and Scenarios](UPDATE_CASES.md). This document covers all 14+ supported cases, partially supported scenarios, and cases not yet implemented.
 
 ## Environment Variables
 

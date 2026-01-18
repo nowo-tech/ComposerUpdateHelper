@@ -62,7 +62,7 @@ The script uses a lightweight architecture for better maintainability:
   - Displaying formatted output from PHP
   - Extracting and executing commands for `--run` flag
 
-- **`process-updates.php`** (in vendor): Contains all the complex logic (~710 lines) including:
+- **`process-updates.php`** (in vendor): Contains all the complex logic (~643 lines) including:
   - Package processing and filtering
   - Framework detection and version constraints
   - Release information fetching
@@ -178,12 +178,12 @@ All documentation is available in the [`docs/`](docs/) directory:
 ### Project Documentation
 - **[CHANGELOG.md](docs/CHANGELOG.md)** - Version history and all notable changes
 - **[UPGRADING.md](docs/UPGRADING.md)** - Upgrade instructions and migration notes
+- **[Testing Documentation](docs/TESTING.md)** - Comprehensive testing guide including tests for new features
+- **[Implementation Roadmap](docs/IMPLEMENTATION_ROADMAP.md)** - Action plan for implementing not-yet-supported features, ordered by complexity and feasibility
 - **[Development Guide](docs/DEVELOPMENT.md)** - Development setup, testing, and CI/CD
 - **[CONTRIBUTING.md](docs/CONTRIBUTING.md)** - Guidelines for contributing to the project
 - **[BRANCHING.md](docs/BRANCHING.md)** - Branching strategy and workflow
 - **[I18N_STRATEGY.md](docs/I18N_STRATEGY.md)** - Internationalization (i18n) implementation strategy
-- **[LANGUAGES_PROPOSAL.md](docs/LANGUAGES_PROPOSAL.md)** - Additional languages proposal for future implementation
-- **[VERIFICATION.md](docs/VERIFICATION.md)** - Verification and testing documentation
 
 ## Contributing
 

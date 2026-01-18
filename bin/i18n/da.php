@@ -31,6 +31,13 @@ return [
     'packages_passed_check' => 'Pakker, der bestod afhængighedstjekket:',
     'none' => '(ingen)',
     'conflicts_with' => 'konflikt med:',
+    'package_abandoned' => 'Pakken er forladt',
+    'replaced_by' => 'erstattet af: %s',
+    'alternative_solutions' => 'Alternative løsninger:',
+    'compatible_with_conflicts' => 'kompatibel med konflikterende afhængigheder',
+    'alternative_packages' => 'Alternative pakker:',
+    'recommended_replacement' => 'anbefalet erstatning',
+    'similar_functionality' => 'lignende funktionalitet',
     
     // Debug messages
     'debug_show_release_info' => 'showReleaseInfo = %s',
@@ -52,5 +59,16 @@ return [
     'release_info' => 'Versionsinformation',
     'release_changelog' => 'Ændringslog',
     'release_view_on_github' => 'Se på GitHub',
+    
+    // Progress messages
+    'checking_dependency_conflicts' => '⏳ Tjekker afhængighedskonflikter...',
+    'checking_abandoned_packages' => '⏳ Tjekker forladte pakker...',
+    'searching_fallback_versions' => '⏳ Søger efter fallback-versioner...',
+    'searching_alternative_packages' => '⏳ Søger efter alternative pakker...',
+    'checking_maintainer_info' => '⏳ Tjekker maintainer-information...',
+    
+    // Impact analysis
+    'impact_analysis' => 'Påvirkningsanalyse: Opdatering af {package} til {version} ville påvirke:',
+    'found_outdated_packages' => 'Fundet %d forældede pakker',
 ];
 

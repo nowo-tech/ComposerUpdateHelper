@@ -86,21 +86,21 @@ final class ScriptTest extends TestCase
 
     public function testScriptSupportsMultipleFrameworks(): void
     {
-        // Framework logic is now in process-updates.php, not in the script
-        // This test verifies the PHP processor contains framework support
-        $processorPath = dirname(__DIR__) . '/bin/process-updates.php';
+        // Framework logic is now in FrameworkDetector class, not directly in process-updates.php
+        // This test verifies the FrameworkDetector class contains framework support
+        $frameworkDetectorPath = dirname(__DIR__) . '/bin/lib/FrameworkDetector.php';
 
-        if (!file_exists($processorPath)) {
-            $this->markTestSkipped('Processor PHP file does not exist');
+        if (!file_exists($frameworkDetectorPath)) {
+            $this->markTestSkipped('FrameworkDetector PHP file does not exist');
         }
 
-        $content = file_get_contents($processorPath);
+        $content = file_get_contents($frameworkDetectorPath);
 
         if ($content === false) {
-            $this->markTestSkipped('Could not read processor PHP file');
+            $this->markTestSkipped('Could not read FrameworkDetector PHP file');
         }
 
-        // Check for framework configurations in PHP processor
+        // Check for framework configurations in FrameworkDetector class
         $this->assertStringContainsString("'symfony'", (string) $content);
         $this->assertStringContainsString("'laravel'", (string) $content);
         $this->assertStringContainsString("'yii'", (string) $content);
@@ -112,41 +112,42 @@ final class ScriptTest extends TestCase
 
     public function testScriptDetectsFrameworkConstraints(): void
     {
-        // Framework detection logic is now in process-updates.php
-        $processorPath = dirname(__DIR__) . '/bin/process-updates.php';
+        // Framework detection logic is now in FrameworkDetector class
+        $frameworkDetectorPath = dirname(__DIR__) . '/bin/lib/FrameworkDetector.php';
 
-        if (!file_exists($processorPath)) {
-            $this->markTestSkipped('Processor PHP file does not exist');
+        if (!file_exists($frameworkDetectorPath)) {
+            $this->markTestSkipped('FrameworkDetector PHP file does not exist');
         }
 
-        $content = file_get_contents($processorPath);
+        $content = file_get_contents($frameworkDetectorPath);
 
         if ($content === false) {
-            $this->markTestSkipped('Could not read processor PHP file');
+            $this->markTestSkipped('Could not read FrameworkDetector PHP file');
         }
 
-        // Check for framework detection logic in PHP processor
+        // Check for framework detection logic in FrameworkDetector class
         $this->assertStringContainsString('frameworkConfigs', (string) $content);
         $this->assertStringContainsString('frameworkConstraints', (string) $content);
         $this->assertStringContainsString('getFrameworkConstraint', (string) $content);
+        $this->assertStringContainsString('detectFrameworkConstraints', (string) $content);
     }
 
     public function testScriptSupportsLaravelIlluminatePackages(): void
     {
-        // Laravel/Illuminate logic is now in process-updates.php
-        $processorPath = dirname(__DIR__) . '/bin/process-updates.php';
+        // Laravel/Illuminate logic is now in FrameworkDetector class
+        $frameworkDetectorPath = dirname(__DIR__) . '/bin/lib/FrameworkDetector.php';
 
-        if (!file_exists($processorPath)) {
-            $this->markTestSkipped('Processor PHP file does not exist');
+        if (!file_exists($frameworkDetectorPath)) {
+            $this->markTestSkipped('FrameworkDetector PHP file does not exist');
         }
 
-        $content = file_get_contents($processorPath);
+        $content = file_get_contents($frameworkDetectorPath);
 
         if ($content === false) {
-            $this->markTestSkipped('Could not read processor PHP file');
+            $this->markTestSkipped('Could not read FrameworkDetector PHP file');
         }
 
-        // Check Laravel also limits illuminate/* packages in PHP processor
+        // Check Laravel also limits illuminate/* packages in FrameworkDetector class
         $this->assertStringContainsString("'illuminate/'", (string) $content);
         $this->assertStringContainsString('laravel/framework', (string) $content);
     }
