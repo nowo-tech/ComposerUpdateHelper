@@ -31,6 +31,13 @@ return [
     'packages_passed_check' => 'Paket som klarade beroendekontrollen:',
     'none' => '(inga)',
     'conflicts_with' => 'konfliktar med:',
+    'package_abandoned' => 'Paketet är övergivet',
+    'replaced_by' => 'ersatt av: %s',
+    'alternative_solutions' => 'Alternativa lösningar:',
+    'compatible_with_conflicts' => 'kompatibel med konflikterande beroenden',
+    'alternative_packages' => 'Alternativa paket:',
+    'recommended_replacement' => 'rekommenderad ersättning',
+    'similar_functionality' => 'liknande funktionalitet',
     
     // Debug messages
     'debug_show_release_info' => 'showReleaseInfo = %s',
@@ -52,5 +59,16 @@ return [
     'release_info' => 'Versionsinformation',
     'release_changelog' => 'Ändringslogg',
     'release_view_on_github' => 'Visa på GitHub',
+    
+    // Progress messages
+    'checking_dependency_conflicts' => '⏳ Kontrollerar beroendekonflikter...',
+    'checking_abandoned_packages' => '⏳ Kontrollerar övergivna paket...',
+    'searching_fallback_versions' => '⏳ Söker efter reservversioner...',
+    'searching_alternative_packages' => '⏳ Söker efter alternativa paket...',
+    'checking_maintainer_info' => '⏳ Kontrollerar maintainer-information...',
+    
+    // Impact analysis
+    'impact_analysis' => 'Påverkan: Uppdatering av {package} till {version} skulle påverka:',
+    'found_outdated_packages' => 'Hittade %d föråldrade paket',
 ];
 

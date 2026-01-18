@@ -31,6 +31,13 @@ return [
     'packages_passed_check' => 'Pachete care au trecut verificarea dependențelor:',
     'none' => '(niciunul)',
     'conflicts_with' => 'conflict cu:',
+    'package_abandoned' => 'Pachetul este abandonat',
+    'replaced_by' => 'înlocuit cu: %s',
+    'alternative_solutions' => 'Soluții alternative:',
+    'compatible_with_conflicts' => 'compatibil cu dependențe conflictuale',
+    'alternative_packages' => 'Pachete alternative:',
+    'recommended_replacement' => 'înlocuire recomandată',
+    'similar_functionality' => 'funcționalitate similară',
     
     // Debug messages
     'debug_show_release_info' => 'showReleaseInfo = %s',
@@ -52,5 +59,16 @@ return [
     'release_info' => 'Informații despre Versiune',
     'release_changelog' => 'Jurnalul Modificărilor',
     'release_view_on_github' => 'Vezi pe GitHub',
+    
+    // Progress messages
+    'checking_dependency_conflicts' => '⏳ Verificarea conflictelor de dependențe...',
+    'checking_abandoned_packages' => '⏳ Verificarea pachetelor abandonate...',
+    'searching_fallback_versions' => '⏳ Căutarea versiunilor de rezervă...',
+    'searching_alternative_packages' => '⏳ Căutarea pachetelor alternative...',
+    'checking_maintainer_info' => '⏳ Verificarea informațiilor despre mentenor...',
+    
+    // Impact analysis
+    'impact_analysis' => 'Analiza impactului: Actualizarea {package} la {version} ar afecta:',
+    'found_outdated_packages' => 'Găsite %d pachet(e) învechite',
 ];
 

@@ -31,6 +31,13 @@ return [
     'packages_passed_check' => 'Пакеты, прошедшие проверку зависимостей:',
     'none' => '(нет)',
     'conflicts_with' => 'конфликт с:',
+    'package_abandoned' => 'Пакет заброшен',
+    'replaced_by' => 'заменён на: %s',
+    'alternative_solutions' => 'Альтернативные решения:',
+    'compatible_with_conflicts' => 'совместим с конфликтующими зависимостями',
+    'alternative_packages' => 'Альтернативные пакеты:',
+    'recommended_replacement' => 'рекомендуемая замена',
+    'similar_functionality' => 'похожая функциональность',
     
     // Debug messages
     'debug_show_release_info' => 'showReleaseInfo = %s',
@@ -52,5 +59,16 @@ return [
     'release_info' => 'Информация о Версии',
     'release_changelog' => 'Журнал Изменений',
     'release_view_on_github' => 'Посмотреть на GitHub',
+    
+    // Progress messages
+    'checking_dependency_conflicts' => '⏳ Проверка конфликтов зависимостей...',
+    'checking_abandoned_packages' => '⏳ Проверка заброшенных пакетов...',
+    'searching_fallback_versions' => '⏳ Поиск резервных версий...',
+    'searching_alternative_packages' => '⏳ Поиск альтернативных пакетов...',
+    'checking_maintainer_info' => '⏳ Проверка информации о сопровождающем...',
+    
+    // Impact analysis
+    'impact_analysis' => 'Анализ влияния: Обновление {package} до {version} повлияет на:',
+    'found_outdated_packages' => 'Найдено %d устаревших пакетов',
 ];
 

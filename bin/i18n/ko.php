@@ -31,6 +31,13 @@ return [
     'packages_passed_check' => '종속성 확인을 통과한 패키지:',
     'none' => '(없음)',
     'conflicts_with' => '다음과 충돌:',
+    'package_abandoned' => '패키지가 포기됨',
+    'replaced_by' => '대체됨: %s',
+    'alternative_solutions' => '대안 솔루션:',
+    'compatible_with_conflicts' => '충돌하는 종속성과 호환',
+    'alternative_packages' => '대체 패키지:',
+    'recommended_replacement' => '권장 대체',
+    'similar_functionality' => '유사한 기능',
     
     // Debug messages
     'debug_show_release_info' => 'showReleaseInfo = %s',
@@ -52,5 +59,16 @@ return [
     'release_info' => '릴리스 정보',
     'release_changelog' => '변경 로그',
     'release_view_on_github' => 'GitHub에서 보기',
+    
+    // Progress messages
+    'checking_dependency_conflicts' => '⏳ 종속성 충돌 확인 중...',
+    'checking_abandoned_packages' => '⏳ 중단된 패키지 확인 중...',
+    'searching_fallback_versions' => '⏳ 대체 버전 검색 중...',
+    'searching_alternative_packages' => '⏳ 대체 패키지 검색 중...',
+    'checking_maintainer_info' => '⏳ 유지 관리자 정보 확인 중...',
+    
+    // Impact analysis
+    'impact_analysis' => '영향 분석: {package}를 {version}로 업데이트하면 다음에 영향을 줍니다:',
+    'found_outdated_packages' => '오래된 패키지 %d개 발견',
 ];
 

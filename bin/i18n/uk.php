@@ -31,6 +31,13 @@ return [
     'packages_passed_check' => 'Пакети, які пройшли перевірку залежностей:',
     'none' => '(немає)',
     'conflicts_with' => 'конфліктує з:',
+    'package_abandoned' => 'Пакет залишений',
+    'replaced_by' => 'замінено на: %s',
+    'alternative_solutions' => 'Альтернативні рішення:',
+    'compatible_with_conflicts' => 'сумісний з конфліктними залежностями',
+    'alternative_packages' => 'Альтернативні пакети:',
+    'recommended_replacement' => 'рекомендована заміна',
+    'similar_functionality' => 'схожа функціональність',
     
     // Debug messages
     'debug_show_release_info' => 'showReleaseInfo = %s',
@@ -52,5 +59,16 @@ return [
     'release_info' => 'Інформація про реліз',
     'release_changelog' => 'Журнал змін',
     'release_view_on_github' => 'Переглянути на GitHub',
+    
+    // Progress messages
+    'checking_dependency_conflicts' => '⏳ Перевірка конфліктів залежностей...',
+    'checking_abandoned_packages' => '⏳ Перевірка занедбаних пакетів...',
+    'searching_fallback_versions' => '⏳ Пошук резервних версій...',
+    'searching_alternative_packages' => '⏳ Пошук альтернативних пакетів...',
+    'checking_maintainer_info' => '⏳ Перевірка інформації про супровідника...',
+    
+    // Impact analysis
+    'impact_analysis' => 'Аналіз впливу: Оновлення {package} до {version} вплине на:',
+    'found_outdated_packages' => 'Знайдено %d застарілих пакетів',
 ];
 

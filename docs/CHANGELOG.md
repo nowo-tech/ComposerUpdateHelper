@@ -7,7 +7,87 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [2.0.21] - 2026-01-15
+## [2.0.22] - 2026-01-18
+
+### Added
+- **Conflict Impact Analysis**: Automatically analyzes which packages would be affected when updating conflicting packages
+  - Shows direct affected packages (packages that directly depend on the conflicting package)
+  - Shows transitive affected packages (packages that depend on directly affected packages)
+  - Recursively checks transitive dependencies (up to 5 levels deep to prevent infinite loops)
+  - Displays impact analysis in output with clear formatting
+  - Integrated into conflict detection flow
+  - Example: `📊 Impact analysis: Updating package-a to 2.0 would affect: - dependent-package-1 (requires package-a:^1.5)`
+  - All impact analysis messages are translated and available in all 31 supported languages
+  - **Optional feature**: Use `--show-impact` or `--impact` flag to enable impact analysis (disabled by default to reduce verbosity)
+  - **Save to file**: Use `--save-impact` flag to save impact analysis to `composer-update-impact.txt` file (automatically added to `.gitignore`)
+- **Outdated packages count**: Shows the total number of outdated packages found after checking
+  - Displays a summary message: `✅ Found X outdated package(s)`
+  - Only shown when packages are found (not in debug mode)
+  - All count messages are translated and available in all 31 supported languages
+- **Progress indicators for use case checking**: Added loading indicators to inform users about the progress of different verification types
+  - Shows progress messages when checking dependency conflicts, searching fallback versions, checking abandoned packages, searching alternative packages, and checking maintainer information
+  - Each progress message is shown only once per verification type (not repeated for each package)
+  - Progress indicators are suppressed in debug mode (debug already shows detailed information)
+  - All progress messages are translated and available in all 31 supported languages
+  - Example messages: `⏳ Checking dependency conflicts...`, `⏳ Searching for fallback versions...`, `⏳ Checking for abandoned packages...`
+- **Abandoned Package Detection**: Automatically detects and warns about abandoned packages in conflict scenarios
+  - Detects abandoned packages via Packagist API when packages are filtered due to conflicts
+  - Shows warning message with replacement package if available
+  - Example: `(⚠️ Package is abandoned, replaced by: new-package/name)`
+- **Fallback Version Suggestions**: Suggests compatible fallback versions when primary updates fail
+  - Automatically searches for older compatible versions when conflicts are detected
+  - Verifies fallback versions satisfy all conflicting dependencies
+  - Shows alternative solutions section in output when fallbacks are found
+  - Example: `💡 Alternative solutions: - package-a:1.9.5 (compatible with conflicting dependencies)`
+- **Alternative Package Suggestions**: Automatically suggests alternative packages when updates are blocked by conflicts
+  - Searches Packagist API for similar packages using keywords extracted from package names
+  - Shows replacement packages when packages are abandoned without replacement
+  - Shows alternative packages when no fallback version is available
+  - Returns top 3 most relevant alternatives based on Packagist search results
+  - Example: `💡 Alternative packages: - new-package/name (recommended replacement) - alternative/pkg (similar functionality)`
+- **Maintainer Contact Suggestions**: Automatically suggests contacting package maintainers when no automatic solution is available
+  - Detects scenarios where manual intervention is needed (incompatible constraints, stale packages)
+  - Extracts maintainer information from Packagist API (name, email, homepage)
+  - Generates repository issue URLs for GitHub, GitLab, and Bitbucket
+  - Shows stale package warnings (>2 years without updates)
+  - Provides actionable steps for manual resolution
+  - Example: `⚠️ No automatic solution available - Contact package maintainer(s): John Doe (john@example.com)`
+- **Modular Architecture Refactoring**: Refactored `process-updates.php` into modular classes for better maintainability
+  - Created `OutputFormatter` class to handle all output formatting logic
+  - Reduced `process-updates.php` from 991 lines to 614 lines (38% reduction)
+  - Improved code organization and testability
+  - All formatting logic now centralized in `bin/lib/OutputFormatter.php`
+- **Comprehensive test suite**: Added unit tests for new features
+  - Tests for abandoned package detection logic
+  - Tests for fallback version search logic
+  - Tests for alternative package search logic
+  - Tests for maintainer contact suggestions
+  - Tests for multiple constraint scenarios
+  - Tests for edge cases
+
+### Changed
+- **Updated UPDATE_CASES.md**: Documentation now reflects 14 fully supported cases (previously 13)
+  - Added case for Conflict Impact Analysis (#14)
+  - Updated summary section to reflect current implementation status
+- **Impact analysis is now optional**: Impact analysis is disabled by default to reduce output verbosity
+  - Use `--show-impact` or `--impact` flag to enable impact analysis
+  - Improves default output readability while keeping detailed analysis available when needed
+
+## [2.0.21] - 2026-01-16
+
+### Added
+- **Update Cases and Scenarios documentation**: New comprehensive document `docs/UPDATE_CASES.md` explaining all update scenarios
+  - Documents 10 fully supported cases (basic updates, dependency conflicts, transitive dependencies, etc.)
+  - Documents 1 partially supported case (wildcard constraints)
+  - Documents 10 not-yet-supported cases (circular dependencies, cascading chains, etc.)
+  - Provides detailed examples and explanations for each scenario
+  - Includes manual intervention guidance for cases requiring maintainer contact
+- **Implementation Roadmap**: New detailed action plan `docs/IMPLEMENTATION_ROADMAP.md` for implementing not-yet-supported features
+  - Prioritized implementation plan ordered by complexity and feasibility
+  - 4 phases with detailed implementation steps
+  - Estimated effort and dependencies for each feature
+  - Translation requirements for all 31 supported languages
+  - Complete timeline for feature implementation
 
 ### Changed
 - **Improved dependency conflict messages**: Enhanced clarity of dependency conflict messages in the output
@@ -16,13 +96,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - The new format explicitly shows which package requires which version constraint
   - Makes it much clearer why a package update is being filtered
   - Users can now easily understand what needs to be updated to resolve the conflict
-
-### Migration Notes
-- **No action required**: This is a documentation/UX improvement with no functional changes
-- The conflict detection logic remains the same, only the message format has been improved
+- **Documentation structure**: Enhanced documentation organization
+  - Added references to UPDATE_CASES.md in README.md, CONFIGURATION.md, and USAGE.md
+  - Added reference to IMPLEMENTATION_ROADMAP.md in README.md and UPDATE_CASES.md
+  - Improved cross-referencing between documentation files
+  - Added section on dependency conflicts in USAGE.md
 
 ### Breaking Changes
 - None
+
+> **Note**: See [UPGRADING.md](UPGRADING.md#upgrading-to-2021) for migration notes.
 
 ## [2.0.20] - 2026-01-11
 
@@ -33,12 +116,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Fixed spacing inconsistency in the "none" variant of filtered packages message
   - Output now displays correctly aligned sections for better readability
 
-### Migration Notes
-- **No action required**: This is a visual formatting fix that improves output readability
-- The functionality remains unchanged, only the visual presentation has been improved
-
 ### Breaking Changes
 - None
+
+> **Note**: See [UPGRADING.md](UPGRADING.md#upgrading-to-2020) for migration notes.
 
 ## [2.0.19] - 2026-01-08
 
@@ -93,7 +174,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Enhanced conflict information: now shows the number of packages with conflicts (e.g., "conflicts with 1 package" or "conflicts with 2 packages")
   - Better visual formatting for dependency conflict analysis section
 - **Documentation enhancements**: Improved visual presentation of language support
-  - Added country flag emojis to all language listings in documentation (README.md, CHANGELOG.md, UPGRADING.md, LANGUAGES_PROPOSAL.md)
+  - Added country flag emojis to all language listings in documentation (README.md, CHANGELOG.md, UPGRADING.md, CONFIGURATION.md)
   - Languages with multiple countries now display all relevant flags (e.g., English 🇬🇧 🇺🇸 🇨🇦 🇦🇺, Spanish 🇪🇸 🇲🇽 🇦🇷 🇨🇴)
   - Makes language selection more intuitive and visually appealing
   - All 31 languages are now fully implemented and documented with their respective flags
@@ -434,7 +515,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.0.6] - 2025-12-26
 
 ### Added
-- **Verification documentation**: New `docs/VERIFICATION.md` file documenting complete verification of YAML include/ignore functionality
+- **Verification**: Complete verification of YAML include/ignore functionality
   - Comprehensive verification of YAML parsing (Bash/AWK)
   - PHP loading and processing verification
   - Priority logic verification

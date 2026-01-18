@@ -31,6 +31,13 @@ return [
     'packages_passed_check' => '通过依赖检查的包:',
     'none' => '(无)',
     'conflicts_with' => '与以下冲突:',
+    'package_abandoned' => '包已弃用',
+    'replaced_by' => '替换为: %s',
+    'alternative_solutions' => '替代方案:',
+    'compatible_with_conflicts' => '与冲突依赖项兼容',
+    'alternative_packages' => '替代包:',
+    'recommended_replacement' => '推荐的替代',
+    'similar_functionality' => '类似功能',
     
     // Debug messages
     'debug_show_release_info' => 'showReleaseInfo = %s',
@@ -52,5 +59,16 @@ return [
     'release_info' => '版本信息',
     'release_changelog' => '更新日志',
     'release_view_on_github' => '在 GitHub 上查看',
+    
+    // Progress messages
+    'checking_dependency_conflicts' => '⏳ 检查依赖冲突...',
+    'checking_abandoned_packages' => '⏳ 检查已弃用的包...',
+    'searching_fallback_versions' => '⏳ 搜索回退版本...',
+    'searching_alternative_packages' => '⏳ 搜索替代包...',
+    'checking_maintainer_info' => '⏳ 检查维护者信息...',
+    
+    // Impact analysis
+    'impact_analysis' => '影响分析：将 {package} 更新到 {version} 会影响：',
+    'found_outdated_packages' => '找到 %d 个过时的包',
 ];
 

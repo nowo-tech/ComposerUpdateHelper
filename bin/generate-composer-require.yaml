@@ -17,6 +17,14 @@
 # Default: true
 check-dependencies: true
 
+# Note: The following features are automatically enabled when check-dependencies is true:
+# - Abandoned Package Detection: Automatically detects and warns about abandoned packages
+#   when they are filtered due to conflicts. Shows replacement package if available.
+# - Fallback Version Suggestions: When a package update conflicts with dependencies,
+#   the tool automatically searches for compatible older versions that satisfy all
+#   conflicting constraints and shows them as "Alternative solutions".
+# These features require no configuration and work automatically.
+
 # List of packages to ignore during update
 # Ignored packages will still be displayed in the output with their available versions,
 # but won't be included in the composer require commands.

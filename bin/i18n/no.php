@@ -31,6 +31,13 @@ return [
     'packages_passed_check' => 'Pakker som bestod avhengighetskontrollen:',
     'none' => '(ingen)',
     'conflicts_with' => 'konflikter med:',
+    'package_abandoned' => 'Pakken er forlatt',
+    'replaced_by' => 'erstattet av: %s',
+    'alternative_solutions' => 'Alternatieve løsninger:',
+    'compatible_with_conflicts' => 'kompatibel med konflikterende avhengigheter',
+    'alternative_packages' => 'Alternative pakker:',
+    'recommended_replacement' => 'anbefalt erstatning',
+    'similar_functionality' => 'lignende funksjonalitet',
     
     // Debug messages
     'debug_show_release_info' => 'showReleaseInfo = %s',
@@ -52,5 +59,16 @@ return [
     'release_info' => 'Versjonsinformasjon',
     'release_changelog' => 'Endringslogg',
     'release_view_on_github' => 'Vis på GitHub',
+    
+    // Progress messages
+    'checking_dependency_conflicts' => '⏳ Kontrollerer avhengighetskonflikter...',
+    'checking_abandoned_packages' => '⏳ Kontrollerer forlatte pakker...',
+    'searching_fallback_versions' => '⏳ Søker etter reserveversjoner...',
+    'searching_alternative_packages' => '⏳ Søker etter alternative pakker...',
+    'checking_maintainer_info' => '⏳ Kontrollerer maintainer-informasjon...',
+    
+    // Impact analysis
+    'impact_analysis' => 'Påvirkningsanalyse: Oppdatering av {package} til {version} vil påvirke:',
+    'found_outdated_packages' => 'Fant %d utdaterte pakker',
 ];
 

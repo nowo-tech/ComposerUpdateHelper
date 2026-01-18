@@ -31,6 +31,13 @@ return [
     'packages_passed_check' => 'Bağımlılık kontrolünü geçen paketler:',
     'none' => '(yok)',
     'conflicts_with' => 'ile çakışıyor:',
+    'package_abandoned' => 'Paket terk edildi',
+    'replaced_by' => 'değiştirildi: %s',
+    'alternative_solutions' => 'Alternatif çözümler:',
+    'compatible_with_conflicts' => 'çakışan bağımlılıklarla uyumlu',
+    'alternative_packages' => 'Alternatif paketler:',
+    'recommended_replacement' => 'önerilen değiştirme',
+    'similar_functionality' => 'benzer işlevsellik',
     
     // Debug messages
     'debug_show_release_info' => 'showReleaseInfo = %s',
@@ -52,5 +59,16 @@ return [
     'release_info' => 'Sürüm Bilgisi',
     'release_changelog' => 'Değişiklik Günlüğü',
     'release_view_on_github' => 'GitHub\'da Görüntüle',
+    
+    // Progress messages
+    'checking_dependency_conflicts' => '⏳ Bağımlılık çakışmaları kontrol ediliyor...',
+    'checking_abandoned_packages' => '⏳ Terk edilmiş paketler kontrol ediliyor...',
+    'searching_fallback_versions' => '⏳ Yedek sürümler aranıyor...',
+    'searching_alternative_packages' => '⏳ Alternatif paketler aranıyor...',
+    'checking_maintainer_info' => '⏳ Bakımcı bilgileri kontrol ediliyor...',
+    
+    // Impact analysis
+    'impact_analysis' => 'Etki analizi: {package} paketini {version} sürümüne güncellemek şunları etkiler:',
+    'found_outdated_packages' => '%d eski paket bulundu',
 ];
 

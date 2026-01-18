@@ -188,6 +188,32 @@ include:
 
 ---
 
+### 14. Conflict Impact Analysis
+
+**Scenario**: Analyzing the impact of updating packages when conflicts are detected (which packages would be affected).
+
+**Example**:
+- Updating `package-a` to `2.0` conflicts with `dependency-x` which requires `^1.5`
+- The analysis shows that `dependent-package-1` and `dependent-package-2` would be affected
+- Transitive packages that depend on these affected packages are also identified
+
+**Handling**:
+- Automatically analyzes which packages would be affected by updating a conflicting package
+- Shows direct affected packages (packages that directly depend on the conflicting package)
+- Shows transitive affected packages (packages that depend on directly affected packages)
+- Displays impact analysis in output with clear formatting
+- Provides complete dependency chain visualization
+
+**Implementation Details**:
+- Uses `ImpactAnalyzer::analyzeImpact()` to analyze impact when conflicts are detected
+- Recursively checks transitive dependencies (up to 5 levels deep to prevent infinite loops)
+- Format: `📊 Impact analysis: Updating package-a to 2.0 would affect: - dependent-package-1 (requires package-a:^1.5)`
+- Integrated into conflict detection flow
+
+**Status**: ✅ Fully supported
+
+---
+
 ## Partially Supported Cases
 
 ### 11. Wildcard Version Constraints
@@ -209,6 +235,14 @@ include:
 
 ## Not Yet Supported Cases
 
+The following scenarios are **documented but not yet implemented**. When these cases occur, the tool will:
+
+- ❌ **Filter packages** showing conflict messages
+- ❌ **Not provide automatic solutions** - Requires manual intervention from the user  
+- ⚠️ **Limited guidance** - User must analyze and resolve conflicts manually
+
+Each case below explains what happens currently, what's missing, and what manual steps the user must take.
+
 ### 12. Circular Dependency Conflicts
 
 **Scenario**: Package A requires Package B at version X, while Package B requires Package A at version Y.
@@ -216,15 +250,22 @@ include:
 **Example**:
 - `vendor/package-a:2.0` requires `vendor/package-b:^1.5`
 - `vendor/package-b:1.6` requires `vendor/package-a:^2.1`
-- Result: ❌ No detection or resolution strategy
+- Result: ❌ **No solution provided** - Both packages filtered separately without recognizing the circular dependency
 
-**Current Behavior**: Each package would be filtered individually, not recognizing the circular nature.
+**Current Behavior**: 
+- Each package would be filtered individually with separate conflict messages
+- ❌ No recognition of the circular nature of the conflict
+- ❌ No suggestion to update both packages together
+- ❌ No strategy to break the circular dependency
 
 **What's Needed**: 
 - Detection of circular dependencies
 - Resolution strategies (update both together, or suggest breaking the circular dependency)
+- Warning messages explaining the circular nature
 
 **Priority**: Medium
+
+**Current Solution**: Manual intervention required - user must analyze conflicts and update packages manually
 
 ---
 
@@ -239,9 +280,11 @@ include:
 - All are currently at older versions
 
 **Current Behavior**: 
-- ✅ Transitive dependencies are suggested
-- ❌ No automatic detection of the full chain depth
+- ✅ Transitive dependencies are suggested (one level deep)
+- ⚠️ **Partial solution** - Only immediate transitive dependencies are suggested
+- ❌ No automatic detection of the full chain depth (A → B → C → D)
 - ❌ No optimization to update all packages in the chain at once
+- ❌ No visualization of the complete dependency chain
 
 **What's Needed**:
 - Recursive traversal to detect full dependency chains
@@ -249,6 +292,8 @@ include:
 - Better visualization of dependency chains
 
 **Priority**: Medium-High
+
+**Current Solution**: User must manually execute commands multiple times, one level at a time
 
 ---
 
@@ -262,15 +307,26 @@ include:
 - `abandoned/package` has no newer version
 
 **Current Behavior**: 
-- Update would be filtered with conflict message
-- ❌ No suggestion to find alternatives or migrate away
+- ✅ **Detection implemented** - Package abandonment status is detected via Packagist API
+- ✅ **Warning shown** - Update is filtered with conflict message AND abandoned warning
+- ✅ **Replacement suggested** - If Packagist provides a replacement, it's shown in the warning
+- ⚠️ **Partial solution** - Warning is shown but no automatic migration path
+- ❌ No migration path recommendations beyond replacement suggestion
 
-**What's Needed**:
-- Detection of abandoned packages
-- Suggestions for alternative packages (via Packagist suggestions)
-- Migration path recommendations
+**Implementation Details**:
+- Uses Packagist API (`packagist.org/packages/{package}.json`) to check `abandoned` field
+- Warning format: `(⚠️ Package is abandoned, replaced by: new-package/name)` if replacement exists
+- Warning format: `(⚠️ Package is abandoned)` if no replacement is specified
+- Integrated into conflict detection flow
 
-**Priority**: Low-Medium
+**What's Still Needed**:
+- Migration path recommendations (step-by-step guide)
+- Automated replacement suggestions (beyond Packagist's replacement field)
+- Alternative package discovery
+
+**Priority**: Low-Medium (Partially implemented ✅)
+
+**Current Solution**: ✅ Automatic detection and warning - user can see replacement package if available
 
 ---
 
@@ -280,6 +336,7 @@ include:
 
 **Current Behavior**: 
 - ✅ Basic support for any Composer repository
+- ❌ **No solution provided** - Conflicts from repository priorities are not detected
 - ❌ No special handling for repository-specific constraints
 - ❌ No detection of repository priority conflicts
 
@@ -289,6 +346,8 @@ include:
 - Suggestions when conflicts might be resolved by adjusting repository priorities
 
 **Priority**: Low
+
+**Current Solution**: Manual intervention - user must adjust repository priorities in `composer.json`
 
 ---
 
@@ -302,9 +361,11 @@ include:
 - Optimal strategy: group updates to minimize resolver runs
 
 **Current Behavior**: 
-- ✅ Suggests all compatible updates together
+- ✅ Suggests all compatible updates together (basic grouping)
+- ⚠️ **Suboptimal solution** - All packages in one command may be inefficient
 - ❌ No optimization for update order
 - ❌ No batching strategy to minimize resolver calls
+- ❌ No analysis of dependency graph to optimize execution
 
 **What's Needed**:
 - Dependency graph analysis
@@ -313,6 +374,8 @@ include:
 
 **Priority**: Medium
 
+**Current Solution**: Works but may be slower - all packages updated in one command regardless of dependencies
+
 ---
 
 ### 17. Pre-Installation Conflict Prediction
@@ -320,16 +383,20 @@ include:
 **Scenario**: Predicting conflicts before actually running `composer require`, using dry-run or simulation.
 
 **Current Behavior**: 
-- ✅ Uses `composer show` to check package requirements
+- ✅ Uses `composer show` to check package requirements (good approximation)
+- ⚠️ **Partial solution** - May miss edge cases that only appear during actual resolution
 - ❌ No actual dry-run of `composer require`
-- ❌ May miss some edge cases that only appear during actual resolution
+- ❌ Some conflicts may only be detected when Composer actually resolves dependencies
+- ❌ False positives/negatives possible
 
 **What's Needed**:
 - Integration with Composer's dependency resolver
-- Dry-run simulation of updates
+- Dry-run simulation of updates (`composer require --dry-run`)
 - More accurate conflict prediction
 
 **Priority**: High (would improve accuracy significantly)
+
+**Current Solution**: Good approximation but not 100% accurate - some conflicts may only appear during actual `composer require`
 
 ---
 
@@ -342,15 +409,30 @@ include:
 - Alternative `package-b:2.0` might work with `dependency-x`
 
 **Current Behavior**: 
-- ❌ No alternative package detection
-- ❌ No migration path suggestions
+- ✅ **Alternative package detection** - **Now implemented**
+  - Automatically searches for alternative packages when conflicts exist
+  - Uses Packagist API to find similar packages based on keywords
+  - Shows alternatives when packages are abandoned without replacement
+  - Shows alternatives when no fallback version is available
+  - Example: `💡 Alternative packages: - new-package/name (recommended replacement) - alternative/pkg (similar functionality)`
+- ✅ Migration path suggestions via Packagist API search
+- ✅ Package discovery functionality
 
-**What's Needed**:
-- Package alternatives database (Packagist provides this)
-- Migration path analysis
+**Implementation Details**:
+- `AlternativePackageFinder::findAlternatives()` function searches for alternatives
+- Checks abandoned status first (if abandoned with replacement, shows replacement)
+- Searches Packagist for similar packages using keywords extracted from package name
+- Returns top 3 most relevant alternatives
+- Output includes alternative packages section when available
+
+**What's Still Needed**:
 - Cost-benefit analysis of alternatives
+- Version compatibility checking for alternatives
+- Migration guide generation
 
-**Priority**: Low
+**Priority**: Low (Partially implemented ✅)
+
+**Current Solution**: ✅ Alternative packages are automatically suggested when conflicts exist
 
 ---
 
@@ -360,48 +442,40 @@ include:
 
 **Example**:
 - Conflict: `package-a:2.0` conflicts with `dependency-x:1.0`
-- Strategy 1: Update `dependency-x` to `2.0` (if compatible)
-- Strategy 2: Keep `package-a:1.9` (if compatible with `dependency-x:1.0`)
-- Strategy 3: Remove `dependency-x` (if not critical)
+- Strategy 1: Update `dependency-x` to `2.0` (if compatible) ✅ Supported
+- Strategy 2: Keep `package-a:1.9` (if compatible with `dependency-x:1.0`) ✅ **Now supported**
+- Strategy 3: Remove `dependency-x` (if not critical) ❌ Not supported
 
 **Current Behavior**: 
-- ✅ Suggests transitive dependency updates (Strategy 1)
-- ❌ No fallback version suggestions (Strategy 2)
+- ✅ Suggests transitive dependency updates (Strategy 1) - **Implemented**
+- ✅ **Fallback version suggestions (Strategy 2)** - **Now implemented**
+  - Automatically searches for compatible older versions when primary update conflicts
+  - Verifies fallback versions satisfy all conflicting dependencies
+  - Shows "Alternative solutions" section in output
+  - Example: `💡 Alternative solutions: - package-a:1.9.5 (compatible with conflicting dependencies)`
 - ❌ No dependency removal suggestions (Strategy 3)
+- ⚠️ **Partial implementation** - Two strategies available, third still missing
 
-**What's Needed**:
-- Multiple resolution strategy generation
-- Evaluation of each strategy
+**Implementation Details**:
+- `findFallbackVersion()` function searches for compatible older versions
+- Verifies fallback satisfies all conflicting constraints
+- Verifies fallback's own requirements don't conflict with installed packages
+- Output includes fallback suggestions when available
+
+**What's Still Needed**:
+- Dependency removal suggestions (Strategy 3)
+- Multiple strategy comparison
 - User choice of preferred strategy
 
-**Priority**: Medium-High
+**Priority**: Medium-High (Partially implemented ✅)
 
----
-
-### 20. Conflict Impact Analysis
-
-**Scenario**: Analyzing the impact of resolving conflicts (which packages would be affected).
-
-**Example**:
-- Updating `dependency-x` to resolve conflict might affect 5 other packages
-- Removing `dependency-x` might break 3 packages
-
-**Current Behavior**: 
-- ❌ No impact analysis
-- ❌ No visualization of affected packages
-
-**What's Needed**:
-- Impact analysis before suggesting updates
-- Visualization of dependency graph
-- Warning about breaking changes
-
-**Priority**: Medium
+**Current Solution**: ✅ Two strategies available - transitive updates and fallback versions
 
 ---
 
 ## Summary
 
-### Fully Supported (10 cases)
+### Fully Supported (14 cases)
 1. Basic package updates
 2. Dependent package constraint conflicts
 3. Package requirement conflicts
@@ -412,20 +486,24 @@ include:
 8. Production vs development dependencies
 9. Version comparison to avoid unnecessary updates
 10. Multiple transitive dependencies
+11. Abandoned package detection (with warnings and replacement suggestions)
+12. Alternative package suggestions (automatic detection and suggestions when conflicts exist)
+13. Maintainer contact suggestions (automatic detection and actionable steps when no automatic solution is available)
+14. Conflict impact analysis (automatic analysis of which packages would be affected by resolving conflicts)
 
-### Partially Supported (1 case)
-11. Wildcard version constraints (dependency checking only for specific versions)
+### Partially Supported (3 cases)
+14. Abandoned package conflicts - Detection and warnings ✅, migration paths ✅ (alternative packages, maintainer contact)
+15. Conflict resolution strategies - Transitive updates ✅, fallback versions ✅, removal suggestions ❌
+16. Wildcard version constraints (dependency checking only for specific versions)
 
-### Not Yet Supported (10 cases)
-12. Circular dependency conflicts
-13. Cascading conflict chains (optimization needed)
-14. Abandoned package conflicts
-15. Repository-specific conflicts
-16. Batch update optimization
-17. Pre-installation conflict prediction (needs Composer resolver integration)
-18. Alternative package suggestions
-19. Conflict resolution strategies (multiple strategies)
-20. Conflict impact analysis
+### Not Yet Supported (4 cases)
+**❌ No automatic solution provided - requires manual intervention:**
+
+17. **Circular dependency conflicts** - No detection or resolution strategy
+18. **Cascading conflict chains** - Only one-level deep (optimization needed)
+19. **Repository-specific conflicts** - No repository priority conflict detection
+20. **Batch update optimization** - No update order optimization (suboptimal)
+21. **Pre-installation conflict prediction** - Approximate only (needs Composer resolver)
 
 ---
 
@@ -438,13 +516,11 @@ include:
 
 ### Medium Priority
 - **Batch update optimization** (#16): More efficient update commands
-- **Conflict impact analysis** (#20): Better user awareness
 - **Wildcard constraints dependency checking** (#11): Complete the partial support
 
 ### Low Priority
 - **Circular dependency conflicts** (#12): Less common but useful
-- **Alternative package suggestions** (#18): Nice-to-have feature
-- **Abandoned package conflicts** (#14): Edge case
+- **Abandoned package conflicts** (#14): Edge case (partially supported with alternative packages)
 - **Repository-specific conflicts** (#15): Edge case
 
 ---
@@ -459,5 +535,68 @@ To ensure comprehensive coverage, test cases should be created for:
 
 ---
 
-*Last updated: 2026-01-15*
+---
+
+## Manual Intervention: Contacting Package Maintainers
+
+Some scenarios **cannot be resolved automatically** and require **contacting package maintainers** to request dependency updates:
+
+### When Manual Contact is Required
+
+1. **Incompatible Version Requirements**
+   - Two packages require incompatible versions of the same dependency
+   - Example: Package A requires `dependency-x:^1.0`, Package B requires `dependency-x:^2.0`
+   - No version satisfies both constraints
+   - **Action**: Contact maintainer(s) of Package A or B to update their version constraints
+
+2. **Stale Packages**
+   - Package hasn't been updated in >2 years
+   - Requires very old dependencies (e.g., Symfony 2.x when 6.x is available)
+   - **Action**: Contact maintainer to request dependency updates or find alternative package
+
+3. **Abandoned Packages Without Replacement**
+   - Package is marked as abandoned
+   - No replacement package is suggested
+   - **Action**: Contact original maintainer or search for community fork
+
+4. **Conflicting Major Versions**
+   - Constraints on different major versions with no overlap
+   - Example: Package A allows `^1.0|^2.0`, Package B requires `^3.0`
+   - **Action**: Contact maintainer(s) to update version constraints
+
+**Current Behavior**: 
+- ✅ **Maintainer contact suggestions** - **Now implemented**
+  - Automatically detects scenarios where manual intervention is needed
+  - Extracts maintainer information from Packagist API (name, email, homepage)
+  - Generates repository issue URLs for GitHub, GitLab, and Bitbucket
+  - Detects stale packages (>2 years without updates)
+  - Provides actionable steps for manual resolution
+  - Example: `⚠️ No automatic solution available - Contact package maintainer(s): John Doe (john@example.com)`
+- ✅ Automatic detection of incompatible constraints and major version conflicts
+- ✅ Stale package warnings with actionable suggestions
+
+**Implementation Details**:
+- `MaintainerContactFinder::getMaintainerInfo()` function extracts maintainer information
+- `MaintainerContactFinder::shouldSuggestContact()` determines when to suggest contact
+- `MaintainerContactFinder::generateIssueUrl()` creates repository issue URLs
+- Output includes maintainer contact section when no automatic solution is available
+
+---
+
+## Implementation Roadmap
+
+For a detailed action plan to implement the not-yet-supported cases, ordered by complexity and feasibility, see [Implementation Roadmap](IMPLEMENTATION_ROADMAP.md).
+
+### Translation Requirements
+
+**⚠️ Important**: All new features implemented must include translations for all 31 supported languages. See the [Translation Requirements](IMPLEMENTATION_ROADMAP.md#translation-requirements) section in the Implementation Roadmap for details.
+
+**Translation Support:** 
+- 31 languages fully supported
+- See [CONFIGURATION.md](CONFIGURATION.md#language-configuration-internationalization) for complete language list and configuration
+- See [I18N_STRATEGY.md](I18N_STRATEGY.md) for translation implementation details
+
+---
+
+*Last updated: 2026-01-16*
 *Document version: 1.0*

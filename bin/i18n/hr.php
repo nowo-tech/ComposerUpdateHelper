@@ -31,6 +31,13 @@ return [
     'packages_passed_check' => 'Paketi koji su prošli provjeru ovisnosti:',
     'none' => '(nema)',
     'conflicts_with' => 'u konfliktu s:',
+    'package_abandoned' => 'Paket je napušten',
+    'replaced_by' => 'zamijenjen sa: %s',
+    'alternative_solutions' => 'Alternativna rješenja:',
+    'compatible_with_conflicts' => 'kompatibilan s konfliktima ovisnosti',
+    'alternative_packages' => 'Alternativni paketi:',
+    'recommended_replacement' => 'preporučena zamjena',
+    'similar_functionality' => 'slična funkcionalnost',
     
     // Debug messages
     'debug_show_release_info' => 'showReleaseInfo = %s',
@@ -52,5 +59,16 @@ return [
     'release_info' => 'Informacije o izdanju',
     'release_changelog' => 'Dnevnik promjena',
     'release_view_on_github' => 'Pogledaj na GitHubu',
+    
+    // Progress messages
+    'checking_dependency_conflicts' => '⏳ Provjera konflikata ovisnosti...',
+    'checking_abandoned_packages' => '⏳ Provjera napuštenih paketa...',
+    'searching_fallback_versions' => '⏳ Traženje rezervnih verzija...',
+    'searching_alternative_packages' => '⏳ Traženje alternativnih paketa...',
+    'checking_maintainer_info' => '⏳ Provjera informacija o održavatelju...',
+    
+    // Impact analysis
+    'impact_analysis' => 'Analiza utjecaja: Ažuriranje {package} na {version} bi utjecalo na:',
+    'found_outdated_packages' => 'Pronađeno %d zastarjelih paketa',
 ];
 

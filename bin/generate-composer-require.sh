@@ -126,13 +126,15 @@ EOF
 }
 
 # Parse arguments
-RUN_FLAG=""; SHOW_RELEASE_DETAIL=false; SHOW_RELEASE_INFO=false; VERBOSE=false; DEBUG=false
+RUN_FLAG=""; SHOW_RELEASE_DETAIL=false; SHOW_RELEASE_INFO=false; SHOW_IMPACT_ANALYSIS=false; SAVE_IMPACT_TO_FILE=false; VERBOSE=false; DEBUG=false
 for arg in "$@"; do
     case "$arg" in
         -h|--help) show_help; exit 0 ;;
         --run) RUN_FLAG="--run" ;;
         --release-info|--releases) SHOW_RELEASE_INFO=true ;;
         --release-detail|--release-full|--detail) SHOW_RELEASE_INFO=true; SHOW_RELEASE_DETAIL=true ;;
+        --show-impact|--impact) SHOW_IMPACT_ANALYSIS=true ;;
+        --save-impact) SAVE_IMPACT_TO_FILE=true; SHOW_IMPACT_ANALYSIS=true ;;
         -v|--verbose) VERBOSE=true ;;
         --debug) DEBUG=true; VERBOSE=true ;;
         --no-release-info|--skip-releases|--no-releases) SHOW_RELEASE_INFO=false ;;
@@ -222,10 +224,12 @@ rm -f /tmp/composer-outdated-$$.json
 [ "$DEBUG" = "true" ] && echo "🔍 $(get_msg debug_prefix)$(get_msg debug_passing_to_php)" >&2
 [ "$DEBUG" = "true" ] && echo "   - CONFIG_FILE: ${CONFIG_FILE:-none}" >&2
 [ "$DEBUG" = "true" ] && echo "   - SHOW_RELEASE_INFO: $SHOW_RELEASE_INFO" >&2
+[ "$DEBUG" = "true" ] && echo "   - SHOW_IMPACT_ANALYSIS: $SHOW_IMPACT_ANALYSIS" >&2
+[ "$DEBUG" = "true" ] && echo "   - SAVE_IMPACT_TO_FILE: $SAVE_IMPACT_TO_FILE" >&2
 [ "$DEBUG" = "true" ] && echo "   - DEBUG: $DEBUG" >&2
 [ "$DEBUG" = "true" ] && echo "   - PROCESSOR_PHP: $PROCESSOR_PHP" >&2
 
-(OUTDATED_JSON="$OUTDATED_JSON" COMPOSER_BIN="$COMPOSER_BIN" PHP_BIN="$PHP_BIN" CONFIG_FILE="$CONFIG_FILE" SHOW_RELEASE_INFO="$SHOW_RELEASE_INFO" DEBUG="$DEBUG" VERBOSE="$VERBOSE" "$PHP_BIN" -d date.timezone=UTC "$PROCESSOR_PHP" 2>&1 | grep -v '^Warning:' || true) > /tmp/composer-process-$$.out &
+(OUTDATED_JSON="$OUTDATED_JSON" COMPOSER_BIN="$COMPOSER_BIN" PHP_BIN="$PHP_BIN" CONFIG_FILE="$CONFIG_FILE" SHOW_RELEASE_INFO="$SHOW_RELEASE_INFO" SHOW_IMPACT_ANALYSIS="$SHOW_IMPACT_ANALYSIS" SAVE_IMPACT_TO_FILE="$SAVE_IMPACT_TO_FILE" DEBUG="$DEBUG" VERBOSE="$VERBOSE" "$PHP_BIN" -d date.timezone=UTC "$PROCESSOR_PHP" 2>&1 | grep -v '^Warning:' || true) > /tmp/composer-process-$$.out &
 PROCESS_PID=$!
 
 if [ "${DEBUG:-false}" = "true" ]; then

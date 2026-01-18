@@ -31,6 +31,13 @@ return [
     'packages_passed_check' => 'Pacotes que passaram na verificação de dependências:',
     'none' => '(nenhum)',
     'conflicts_with' => 'conflita com:',
+    'package_abandoned' => 'Pacote está abandonado',
+    'replaced_by' => 'substituído por: %s',
+    'alternative_solutions' => 'Soluções alternativas:',
+    'compatible_with_conflicts' => 'compatível com dependências em conflito',
+    'alternative_packages' => 'Pacotes alternativos:',
+    'recommended_replacement' => 'substituição recomendada',
+    'similar_functionality' => 'funcionalidade similar',
     
     // Debug messages
     'debug_show_release_info' => 'showReleaseInfo = %s',
@@ -52,5 +59,16 @@ return [
     'release_info' => 'Informação de Versão',
     'release_changelog' => 'Registro de Alterações',
     'release_view_on_github' => 'Ver no GitHub',
+    
+    // Progress messages
+    'checking_dependency_conflicts' => '⏳ Verificando conflitos de dependências...',
+    'checking_abandoned_packages' => '⏳ Verificando pacotes abandonados...',
+    'searching_fallback_versions' => '⏳ Procurando versões fallback...',
+    'searching_alternative_packages' => '⏳ Procurando pacotes alternativos...',
+    'checking_maintainer_info' => '⏳ Verificando informações do mantenedor...',
+    
+    // Impact analysis
+    'impact_analysis' => 'Análise de impacto: Atualizar {package} para {version} afetaria:',
+    'found_outdated_packages' => 'Encontrados %d pacote(s) desatualizado(s)',
 ];
 

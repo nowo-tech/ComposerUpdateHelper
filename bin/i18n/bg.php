@@ -31,6 +31,13 @@ return [
     'packages_passed_check' => 'Пакети, които преминаха проверката на зависимости:',
     'none' => '(няма)',
     'conflicts_with' => 'конфликтира с:',
+    'package_abandoned' => 'Пакетът е изоставен',
+    'replaced_by' => 'заменен с: %s',
+    'alternative_solutions' => 'Алтернативни решения:',
+    'compatible_with_conflicts' => 'съвместим с конфликтни зависимости',
+    'alternative_packages' => 'Алтернативни пакети:',
+    'recommended_replacement' => 'препоръчана замяна',
+    'similar_functionality' => 'подобна функционалност',
     
     // Debug messages
     'debug_show_release_info' => 'showReleaseInfo = %s',
@@ -52,5 +59,16 @@ return [
     'release_info' => 'Информация за изданието',
     'release_changelog' => 'Дневник на промените',
     'release_view_on_github' => 'Преглед в GitHub',
+    
+    // Progress messages
+    'checking_dependency_conflicts' => '⏳ Проверка на конфликти на зависимости...',
+    'checking_abandoned_packages' => '⏳ Проверка на изоставени пакети...',
+    'searching_fallback_versions' => '⏳ Търсене на резервни версии...',
+    'searching_alternative_packages' => '⏳ Търсене на алтернативни пакети...',
+    'checking_maintainer_info' => '⏳ Проверка на информация за поддръжка...',
+    
+    // Impact analysis
+    'impact_analysis' => 'Анализ на въздействието: Актуализирането на {package} до {version} ще засегне:',
+    'found_outdated_packages' => 'Намерени %d остарели пакета',
 ];
 

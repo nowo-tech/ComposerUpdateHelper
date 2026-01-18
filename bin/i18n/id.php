@@ -31,6 +31,13 @@ return [
     'packages_passed_check' => 'Paket yang lulus pemeriksaan dependensi:',
     'none' => '(tidak ada)',
     'conflicts_with' => 'berkonflik dengan:',
+    'package_abandoned' => 'Paket ditinggalkan',
+    'replaced_by' => 'diganti dengan: %s',
+    'alternative_solutions' => 'Solusi alternatif:',
+    'compatible_with_conflicts' => 'kompatibel dengan dependensi yang berkonflik',
+    'alternative_packages' => 'Paket alternatif:',
+    'recommended_replacement' => 'pengganti yang direkomendasikan',
+    'similar_functionality' => 'fungsionalitas serupa',
     
     // Debug messages
     'debug_show_release_info' => 'showReleaseInfo = %s',
@@ -52,5 +59,16 @@ return [
     'release_info' => 'Informasi Rilis',
     'release_changelog' => 'Catatan Perubahan',
     'release_view_on_github' => 'Lihat di GitHub',
+    
+    // Progress messages
+    'checking_dependency_conflicts' => '⏳ Memeriksa konflik dependensi...',
+    'checking_abandoned_packages' => '⏳ Memeriksa paket yang ditinggalkan...',
+    'searching_fallback_versions' => '⏳ Mencari versi cadangan...',
+    'searching_alternative_packages' => '⏳ Mencari paket alternatif...',
+    'checking_maintainer_info' => '⏳ Memeriksa informasi maintainer...',
+    
+    // Impact analysis
+    'impact_analysis' => 'Analisis dampak: Memperbarui {package} ke {version} akan mempengaruhi:',
+    'found_outdated_packages' => 'Ditemukan %d paket usang',
 ];
 

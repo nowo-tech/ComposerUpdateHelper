@@ -8,6 +8,8 @@ OPTIONS:
     --release-info           Show release information (summary with links)
     --release-detail         Show full release changelog for each package (implies --release-info)
     --no-release-info        Skip release information section (default behavior)
+    --show-impact, --impact  Show impact analysis for conflicting packages (disabled by default)
+    --save-impact            Save impact analysis to composer-update-impact.txt file (implies --show-impact)
     -v, --verbose            Show verbose output (configuration files, packages, etc.)
     --debug                  Show debug information (very detailed, includes file paths, parsing, etc.)
     -h, --help               Show this help message
@@ -17,10 +19,14 @@ EXAMPLES:
     %s --run                              # Execute suggested commands
     %s --release-info                     # Show release information summary
     %s --release-detail                   # Show full changelogs (implies --release-info)
+    %s --show-impact                      # Show impact analysis for conflicting packages
+    %s --save-impact                      # Save impact analysis to file
     %s --verbose                           # Show verbose output with configuration details
     %s --debug                             # Show detailed debug information
     %s --run --release-detail             # Execute and show full changelogs
     %s --verbose --release-info # Verbose with release info
+    %s --show-impact --verbose            # Show impact analysis with verbose output
+    %s --save-impact --verbose            # Save impact analysis to file with verbose output
     %s --debug                  # Debug mode (very detailed)
 
 FRAMEWORK SUPPORT:

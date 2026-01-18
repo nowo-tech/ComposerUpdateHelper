@@ -31,6 +31,13 @@ return [
     'packages_passed_check' => 'แพ็กเกจที่ผ่านการตรวจสอบ dependencies:',
     'none' => '(ไม่มี)',
     'conflicts_with' => 'ขัดแย้งกับ:',
+    'package_abandoned' => 'แพ็กเกจถูกทิ้ง',
+    'replaced_by' => 'แทนที่ด้วย: %s',
+    'alternative_solutions' => 'โซลูชันทางเลือก:',
+    'compatible_with_conflicts' => 'เข้ากันได้กับ dependencies ที่ขัดแย้ง',
+    'alternative_packages' => 'แพ็กเกจทางเลือก:',
+    'recommended_replacement' => 'การแทนที่ที่แนะนำ',
+    'similar_functionality' => 'ฟังก์ชันการทำงานที่คล้ายกัน',
     
     // Debug messages
     'debug_show_release_info' => 'showReleaseInfo = %s',
@@ -52,5 +59,16 @@ return [
     'release_info' => 'ข้อมูลการเผยแพร่',
     'release_changelog' => 'บันทึกการเปลี่ยนแปลง',
     'release_view_on_github' => 'ดูบน GitHub',
+    
+    // Progress messages
+    'checking_dependency_conflicts' => '⏳ กำลังตรวจสอบความขัดแย้งของ dependencies...',
+    'checking_abandoned_packages' => '⏳ กำลังตรวจสอบแพ็กเกจที่ถูกทิ้ง...',
+    'searching_fallback_versions' => '⏳ กำลังค้นหาเวอร์ชันสำรอง...',
+    'searching_alternative_packages' => '⏳ กำลังค้นหาแพ็กเกจทางเลือก...',
+    'checking_maintainer_info' => '⏳ กำลังตรวจสอบข้อมูลผู้ดูแล...',
+    
+    // Impact analysis
+    'impact_analysis' => 'การวิเคราะห์ผลกระทบ: การอัปเดต {package} เป็น {version} จะส่งผลต่อ:',
+    'found_outdated_packages' => 'พบแพ็กเกจที่ล้าสมัย %d รายการ',
 ];
 
