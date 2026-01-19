@@ -71,7 +71,7 @@ class ConfigLoader
      * @return string|int|float|bool|null Configuration value or default
      *                                    Returns: bool for 'true'/'false', int/float for numbers, string for text, null if not found
      */
-    public static function readConfigValue(string $yamlPath, string $key, $default = null): string|int|float|bool|null
+    public static function readConfigValue(string $yamlPath, string $key, string|int|float|bool|null $default = null): string|int|float|bool|null
     {
         if (!file_exists($yamlPath)) {
             return $default;
