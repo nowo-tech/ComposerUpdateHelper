@@ -32,6 +32,8 @@ return [
     'none' => '(không có)',
     'conflicts_with' => 'xung đột với:',
     'package_abandoned' => 'Gói đã bị bỏ rơi',
+    'abandoned_packages_section' => 'Tìm thấy các gói đã bị bỏ rơi:',
+    'all_installed_abandoned_section' => 'Tất cả các gói đã bị bỏ rơi đã cài đặt:',
     'replaced_by' => 'được thay thế bởi: %s',
     'alternative_solutions' => 'Giải pháp thay thế:',
     'compatible_with_conflicts' => 'tương thích với các phụ thuộc xung đột',
@@ -63,12 +65,14 @@ return [
     // Progress messages
     'checking_dependency_conflicts' => '⏳ Đang kiểm tra xung đột phụ thuộc...',
     'checking_abandoned_packages' => '⏳ Đang kiểm tra các gói bị bỏ hoang...',
+    'checking_all_abandoned_packages' => '⏳ Đang kiểm tra tất cả các gói đã cài đặt để xem trạng thái bị bỏ rơi...',
     'searching_fallback_versions' => '⏳ Đang tìm kiếm phiên bản dự phòng...',
     'searching_alternative_packages' => '⏳ Đang tìm kiếm các gói thay thế...',
     'checking_maintainer_info' => '⏳ Đang kiểm tra thông tin người bảo trì...',
     
     // Impact analysis
     'impact_analysis' => 'Phân tích tác động: Cập nhật {package} lên {version} sẽ ảnh hưởng đến:',
+    'impact_analysis_saved' => '✅ Phân tích tác động đã lưu vào: %s',
     'found_outdated_packages' => 'Tìm thấy %d gói lỗi thời',
 ];
 

@@ -32,6 +32,8 @@ return [
     'none' => '(yok)',
     'conflicts_with' => 'ile çakışıyor:',
     'package_abandoned' => 'Paket terk edildi',
+    'abandoned_packages_section' => 'Terk edilmiş paketler bulundu:',
+    'all_installed_abandoned_section' => 'Yüklü tüm terk edilmiş paketler:',
     'replaced_by' => 'değiştirildi: %s',
     'alternative_solutions' => 'Alternatif çözümler:',
     'compatible_with_conflicts' => 'çakışan bağımlılıklarla uyumlu',
@@ -63,12 +65,14 @@ return [
     // Progress messages
     'checking_dependency_conflicts' => '⏳ Bağımlılık çakışmaları kontrol ediliyor...',
     'checking_abandoned_packages' => '⏳ Terk edilmiş paketler kontrol ediliyor...',
+    'checking_all_abandoned_packages' => '⏳ Yüklü tüm paketlerin terk edilme durumu kontrol ediliyor...',
     'searching_fallback_versions' => '⏳ Yedek sürümler aranıyor...',
     'searching_alternative_packages' => '⏳ Alternatif paketler aranıyor...',
     'checking_maintainer_info' => '⏳ Bakımcı bilgileri kontrol ediliyor...',
     
     // Impact analysis
     'impact_analysis' => 'Etki analizi: {package} paketini {version} sürümüne güncellemek şunları etkiler:',
+    'impact_analysis_saved' => '✅ Etki analizi kaydedildi: %s',
     'found_outdated_packages' => '%d eski paket bulundu',
 ];
 

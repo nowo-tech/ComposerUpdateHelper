@@ -32,6 +32,8 @@ return [
     'none' => '(žádné)',
     'conflicts_with' => 'konfliktuje s:',
     'package_abandoned' => 'Balíček je opuštěn',
+    'abandoned_packages_section' => 'Nalezeny opuštěné balíčky:',
+    'all_installed_abandoned_section' => 'Všechny nainstalované opuštěné balíčky:',
     'replaced_by' => 'nahrazen: %s',
     'alternative_solutions' => 'Alternativní řešení:',
     'compatible_with_conflicts' => 'kompatibilní s konfliktními závislostmi',
@@ -63,12 +65,14 @@ return [
     // Progress messages
     'checking_dependency_conflicts' => '⏳ Kontrola konfliktů závislostí...',
     'checking_abandoned_packages' => '⏳ Kontrola opuštěných balíčků...',
+    'checking_all_abandoned_packages' => '⏳ Kontrola všech nainstalovaných balíčků na opuštěný stav...',
     'searching_fallback_versions' => '⏳ Vyhledávání záložních verzí...',
     'searching_alternative_packages' => '⏳ Vyhledávání alternativních balíčků...',
     'checking_maintainer_info' => '⏳ Kontrola informací o správci...',
     
     // Impact analysis
     'impact_analysis' => 'Analýza dopadu: Aktualizace {package} na {version} by ovlivnila:',
+    'impact_analysis_saved' => '✅ Analýza dopadu uložena do: %s',
     'found_outdated_packages' => 'Nalezeno %d zastaralých balíčků',
 ];
 

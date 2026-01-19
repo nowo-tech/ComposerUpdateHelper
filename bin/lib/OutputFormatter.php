@@ -38,6 +38,7 @@ class OutputFormatter
         $requiredTransitiveUpdates = $data['requiredTransitiveUpdates'] ?? [];
         $releaseInfo = $data['releaseInfo'] ?? [];
         $devSet = $data['devSet'] ?? [];
+        $allInstalledAbandoned = $data['allInstalledAbandoned'] ?? [];
 
         $debug = $options['debug'] ?? false;
         $verbose = $options['verbose'] ?? false;
@@ -100,6 +101,50 @@ class OutputFormatter
             $output[] = "";
         }
 
+        // Show all installed abandoned packages section (if any) - BEFORE dependency analysis
+        if (!empty($allInstalledAbandoned)) {
+            $msg = function_exists('t') ? t('all_installed_abandoned_section', [], $detectedLang) : 'All abandoned packages installed:';
+            $output[] = " " . E_WARNING . " " . $msg;
+            if ($debug) {
+                error_log("DEBUG: i18n - Using translation for 'all_installed_abandoned_section': " . $msg);
+            }
+            
+            // Separate abandoned packages by prod/dev
+            $abandonedProd = [];
+            $abandonedDev = [];
+            
+            foreach ($allInstalledAbandoned as $packageString => $abandonedInfo) {
+                $packageName = explode(':', $packageString)[0];
+                $isDev = $abandonedInfo['is_dev'] ?? false;
+                
+                $abandonedMsg = function_exists('t') ? t('package_abandoned', [], $detectedLang) : 'Package is abandoned';
+                $info = " (⚠️ " . $abandonedMsg;
+                if ($abandonedInfo['replacement']) {
+                    $replacedByMsg = function_exists('t') ? t('replaced_by', [$abandonedInfo['replacement']], $detectedLang) : "replaced by: {$abandonedInfo['replacement']}";
+                    $info .= ", " . $replacedByMsg;
+                }
+                $info .= ")";
+                
+                if ($isDev) {
+                    $abandonedDev[] = $packageString . " " . LABEL_DEV . $info;
+                } else {
+                    $abandonedProd[] = $packageString . " " . LABEL_PROD . $info;
+                }
+            }
+            
+            if (!empty($abandonedProd)) {
+                foreach ($abandonedProd as $pkg) {
+                    $output[] = "     - " . $pkg;
+                }
+            }
+            if (!empty($abandonedDev)) {
+                foreach ($abandonedDev as $pkg) {
+                    $output[] = "     - " . $pkg;
+                }
+            }
+            $output[] = "";
+        }
+
         // Show dependency checking comparison when enabled
         if ($checkDependencies) {
             $msg = function_exists('t') ? t('dependency_analysis', [], $detectedLang) : 'Dependency checking analysis:';
@@ -122,6 +167,51 @@ class OutputFormatter
                 $msg = function_exists('t') ? t('all_outdated_before', [], $detectedLang) : 'All outdated packages (before dependency check):';
                 $noneLabel = function_exists('t') ? t('none', [], $detectedLang) : LABEL_NONE;
                 $output[] = "  " . E_CLIPBOARD . " " . $msg . " " . $noneLabel;
+                $output[] = "";
+            }
+
+            // Show abandoned packages section (if any)
+            if (!empty($filteredPackageAbandoned)) {
+                $msg = function_exists('t') ? t('abandoned_packages_section', [], $detectedLang) : 'Abandoned packages found:';
+                $output[] = "  " . E_WARNING . " " . $msg;
+                if ($debug) {
+                    error_log("DEBUG: i18n - Using translation for 'abandoned_packages_section': " . $msg);
+                }
+                
+                // Separate abandoned packages by prod/dev
+                $abandonedProd = [];
+                $abandonedDev = [];
+                $devSet = $data['devSet'] ?? [];
+                
+                foreach ($filteredPackageAbandoned as $packageString => $abandonedInfo) {
+                    $packageName = explode(':', $packageString)[0];
+                    $isDev = isset($devSet[$packageName]);
+                    
+                    $abandonedMsg = function_exists('t') ? t('package_abandoned', [], $detectedLang) : 'Package is abandoned';
+                    $info = " (⚠️ " . $abandonedMsg;
+                    if ($abandonedInfo['replacement']) {
+                        $replacedByMsg = function_exists('t') ? t('replaced_by', [$abandonedInfo['replacement']], $detectedLang) : "replaced by: {$abandonedInfo['replacement']}";
+                        $info .= ", " . $replacedByMsg;
+                    }
+                    $info .= ")";
+                    
+                    if ($isDev) {
+                        $abandonedDev[] = $packageString . " " . LABEL_DEV . $info;
+                    } else {
+                        $abandonedProd[] = $packageString . " " . LABEL_PROD . $info;
+                    }
+                }
+                
+                if (!empty($abandonedProd)) {
+                    foreach ($abandonedProd as $pkg) {
+                        $output[] = "     - " . $pkg;
+                    }
+                }
+                if (!empty($abandonedDev)) {
+                    foreach ($abandonedDev as $pkg) {
+                        $output[] = "     - " . $pkg;
+                    }
+                }
                 $output[] = "";
             }
 

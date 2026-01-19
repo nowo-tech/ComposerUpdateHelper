@@ -32,6 +32,8 @@ return [
     'none' => '(няма)',
     'conflicts_with' => 'конфликтира с:',
     'package_abandoned' => 'Пакетът е изоставен',
+    'abandoned_packages_section' => 'Намерени изоставени пакети:',
+    'all_installed_abandoned_section' => 'Всички инсталирани изоставени пакети:',
     'replaced_by' => 'заменен с: %s',
     'alternative_solutions' => 'Алтернативни решения:',
     'compatible_with_conflicts' => 'съвместим с конфликтни зависимости',
@@ -63,12 +65,14 @@ return [
     // Progress messages
     'checking_dependency_conflicts' => '⏳ Проверка на конфликти на зависимости...',
     'checking_abandoned_packages' => '⏳ Проверка на изоставени пакети...',
+    'checking_all_abandoned_packages' => '⏳ Проверка на всички инсталирани пакети за изоставен статус...',
     'searching_fallback_versions' => '⏳ Търсене на резервни версии...',
     'searching_alternative_packages' => '⏳ Търсене на алтернативни пакети...',
     'checking_maintainer_info' => '⏳ Проверка на информация за поддръжка...',
     
     // Impact analysis
     'impact_analysis' => 'Анализ на въздействието: Актуализирането на {package} до {version} ще засегне:',
+    'impact_analysis_saved' => '✅ Анализ на въздействието запазен в: %s',
     'found_outdated_packages' => 'Намерени %d остарели пакета',
 ];
 

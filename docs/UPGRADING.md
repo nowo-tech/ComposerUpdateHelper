@@ -18,6 +18,43 @@ This guide will help you upgrade Composer Update Helper to newer versions.
 
 ## Version-Specific Upgrade Notes
 
+### Upgrading to 2.0.24+ (Unreleased)
+
+#### What's New
+This release significantly improves abandoned package detection to provide comprehensive visibility into all abandoned packages in your project.
+
+**New Features:**
+- **Comprehensive Abandoned Package Detection**: Now detects abandoned packages for ALL installed packages, not just outdated ones
+  - New section "All abandoned packages installed:" appears before dependency analysis
+  - Shows all abandoned packages from your `composer.json` (both `require` and `require-dev`)
+  - Includes replacement package information when available
+  - Separates packages by prod/dev labels for clarity
+  - Example output:
+    ```
+    ⚠️ All abandoned packages installed:
+       - old-package:1.0.0 (prod) (⚠️ Package is abandoned, replaced by: new-package/name)
+       - deprecated-lib:2.5.0 (dev) (⚠️ Package is abandoned)
+    ```
+- **Enhanced Detection for Outdated Packages**: Improved to check ALL outdated packages for abandoned status
+  - Previously only checked packages with dependency conflicts
+  - Now checks all outdated packages regardless of conflicts
+  - Provides more complete picture of package maintenance status
+
+**Changed:**
+- **Detection Flow**: Restructured to check abandoned status at two points:
+  1. All installed packages (before dependency analysis)
+  2. Outdated packages (during dependency analysis)
+  - Avoids duplicate detection
+  - Better organization of information in output
+
+#### Migration Notes
+- **No action required**: These are enhancements to existing functionality
+- **New output section**: You'll now see "All abandoned packages installed:" section at the beginning of the output
+- **More comprehensive information**: You'll get visibility into all abandoned packages, not just those with conflicts or updates available
+
+#### Breaking Changes
+- None
+
 ### Upgrading to 2.0.23+
 
 #### What's New
@@ -82,6 +119,9 @@ This release adds several new features to help resolve dependency conflicts and 
   - Displays: `✅ Found X outdated package(s)`
   - Automatically shown when packages are found
 - **Abandoned Package Detection**: Automatically detects and warns about abandoned packages
+  - Detects abandoned packages for all installed packages (not just outdated ones)
+  - Shows comprehensive list of all abandoned packages before dependency analysis
+  - Also detects abandoned status for outdated packages during conflict analysis
 - **Fallback Version Suggestions**: Suggests compatible older versions when conflicts are detected
 - **Alternative Package Suggestions**: Suggests alternative packages when updates are blocked
 - **Maintainer Contact Suggestions**: Provides maintainer contact information when manual intervention is needed

@@ -32,6 +32,8 @@ return [
     'none' => '(なし)',
     'conflicts_with' => 'と競合:',
     'package_abandoned' => 'パッケージは放棄されました',
+    'abandoned_packages_section' => '廃止されたパッケージが見つかりました:',
+    'all_installed_abandoned_section' => 'インストールされているすべての廃止されたパッケージ:',
     'replaced_by' => '置き換え: %s',
     'alternative_solutions' => '代替ソリューション:',
     'compatible_with_conflicts' => '競合する依存関係と互換性あり',
@@ -63,12 +65,14 @@ return [
     // Progress messages
     'checking_dependency_conflicts' => '⏳ 依存関係の競合を確認中...',
     'checking_abandoned_packages' => '⏳ 廃止されたパッケージを確認中...',
+    'checking_all_abandoned_packages' => '⏳ インストールされているすべてのパッケージの廃止状態を確認中...',
     'searching_fallback_versions' => '⏳ フォールバックバージョンを検索中...',
     'searching_alternative_packages' => '⏳ 代替パッケージを検索中...',
     'checking_maintainer_info' => '⏳ メンテナ情報を確認中...',
     
     // Impact analysis
     'impact_analysis' => '影響分析：{package} を {version} に更新すると、以下に影響します：',
+    'impact_analysis_saved' => '✅ 影響分析を保存しました: %s',
     'found_outdated_packages' => '%d 個の古いパッケージが見つかりました',
 ];
 

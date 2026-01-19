@@ -32,6 +32,8 @@ return [
     'none' => '(niciunul)',
     'conflicts_with' => 'conflict cu:',
     'package_abandoned' => 'Pachetul este abandonat',
+    'abandoned_packages_section' => 'Pachete abandonate găsite:',
+    'all_installed_abandoned_section' => 'Toate pachetele abandonate instalate:',
     'replaced_by' => 'înlocuit cu: %s',
     'alternative_solutions' => 'Soluții alternative:',
     'compatible_with_conflicts' => 'compatibil cu dependențe conflictuale',
@@ -63,12 +65,14 @@ return [
     // Progress messages
     'checking_dependency_conflicts' => '⏳ Verificarea conflictelor de dependențe...',
     'checking_abandoned_packages' => '⏳ Verificarea pachetelor abandonate...',
+    'checking_all_abandoned_packages' => '⏳ Verificarea tuturor pachetelor instalate pentru status abandonat...',
     'searching_fallback_versions' => '⏳ Căutarea versiunilor de rezervă...',
     'searching_alternative_packages' => '⏳ Căutarea pachetelor alternative...',
     'checking_maintainer_info' => '⏳ Verificarea informațiilor despre mentenor...',
     
     // Impact analysis
     'impact_analysis' => 'Analiza impactului: Actualizarea {package} la {version} ar afecta:',
+    'impact_analysis_saved' => '✅ Analiza impactului salvată în: %s',
     'found_outdated_packages' => 'Găsite %d pachet(e) învechite',
 ];
 

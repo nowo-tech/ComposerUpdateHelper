@@ -32,6 +32,8 @@ return [
     'none' => '(ninguno)',
     'conflicts_with' => 'conflicta con:',
     'package_abandoned' => 'El paquete está abandonado',
+    'abandoned_packages_section' => 'Paquetes abandonados encontrados:',
+    'all_installed_abandoned_section' => 'Todos los paquetes abandonados instalados:',
     'replaced_by' => 'reemplazado por: %s',
     'alternative_solutions' => 'Soluciones alternativas:',
     'compatible_with_conflicts' => 'compatible con dependencias en conflicto',
@@ -63,12 +65,14 @@ return [
     // Progress messages
     'checking_dependency_conflicts' => '⏳ Verificando conflictos de dependencias...',
     'checking_abandoned_packages' => '⏳ Verificando paquetes abandonados...',
+    'checking_all_abandoned_packages' => '⏳ Verificando todos los paquetes instalados para estado de abandono...',
     'searching_fallback_versions' => '⏳ Buscando versiones fallback...',
     'searching_alternative_packages' => '⏳ Buscando paquetes alternativos...',
     'checking_maintainer_info' => '⏳ Verificando información de mantenedores...',
     
     // Impact analysis
     'impact_analysis' => 'Análisis de impacto: Actualizar {package} a {version} afectaría a:',
+    'impact_analysis_saved' => '✅ Análisis de impacto guardado en: %s',
     
     // Package count
     'found_outdated_packages' => 'Se encontraron %d paquete(s) desactualizado(s)',

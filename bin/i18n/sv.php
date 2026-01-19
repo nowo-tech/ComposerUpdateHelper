@@ -32,6 +32,8 @@ return [
     'none' => '(inga)',
     'conflicts_with' => 'konfliktar med:',
     'package_abandoned' => 'Paketet är övergivet',
+    'abandoned_packages_section' => 'Övergivna paket hittades:',
+    'all_installed_abandoned_section' => 'Alla installerade övergivna paket:',
     'replaced_by' => 'ersatt av: %s',
     'alternative_solutions' => 'Alternativa lösningar:',
     'compatible_with_conflicts' => 'kompatibel med konflikterande beroenden',
@@ -63,12 +65,14 @@ return [
     // Progress messages
     'checking_dependency_conflicts' => '⏳ Kontrollerar beroendekonflikter...',
     'checking_abandoned_packages' => '⏳ Kontrollerar övergivna paket...',
+    'checking_all_abandoned_packages' => '⏳ Kontrollerar alla installerade paket för övergiven status...',
     'searching_fallback_versions' => '⏳ Söker efter reservversioner...',
     'searching_alternative_packages' => '⏳ Söker efter alternativa paket...',
     'checking_maintainer_info' => '⏳ Kontrollerar maintainer-information...',
     
     // Impact analysis
     'impact_analysis' => 'Påverkan: Uppdatering av {package} till {version} skulle påverka:',
+    'impact_analysis_saved' => '✅ Påverkan sparad i: %s',
     'found_outdated_packages' => 'Hittade %d föråldrade paket',
 ];
 

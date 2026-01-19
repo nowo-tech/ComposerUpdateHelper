@@ -32,6 +32,8 @@ return [
     'none' => '(אין)',
     'conflicts_with' => 'מתנגש עם:',
     'package_abandoned' => 'החבילה ננטשה',
+    'abandoned_packages_section' => 'נמצאו חבילות נטושות:',
+    'all_installed_abandoned_section' => 'כל החבילות הנטושות המותקנות:',
     'replaced_by' => 'הוחלף ב: %s',
     'alternative_solutions' => 'פתרונות חלופיים:',
     'compatible_with_conflicts' => 'תואם לתלויות מתנגשות',
@@ -63,12 +65,14 @@ return [
     // Progress messages
     'checking_dependency_conflicts' => '⏳ בודק התנגשויות תלותיות...',
     'checking_abandoned_packages' => '⏳ בודק חבילות נטושות...',
+    'checking_all_abandoned_packages' => '⏳ בודק את כל החבילות המותקנות עבור סטטוס נטוש...',
     'searching_fallback_versions' => '⏳ מחפש גרסאות גיבוי...',
     'searching_alternative_packages' => '⏳ מחפש חבילות חלופיות...',
     'checking_maintainer_info' => '⏳ בודק מידע על מפתח...',
     
     // Impact analysis
     'impact_analysis' => 'ניתוח השפעה: עדכון {package} לגרסה {version} ישפיע על:',
+    'impact_analysis_saved' => '✅ ניתוח השפעה נשמר ב: %s',
     'found_outdated_packages' => 'נמצאו %d חבילות מיושנות',
 ];
 

@@ -32,6 +32,8 @@ return [
     'none' => '(없음)',
     'conflicts_with' => '다음과 충돌:',
     'package_abandoned' => '패키지가 포기됨',
+    'abandoned_packages_section' => '중단된 패키지 발견:',
+    'all_installed_abandoned_section' => '설치된 모든 중단된 패키지:',
     'replaced_by' => '대체됨: %s',
     'alternative_solutions' => '대안 솔루션:',
     'compatible_with_conflicts' => '충돌하는 종속성과 호환',
@@ -63,12 +65,14 @@ return [
     // Progress messages
     'checking_dependency_conflicts' => '⏳ 종속성 충돌 확인 중...',
     'checking_abandoned_packages' => '⏳ 중단된 패키지 확인 중...',
+    'checking_all_abandoned_packages' => '⏳ 설치된 모든 패키지의 중단 상태 확인 중...',
     'searching_fallback_versions' => '⏳ 대체 버전 검색 중...',
     'searching_alternative_packages' => '⏳ 대체 패키지 검색 중...',
     'checking_maintainer_info' => '⏳ 유지 관리자 정보 확인 중...',
     
     // Impact analysis
     'impact_analysis' => '영향 분석: {package}를 {version}로 업데이트하면 다음에 영향을 줍니다:',
+    'impact_analysis_saved' => '✅ 영향 분석 저장됨: %s',
     'found_outdated_packages' => '오래된 패키지 %d개 발견',
 ];
 

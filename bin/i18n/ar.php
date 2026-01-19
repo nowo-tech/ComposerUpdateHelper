@@ -32,6 +32,8 @@ return [
     'none' => '(لا شيء)',
     'conflicts_with' => 'يتعارض مع:',
     'package_abandoned' => 'الحزمة مهجورة',
+    'abandoned_packages_section' => 'تم العثور على حزم مهجورة:',
+    'all_installed_abandoned_section' => 'جميع الحزم المهجورة المثبتة:',
     'replaced_by' => 'استبدلت بـ: %s',
     'alternative_solutions' => 'حلول بديلة:',
     'compatible_with_conflicts' => 'متوافق مع التبعيات المتعارضة',
@@ -63,12 +65,14 @@ return [
     // Progress messages
     'checking_dependency_conflicts' => '⏳ التحقق من تعارضات التبعيات...',
     'checking_abandoned_packages' => '⏳ التحقق من الحزم المهجورة...',
+    'checking_all_abandoned_packages' => '⏳ التحقق من جميع الحزم المثبتة للحالة المهجورة...',
     'searching_fallback_versions' => '⏳ البحث عن إصدارات احتياطية...',
     'searching_alternative_packages' => '⏳ البحث عن حزم بديلة...',
     'checking_maintainer_info' => '⏳ التحقق من معلومات المطور...',
     
     // Impact analysis
     'impact_analysis' => 'تحليل التأثير: تحديث {package} إلى {version} سيؤثر على:',
+    'impact_analysis_saved' => '✅ تم حفظ تحليل التأثير في: %s',
     'found_outdated_packages' => 'تم العثور على %d حزمة قديمة',
 ];
 
