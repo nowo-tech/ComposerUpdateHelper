@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.0.23] - 2026-01-18
 
+### Fixed
+- **PHP 7.4 compatibility**: Removed `mixed` type hint from `ConfigLoader::readConfigValue()` method
+  - The `mixed` type was introduced in PHP 8.0, but the project supports PHP 7.4+
+  - Changed to untyped parameter with PHPDoc annotation for backward compatibility
+  - Fixes test failure on PHP 7.4 CI environment
+
 ### Added
 - **Command-line options configuration in YAML**: All command-line options can now be configured as defaults in `generate-composer-require.yaml`
   - Set your preferred defaults once in the YAML file, then override them when needed via command-line arguments
