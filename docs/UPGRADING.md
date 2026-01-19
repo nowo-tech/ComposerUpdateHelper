@@ -46,6 +46,13 @@ This release significantly improves abandoned package detection to provide compr
   2. Outdated packages (during dependency analysis)
   - Avoids duplicate detection
   - Better organization of information in output
+- **Fixed save-impact-to-file configuration**: When `save-impact-to-file: true` is set in YAML, automatically enables `show-impact-analysis` to ensure data is generated
+
+**Fixed:**
+- **Impact analysis file location**: Fixed issue where `composer-update-impact.txt` was saved in the current working directory instead of the script's directory
+  - Now saves the file in the same directory where the script is located
+  - Example: If script is in `/usr/src/app/symfony/generate-composer-require.sh`, file is saved to `/usr/src/app/symfony/composer-update-impact.txt`
+  - Ensures the file is always generated next to the script, regardless of where the command is executed from
 
 #### Migration Notes
 - **No action required**: These are enhancements to existing functionality

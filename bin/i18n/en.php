@@ -1,7 +1,7 @@
 <?php
 /**
  * English translations (default)
- *
+ * 
  * @package ComposerUpdateHelper
  * @subpackage i18n
  */
@@ -13,13 +13,13 @@ return [
     'all_have_conflicts' => 'all outdated packages have dependency conflicts',
     'all_ignored' => 'all outdated packages are ignored',
     'all_ignored_or_conflicts' => 'all outdated packages are ignored or have dependency conflicts',
-
+    
     // Commands
     'suggested_commands' => 'Suggested commands:',
     'suggested_commands_conflicts' => 'Suggested commands to resolve dependency conflicts:',
     'includes_transitive' => '(Includes transitive dependencies needed to resolve conflicts)',
     'update_transitive_first' => '(Update these transitive dependencies first, then retry updating the filtered packages)',
-
+    
     // Framework and packages
     'detected_framework' => 'Detected framework constraints:',
     'ignored_packages_prod' => 'Ignored packages (prod):',
@@ -40,7 +40,7 @@ return [
     'alternative_packages' => 'Alternative packages:',
     'recommended_replacement' => 'recommended replacement',
     'similar_functionality' => 'similar functionality',
-
+    
     // Debug messages
     'debug_show_release_info' => 'showReleaseInfo = %s',
     'debug_check_dependencies' => 'checkDependencies = %s',
@@ -56,7 +56,7 @@ return [
     'debug_action_skipped' => 'Action: SKIPPED (no compatible version found due to dependency constraints)',
     'debug_action_added' => 'Action: ADDED to %s dependencies: %s',
     'debug_no_compatible_version' => 'No compatible version found for %s (proposed: %s)',
-
+    
     // Release info
     'release_info' => 'Release Information',
     'release_changelog' => 'Changelog',

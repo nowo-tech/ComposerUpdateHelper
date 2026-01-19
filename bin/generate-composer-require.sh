@@ -302,7 +302,11 @@ rm -f /tmp/composer-outdated-$$.json
 [ "$DEBUG" = "true" ] && echo "   - DEBUG: $DEBUG" >&2
 [ "$DEBUG" = "true" ] && echo "   - PROCESSOR_PHP: $PROCESSOR_PHP" >&2
 
-(OUTDATED_JSON="$OUTDATED_JSON" COMPOSER_BIN="$COMPOSER_BIN" PHP_BIN="$PHP_BIN" CONFIG_FILE="$CONFIG_FILE" SHOW_RELEASE_INFO="$SHOW_RELEASE_INFO" SHOW_IMPACT_ANALYSIS="$SHOW_IMPACT_ANALYSIS" SAVE_IMPACT_TO_FILE="$SAVE_IMPACT_TO_FILE" DEBUG="$DEBUG" VERBOSE="$VERBOSE" "$PHP_BIN" -d date.timezone=UTC "$PROCESSOR_PHP" 2>&1 | grep -v '^Warning:' || true) > /tmp/composer-process-$$.out &
+# Get script directory for impact file (where the script is located)
+IMPACT_FILE_DIR="$(dirname "$0")"
+[ "$DEBUG" = "true" ] && echo "   - IMPACT_FILE_DIR: $IMPACT_FILE_DIR" >&2
+
+(OUTDATED_JSON="$OUTDATED_JSON" COMPOSER_BIN="$COMPOSER_BIN" PHP_BIN="$PHP_BIN" CONFIG_FILE="$CONFIG_FILE" SHOW_RELEASE_INFO="$SHOW_RELEASE_INFO" SHOW_IMPACT_ANALYSIS="$SHOW_IMPACT_ANALYSIS" SAVE_IMPACT_TO_FILE="$SAVE_IMPACT_TO_FILE" IMPACT_FILE_DIR="$IMPACT_FILE_DIR" DEBUG="$DEBUG" VERBOSE="$VERBOSE" "$PHP_BIN" -d date.timezone=UTC "$PROCESSOR_PHP" 2>&1 | grep -v '^Warning:' || true) > /tmp/composer-process-$$.out &
 PROCESS_PID=$!
 
 if [ "${DEBUG:-false}" = "true" ]; then
