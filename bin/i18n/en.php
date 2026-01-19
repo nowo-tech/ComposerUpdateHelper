@@ -1,7 +1,7 @@
 <?php
 /**
  * English translations (default)
- * 
+ *
  * @package ComposerUpdateHelper
  * @subpackage i18n
  */
@@ -13,13 +13,13 @@ return [
     'all_have_conflicts' => 'all outdated packages have dependency conflicts',
     'all_ignored' => 'all outdated packages are ignored',
     'all_ignored_or_conflicts' => 'all outdated packages are ignored or have dependency conflicts',
-    
+
     // Commands
     'suggested_commands' => 'Suggested commands:',
     'suggested_commands_conflicts' => 'Suggested commands to resolve dependency conflicts:',
     'includes_transitive' => '(Includes transitive dependencies needed to resolve conflicts)',
     'update_transitive_first' => '(Update these transitive dependencies first, then retry updating the filtered packages)',
-    
+
     // Framework and packages
     'detected_framework' => 'Detected framework constraints:',
     'ignored_packages_prod' => 'Ignored packages (prod):',
@@ -32,13 +32,15 @@ return [
     'none' => '(none)',
     'conflicts_with' => 'conflicts with:',
     'package_abandoned' => 'Package is abandoned',
+    'abandoned_packages_section' => 'Abandoned packages found:',
+    'all_installed_abandoned_section' => 'All abandoned packages installed:',
     'replaced_by' => 'replaced by: %s',
     'alternative_solutions' => 'Alternative solutions:',
     'compatible_with_conflicts' => 'compatible with conflicting dependencies',
     'alternative_packages' => 'Alternative packages:',
     'recommended_replacement' => 'recommended replacement',
     'similar_functionality' => 'similar functionality',
-    
+
     // Debug messages
     'debug_show_release_info' => 'showReleaseInfo = %s',
     'debug_check_dependencies' => 'checkDependencies = %s',
@@ -54,22 +56,24 @@ return [
     'debug_action_skipped' => 'Action: SKIPPED (no compatible version found due to dependency constraints)',
     'debug_action_added' => 'Action: ADDED to %s dependencies: %s',
     'debug_no_compatible_version' => 'No compatible version found for %s (proposed: %s)',
-    
+
     // Release info
     'release_info' => 'Release Information',
     'release_changelog' => 'Changelog',
     'release_view_on_github' => 'View on GitHub',
-    
+
     // Progress messages
     'checking_dependency_conflicts' => '⏳ Checking dependency conflicts...',
     'checking_abandoned_packages' => '⏳ Checking for abandoned packages...',
+    'checking_all_abandoned_packages' => '⏳ Checking all installed packages for abandoned status...',
     'searching_fallback_versions' => '⏳ Searching for fallback versions...',
     'searching_alternative_packages' => '⏳ Searching for alternative packages...',
     'checking_maintainer_info' => '⏳ Checking maintainer information...',
-    
+
     // Impact analysis
     'impact_analysis' => 'Impact analysis: Updating {package} to {version} would affect:',
-    
+    'impact_analysis_saved' => '✅ Impact analysis saved to: %s',
+
     // Package count
     'found_outdated_packages' => 'Found %d outdated package(s)',
 ];

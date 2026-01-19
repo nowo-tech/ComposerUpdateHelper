@@ -32,6 +32,8 @@ return [
     'none' => '(ไม่มี)',
     'conflicts_with' => 'ขัดแย้งกับ:',
     'package_abandoned' => 'แพ็กเกจถูกทิ้ง',
+    'abandoned_packages_section' => 'พบแพ็กเกจที่ถูกทิ้ง:',
+    'all_installed_abandoned_section' => 'แพ็กเกจที่ถูกทิ้งทั้งหมดที่ติดตั้ง:',
     'replaced_by' => 'แทนที่ด้วย: %s',
     'alternative_solutions' => 'โซลูชันทางเลือก:',
     'compatible_with_conflicts' => 'เข้ากันได้กับ dependencies ที่ขัดแย้ง',
@@ -63,12 +65,14 @@ return [
     // Progress messages
     'checking_dependency_conflicts' => '⏳ กำลังตรวจสอบความขัดแย้งของ dependencies...',
     'checking_abandoned_packages' => '⏳ กำลังตรวจสอบแพ็กเกจที่ถูกทิ้ง...',
+    'checking_all_abandoned_packages' => '⏳ กำลังตรวจสอบแพ็กเกจที่ติดตั้งทั้งหมดสำหรับสถานะที่ถูกทิ้ง...',
     'searching_fallback_versions' => '⏳ กำลังค้นหาเวอร์ชันสำรอง...',
     'searching_alternative_packages' => '⏳ กำลังค้นหาแพ็กเกจทางเลือก...',
     'checking_maintainer_info' => '⏳ กำลังตรวจสอบข้อมูลผู้ดูแล...',
     
     // Impact analysis
     'impact_analysis' => 'การวิเคราะห์ผลกระทบ: การอัปเดต {package} เป็น {version} จะส่งผลต่อ:',
+    'impact_analysis_saved' => '✅ บันทึกการวิเคราะห์ผลกระทบไปที่: %s',
     'found_outdated_packages' => 'พบแพ็กเกจที่ล้าสมัย %d รายการ',
 ];
 

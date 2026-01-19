@@ -32,6 +32,8 @@ return [
     'none' => '(ingen)',
     'conflicts_with' => 'konflikt med:',
     'package_abandoned' => 'Pakken er forladt',
+    'abandoned_packages_section' => 'Forladte pakker fundet:',
+    'all_installed_abandoned_section' => 'Alle installerede forladte pakker:',
     'replaced_by' => 'erstattet af: %s',
     'alternative_solutions' => 'Alternative løsninger:',
     'compatible_with_conflicts' => 'kompatibel med konflikterende afhængigheder',
@@ -63,12 +65,14 @@ return [
     // Progress messages
     'checking_dependency_conflicts' => '⏳ Tjekker afhængighedskonflikter...',
     'checking_abandoned_packages' => '⏳ Tjekker forladte pakker...',
+    'checking_all_abandoned_packages' => '⏳ Tjekker alle installerede pakker for forladt status...',
     'searching_fallback_versions' => '⏳ Søger efter fallback-versioner...',
     'searching_alternative_packages' => '⏳ Søger efter alternative pakker...',
     'checking_maintainer_info' => '⏳ Tjekker maintainer-information...',
     
     // Impact analysis
     'impact_analysis' => 'Påvirkningsanalyse: Opdatering af {package} til {version} ville påvirke:',
+    'impact_analysis_saved' => '✅ Påvirkningsanalyse gemt i: %s',
     'found_outdated_packages' => 'Fundet %d forældede pakker',
 ];
 

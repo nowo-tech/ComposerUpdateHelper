@@ -32,6 +32,8 @@ return [
     'none' => '(ingen)',
     'conflicts_with' => 'konflikter med:',
     'package_abandoned' => 'Pakken er forlatt',
+    'abandoned_packages_section' => 'Forlatte pakker funnet:',
+    'all_installed_abandoned_section' => 'Alle installerte forlatte pakker:',
     'replaced_by' => 'erstattet av: %s',
     'alternative_solutions' => 'Alternatieve løsninger:',
     'compatible_with_conflicts' => 'kompatibel med konflikterende avhengigheter',
@@ -63,12 +65,14 @@ return [
     // Progress messages
     'checking_dependency_conflicts' => '⏳ Kontrollerer avhengighetskonflikter...',
     'checking_abandoned_packages' => '⏳ Kontrollerer forlatte pakker...',
+    'checking_all_abandoned_packages' => '⏳ Kontrollerer alle installerte pakker for forlatt status...',
     'searching_fallback_versions' => '⏳ Søker etter reserveversjoner...',
     'searching_alternative_packages' => '⏳ Søker etter alternative pakker...',
     'checking_maintainer_info' => '⏳ Kontrollerer maintainer-informasjon...',
     
     // Impact analysis
     'impact_analysis' => 'Påvirkningsanalyse: Oppdatering av {package} til {version} vil påvirke:',
+    'impact_analysis_saved' => '✅ Påvirkningsanalyse lagret i: %s',
     'found_outdated_packages' => 'Fant %d utdaterte pakker',
 ];
 

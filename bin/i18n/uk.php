@@ -32,6 +32,8 @@ return [
     'none' => '(немає)',
     'conflicts_with' => 'конфліктує з:',
     'package_abandoned' => 'Пакет залишений',
+    'abandoned_packages_section' => 'Знайдено занедбані пакети:',
+    'all_installed_abandoned_section' => 'Всі встановлені занедбані пакети:',
     'replaced_by' => 'замінено на: %s',
     'alternative_solutions' => 'Альтернативні рішення:',
     'compatible_with_conflicts' => 'сумісний з конфліктними залежностями',
@@ -63,12 +65,14 @@ return [
     // Progress messages
     'checking_dependency_conflicts' => '⏳ Перевірка конфліктів залежностей...',
     'checking_abandoned_packages' => '⏳ Перевірка занедбаних пакетів...',
+    'checking_all_abandoned_packages' => '⏳ Перевірка всіх встановлених пакетів на занедбаний статус...',
     'searching_fallback_versions' => '⏳ Пошук резервних версій...',
     'searching_alternative_packages' => '⏳ Пошук альтернативних пакетів...',
     'checking_maintainer_info' => '⏳ Перевірка інформації про супровідника...',
     
     // Impact analysis
     'impact_analysis' => 'Аналіз впливу: Оновлення {package} до {version} вплине на:',
+    'impact_analysis_saved' => '✅ Аналіз впливу збережено в: %s',
     'found_outdated_packages' => 'Знайдено %d застарілих пакетів',
 ];
 

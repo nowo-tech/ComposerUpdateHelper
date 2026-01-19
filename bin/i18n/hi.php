@@ -32,6 +32,8 @@ return [
     'none' => '(कोई नहीं)',
     'conflicts_with' => 'के साथ संघर्ष:',
     'package_abandoned' => 'पैकेज परित्यक्त है',
+    'abandoned_packages_section' => 'परित्यक्त पैकेज मिले:',
+    'all_installed_abandoned_section' => 'सभी स्थापित परित्यक्त पैकेज:',
     'replaced_by' => 'द्वारा प्रतिस्थापित: %s',
     'alternative_solutions' => 'वैकल्पिक समाधान:',
     'compatible_with_conflicts' => 'संघर्ष निर्भरताओं के साथ संगत',
@@ -63,12 +65,14 @@ return [
     // Progress messages
     'checking_dependency_conflicts' => '⏳ निर्भरता संघर्षों की जाँच कर रहा है...',
     'checking_abandoned_packages' => '⏳ परित्यक्त पैकेजों की जाँच कर रहा है...',
+    'checking_all_abandoned_packages' => '⏳ सभी स्थापित पैकेजों की परित्यक्त स्थिति की जाँच कर रहा है...',
     'searching_fallback_versions' => '⏳ फ़ॉलबैक संस्करण खोज रहा है...',
     'searching_alternative_packages' => '⏳ वैकल्पिक पैकेज खोज रहा है...',
     'checking_maintainer_info' => '⏳ रखरखावकर्ता जानकारी की जाँच कर रहा है...',
     
     // Impact analysis
     'impact_analysis' => 'प्रभाव विश्लेषण: {package} को {version} में अपडेट करने से प्रभावित होगा:',
+    'impact_analysis_saved' => '✅ प्रभाव विश्लेषण सहेजा गया: %s',
     'found_outdated_packages' => '%d पुराने पैकेज मिले',
 ];
 

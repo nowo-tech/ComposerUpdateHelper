@@ -32,6 +32,8 @@ return [
     'none' => '(нет)',
     'conflicts_with' => 'конфликт с:',
     'package_abandoned' => 'Пакет заброшен',
+    'abandoned_packages_section' => 'Найдены заброшенные пакеты:',
+    'all_installed_abandoned_section' => 'Все установленные заброшенные пакеты:',
     'replaced_by' => 'заменён на: %s',
     'alternative_solutions' => 'Альтернативные решения:',
     'compatible_with_conflicts' => 'совместим с конфликтующими зависимостями',
@@ -63,12 +65,14 @@ return [
     // Progress messages
     'checking_dependency_conflicts' => '⏳ Проверка конфликтов зависимостей...',
     'checking_abandoned_packages' => '⏳ Проверка заброшенных пакетов...',
+    'checking_all_abandoned_packages' => '⏳ Проверка всех установленных пакетов на статус заброшенности...',
     'searching_fallback_versions' => '⏳ Поиск резервных версий...',
     'searching_alternative_packages' => '⏳ Поиск альтернативных пакетов...',
     'checking_maintainer_info' => '⏳ Проверка информации о сопровождающем...',
     
     // Impact analysis
     'impact_analysis' => 'Анализ влияния: Обновление {package} до {version} повлияет на:',
+    'impact_analysis_saved' => '✅ Анализ влияния сохранен в: %s',
     'found_outdated_packages' => 'Найдено %d устаревших пакетов',
 ];
 

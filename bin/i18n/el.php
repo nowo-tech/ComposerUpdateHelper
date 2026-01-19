@@ -32,6 +32,8 @@ return [
     'none' => '(κανένα)',
     'conflicts_with' => 'σύγκρουση με:',
     'package_abandoned' => 'Το πακέτο έχει εγκαταλειφθεί',
+    'abandoned_packages_section' => 'Βρέθηκαν εγκαταλελειμμένα πακέτα:',
+    'all_installed_abandoned_section' => 'Όλα τα εγκατεστημένα εγκαταλελειμμένα πακέτα:',
     'replaced_by' => 'αντικαταστάθηκε από: %s',
     'alternative_solutions' => 'Εναλλακτικές λύσεις:',
     'compatible_with_conflicts' => 'συμβατό με συγκρουόμενες εξαρτήσεις',
@@ -63,12 +65,14 @@ return [
     // Progress messages
     'checking_dependency_conflicts' => '⏳ Έλεγχος συγκρούσεων εξαρτήσεων...',
     'checking_abandoned_packages' => '⏳ Έλεγχος εγκαταλελειμμένων πακέτων...',
+    'checking_all_abandoned_packages' => '⏳ Έλεγχος όλων των εγκατεστημένων πακέτων για εγκαταλελειμμένη κατάσταση...',
     'searching_fallback_versions' => '⏳ Αναζήτηση εφεδρικών εκδόσεων...',
     'searching_alternative_packages' => '⏳ Αναζήτηση εναλλακτικών πακέτων...',
     'checking_maintainer_info' => '⏳ Έλεγχος πληροφοριών συντηρητή...',
     
     // Impact analysis
     'impact_analysis' => 'Ανάλυση αντίκτυπου: Η ενημέρωση του {package} στην {version} θα επηρέαζε:',
+    'impact_analysis_saved' => '✅ Ανάλυση αντίκτυπου αποθηκεύτηκε σε: %s',
     'found_outdated_packages' => 'Βρέθηκαν %d ξεπερασμένα πακέτα',
 ];
 

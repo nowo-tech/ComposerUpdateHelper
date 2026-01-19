@@ -32,6 +32,8 @@ return [
     'none' => '(nincs)',
     'conflicts_with' => 'konfliktus:',
     'package_abandoned' => 'A csomag elhagyott',
+    'abandoned_packages_section' => 'Elhagyott csomagok találva:',
+    'all_installed_abandoned_section' => 'Minden telepített elhagyott csomag:',
     'replaced_by' => 'lecserélve: %s',
     'alternative_solutions' => 'Alternatív megoldások:',
     'compatible_with_conflicts' => 'kompatibilis konfliktusos függőségekkel',
@@ -63,12 +65,14 @@ return [
     // Progress messages
     'checking_dependency_conflicts' => '⏳ Függőségi konfliktusok ellenőrzése...',
     'checking_abandoned_packages' => '⏳ Elhagyott csomagok ellenőrzése...',
+    'checking_all_abandoned_packages' => '⏳ Az összes telepített csomag ellenőrzése elhagyott állapotra...',
     'searching_fallback_versions' => '⏳ Tartalék verziók keresése...',
     'searching_alternative_packages' => '⏳ Alternatív csomagok keresése...',
     'checking_maintainer_info' => '⏳ Karbantartói információk ellenőrzése...',
     
     // Impact analysis
     'impact_analysis' => 'Hatáselemzés: A {package} frissítése {version} verzióra befolyásolná:',
+    'impact_analysis_saved' => '✅ Hatáselemzés mentve: %s',
     'found_outdated_packages' => '%d elavult csomag található',
 ];
 

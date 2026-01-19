@@ -32,6 +32,8 @@ return [
     'none' => '(geen)',
     'conflicts_with' => 'conflicteert met:',
     'package_abandoned' => 'Pakket is verlaten',
+    'abandoned_packages_section' => 'Verlaten pakketten gevonden:',
+    'all_installed_abandoned_section' => 'Alle geïnstalleerde verlaten pakketten:',
     'replaced_by' => 'vervangen door: %s',
     'alternative_solutions' => 'Alternatieve oplossingen:',
     'compatible_with_conflicts' => 'compatibel met conflicterende afhankelijkheden',
@@ -63,12 +65,14 @@ return [
     // Progress messages
     'checking_dependency_conflicts' => '⏳ Controleren van afhankelijkheidsconflicten...',
     'checking_abandoned_packages' => '⏳ Controleren op verlaten pakketten...',
+    'checking_all_abandoned_packages' => '⏳ Controleren van alle geïnstalleerde pakketten op verlaten status...',
     'searching_fallback_versions' => '⏳ Zoeken naar fallback-versies...',
     'searching_alternative_packages' => '⏳ Zoeken naar alternatieve pakketten...',
     'checking_maintainer_info' => '⏳ Controleren van maintainer-informatie...',
     
     // Impact analysis
     'impact_analysis' => 'Impactanalyse: Bijwerken van {package} naar {version} zou beïnvloeden:',
+    'impact_analysis_saved' => '✅ Impactanalyse opgeslagen in: %s',
     'found_outdated_packages' => '%d verouderde pakket(ten) gevonden',
 ];
 

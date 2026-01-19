@@ -196,6 +196,8 @@ fi
 [ "$YAML_SHOW_RELEASE_DETAIL" = "true" ] && SHOW_RELEASE_DETAIL=true || SHOW_RELEASE_DETAIL=false
 [ "$YAML_SHOW_IMPACT_ANALYSIS" = "true" ] && SHOW_IMPACT_ANALYSIS=true || SHOW_IMPACT_ANALYSIS=false
 [ "$YAML_SAVE_IMPACT_TO_FILE" = "true" ] && SAVE_IMPACT_TO_FILE=true || SAVE_IMPACT_TO_FILE=false
+# If save-impact-to-file is enabled, automatically enable show-impact-analysis (like --save-impact flag does)
+[ "$YAML_SAVE_IMPACT_TO_FILE" = "true" ] && SHOW_IMPACT_ANALYSIS=true
 [ "$YAML_VERBOSE" = "true" ] && VERBOSE=true || VERBOSE=false
 [ "$YAML_DEBUG" = "true" ] && DEBUG=true || DEBUG=false
 

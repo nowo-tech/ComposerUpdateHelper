@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.24] - 2026-01-19
+
+### Added
+- **Comprehensive Abandoned Package Detection**: Now detects abandoned packages for ALL installed packages, not just outdated ones
+  - New section "All abandoned packages installed:" shows all abandoned packages in your project before dependency analysis
+  - Previously only detected abandoned packages when they had dependency conflicts
+  - Now checks all packages from `composer.json` (both `require` and `require-dev`)
+  - Shows replacement package information if available
+  - Separates packages by prod/dev labels
+  - Example: `⚠️ All abandoned packages installed: - old-package:1.0.0 (prod) (⚠️ Package is abandoned, replaced by: new-package/name)`
+  - All messages are translated and available in all 31 supported languages
+- **Enhanced Abandoned Package Detection for Outdated Packages**: Improved detection to check ALL outdated packages for abandoned status
+  - Previously only checked abandoned status for packages with dependency conflicts
+  - Now checks abandoned status for all outdated packages, regardless of conflicts
+  - Provides more comprehensive information about package maintenance status
+  - Shows abandoned status in the "Abandoned packages found:" section within dependency analysis
+
+### Changed
+- **Abandoned Package Detection Flow**: Restructured to provide more comprehensive coverage
+  - Detection now happens at two points: for all installed packages (before analysis) and for outdated packages (during analysis)
+  - Avoids duplicate detection by skipping packages already checked
+  - Better organization of abandoned package information in output
+- **Fixed save-impact-to-file configuration**: When `save-impact-to-file: true` is set in YAML, automatically enables `show-impact-analysis` to ensure data is generated
+  - Previously, setting only `save-impact-to-file: true` without `show-impact-analysis: true` would not create the file
+  - Now automatically activates impact analysis when saving to file is requested
+  - Works consistently with `--save-impact` command-line flag behavior
+
 ## [2.0.23] - 2026-01-18
 
 ### Changed

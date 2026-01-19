@@ -32,6 +32,8 @@ return [
     'none' => '(无)',
     'conflicts_with' => '与以下冲突:',
     'package_abandoned' => '包已弃用',
+    'abandoned_packages_section' => '发现已弃用的包:',
+    'all_installed_abandoned_section' => '所有已安装的已弃用包:',
     'replaced_by' => '替换为: %s',
     'alternative_solutions' => '替代方案:',
     'compatible_with_conflicts' => '与冲突依赖项兼容',
@@ -63,12 +65,14 @@ return [
     // Progress messages
     'checking_dependency_conflicts' => '⏳ 检查依赖冲突...',
     'checking_abandoned_packages' => '⏳ 检查已弃用的包...',
+    'checking_all_abandoned_packages' => '⏳ 检查所有已安装的包是否已弃用...',
     'searching_fallback_versions' => '⏳ 搜索回退版本...',
     'searching_alternative_packages' => '⏳ 搜索替代包...',
     'checking_maintainer_info' => '⏳ 检查维护者信息...',
     
     // Impact analysis
     'impact_analysis' => '影响分析：将 {package} 更新到 {version} 会影响：',
+    'impact_analysis_saved' => '✅ 影响分析已保存到: %s',
     'found_outdated_packages' => '找到 %d 个过时的包',
 ];
 

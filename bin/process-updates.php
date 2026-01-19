@@ -124,6 +124,10 @@ $showReleaseInfo = getenv('SHOW_RELEASE_INFO') === 'true';
 $showReleaseDetail = getenv('SHOW_RELEASE_DETAIL') === 'true';
 $showImpactAnalysis = getenv('SHOW_IMPACT_ANALYSIS') === 'true';
 $saveImpactToFile = getenv('SAVE_IMPACT_TO_FILE') === 'true';
+// If save-impact-to-file is enabled, automatically enable show-impact-analysis (like --save-impact flag does)
+if ($saveImpactToFile) {
+    $showImpactAnalysis = true;
+}
 $debug = getenv('DEBUG') === 'true';
 $verbose = getenv('VERBOSE') === 'true';
 
@@ -431,6 +435,20 @@ foreach ($report['installed'] as $pkg) {
         } else {
             $allOutdatedProd[] = $packageString;
         }
+
+        // Check if package is abandoned (for ALL outdated packages, not just those with conflicts)
+        // Show progress message for abandoned package checking (only once)
+        $progressMsg = function_exists('t') ? t('checking_abandoned_packages', [], $detectedLang) : '⏳ Checking for abandoned packages...';
+        Utils::showProgressMessage('checking_abandoned_packages', $progressMsg, $debug, $verbose);
+
+        $abandonedInfo = isPackageAbandoned($name, $debug);
+        if ($abandonedInfo && $abandonedInfo['abandoned']) {
+            $filteredPackageAbandoned[$packageString] = $abandonedInfo;
+            if ($debug) {
+                error_log("DEBUG: Package {$name} is abandoned" .
+                          ($abandonedInfo['replacement'] ? " (replacement: {$abandonedInfo['replacement']})" : ""));
+            }
+        }
     }
 
     // Check dependency compatibility before suggesting update
@@ -439,7 +457,7 @@ foreach ($report['installed'] as $pkg) {
         // Show progress message for dependency conflict checking (only once)
         $progressMsg = function_exists('t') ? t('checking_dependency_conflicts', [], $detectedLang) : '⏳ Checking dependency conflicts...';
         Utils::showProgressMessage('checking_dependency_conflicts', $progressMsg, $debug, $verbose);
-        
+
         $conflictingDependents = [];
         $fallbackVersion = null; // New variable for fallback versions
         $compatibleVersion = findCompatibleVersion($name, $constraint, $debug, $checkDependencies, $requiredTransitiveUpdates, $conflictingDependents);
@@ -449,7 +467,7 @@ foreach ($report['installed'] as $pkg) {
             // Show progress message for fallback version search (only once)
             $progressMsg = function_exists('t') ? t('searching_fallback_versions', [], $detectedLang) : '⏳ Searching for fallback versions...';
             Utils::showProgressMessage('searching_fallback_versions', $progressMsg, $debug, $verbose);
-            
+
             $fallbackVersion = findFallbackVersion($name, $constraint, $conflictingDependents, $debug);
             if ($fallbackVersion) {
                 // Verify fallback version also satisfies package requirements
@@ -510,32 +528,21 @@ foreach ($report['installed'] as $pkg) {
                         $formattedImpact = ImpactAnalyzer::formatImpactForOutput($impact, $name, $constraint);
                         $filteredPackageImpact[$packageString] = $formattedImpact;
                         if ($debug) {
-                            error_log("DEBUG: Impact analysis for {$packageString}: " . 
-                                      count($formattedImpact['direct_affected']) . " direct, " . 
+                            error_log("DEBUG: Impact analysis for {$packageString}: " .
+                                      count($formattedImpact['direct_affected']) . " direct, " .
                                       count($formattedImpact['transitive_affected']) . " transitive");
                         }
                     }
                 }
 
-                // Check if package is abandoned
-                // Show progress message for abandoned package checking (only once)
-                $progressMsg = function_exists('t') ? t('checking_abandoned_packages', [], $detectedLang) : '⏳ Checking for abandoned packages...';
-                Utils::showProgressMessage('checking_abandoned_packages', $progressMsg, $debug, $verbose);
-                
-                $abandonedInfo = isPackageAbandoned($name, $debug);
-                if ($abandonedInfo && $abandonedInfo['abandoned']) {
-                    $filteredPackageAbandoned[$packageString] = $abandonedInfo;
-                    if ($debug) {
-                        error_log("DEBUG: Package {$name} is abandoned" .
-                                  ($abandonedInfo['replacement'] ? " (replacement: {$abandonedInfo['replacement']})" : ""));
-                    }
-
-                    // If abandoned without replacement or no fallback available, search for alternatives
+                // If package is abandoned without replacement or no fallback available, search for alternatives
+                if (isset($filteredPackageAbandoned[$packageString])) {
+                    $abandonedInfo = $filteredPackageAbandoned[$packageString];
                     if (!$abandonedInfo['replacement'] && !isset($filteredPackageFallbacks[$packageString])) {
                         // Show progress message for alternative package search (only once)
                         $progressMsg = function_exists('t') ? t('searching_alternative_packages', [], $detectedLang) : '⏳ Searching for alternative packages...';
                         Utils::showProgressMessage('searching_alternative_packages', $progressMsg, $debug, $verbose);
-                        
+
                         $alternatives = AlternativePackageFinder::findAlternatives($name, $debug);
                         if ($alternatives && !empty($alternatives['alternatives'])) {
                             $filteredPackageAlternatives[$packageString] = $alternatives;
@@ -549,7 +556,7 @@ foreach ($report['installed'] as $pkg) {
                     // Show progress message for alternative package search (only once)
                     $progressMsg = function_exists('t') ? t('searching_alternative_packages', [], $detectedLang) : '⏳ Searching for alternative packages...';
                     Utils::showProgressMessage('searching_alternative_packages', $progressMsg, $debug, $verbose);
-                    
+
                     $alternatives = AlternativePackageFinder::findAlternatives($name, $debug);
                     if ($alternatives && !empty($alternatives['alternatives'])) {
                         $filteredPackageAlternatives[$packageString] = $alternatives;
@@ -562,10 +569,10 @@ foreach ($report['installed'] as $pkg) {
                         if (!empty($conflictingDependents)) {
                             $firstConflictPackage = array_key_first($conflictingDependents);
                             $firstConflictConstraint = $conflictingDependents[$firstConflictPackage];
-                            
+
                             // Get current constraint from packageString (format: "package:constraint")
                             $currentConstraint = explode(':', $packageString, 2)[1] ?? '';
-                            
+
                             // Check if we should suggest maintainer contact
                             if (MaintainerContactFinder::shouldSuggestContact(
                                 $name,
@@ -577,7 +584,7 @@ foreach ($report['installed'] as $pkg) {
                                 // Show progress message for maintainer info checking (only once)
                                 $progressMsg = function_exists('t') ? t('checking_maintainer_info', [], $detectedLang) : '⏳ Checking maintainer information...';
                                 Utils::showProgressMessage('checking_maintainer_info', $progressMsg, $debug, $verbose);
-                                
+
                                 $maintainerInfo = MaintainerContactFinder::getMaintainerInfo($name, $debug);
                                 if (!empty($maintainerInfo['maintainers']) || $maintainerInfo['repository_url']) {
                                     $filteredPackageMaintainerContacts[$packageString] = $maintainerInfo;
@@ -633,6 +640,57 @@ if ($totalOutdated > 0 && !$debug) {
 }
 
 // ============================================================================
+// CHECK ALL INSTALLED PACKAGES FOR ABANDONED STATUS
+// ============================================================================
+// Check ALL installed packages (not just outdated ones) for abandoned status
+$allInstalledAbandoned = []; // Format: 'package:version' => ['abandoned' => true, 'replacement' => 'new/package'|null, 'is_dev' => bool]
+
+// Show progress message for checking all installed packages (only once)
+$progressMsg = function_exists('t') ? t('checking_all_abandoned_packages', [], $detectedLang) : '⏳ Checking all installed packages for abandoned status...';
+Utils::showProgressMessage('checking_all_abandoned_packages', $progressMsg, $debug, $verbose);
+
+// Check all packages from composer.json (require and require-dev)
+$allInstalledPackages = array_merge(
+    array_keys($require),
+    array_keys($requireDev)
+);
+
+foreach ($allInstalledPackages as $packageName) {
+    // Skip if already checked (in filteredPackageAbandoned)
+    $alreadyChecked = false;
+    foreach ($filteredPackageAbandoned as $packageString => $abandonedInfo) {
+        if (strpos($packageString, $packageName . ':') === 0) {
+            $alreadyChecked = true;
+            break;
+        }
+    }
+
+    // If already checked in outdated packages, skip to avoid duplicates
+    if ($alreadyChecked) {
+        continue;
+    }
+
+    // Check if package is abandoned
+    $abandonedInfo = isPackageAbandoned($packageName, $debug);
+    if ($abandonedInfo && $abandonedInfo['abandoned']) {
+        // Get installed version from composer.lock or composer.json
+        $installedVersion = getInstalledPackageVersion($packageName);
+        $packageString = $packageName . ':' . ($installedVersion ?: 'unknown');
+
+        $allInstalledAbandoned[$packageString] = [
+            'abandoned' => true,
+            'replacement' => $abandonedInfo['replacement'] ?? null,
+            'is_dev' => isset($devSet[$packageName])
+        ];
+
+        if ($debug) {
+            error_log("DEBUG: Installed package {$packageName} is abandoned" .
+                      ($abandonedInfo['replacement'] ? " (replacement: {$abandonedInfo['replacement']})" : ""));
+        }
+    }
+}
+
+// ============================================================================
 // OUTPUT FORMATTING
 // ============================================================================
 
@@ -656,6 +714,7 @@ $outputData = [
     'requiredTransitiveUpdates' => $requiredTransitiveUpdates,
     'releaseInfo' => $releaseInfo,
     'devSet' => $devSet,
+    'allInstalledAbandoned' => $allInstalledAbandoned,
 ];
 
 $outputOptions = [
@@ -689,7 +748,7 @@ if ($saveImpactToFile && !empty($filteredPackageImpact)) {
     $impactContent[] = "";
     $impactContent[] = "================================================================================";
     $impactContent[] = "";
-    
+
     foreach ($filteredPackageImpact as $packageString => $impact) {
         if ($impact['total_affected'] > 0) {
             $packageName = explode(':', $packageString)[0];
@@ -697,7 +756,7 @@ if ($saveImpactToFile && !empty($filteredPackageImpact)) {
             $impactContent[] = "Impact Analysis: Updating {$packageName} to {$newVersion}";
             $impactContent[] = str_repeat("-", 80);
             $impactContent[] = "";
-            
+
             if (!empty($impact['direct_affected'])) {
                 $impactContent[] = "Directly Affected Packages (" . count($impact['direct_affected']) . "):";
                 foreach ($impact['direct_affected'] as $affected) {
@@ -705,7 +764,7 @@ if ($saveImpactToFile && !empty($filteredPackageImpact)) {
                 }
                 $impactContent[] = "";
             }
-            
+
             if (!empty($impact['transitive_affected'])) {
                 $impactContent[] = "Transitively Affected Packages (" . count($impact['transitive_affected']) . "):";
                 foreach ($impact['transitive_affected'] as $affected) {
@@ -713,20 +772,19 @@ if ($saveImpactToFile && !empty($filteredPackageImpact)) {
                 }
                 $impactContent[] = "";
             }
-            
+
             $impactContent[] = "Total Affected: {$impact['total_affected']} package(s)";
             $impactContent[] = "";
             $impactContent[] = str_repeat("=", 80);
             $impactContent[] = "";
         }
     }
-    
+
     $impactContent[] = "End of Impact Analysis Report";
-    
+
     if (file_put_contents($impactFile, implode(PHP_EOL, $impactContent))) {
-        if ($debug || $verbose) {
-            error_log("✅ Impact analysis saved to: {$impactFile}");
-        }
+        $saveMsg = function_exists('t') ? t('impact_analysis_saved', [$impactFile], $detectedLang) : "✅ Impact analysis saved to: {$impactFile}";
+        error_log($saveMsg);
     } else {
         error_log("⚠️  Failed to save impact analysis to: {$impactFile}");
     }

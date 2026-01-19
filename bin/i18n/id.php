@@ -32,6 +32,8 @@ return [
     'none' => '(tidak ada)',
     'conflicts_with' => 'berkonflik dengan:',
     'package_abandoned' => 'Paket ditinggalkan',
+    'abandoned_packages_section' => 'Paket yang ditinggalkan ditemukan:',
+    'all_installed_abandoned_section' => 'Semua paket yang ditinggalkan yang diinstal:',
     'replaced_by' => 'diganti dengan: %s',
     'alternative_solutions' => 'Solusi alternatif:',
     'compatible_with_conflicts' => 'kompatibel dengan dependensi yang berkonflik',
@@ -63,12 +65,14 @@ return [
     // Progress messages
     'checking_dependency_conflicts' => '⏳ Memeriksa konflik dependensi...',
     'checking_abandoned_packages' => '⏳ Memeriksa paket yang ditinggalkan...',
+    'checking_all_abandoned_packages' => '⏳ Memeriksa semua paket yang diinstal untuk status ditinggalkan...',
     'searching_fallback_versions' => '⏳ Mencari versi cadangan...',
     'searching_alternative_packages' => '⏳ Mencari paket alternatif...',
     'checking_maintainer_info' => '⏳ Memeriksa informasi maintainer...',
     
     // Impact analysis
     'impact_analysis' => 'Analisis dampak: Memperbarui {package} ke {version} akan mempengaruhi:',
+    'impact_analysis_saved' => '✅ Analisis dampak disimpan ke: %s',
     'found_outdated_packages' => 'Ditemukan %d paket usang',
 ];
 

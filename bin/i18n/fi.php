@@ -32,6 +32,8 @@ return [
     'none' => '(ei mitään)',
     'conflicts_with' => 'konfliktoi:',
     'package_abandoned' => 'Paketti on hylätty',
+    'abandoned_packages_section' => 'Hylätyt paketit löydetty:',
+    'all_installed_abandoned_section' => 'Kaikki asennetut hylätyt paketit:',
     'replaced_by' => 'korvattu: %s',
     'alternative_solutions' => 'Vaihtoehtoiset ratkaisut:',
     'compatible_with_conflicts' => 'yhteensopiva ristiriitaisten riippuvuuksien kanssa',
@@ -63,12 +65,14 @@ return [
     // Progress messages
     'checking_dependency_conflicts' => '⏳ Tarkistetaan riippuvuuskonflikteja...',
     'checking_abandoned_packages' => '⏳ Tarkistetaan hylättyjä paketteja...',
+    'checking_all_abandoned_packages' => '⏳ Tarkistetaan kaikki asennetut paketit hylättyä tilaa varten...',
     'searching_fallback_versions' => '⏳ Etsitään varaversioita...',
     'searching_alternative_packages' => '⏳ Etsitään vaihtoehtoisia paketteja...',
     'checking_maintainer_info' => '⏳ Tarkistetaan ylläpitäjätietoja...',
     
     // Impact analysis
     'impact_analysis' => 'Vaikutusanalyysi: {package} päivittäminen versioon {version} vaikuttaisi:',
+    'impact_analysis_saved' => '✅ Vaikutusanalyysi tallennettu: %s',
     'found_outdated_packages' => 'Löydettiin %d vanhentunutta pakettia',
 ];
 

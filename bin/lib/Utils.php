@@ -12,7 +12,7 @@ declare(strict_types=1);
 class Utils
 {
     const DEBUG_PREFIX = 'DEBUG: ';
-    
+
     private static array $progressMessagesShown = [];
 
     /**
