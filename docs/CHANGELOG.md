@@ -9,11 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.0.23] - 2026-01-18
 
-### Fixed
-- **PHP 7.4 compatibility**: Removed `mixed` type hint from `ConfigLoader::readConfigValue()` method
-  - The `mixed` type was introduced in PHP 8.0, but the project supports PHP 7.4+
-  - Changed to untyped parameter with PHPDoc annotation for backward compatibility
-  - Fixes test failure on PHP 7.4 CI environment
+### Changed
+- **Improved type hints**: Updated `ConfigLoader::readConfigValue()` PHPDoc with union types for better type safety
+  - PHPDoc now uses `string|int|float|bool|null` union types for better IDE support and static analysis
+  - Code remains compatible with PHP 7.4+ (union types only in PHPDoc, not in code)
+  - More specific than generic `mixed` type
+  - Provides better autocompletion and type checking in IDEs
 
 ### Added
 - **Command-line options configuration in YAML**: All command-line options can now be configured as defaults in `generate-composer-require.yaml`

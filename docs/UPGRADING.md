@@ -18,7 +18,46 @@ This guide will help you upgrade Composer Update Helper to newer versions.
 
 ## Version-Specific Upgrade Notes
 
-### Upgrading to 2.0.22+ (Unreleased)
+### Upgrading to 2.0.23+
+
+#### What's New
+This release adds command-line options configuration in YAML and extends wildcard dependency checking. See [CHANGELOG.md](CHANGELOG.md#2023) for complete details.
+
+**New Features:**
+- **Command-line options configuration in YAML**: Configure default values for all command-line options in `generate-composer-require.yaml`
+  - Set your preferred defaults once, then override them when needed via command-line arguments
+  - Available options: `show-release-info`, `show-release-detail`, `show-impact-analysis`, `save-impact-to-file`, `verbose`, `debug`
+  - Example: Set `show-release-info: true` in YAML to always show release info by default
+  - Command-line arguments always override YAML configuration
+  - See [Configuration Guide](docs/CONFIGURATION.md#command-line-options-configuration) for complete details
+- **Wildcard Dependency Checking**: Extended dependency conflict detection to support wildcard constraints (`^`, `~`, `*`)
+  - Previously, dependency checking was skipped for packages with wildcard constraints
+  - Now properly validates wildcard constraints against dependent package requirements
+  - Improves conflict detection accuracy for framework constraints and version ranges
+
+**Changed:**
+- **Improved type hints**: Better type safety with union types in PHPDoc for `ConfigLoader::readConfigValue()`
+  - PHPDoc uses `string|int|float|bool|null` union types for better IDE support
+  - Code remains compatible with PHP 7.4+ (union types only in documentation)
+  - More specific than generic `mixed` type
+
+#### Migration Notes
+- **No action required**: These are new features that enhance existing functionality
+- **YAML configuration for command-line options** (optional): You can now set default values for command-line options in your `generate-composer-require.yaml`:
+  ```yaml
+  # Set defaults for command-line options
+  show-release-info: true          # Always show release info by default
+  show-impact-analysis: true       # Always show impact analysis by default
+  verbose: false                   # Don't show verbose output by default
+  ```
+  - Command-line arguments always override YAML configuration
+  - Example: If you set `show-release-info: true` in YAML but run `./generate-composer-require.sh --no-release-info`, release info will be disabled for that run
+- **Wildcard dependency checking**: Now works automatically for all constraint types (`^`, `~`, `*`). No configuration needed.
+
+#### Breaking Changes
+- None
+
+### Upgrading to 2.0.22+
 
 #### What's New
 This release adds several new features to help resolve dependency conflicts and provide better guidance when automatic solutions aren't available. See [CHANGELOG.md](CHANGELOG.md#unreleased) for complete details.
