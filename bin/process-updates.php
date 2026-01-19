@@ -434,8 +434,8 @@ foreach ($report['installed'] as $pkg) {
     }
 
     // Check dependency compatibility before suggesting update
-    // Only check for specific versions (not wildcards) and if dependency checking is enabled
-    if ($needsUpdate && $checkDependencies && strpos($constraint, '*') === false && strpos($constraint, '^') === false && strpos($constraint, '~') === false) {
+    // Now supports wildcard constraints (^, ~, *) using versionSatisfiesConstraint
+    if ($needsUpdate && $checkDependencies) {
         // Show progress message for dependency conflict checking (only once)
         $progressMsg = function_exists('t') ? t('checking_dependency_conflicts', [], $detectedLang) : '⏳ Checking dependency conflicts...';
         Utils::showProgressMessage('checking_dependency_conflicts', $progressMsg, $debug, $verbose);

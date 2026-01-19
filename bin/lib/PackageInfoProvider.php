@@ -8,14 +8,14 @@ declare(strict_types=1);
  *
  * @author Héctor Franco Aceituno <hectorfranco@nowo.tech>
  */
-
 class PackageInfoProvider
 {
     /**
      * Get package requirements from Packagist
      *
      * @param string $packageName Package name
-     * @param string $version Version to check
+     * @param string $version     Version to check
+     *
      * @return array Package requirements
      */
     public static function getPackageRequirements(string $packageName, string $version): array
@@ -25,7 +25,7 @@ class PackageInfoProvider
             'http' => [
                 'timeout' => 5,
                 'user_agent' => 'Composer Update Helper',
-            ]
+            ],
         ]);
 
         $json = @file_get_contents($url, false, $context);

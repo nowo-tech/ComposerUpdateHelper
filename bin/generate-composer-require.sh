@@ -125,8 +125,82 @@ EOF
     fi
 }
 
-# Parse arguments
-RUN_FLAG=""; SHOW_RELEASE_DETAIL=false; SHOW_RELEASE_INFO=false; SHOW_IMPACT_ANALYSIS=false; SAVE_IMPACT_TO_FILE=false; VERBOSE=false; DEBUG=false
+# Helper function to read YAML config value using PHP (if available)
+read_yaml_config_value() {
+    local yaml_file="$1"
+    local key="$2"
+    local default="$3"
+
+    if [ ! -f "$yaml_file" ]; then
+        echo "$default"
+        return
+    fi
+
+    # Try to use PHP if available (more reliable)
+    if command -v php >/dev/null 2>&1; then
+        local php_code="
+        \$content = @file_get_contents('$yaml_file');
+        if (!\$content) { echo '$default'; exit; }
+        \$lines = explode(\"\\n\", \$content);
+        foreach (\$lines as \$line) {
+            \$line = trim(\$line);
+            if (empty(\$line) || strpos(\$line, '#') === 0) continue;
+            if (preg_match('/^' . preg_quote('$key', '/') . ':\\\\s*(.+)\$/', \$line, \$matches)) {
+                \$value = trim(\$matches[1]);
+                if (strtolower(\$value) === 'true') { echo 'true'; exit; }
+                if (strtolower(\$value) === 'false') { echo 'false'; exit; }
+                echo \$value; exit;
+            }
+        }
+        echo '$default';
+        "
+        php -r "$php_code" 2>/dev/null || echo "$default"
+    else
+        # Fallback: simple grep (less reliable)
+        local value=$(grep -E "^${key}:" "$yaml_file" 2>/dev/null | head -1 | sed 's/^[^:]*:[[:space:]]*//' | tr -d '\n')
+        if [ -n "$value" ]; then
+            echo "$value"
+        else
+            echo "$default"
+        fi
+    fi
+}
+
+# Detect config file early (before parsing arguments) to read defaults
+config_info=$(detect_config_file)
+CONFIG_FILE=$(echo "$config_info" | cut -d'|' -f1)
+CONFIG_FILE_DISPLAY=$(echo "$config_info" | cut -d'|' -f2)
+CONFIG_FILE_SUFFIX=$(echo "$config_info" | cut -d'|' -f3)
+
+# Read default values from YAML config (if config file exists)
+if [ -n "$CONFIG_FILE" ] && [ -f "$CONFIG_FILE" ]; then
+    # Read boolean config values (default to false)
+    YAML_SHOW_RELEASE_INFO=$(read_yaml_config_value "$CONFIG_FILE" "show-release-info" "false")
+    YAML_SHOW_RELEASE_DETAIL=$(read_yaml_config_value "$CONFIG_FILE" "show-release-detail" "false")
+    YAML_SHOW_IMPACT_ANALYSIS=$(read_yaml_config_value "$CONFIG_FILE" "show-impact-analysis" "false")
+    YAML_SAVE_IMPACT_TO_FILE=$(read_yaml_config_value "$CONFIG_FILE" "save-impact-to-file" "false")
+    YAML_VERBOSE=$(read_yaml_config_value "$CONFIG_FILE" "verbose" "false")
+    YAML_DEBUG=$(read_yaml_config_value "$CONFIG_FILE" "debug" "false")
+else
+    # No config file, use defaults
+    YAML_SHOW_RELEASE_INFO="false"
+    YAML_SHOW_RELEASE_DETAIL="false"
+    YAML_SHOW_IMPACT_ANALYSIS="false"
+    YAML_SAVE_IMPACT_TO_FILE="false"
+    YAML_VERBOSE="false"
+    YAML_DEBUG="false"
+fi
+
+# Convert YAML values to boolean (normalize true/false strings)
+[ "$YAML_SHOW_RELEASE_INFO" = "true" ] && SHOW_RELEASE_INFO=true || SHOW_RELEASE_INFO=false
+[ "$YAML_SHOW_RELEASE_DETAIL" = "true" ] && SHOW_RELEASE_DETAIL=true || SHOW_RELEASE_DETAIL=false
+[ "$YAML_SHOW_IMPACT_ANALYSIS" = "true" ] && SHOW_IMPACT_ANALYSIS=true || SHOW_IMPACT_ANALYSIS=false
+[ "$YAML_SAVE_IMPACT_TO_FILE" = "true" ] && SAVE_IMPACT_TO_FILE=true || SAVE_IMPACT_TO_FILE=false
+[ "$YAML_VERBOSE" = "true" ] && VERBOSE=true || VERBOSE=false
+[ "$YAML_DEBUG" = "true" ] && DEBUG=true || DEBUG=false
+
+# Parse arguments (command line arguments override YAML defaults)
+RUN_FLAG=""
 for arg in "$@"; do
     case "$arg" in
         -h|--help) show_help; exit 0 ;;
@@ -156,11 +230,8 @@ ${SCRIPT_DIR}/process-updates.php
 PROCESSOR_PHP=$(find_file_in_paths "$PROCESSOR_PATHS")
 [ -z "$PROCESSOR_PHP" ] && echo "❌  $(get_msg processor_not_found)" >&2 && echo "   $(get_msg please_install)" >&2 && exit 1
 
-# Detect config file (delegates to helper)
-config_info=$(detect_config_file)
-CONFIG_FILE=$(echo "$config_info" | cut -d'|' -f1)
-CONFIG_FILE_DISPLAY=$(echo "$config_info" | cut -d'|' -f2)
-CONFIG_FILE_SUFFIX=$(echo "$config_info" | cut -d'|' -f3)
+# Config file already detected above (before parsing arguments)
+# CONFIG_FILE, CONFIG_FILE_DISPLAY, CONFIG_FILE_SUFFIX are already set
 
 # Initialize language for translations after detecting config file
 if command -v t >/dev/null 2>&1 && command -v load_translations_sh >/dev/null 2>&1; then

@@ -226,10 +226,10 @@ include:
 
 **Handling**:
 - ✅ Framework constraints with wildcards are supported
-- ⚠️ Dependency checking is skipped for wildcard constraints (`*`, `^`, `~`)
-- ⚠️ Only specific version constraints trigger dependency conflict detection
+- ✅ **Dependency checking now supports wildcard constraints** (`*`, `^`, `~`)
+- ✅ Full dependency conflict detection for wildcard constraints using `versionSatisfiesConstraint`
 
-**Status**: ⚠️ Partially supported (dependency checking only for specific versions)
+**Status**: ✅ Fully supported
 
 ---
 
@@ -475,7 +475,7 @@ Each case below explains what happens currently, what's missing, and what manual
 
 ## Summary
 
-### Fully Supported (14 cases)
+### Fully Supported (15 cases)
 1. Basic package updates
 2. Dependent package constraint conflicts
 3. Package requirement conflicts
@@ -486,15 +486,15 @@ Each case below explains what happens currently, what's missing, and what manual
 8. Production vs development dependencies
 9. Version comparison to avoid unnecessary updates
 10. Multiple transitive dependencies
-11. Abandoned package detection (with warnings and replacement suggestions)
-12. Alternative package suggestions (automatic detection and suggestions when conflicts exist)
-13. Maintainer contact suggestions (automatic detection and actionable steps when no automatic solution is available)
-14. Conflict impact analysis (automatic analysis of which packages would be affected by resolving conflicts)
+11. Wildcard version constraints (dependency checking for `*`, `^`, `~` constraints)
+12. Abandoned package detection (with warnings and replacement suggestions)
+13. Alternative package suggestions (automatic detection and suggestions when conflicts exist)
+14. Maintainer contact suggestions (automatic detection and actionable steps when no automatic solution is available)
+15. Conflict impact analysis (automatic analysis of which packages would be affected by resolving conflicts)
 
-### Partially Supported (3 cases)
+### Partially Supported (2 cases)
 14. Abandoned package conflicts - Detection and warnings ✅, migration paths ✅ (alternative packages, maintainer contact)
 15. Conflict resolution strategies - Transitive updates ✅, fallback versions ✅, removal suggestions ❌
-16. Wildcard version constraints (dependency checking only for specific versions)
 
 ### Not Yet Supported (4 cases)
 **❌ No automatic solution provided - requires manual intervention:**

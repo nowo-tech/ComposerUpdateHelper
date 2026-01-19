@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.23] - 2026-01-18
+
+### Added
+- **Command-line options configuration in YAML**: All command-line options can now be configured as defaults in `generate-composer-require.yaml`
+  - Set your preferred defaults once in the YAML file, then override them when needed via command-line arguments
+  - Configuration priority: Command-line arguments (highest) > YAML configuration > Built-in defaults
+  - Available options: `show-release-info`, `show-release-detail`, `show-impact-analysis`, `save-impact-to-file`, `verbose`, `debug`
+  - Example: Set `show-release-info: true` in YAML to always show release info by default, then override with `--no-release-info` when needed
+  - Benefits: Consistent defaults for team members, no need to remember long command-line flags for frequently used options
+  - See [Configuration Guide](docs/CONFIGURATION.md#command-line-options-configuration) for complete details
+- **Wildcard Dependency Checking**: Extended dependency conflict detection to support wildcard constraints (`^`, `~`, `*`)
+  - Previously, dependency checking was skipped for packages with wildcard constraints
+  - Now uses `versionSatisfiesConstraint()` to properly validate wildcard constraints against dependent package requirements
+  - Supports caret constraints (`^1.2.3`), tilde constraints (`~1.2.3`), and wildcard constraints (`1.2.*`)
+  - Improves conflict detection accuracy for framework constraints and version ranges
+  - Example: Now detects conflicts when `package-a:^2.0` conflicts with `dependent-package` requiring `package-a:^1.5`
+
+### Changed
+- **Updated UPDATE_CASES.md**: Documentation now reflects 15 fully supported cases (previously 14)
+  - Case #11 (Wildcard Version Constraints) moved from "Partially Supported" to "Fully Supported"
+  - Updated summary section to reflect current implementation status
+- **Updated IMPLEMENTATION_ROADMAP.md**: Priority 7 (Wildcard Dependency Checking) marked as completed
+  - Phase 2 progress: 3/4 features completed (75%)
+- **Updated CONFIGURATION.md**: Added new section "Command-Line Options Configuration" explaining how to set defaults in YAML
+
 ## [2.0.22] - 2026-01-18
 
 ### Added
@@ -66,8 +91,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Tests for edge cases
 
 ### Changed
-- **Updated UPDATE_CASES.md**: Documentation now reflects 14 fully supported cases (previously 13)
+- **Updated UPDATE_CASES.md**: Documentation now reflects 15 fully supported cases (previously 14)
   - Added case for Conflict Impact Analysis (#14)
+  - Case #11 (Wildcard Version Constraints) moved from "Partially Supported" to "Fully Supported"
   - Updated summary section to reflect current implementation status
 - **Impact analysis is now optional**: Impact analysis is disabled by default to reduce output verbosity
   - Use `--show-impact` or `--impact` flag to enable impact analysis

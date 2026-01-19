@@ -22,3 +22,4 @@ require_once __DIR__ . '/VersionResolver.php';
 require_once __DIR__ . '/OutputFormatter.php';
 require_once __DIR__ . '/MaintainerContactFinder.php';
 require_once __DIR__ . '/ImpactAnalyzer.php';
+require_once __DIR__ . '/BatchUpdateOptimizer.php';

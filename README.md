@@ -23,10 +23,12 @@ Generates `composer require` commands from outdated dependencies. Works with any
 - ✅ Compares versions to avoid unnecessary updates
 - ✅ **Dependency compatibility checking**: Automatically detects and prevents dependency conflicts before suggesting updates
 - ✅ **Transitive dependency suggestions**: When conflicts are detected, automatically suggests updating required transitive dependencies with ready-to-use commands
+- ✅ **Conflict Impact Analysis**: Analyzes which packages would be affected by updating conflicting packages (optional with `--show-impact` flag)
+- ✅ **Save impact analysis**: Save impact analysis to file with `--save-impact` flag
 - ✅ Can execute commands directly with `--run` flag
 - ✅ Automatic installation via Composer plugin
 - ✅ **Release information and changelogs**: Shows GitHub release links and changelog previews for outdated packages
-- ✅ **Progress indicators**: Animated spinner shows activity during long-running operations
+- ✅ **Progress indicators**: Shows loading messages during long-running operations (dependency checking, fallback search, etc.)
 - ✅ **Help option**: Built-in `--help` flag for comprehensive usage information
 - ✅ **Verbose and Debug modes**: `-v, --verbose` and `--debug` options for troubleshooting and detailed information
 - ✅ **Multiple file extensions**: Supports both `.yaml` and `.yml` extensions for configuration files
@@ -86,6 +88,24 @@ The script automatically detects `process-updates.php` in `vendor/nowo-tech/comp
 # Execute commands directly
 ./generate-composer-require.sh --run
 
+# Show release information
+./generate-composer-require.sh --release-info
+
+# Show full changelogs
+./generate-composer-require.sh --release-detail
+
+# Show impact analysis for conflicting packages
+./generate-composer-require.sh --show-impact
+
+# Save impact analysis to file
+./generate-composer-require.sh --save-impact
+
+# Verbose output
+./generate-composer-require.sh --verbose
+
+# Debug mode
+./generate-composer-require.sh --debug
+
 # Show help
 ./generate-composer-require.sh --help
 ```
@@ -104,12 +124,15 @@ Example output:
 > **Note:** By default, release information is **not shown** (no API calls are made). Use `--release-info` or `--release-detail` to enable it.
 
 **Available options:**
-- `--run` - Execute suggested commands
-- `--release-info` - Show release summary
-- `--release-detail` - Show full changelog
-- `-v, --verbose` - Show detailed information
-- `--debug` - Show debug information
-- `-h, --help` - Show help
+- `--run` - Execute suggested commands automatically
+- `--release-info` - Show release information (summary with links)
+- `--release-detail` - Show full release changelog for each package (implies `--release-info`)
+- `--no-release-info` - Skip release information section (default behavior)
+- `--show-impact, --impact` - Show impact analysis for conflicting packages (disabled by default)
+- `--save-impact` - Save impact analysis to `composer-update-impact.txt` file (implies `--show-impact`)
+- `-v, --verbose` - Show verbose output (configuration files, packages, etc.)
+- `--debug` - Show debug information (very detailed, includes file paths, parsing, etc.)
+- `-h, --help` - Show help message
 
 For detailed usage information, see [Usage Guide](docs/USAGE.md).
 
@@ -117,7 +140,7 @@ For detailed usage information, see [Usage Guide](docs/USAGE.md).
 
 The script searches for configuration files in the current directory (where `composer.json` is located). It supports both `.yaml` and `.yml` extensions, with `.yaml` taking priority.
 
-Edit `generate-composer-require.yaml` to configure which packages to ignore or force include during updates:
+Edit `generate-composer-require.yaml` to configure which packages to ignore or force include during updates, and set default values for command-line options:
 
 ```yaml
 # Composer Update Helper Configuration
@@ -138,6 +161,15 @@ check-dependencies: true
 # ⚠️  WARNING: i18n feature is currently in DEVELOPMENT MODE
 #language: es
 
+# Command-line options defaults (can be overridden via command-line arguments)
+# Set your preferred defaults here, then override them when needed via command-line flags
+show-release-info: false          # Show release information by default
+show-release-detail: false        # Show full changelog by default
+show-impact-analysis: false       # Show impact analysis by default
+save-impact-to-file: false       # Save impact analysis to file by default
+verbose: false                    # Verbose output by default
+debug: false                     # Debug mode by default
+
 # List of packages to ignore during update
 # Ignored packages will still be displayed in the output with their available versions,
 # but won't be included in the composer require commands.
@@ -155,6 +187,8 @@ include:
   - some/package
   - another/package
 ```
+
+> 💡 **Tip**: Command-line arguments always override YAML configuration. For example, if you set `show-release-info: true` in YAML but run `./generate-composer-require.sh --no-release-info`, the release info will be disabled for that run.
 
 For detailed configuration options including language settings, dependency checking, and backward compatibility, see [Configuration Guide](docs/CONFIGURATION.md).
 
