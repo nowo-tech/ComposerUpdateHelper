@@ -64,8 +64,13 @@ class ConfigLoader
 
     /**
      * Read a configuration value from YAML file
+     *
+     * @param string $yamlPath Path to YAML file
+     * @param string $key Configuration key
+     * @param mixed $default Default value if key not found
+     * @return mixed Configuration value or default
      */
-    public static function readConfigValue(string $yamlPath, string $key, mixed $default = null)
+    public static function readConfigValue(string $yamlPath, string $key, $default = null)
     {
         if (!file_exists($yamlPath)) {
             return $default;
