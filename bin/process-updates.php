@@ -204,7 +204,11 @@ define('COMPOSER_REQUIRE_FLAGS', '--with-all-dependencies');
 
 if ($debug) {
     Utils::debugLog("showReleaseInfo = " . ($showReleaseInfo ? 'true' : 'false'), $debug);
+    Utils::debugLog("showReleaseDetail = " . ($showReleaseDetail ? 'true' : 'false'), $debug);
+    Utils::debugLog("showImpactAnalysis = " . ($showImpactAnalysis ? 'true' : 'false'), $debug);
+    Utils::debugLog("saveImpactToFile = " . ($saveImpactToFile ? 'true' : 'false'), $debug);
     Utils::debugLog("checkDependencies = " . ($checkDependencies ? 'true' : 'false'), $debug);
+    Utils::debugLog("verbose = " . ($verbose ? 'true' : 'false'), $debug);
     Utils::debugLog("ignoredPackages count = " . count($ignoredPackages), $debug);
     Utils::debugLog("includedPackages count = " . count($includedPackages), $debug);
     if (count($ignoredPackages) > 0) {
@@ -216,6 +220,12 @@ if ($debug) {
     Utils::debugLog("Total outdated packages: " . count($report['installed']), $debug);
     Utils::debugLog("require packages: " . count($require), $debug);
     Utils::debugLog("require-dev packages: " . count($requireDev), $debug);
+
+    // Show impact file directory if saving to file
+    if ($saveImpactToFile) {
+        $impactFileDir = getenv('IMPACT_FILE_DIR');
+        Utils::debugLog("IMPACT_FILE_DIR = " . ($impactFileDir ?: 'not set (will use current directory)'), $debug);
+    }
 }
 
 // ============================================================================
@@ -638,6 +648,12 @@ if ($totalOutdated > 0 && !$debug) {
     $countMsg = function_exists('t') ? t('found_outdated_packages', [$totalOutdated], $detectedLang) : "✅ Found {$totalOutdated} outdated package(s)";
     error_log($countMsg);
 }
+if ($debug && $totalOutdated > 0) {
+    Utils::debugLog("Total outdated packages found: {$totalOutdated} (prod: " . count($allOutdatedProd) . ", dev: " . count($allOutdatedDev) . ")", $debug);
+}
+if ($debug && $totalOutdated > 0) {
+    Utils::debugLog("Total outdated packages found: {$totalOutdated} (prod: " . count($allOutdatedProd) . ", dev: " . count($allOutdatedDev) . ")", $debug);
+}
 
 // ============================================================================
 // CHECK ALL INSTALLED PACKAGES FOR ABANDONED STATUS
@@ -654,6 +670,10 @@ $allInstalledPackages = array_merge(
     array_keys($require),
     array_keys($requireDev)
 );
+
+if ($debug) {
+    Utils::debugLog("Checking " . count($allInstalledPackages) . " installed packages for abandoned status", $debug);
+}
 
 foreach ($allInstalledPackages as $packageName) {
     // Skip if already checked (in filteredPackageAbandoned)
@@ -741,7 +761,14 @@ if (count($output) === 1 && strpos($output[0], 'No outdated direct dependencies'
 
 // Save impact analysis to file if requested
 if ($saveImpactToFile && !empty($filteredPackageImpact)) {
-    $impactFile = 'composer-update-impact.txt';
+    // Get directory for impact file (prefer script directory, fallback to current directory)
+    $impactFileDir = getenv('IMPACT_FILE_DIR');
+    if ($impactFileDir && is_dir($impactFileDir) && is_writable($impactFileDir)) {
+        $impactFile = rtrim($impactFileDir, '/') . '/composer-update-impact.txt';
+    } else {
+        // Fallback to current directory
+        $impactFile = 'composer-update-impact.txt';
+    }
     $impactContent = [];
     $impactContent[] = "Composer Update Helper - Impact Analysis Report";
     $impactContent[] = "Generated: " . date('Y-m-d H:i:s');
@@ -782,11 +809,26 @@ if ($saveImpactToFile && !empty($filteredPackageImpact)) {
 
     $impactContent[] = "End of Impact Analysis Report";
 
+    if ($debug) {
+        error_log("DEBUG: Saving impact analysis to file: {$impactFile}");
+        error_log("DEBUG:   - File directory: " . dirname($impactFile));
+        error_log("DEBUG:   - Directory exists: " . (is_dir(dirname($impactFile)) ? 'yes' : 'no'));
+        error_log("DEBUG:   - Directory writable: " . (is_writable(dirname($impactFile)) ? 'yes' : 'no'));
+        error_log("DEBUG:   - Content size: " . strlen(implode(PHP_EOL, $impactContent)) . " bytes");
+        error_log("DEBUG:   - Packages with impact: " . count($filteredPackageImpact));
+    }
+
     if (file_put_contents($impactFile, implode(PHP_EOL, $impactContent))) {
         $saveMsg = function_exists('t') ? t('impact_analysis_saved', [$impactFile], $detectedLang) : "✅ Impact analysis saved to: {$impactFile}";
         error_log($saveMsg);
+        if ($debug) {
+            error_log("DEBUG: Impact file saved successfully");
+        }
     } else {
         error_log("⚠️  Failed to save impact analysis to: {$impactFile}");
+        if ($debug) {
+            error_log("DEBUG: Failed to write impact file. Check directory permissions.");
+        }
     }
 }
 
@@ -797,6 +839,25 @@ if ($debug) {
     error_log("DEBUG:   - Dev packages: " . count($dev) . " (" . implode(', ', $dev) . ")");
     error_log("DEBUG:   - Ignored prod: " . count($ignoredProd) . " (" . implode(', ', $ignoredProd) . ")");
     error_log("DEBUG:   - Ignored dev: " . count($ignoredDev) . " (" . implode(', ', $ignoredDev) . ")");
+    error_log("DEBUG:   - All outdated prod: " . count($allOutdatedProd) . " (" . implode(', ', $allOutdatedProd) . ")");
+    error_log("DEBUG:   - All outdated dev: " . count($allOutdatedDev) . " (" . implode(', ', $allOutdatedDev) . ")");
+    error_log("DEBUG:   - Filtered by dependencies prod: " . count($filteredByDependenciesProd) . " (" . implode(', ', $filteredByDependenciesProd) . ")");
+    error_log("DEBUG:   - Filtered by dependencies dev: " . count($filteredByDependenciesDev) . " (" . implode(', ', $filteredByDependenciesDev) . ")");
+    error_log("DEBUG:   - Packages with conflicts: " . count($filteredPackageConflicts));
+    error_log("DEBUG:   - Abandoned packages (outdated): " . count($filteredPackageAbandoned));
+    error_log("DEBUG:   - All installed abandoned packages: " . count($allInstalledAbandoned));
+    error_log("DEBUG:   - Packages with fallbacks: " . count($filteredPackageFallbacks));
+    error_log("DEBUG:   - Packages with alternatives: " . count($filteredPackageAlternatives));
+    error_log("DEBUG:   - Packages with maintainer contacts: " . count($filteredPackageMaintainerContacts));
+    error_log("DEBUG:   - Packages with impact analysis: " . count($filteredPackageImpact));
+    if ($saveImpactToFile) {
+        $impactFileDir = getenv('IMPACT_FILE_DIR');
+        $impactFile = $impactFileDir && is_dir($impactFileDir) && is_writable($impactFileDir)
+            ? rtrim($impactFileDir, '/') . '/composer-update-impact.txt'
+            : 'composer-update-impact.txt';
+        error_log("DEBUG:   - Impact file will be saved to: {$impactFile}");
+        error_log("DEBUG:   - Impact file directory writable: " . (is_writable($impactFileDir ?: getcwd()) ? 'yes' : 'no'));
+    }
 }
 
 // Output the formatted result

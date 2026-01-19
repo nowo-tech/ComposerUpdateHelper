@@ -34,6 +34,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Now automatically activates impact analysis when saving to file is requested
   - Works consistently with `--save-impact` command-line flag behavior
 
+### Fixed
+- **Impact analysis file location**: Fixed issue where `composer-update-impact.txt` was saved in the current working directory instead of the script's directory
+  - Previously, the file was saved in the directory where the command was executed (working directory)
+  - Now saves the file in the same directory where the script is located
+  - Example: If script is in `/usr/src/app/symfony/generate-composer-require.sh`, file is saved to `/usr/src/app/symfony/composer-update-impact.txt`
+  - Ensures the file is always generated next to the script, regardless of where the command is executed from
+  - Falls back to current directory if script directory is not writable
+
 ## [2.0.23] - 2026-01-18
 
 ### Changed
