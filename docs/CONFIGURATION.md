@@ -23,6 +23,7 @@ Edit `generate-composer-require.yaml` (or `.yml`) to configure which packages to
 # When disabled (false), the tool will suggest all available updates without checking
 # dependency compatibility (faster but may suggest incompatible updates).
 # Default: true
+# Can be overridden with command line arguments
 check-dependencies: true
 
 # Language for output messages
@@ -31,6 +32,48 @@ check-dependencies: true
 # If not set, will auto-detect from system (LANG, LC_ALL, LC_MESSAGES)
 # Default: en (English)
 #language: es
+
+# Show release information by default
+# When enabled (true), shows release summary with links to GitHub releases and changelogs.
+# When disabled (false), no API calls are made for release information (faster execution).
+# Default: false
+# Can be overridden with --release-info, --release-detail, or --no-release-info
+show-release-info: false
+
+# Show full release changelog by default
+# When enabled (true), shows full changelog for each package (implies show-release-info).
+# When disabled (false), only shows release summary if show-release-info is enabled.
+# Default: false
+# Can be overridden with --release-detail or --no-release-info
+show-release-detail: false
+
+# Show impact analysis for conflicting packages by default
+# When enabled (true), shows which packages would be affected by updating conflicting packages.
+# When disabled (false), impact analysis is not shown (reduces output verbosity).
+# Default: false
+# Can be overridden with --show-impact, --impact, or --save-impact
+show-impact-analysis: false
+
+# Save impact analysis to file by default
+# When enabled (true), saves impact analysis to composer-update-impact.txt (implies show-impact-analysis).
+# When disabled (false), impact analysis is only shown in output if show-impact-analysis is enabled.
+# Default: false
+# Can be overridden with --save-impact
+save-impact-to-file: false
+
+# Verbose output by default
+# When enabled (true), shows detailed information including configuration files and packages.
+# When disabled (false), shows only essential information.
+# Default: false
+# Can be overridden with -v, --verbose, or --debug
+verbose: false
+
+# Debug mode by default
+# When enabled (true), shows very detailed debug information including file paths and parsing details.
+# When disabled (false), debug information is not shown.
+# Default: false
+# Can be overridden with --debug
+debug: false
 
 # List of packages to ignore during update
 # Ignored packages will still be displayed in the output with their available versions,
@@ -171,6 +214,82 @@ This will show:
 - Test translations
 
 **Note:** Translation files are stored in the package (`vendor/nowo-tech/composer-update-helper/bin/i18n/`) and are not copied to your project root. Only `generate-composer-require.sh` is copied to the project root.
+
+## Command-Line Options Configuration
+
+All command-line options can be configured as defaults in the YAML configuration file. These defaults can then be overridden by passing the corresponding command-line arguments.
+
+**Configuration priority (highest to lowest):**
+1. **Command-line arguments** (highest priority) - Always override YAML configuration
+2. **YAML configuration** - Used as defaults if not specified in command line
+3. **Built-in defaults** - Used if not specified in YAML or command line
+
+**Available configuration options:**
+
+### `show-release-info`
+- **Type**: Boolean (`true` or `false`)
+- **Default**: `false`
+- **Description**: Show release information (summary with links) by default
+- **Command-line override**: `--release-info`, `--release-detail`, or `--no-release-info`
+
+### `show-release-detail`
+- **Type**: Boolean (`true` or `false`)
+- **Default**: `false`
+- **Description**: Show full release changelog for each package by default (implies `show-release-info`)
+- **Command-line override**: `--release-detail` or `--no-release-info`
+
+### `show-impact-analysis`
+- **Type**: Boolean (`true` or `false`)
+- **Default**: `false`
+- **Description**: Show impact analysis for conflicting packages by default
+- **Command-line override**: `--show-impact`, `--impact`, or `--save-impact`
+
+### `save-impact-to-file`
+- **Type**: Boolean (`true` or `false`)
+- **Default**: `false`
+- **Description**: Save impact analysis to `composer-update-impact.txt` file by default (implies `show-impact-analysis`)
+- **Command-line override**: `--save-impact`
+
+### `verbose`
+- **Type**: Boolean (`true` or `false`)
+- **Default**: `false`
+- **Description**: Show verbose output (detailed information) by default
+- **Command-line override**: `-v`, `--verbose`, or `--debug`
+
+### `debug`
+- **Type**: Boolean (`true` or `false`)
+- **Default**: `false`
+- **Description**: Show debug information (very detailed) by default
+- **Command-line override**: `--debug`
+
+**Example configuration:**
+
+```yaml
+# Set defaults for command-line options
+show-release-info: true          # Always show release info by default
+show-impact-analysis: true        # Always show impact analysis by default
+verbose: false                    # Don't show verbose output by default
+debug: false                     # Don't show debug info by default
+```
+
+**Example usage:**
+
+```bash
+# Uses YAML defaults (show-release-info: true, show-impact-analysis: true)
+./generate-composer-require.sh
+
+# Override YAML defaults: disable release info, enable verbose
+./generate-composer-require.sh --no-release-info --verbose
+
+# Override YAML defaults: enable debug (implies verbose)
+./generate-composer-require.sh --debug
+```
+
+**Benefits:**
+- ✅ Set your preferred defaults once in the YAML file
+- ✅ Override defaults when needed via command-line arguments
+- ✅ Team members can have consistent defaults via shared YAML configuration
+- ✅ No need to remember long command-line flags for frequently used options
 
 ## Dependency Compatibility Checking
 

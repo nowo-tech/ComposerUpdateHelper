@@ -15,7 +15,50 @@
 # When disabled (false), the tool will suggest all available updates without checking
 # dependency compatibility (faster but may suggest incompatible updates).
 # Default: true
+# Can be overridden with command line arguments
 check-dependencies: true
+
+# Show release information by default
+# When enabled (true), shows release summary with links to GitHub releases and changelogs.
+# When disabled (false), no API calls are made for release information (faster execution).
+# Default: false
+# Can be overridden with --release-info, --release-detail, or --no-release-info
+show-release-info: false
+
+# Show full release changelog by default
+# When enabled (true), shows full changelog for each package (implies show-release-info).
+# When disabled (false), only shows release summary if show-release-info is enabled.
+# Default: false
+# Can be overridden with --release-detail or --no-release-info
+show-release-detail: false
+
+# Show impact analysis for conflicting packages by default
+# When enabled (true), shows which packages would be affected by updating conflicting packages.
+# When disabled (false), impact analysis is not shown (reduces output verbosity).
+# Default: false
+# Can be overridden with --show-impact, --impact, or --save-impact
+show-impact-analysis: false
+
+# Save impact analysis to file by default
+# When enabled (true), saves impact analysis to composer-update-impact.txt (implies show-impact-analysis).
+# When disabled (false), impact analysis is only shown in output if show-impact-analysis is enabled.
+# Default: false
+# Can be overridden with --save-impact
+save-impact-to-file: false
+
+# Verbose output by default
+# When enabled (true), shows detailed information including configuration files and packages.
+# When disabled (false), shows only essential information.
+# Default: false
+# Can be overridden with -v, --verbose, or --debug
+verbose: false
+
+# Debug mode by default
+# When enabled (true), shows very detailed debug information including file paths and parsing details.
+# When disabled (false), debug information is not shown.
+# Default: false
+# Can be overridden with --debug
+debug: false
 
 # Note: The following features are automatically enabled when check-dependencies is true:
 # - Abandoned Package Detection: Automatically detects and warns about abandoned packages

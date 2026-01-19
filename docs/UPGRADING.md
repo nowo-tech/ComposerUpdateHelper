@@ -24,6 +24,16 @@ This guide will help you upgrade Composer Update Helper to newer versions.
 This release adds several new features to help resolve dependency conflicts and provide better guidance when automatic solutions aren't available. See [CHANGELOG.md](CHANGELOG.md#unreleased) for complete details.
 
 **New Features:**
+- **Command-line options configuration in YAML**: Configure default values for all command-line options in `generate-composer-require.yaml`
+  - Set your preferred defaults once, then override them when needed via command-line arguments
+  - Available options: `show-release-info`, `show-release-detail`, `show-impact-analysis`, `save-impact-to-file`, `verbose`, `debug`
+  - Example: Set `show-release-info: true` in YAML to always show release info by default
+  - Command-line arguments always override YAML configuration
+  - See [Configuration Guide](docs/CONFIGURATION.md#command-line-options-configuration) for complete details
+- **Wildcard Dependency Checking**: Extended dependency conflict detection to support wildcard constraints (`^`, `~`, `*`)
+  - Previously, dependency checking was skipped for packages with wildcard constraints
+  - Now properly validates wildcard constraints against dependent package requirements
+  - Improves conflict detection accuracy for framework constraints and version ranges
 - **Conflict Impact Analysis**: Analyzes which packages would be affected when updating conflicting packages
   - Shows direct and transitive affected packages
   - **Optional feature**: Use `--show-impact` or `--impact` flag to enable (disabled by default to reduce verbosity)
@@ -40,10 +50,20 @@ This release adds several new features to help resolve dependency conflicts and 
 
 #### Migration Notes
 - **No action required**: These are new features that enhance existing conflict detection
+- **YAML configuration for command-line options** (optional): You can now set default values for command-line options in your `generate-composer-require.yaml`:
+  ```yaml
+  # Set defaults for command-line options
+  show-release-info: true          # Always show release info by default
+  show-impact-analysis: true       # Always show impact analysis by default
+  verbose: false                   # Don't show verbose output by default
+  ```
+  - Command-line arguments always override YAML configuration
+  - Example: If you set `show-release-info: true` in YAML but run `./generate-composer-require.sh --no-release-info`, release info will be disabled for that run
 - All new features are automatic and require no configuration (except impact analysis which requires `--show-impact` flag)
 - Abandoned package detection, fallback suggestions, and alternative packages appear automatically when conflicts are detected
 - **Impact analysis is optional**: By default, impact analysis is disabled to reduce output verbosity. Use `--show-impact` flag if you need detailed impact information
 - **Save impact to file**: Use `--save-impact` flag to save impact analysis to a text file for later review or documentation. The file `composer-update-impact.txt` is automatically added to `.gitignore`
+- **Wildcard dependency checking**: Now works automatically for all constraint types (`^`, `~`, `*`). No configuration needed.
 
 #### Breaking Changes
 - None
