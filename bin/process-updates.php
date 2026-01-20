@@ -472,7 +472,13 @@ foreach ($report['installed'] as $pkg) {
         $fallbackVersion = null; // New variable for fallback versions
         $compatibleVersion = findCompatibleVersion($name, $constraint, $debug, $checkDependencies, $requiredTransitiveUpdates, $conflictingDependents);
 
-        // If no compatible version but we have conflicts, try fallback
+        // If no compatible version but we have conflicts, check if dependent packages can be updated
+        if ($compatibleVersion === null && !empty($conflictingDependents)) {
+            // Check if conflicting dependent packages have newer versions that support the proposed version
+            VersionResolver::findCompatibleDependentVersions($name, $constraint, $conflictingDependents, $requiredTransitiveUpdates, $debug);
+        }
+
+        // If still no compatible version but we have conflicts, try fallback
         if ($compatibleVersion === null && !empty($conflictingDependents)) {
             // Show progress message for fallback version search (only once)
             $progressMsg = function_exists('t') ? t('searching_fallback_versions', [], $detectedLang) : '⏳ Searching for fallback versions...';
