@@ -194,6 +194,70 @@ For detailed configuration options including language settings, dependency check
 
 For framework support details, see [Framework Support](docs/FRAMEWORKS.md).
 
+## Packagist Integration
+
+Composer Update Helper fetches package information from Packagist to analyze dependencies and find compatible versions. Here's how it works:
+
+### How It Works
+
+The tool uses a two-tier approach for fetching package information:
+
+1. **Primary Method**: Direct Packagist API calls (`https://packagist.org/packages/{package}.json`)
+   - Fast and efficient for most use cases
+   - Used for: package requirements, versions, abandoned status, maintainer info, alternative package search
+
+2. **Fallback Method**: `composer show` command
+   - Automatically used when Packagist API is unavailable or returns incomplete data
+   - **Respects your project's repository configuration** in `composer.json`
+   - Supports mirrors, private repositories, and custom repository setups
+
+### Improving Packagist Access
+
+#### Using Packagist Mirrors
+
+If you're experiencing slow API responses or rate limiting, you can configure a Packagist mirror in your `composer.json`:
+
+```json
+{
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://mirror.packagist.com",
+            "only": ["packagist"]
+        }
+    ]
+}
+```
+
+The fallback method (`composer show`) will automatically use your configured mirror.
+
+#### Using Private Repositories
+
+For private packages or internal repositories, simply configure them in your `composer.json`:
+
+```json
+{
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/your-org/private-package"
+        }
+    ]
+}
+```
+
+When the Packagist API doesn't have information about these packages, the tool automatically falls back to `composer show`, which respects your repository configuration.
+
+#### Performance Considerations
+
+- **API Rate Limiting**: Packagist doesn't enforce strict rate limits, but excessive requests may be throttled. The tool includes proper user-agent headers and reasonable timeouts (5 seconds).
+
+- **Offline Mode**: If you're working offline or behind a firewall, the tool will fall back to `composer show`, which uses Composer's local cache when available.
+
+- **Caching**: Composer caches package metadata automatically. Running `composer update` periodically ensures your cache is fresh, improving fallback performance.
+
+> 💡 **Tip**: If you're using a VPN or behind a corporate firewall, configuring a Packagist mirror or ensuring `composer show` works will provide the best experience.
+
 ## Requirements
 
 - PHP >= 7.4
