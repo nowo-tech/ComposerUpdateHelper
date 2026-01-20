@@ -18,6 +18,37 @@ This guide will help you upgrade Composer Update Helper to newer versions.
 
 ## Version-Specific Upgrade Notes
 
+### Upgrading to 2.0.25+ (Unreleased)
+
+#### What's New
+This release significantly improves conflict resolution by automatically detecting when dependent packages can be updated to support proposed package updates.
+
+**New Features:**
+- **Dependent Package Update Detection**: Automatically detects when conflicting dependent packages have newer versions that support the proposed update
+  - When a package update conflicts with a dependent package, the system now checks if the dependent package has a newer version that supports the proposed update
+  - If found, both packages are included in the same update command
+  - Example scenario:
+    - Trying to update: `zircote/swagger-php:6.0.2`
+    - Conflicts with: `nelmio/api-doc-bundle` (installed: `5.9.2`) requiring `zircote/swagger-php:^4.11.1 || ^5.0`
+    - System detects: `nelmio/api-doc-bundle:6.0.0` requires `zircote/swagger-php:^6.0`
+    - Suggested command: `composer require --with-all-dependencies zircote/swagger-php:6.0.2 nelmio/api-doc-bundle:6.0.0`
+  - Reduces manual intervention and provides actionable solutions
+  - Works automatically - no configuration needed
+
+**Changed:**
+- **Enhanced Conflict Resolution Flow**: Improved conflict resolution strategy with better ordering
+  - Now checks dependent packages for compatible versions first
+  - Falls back to searching for compatible older versions if no dependent updates found
+  - Provides more comprehensive solutions before suggesting alternatives
+
+#### Migration Notes
+- **No action required**: This is an automatic enhancement to conflict resolution
+- **Better conflict resolution**: You'll now see more actionable suggestions when conflicts occur
+- **Automatic detection**: The system automatically detects compatible dependent package versions - no manual configuration needed
+
+#### Breaking Changes
+- None
+
 ### Upgrading to 2.0.24+ (Unreleased)
 
 #### What's New
