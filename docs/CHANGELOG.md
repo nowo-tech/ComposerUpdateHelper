@@ -7,6 +7,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.26] - 2026-01-20
+
+### Added
+- **Dependent Package Update Detection**: When a package update conflicts with a dependent package, the system now automatically checks if the dependent package has a newer version that supports the proposed update
+  - Previously, when `package-a:2.0` conflicted with `dependent-package` requiring `package-a:^1.5`, the update was simply filtered
+  - Now automatically searches for newer versions of `dependent-package` that require a version compatible with `package-a:2.0`
+  - If found, both packages are included in the same update command
+  - Example: Instead of just filtering `zircote/swagger-php:6.0.2` when it conflicts with `nelmio/api-doc-bundle` requiring `^4.11.1 || ^5.0`, the system now checks if `nelmio/api-doc-bundle` has a version (e.g., `6.0.0`) that requires `zircote/swagger-php:^6.0`
+  - If compatible version is found, suggests: `composer require --with-all-dependencies zircote/swagger-php:6.0.2 nelmio/api-doc-bundle:6.0.0`
+  - Significantly improves conflict resolution by automatically detecting when both packages need to be updated together
+  - Reduces manual intervention required to resolve dependency conflicts
+  - Integrated into the conflict detection flow before fallback version search
+
+### Changed
+- **Enhanced Conflict Resolution**: Improved conflict resolution strategy to check dependent packages for compatible versions before suggesting fallback versions
+  - Conflict resolution now follows this order:
+    1. Check if dependent packages have newer compatible versions (NEW)
+    2. If not found, search for fallback versions of the original package
+    3. If still not found, suggest alternative packages or maintainer contact
+  - Provides more comprehensive solutions to dependency conflicts
+  - Better user experience with actionable suggestions
+
+## [2.0.25] - 2026-01-20
+
+### Added
+- **Dependent Package Update Detection**: When a package update conflicts with a dependent package, the system now automatically checks if the dependent package has a newer version that supports the proposed update
+  - Previously, when `package-a:2.0` conflicted with `dependent-package` requiring `package-a:^1.5`, the update was simply filtered
+  - Now automatically searches for newer versions of `dependent-package` that require a version compatible with `package-a:2.0`
+  - If found, both packages are included in the same update command
+  - Example: Instead of just filtering `zircote/swagger-php:6.0.2` when it conflicts with `nelmio/api-doc-bundle` requiring `^4.11.1 || ^5.0`, the system now checks if `nelmio/api-doc-bundle` has a version (e.g., `6.0.0`) that requires `zircote/swagger-php:^6.0`
+  - If compatible version is found, suggests: `composer require --with-all-dependencies zircote/swagger-php:6.0.2 nelmio/api-doc-bundle:6.0.0`
+  - Significantly improves conflict resolution by automatically detecting when both packages need to be updated together
+  - Reduces manual intervention required to resolve dependency conflicts
+  - Integrated into the conflict detection flow before fallback version search
+
+### Changed
+- **Enhanced Conflict Resolution**: Improved conflict resolution strategy to check dependent packages for compatible versions before suggesting fallback versions
+  - Conflict resolution now follows this order:
+    1. Check if dependent packages have newer compatible versions (NEW)
+    2. If not found, search for fallback versions of the original package
+    3. If still not found, suggest alternative packages or maintainer contact
+  - Provides more comprehensive solutions to dependency conflicts
+  - Better user experience with actionable suggestions
+
 ## [2.0.24] - 2026-01-19
 
 ### Added

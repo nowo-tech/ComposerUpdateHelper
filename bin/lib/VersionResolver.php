@@ -377,4 +377,119 @@ class VersionResolver
 
         return null;
     }
+
+    /**
+     * Find compatible versions of conflicting dependent packages
+     * When a dependent package conflicts, check if it has a newer version that supports the proposed version
+     *
+     * @param string $packageName Package name being updated
+     * @param string $proposedVersion Proposed version of the package
+     * @param array $conflictingDependents Array of ['package' => 'constraint'] pairs
+     * @param array|null $requiredTransitiveUpdates Output array for transitive updates
+     * @param bool $debug Enable debug logging
+     * @return void Modifies $requiredTransitiveUpdates in place
+     */
+    public static function findCompatibleDependentVersions(
+        string $packageName,
+        string $proposedVersion,
+        array $conflictingDependents,
+        ?array &$requiredTransitiveUpdates,
+        bool $debug = false
+    ): void {
+        if (empty($conflictingDependents) || $requiredTransitiveUpdates === null) {
+            return;
+        }
+
+        $composerBin = getenv('COMPOSER_BIN') ?: 'composer';
+        $phpBin = getenv('PHP_BIN') ?: 'php';
+
+        foreach ($conflictingDependents as $depPackage => $oldConstraint) {
+            if ($debug) {
+                error_log("DEBUG: Checking if {$depPackage} has a newer version compatible with {$packageName}:{$proposedVersion}");
+            }
+
+            // Get available versions of the dependent package
+            $cmd = escapeshellarg($phpBin) . ' -d date.timezone=UTC ' . escapeshellarg($composerBin) .
+                   ' show ' . escapeshellarg($depPackage) . ' --all --format=json 2>/dev/null';
+
+            $output = shell_exec($cmd);
+            if (!$output) {
+                if ($debug) {
+                    error_log("DEBUG: Could not get versions for {$depPackage}");
+                }
+                continue;
+            }
+
+            $data = json_decode($output, true);
+            if (!$data || !isset($data['versions'])) {
+                if ($debug) {
+                    error_log("DEBUG: No versions found for {$depPackage}");
+                }
+                continue;
+            }
+
+            // Get installed version of the dependent package
+            $installedVersion = DependencyAnalyzer::getInstalledPackageVersion($depPackage);
+            if (!$installedVersion) {
+                if ($debug) {
+                    error_log("DEBUG: Could not get installed version for {$depPackage}");
+                }
+                continue;
+            }
+
+            // Filter stable versions and sort descending
+            $stableVersions = [];
+            foreach ($data['versions'] as $version) {
+                $normalized = ltrim($version, 'v');
+                if (!preg_match('/(dev|alpha|beta|rc)/i', $version)) {
+                    $stableVersions[] = $normalized;
+                }
+            }
+
+            if (empty($stableVersions)) {
+                continue;
+            }
+
+            usort($stableVersions, function($a, $b) {
+                return version_compare($b, $a); // Descending order
+            });
+
+            // Find the highest version that requires a version of $packageName compatible with $proposedVersion
+            foreach ($stableVersions as $depVersion) {
+                // Skip if this version is not newer than installed
+                if (version_compare($depVersion, ltrim($installedVersion, 'v'), '<=')) {
+                    continue;
+                }
+
+                // Get requirements of this version of the dependent package
+                $depRequirements = PackageInfoProvider::getPackageRequirements($depPackage, $depVersion);
+                if (empty($depRequirements) || !isset($depRequirements[$packageName])) {
+                    continue;
+                }
+
+                $depRequiresConstraint = $depRequirements[$packageName];
+
+                // Check if this constraint is compatible with the proposed version
+                if (DependencyAnalyzer::versionSatisfiesConstraint($proposedVersion, $depRequiresConstraint)) {
+                    if ($debug) {
+                        error_log("DEBUG: Found compatible version {$depVersion} of {$depPackage} that requires {$packageName}:{$depRequiresConstraint} (compatible with proposed {$proposedVersion})");
+                    }
+
+                    // Add to required transitive updates
+                    if (!isset($requiredTransitiveUpdates[$depPackage])) {
+                        $requiredTransitiveUpdates[$depPackage] = [
+                            'required_by' => [],
+                            'required_constraint' => "compatible with {$packageName}:{$proposedVersion}",
+                            'installed_version' => $installedVersion,
+                            'suggested_version' => $depVersion
+                        ];
+                    }
+                    $requiredTransitiveUpdates[$depPackage]['required_by'][] = "{$packageName}:{$proposedVersion}";
+                    break; // Found compatible version, no need to check older ones
+                } elseif ($debug) {
+                    error_log("DEBUG: Version {$depVersion} of {$depPackage} requires {$packageName}:{$depRequiresConstraint} (NOT compatible with proposed {$proposedVersion})");
+                }
+            }
+        }
+    }
 }

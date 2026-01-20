@@ -24,14 +24,20 @@ This document explains the different update scenarios that Composer Update Helpe
 **Example**:
 - Trying to update: `rector/rector:2.3.1`
 - Blocked by: `lexik/jwt-authentication-bundle` requires `rector/rector ^1.2`
-- Result: ❌ Update filtered with clear message: `lexik/jwt-authentication-bundle requires rector/rector ^1.2`
+- Result: ⚠️ System checks if `lexik/jwt-authentication-bundle` has a newer version that supports `rector/rector:2.3.1`
+  - If newer compatible version found: ✅ Suggests updating both packages together
+  - If not found: ❌ Update filtered with clear message: `lexik/jwt-authentication-bundle requires rector/rector ^1.2`
 
 **Handling**: 
 - The system checks `composer.lock` for all packages that depend on the target package
 - Verifies if the proposed version satisfies all dependent constraints
-- If not satisfied, the update is filtered and the conflicting dependent is reported
+- **NEW**: If not satisfied, automatically checks if dependent packages have newer versions that support the proposed update
+- If compatible dependent version found, suggests updating both packages together
+- If not found, the update is filtered and the conflicting dependent is reported
+- Example: When `zircote/swagger-php:6.0.2` conflicts with `nelmio/api-doc-bundle` requiring `^4.11.1 || ^5.0`, the system checks if `nelmio/api-doc-bundle:6.0.0` exists and requires `zircote/swagger-php:^6.0`
+  - If found: Suggests `composer require --with-all-dependencies zircote/swagger-php:6.0.2 nelmio/api-doc-bundle:6.0.0`
 
-**Status**: ✅ Fully supported
+**Status**: ✅ Fully supported with automatic dependent package update detection
 
 ---
 
@@ -448,19 +454,26 @@ Each case below explains what happens currently, what's missing, and what manual
 
 **Current Behavior**: 
 - ✅ Suggests transitive dependency updates (Strategy 1) - **Implemented**
-- ✅ **Fallback version suggestions (Strategy 2)** - **Now implemented**
+- ✅ **Dependent package update detection (Strategy 1b)** - **Now implemented**
+  - When a package conflicts with a dependent package, automatically checks if the dependent package has a newer version that supports the proposed update
+  - If found, suggests updating both packages together
+  - Example: `composer require --with-all-dependencies package-a:2.0 dependent-package:3.0`
+- ✅ **Fallback version suggestions (Strategy 2)** - **Implemented**
   - Automatically searches for compatible older versions when primary update conflicts
   - Verifies fallback versions satisfy all conflicting dependencies
   - Shows "Alternative solutions" section in output
   - Example: `💡 Alternative solutions: - package-a:1.9.5 (compatible with conflicting dependencies)`
 - ❌ No dependency removal suggestions (Strategy 3)
-- ⚠️ **Partial implementation** - Two strategies available, third still missing
+- ⚠️ **Partial implementation** - Three strategies available (transitive updates, dependent updates, fallback versions), removal suggestions still missing
 
 **Implementation Details**:
+- `VersionResolver::findCompatibleDependentVersions()` searches for newer versions of conflicting dependent packages
+  - Checks if dependent packages have versions that support the proposed update
+  - If found, adds them to transitive updates to be included in the same command
 - `findFallbackVersion()` function searches for compatible older versions
 - Verifies fallback satisfies all conflicting constraints
 - Verifies fallback's own requirements don't conflict with installed packages
-- Output includes fallback suggestions when available
+- Output includes both dependent updates and fallback suggestions when available
 
 **What's Still Needed**:
 - Dependency removal suggestions (Strategy 3)
@@ -469,7 +482,7 @@ Each case below explains what happens currently, what's missing, and what manual
 
 **Priority**: Medium-High (Partially implemented ✅)
 
-**Current Solution**: ✅ Two strategies available - transitive updates and fallback versions
+**Current Solution**: ✅ Three strategies available - transitive updates, dependent package updates, and fallback versions
 
 ---
 
