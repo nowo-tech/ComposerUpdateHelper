@@ -20,7 +20,7 @@ return [
     'suggested_commands_grouped' => 'Odporúčané príkazy (skúste nainštalovať spolu - Composer môže lepšie vyriešiť konflikty):',
     'grouped_install_explanation' => '(Inštalácia viacerých balíčkov spolu niekedy pomáha Composeru vyriešiť konflikty)',
     'grouped_install_warning' => '(Poznámka: To môže stále zlyhať, ak existujú konflikty s nainštalovanými balíčkami, ktoré nie je možné aktualizovať)',
-    'copy_command_hint' => '(Click to copy or select the command)',
+    'copy_command_hint' => '(Select the command to copy)',
     'packages_need_maintainer_update' => '(The following packages need updates from their maintainers)',
     'package_needs_update_for_grouped' => '%s (installed: %s) needs update to support: %s (requires: %s)',
     'suggest_contact_maintainer' => '💡 Consider contacting the maintainer of %s',

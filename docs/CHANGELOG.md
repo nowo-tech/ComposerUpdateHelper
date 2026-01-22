@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.29] - 2026-01-22
+
+### Changed
+- **Simplified Command Display**: Removed clickable command functionality for better compatibility
+  - Removed OSC 8 hyperlink codes that were not working reliably across terminals
+  - Commands now display normally with 📋 icon for visual indication
+  - Updated hint message to "(Select the command to copy)" for clarity
+  - Commands remain fully selectable and copyable in all terminals
+  - Better compatibility across different terminal emulators
+
 ## [2.0.28] - 2026-01-20
 
 ### Added
@@ -24,10 +34,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Example output: "The following packages need updates from their maintainers: - a2lix/auto-form-bundle (installed: 1.0.0) needs update to support: phpdocumentor/reflection-docblock:6.0.1 (requires: ^6.0) 💡 Consider contacting the maintainer..."
 - **Copy-Friendly Command Display**: Enhanced command output for easier copying
   - Commands are displayed with a 📋 icon to indicate they can be copied
-  - Clickable commands in modern terminals using OSC 8 hyperlink protocol (iTerm2, Windows Terminal, VS Code, GNOME Terminal, etc.)
-  - Helpful hint message: "(Click to copy or select the command)"
-  - Fallback for terminals that don't support hyperlinks (commands are still selectable)
+  - Helpful hint message: "(Select the command to copy)"
   - Improves user experience when copying long commands with multiple packages
+  - Commands are displayed normally and can be selected for copying
 - **Comprehensive Help Documentation**: Updated help files to document all conflict resolution features
   - Added "CONFLICT RESOLUTION FEATURES" section documenting 8 key features
   - Added "OUTPUT FEATURES" section documenting 5 output enhancements

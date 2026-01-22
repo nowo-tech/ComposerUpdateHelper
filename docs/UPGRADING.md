@@ -18,6 +18,20 @@ This guide will help you upgrade Composer Update Helper to newer versions.
 
 ## Version-Specific Upgrade Notes
 
+### Upgrading to 2.0.29+ (2026-01-22)
+
+#### What's Changed
+This release simplifies command display by removing clickable functionality that wasn't working reliably across all terminals.
+
+**Changed:**
+- **Simplified Command Display**: Commands now display normally with 📋 icon
+  - Removed OSC 8 hyperlink codes for better compatibility
+  - Commands remain fully selectable and copyable
+  - Works consistently across all terminal emulators
+  - Updated hint message for clarity
+
+**No Breaking Changes**: This is a compatibility improvement with no breaking changes.
+
 ### Upgrading to 2.0.28+ (2026-01-20)
 
 #### What's New
