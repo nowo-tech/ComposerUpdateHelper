@@ -17,6 +17,8 @@ return [
     // Commands
     'suggested_commands' => 'คำสั่งที่แนะนำ:',
     'suggested_commands_conflicts' => 'คำสั่งที่แนะนำเพื่อแก้ไขข้อขัดแย้งของ dependencies:',
+    'suggested_commands_grouped' => 'คำสั่งที่แนะนำ (ลองติดตั้งร่วมกัน - Composer อาจแก้ไขข้อขัดแย้งได้ดีขึ้น):',
+    'grouped_install_explanation' => '(การติดตั้งหลายแพ็กเกจร่วมกันบางครั้งช่วยให้ Composer แก้ไขข้อขัดแย้งได้)',
     'includes_transitive' => '(รวม dependencies แบบ transitive ที่จำเป็นในการแก้ไขข้อขัดแย้ง)',
     'update_transitive_first' => '(อัปเดต dependencies แบบ transitive เหล่านี้ก่อน แล้วลองอัปเดตแพ็กเกจที่กรองแล้วอีกครั้ง)',
     
@@ -28,6 +30,10 @@ return [
     'all_outdated_before' => 'แพ็กเกจที่ล้าสมัยทั้งหมด (ก่อนการตรวจสอบ dependencies):',
     'filtered_by_conflicts' => 'กรองตามข้อขัดแย้งของ dependencies:',
     'suggested_transitive' => 'การอัปเดต dependencies แบบ transitive ที่แนะนำเพื่อแก้ไขข้อขัดแย้ง:',
+    'no_compatible_dependent_versions' => 'ไม่พบเวอร์ชันที่เข้ากันได้ของแพ็กเกจที่ขึ้นอยู่กับ:',
+    'no_compatible_version_explanation' => '     - {depPackage}: ไม่พบเวอร์ชันที่รองรับ {requiredBy}',
+    'latest_checked_constraint' => '       (เวอร์ชันล่าสุดที่ตรวจสอบต้องใช้: {constraint})',
+    'all_versions_require' => '       (เวอร์ชันที่มีอยู่ทั้งหมดต้องใช้: {constraint})',
     'packages_passed_check' => 'แพ็กเกจที่ผ่านการตรวจสอบ dependencies:',
     'none' => '(ไม่มี)',
     'conflicts_with' => 'ขัดแย้งกับ:',

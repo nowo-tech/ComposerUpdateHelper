@@ -17,6 +17,8 @@ return [
     // Commands
     'suggested_commands' => 'Lệnh được đề xuất:',
     'suggested_commands_conflicts' => 'Lệnh được đề xuất để giải quyết xung đột phụ thuộc:',
+    'suggested_commands_grouped' => 'Lệnh được đề xuất (thử cài đặt cùng nhau - Composer có thể giải quyết xung đột tốt hơn):',
+    'grouped_install_explanation' => '(Cài đặt nhiều gói cùng nhau đôi khi giúp Composer giải quyết xung đột)',
     'includes_transitive' => '(Bao gồm các phụ thuộc chuyển tiếp cần thiết để giải quyết xung đột)',
     'update_transitive_first' => '(Cập nhật các phụ thuộc chuyển tiếp này trước, sau đó thử lại cập nhật các gói đã lọc)',
     
@@ -28,6 +30,10 @@ return [
     'all_outdated_before' => 'Tất cả các gói lỗi thời (trước khi kiểm tra phụ thuộc):',
     'filtered_by_conflicts' => 'Đã lọc theo xung đột phụ thuộc:',
     'suggested_transitive' => 'Cập nhật phụ thuộc chuyển tiếp được đề xuất để giải quyết xung đột:',
+    'no_compatible_dependent_versions' => 'Không tìm thấy phiên bản tương thích của các gói phụ thuộc:',
+    'no_compatible_version_explanation' => '     - {depPackage}: Không tìm thấy phiên bản hỗ trợ {requiredBy}',
+    'latest_checked_constraint' => '       (Phiên bản được kiểm tra gần đây nhất yêu cầu: {constraint})',
+    'all_versions_require' => '       (Tất cả các phiên bản có sẵn yêu cầu: {constraint})',
     'packages_passed_check' => 'Gói đã vượt qua kiểm tra phụ thuộc:',
     'none' => '(không có)',
     'conflicts_with' => 'xung đột với:',

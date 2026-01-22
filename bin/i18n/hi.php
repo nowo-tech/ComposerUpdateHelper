@@ -17,6 +17,8 @@ return [
     // Commands
     'suggested_commands' => 'सुझाए गए कमांड:',
     'suggested_commands_conflicts' => 'निर्भरता संघर्षों को हल करने के लिए सुझाए गए कमांड:',
+    'suggested_commands_grouped' => 'सुझाए गए कमांड (एक साथ स्थापित करने का प्रयास करें - Composer संघर्षों को बेहतर तरीके से हल कर सकता है):',
+    'grouped_install_explanation' => '(कई पैकेजों को एक साथ स्थापित करना कभी-कभी Composer को संघर्षों को हल करने में मदद करता है)',
     'includes_transitive' => '(संघर्षों को हल करने के लिए आवश्यक सकर्मक निर्भरताएं शामिल हैं)',
     'update_transitive_first' => '(पहले इन सकर्मक निर्भरताओं को अपडेट करें, फिर फ़िल्टर किए गए पैकेजों को अपडेट करने का पुनः प्रयास करें)',
     
@@ -28,6 +30,10 @@ return [
     'all_outdated_before' => 'सभी पुराने पैकेज (निर्भरता जांच से पहले):',
     'filtered_by_conflicts' => 'निर्भरता संघर्षों द्वारा फ़िल्टर किया गया:',
     'suggested_transitive' => 'संघर्षों को हल करने के लिए सुझाए गए सकर्मक निर्भरता अपडेट:',
+    'no_compatible_dependent_versions' => 'निर्भर पैकेजों के संगत संस्करण नहीं मिले:',
+    'no_compatible_version_explanation' => '     - {depPackage}: {requiredBy} का समर्थन करने वाला कोई संस्करण नहीं मिला',
+    'latest_checked_constraint' => '       (अंतिम जांचे गए संस्करण की आवश्यकता है: {constraint})',
+    'all_versions_require' => '       (सभी उपलब्ध संस्करणों की आवश्यकता है: {constraint})',
     'packages_passed_check' => 'निर्भरता जांच पास करने वाले पैकेज:',
     'none' => '(कोई नहीं)',
     'conflicts_with' => 'के साथ संघर्ष:',

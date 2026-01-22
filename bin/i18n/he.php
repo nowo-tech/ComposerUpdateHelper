@@ -17,6 +17,8 @@ return [
     // Commands
     'suggested_commands' => 'פקודות מומלצות:',
     'suggested_commands_conflicts' => 'פקודות מומלצות לפתרון התנגשויות תלויות:',
+    'suggested_commands_grouped' => 'פקודות מומלצות (נסה להתקין יחד - Composer עשוי לפתור התנגשויות טוב יותר):',
+    'grouped_install_explanation' => '(התקנת מספר חבילות יחד עוזרת לפעמים ל-Composer לפתור התנגשויות)',
     'includes_transitive' => '(כולל תלויות מעבר הנדרשות לפתרון התנגשויות)',
     'update_transitive_first' => '(עדכן תחילה את תלויות המעבר הללו, ואז נסה שוב לעדכן את החבילות המסוננות)',
     
@@ -28,6 +30,10 @@ return [
     'all_outdated_before' => 'כל החבילות המיושנות (לפני בדיקת תלויות):',
     'filtered_by_conflicts' => 'מסונן לפי התנגשויות תלויות:',
     'suggested_transitive' => 'עדכוני תלויות מעבר מומלצים לפתרון התנגשויות:',
+    'no_compatible_dependent_versions' => 'לא נמצאו גרסאות תואמות של חבילות תלויות:',
+    'no_compatible_version_explanation' => '     - {depPackage}: לא נמצאה גרסה התומכת ב-{requiredBy}',
+    'latest_checked_constraint' => '       (הגרסה האחרונה שנבדקה דורשת: {constraint})',
+    'all_versions_require' => '       (כל הגרסאות הזמינות דורשות: {constraint})',
     'packages_passed_check' => 'חבילות שעברו את בדיקת התלויות:',
     'none' => '(אין)',
     'conflicts_with' => 'מתנגש עם:',

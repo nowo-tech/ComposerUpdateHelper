@@ -17,6 +17,8 @@ return [
     // Commands
     'suggested_commands' => 'Ehdotetut komennot:',
     'suggested_commands_conflicts' => 'Ehdotetut komennot riippuvuuskonfliktien ratkaisemiseksi:',
+    'suggested_commands_grouped' => 'Ehdotetut komennot (kokeile asentaa yhdessä - Composer voi ratkaista konfliktit paremmin):',
+    'grouped_install_explanation' => '(Useiden pakettien asentaminen yhdessä auttaa joskus Composeria ratkaisemaan konfliktit)',
     'includes_transitive' => '(Sisältää transitiiviset riippuvuudet, joita tarvitaan konfliktien ratkaisemiseksi)',
     'update_transitive_first' => '(Päivitä ensin nämä transitiiviset riippuvuudet, yritä sitten päivittää suodatetut paketit)',
     
@@ -28,6 +30,10 @@ return [
     'all_outdated_before' => 'Kaikki vanhentuneet paketit (ennen riippuvuustarkistusta):',
     'filtered_by_conflicts' => 'Suodatettu riippuvuuskonfliktien mukaan:',
     'suggested_transitive' => 'Ehdotetut transitiivisten riippuvuuksien päivitykset konfliktien ratkaisemiseksi:',
+    'no_compatible_dependent_versions' => 'Yhteensopivia riippuvien pakettien versioita ei löytynyt:',
+    'no_compatible_version_explanation' => '     - {depPackage}: Versiota, joka tukee {requiredBy}, ei löytynyt',
+    'latest_checked_constraint' => '       (Viimeisin tarkistettu versio vaatii: {constraint})',
+    'all_versions_require' => '       (Kaikki saatavilla olevat versiot vaativat: {constraint})',
     'packages_passed_check' => 'Paketit, jotka läpäisivät riippuvuustarkistuksen:',
     'none' => '(ei mitään)',
     'conflicts_with' => 'konfliktoi:',

@@ -17,6 +17,8 @@ return [
     // Commands
     'suggested_commands' => 'الأوامر المقترحة:',
     'suggested_commands_conflicts' => 'الأوامر المقترحة لحل تعارضات التبعيات:',
+    'suggested_commands_grouped' => 'الأوامر المقترحة (حاول التثبيت معًا - قد يحل Composer التعارضات بشكل أفضل):',
+    'grouped_install_explanation' => '(تثبيت عدة حزم معًا يساعد أحيانًا Composer في حل التعارضات)',
     'includes_transitive' => '(يتضمن التبعيات العابرة اللازمة لحل التعارضات)',
     'update_transitive_first' => '(قم بتحديث هذه التبعيات العابرة أولاً، ثم أعد محاولة تحديث الحزم المفلترة)',
     
@@ -28,6 +30,10 @@ return [
     'all_outdated_before' => 'جميع الحزم القديمة (قبل فحص التبعيات):',
     'filtered_by_conflicts' => 'مفلتر حسب تعارضات التبعيات:',
     'suggested_transitive' => 'تحديثات التبعيات العابرة المقترحة لحل التعارضات:',
+    'no_compatible_dependent_versions' => 'لم يتم العثور على إصدارات متوافقة من الحزم التابعة:',
+    'no_compatible_version_explanation' => '     - {depPackage}: لم يتم العثور على إصدار يدعم {requiredBy}',
+    'latest_checked_constraint' => '       (يتطلب الإصدار الأخير الذي تم التحقق منه: {constraint})',
+    'all_versions_require' => '       (جميع الإصدارات المتاحة تتطلب: {constraint})',
     'packages_passed_check' => 'الحزم التي اجتازت فحص التبعيات:',
     'none' => '(لا شيء)',
     'conflicts_with' => 'يتعارض مع:',

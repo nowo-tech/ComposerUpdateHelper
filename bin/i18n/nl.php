@@ -17,6 +17,8 @@ return [
     // Commands
     'suggested_commands' => 'Voorgestelde commando\'s:',
     'suggested_commands_conflicts' => 'Voorgestelde commando\'s om afhankelijkheidsconflicten op te lossen:',
+    'suggested_commands_grouped' => 'Voorgestelde commando\'s (probeer samen te installeren - Composer kan conflicten beter oplossen):',
+    'grouped_install_explanation' => '(Meerdere pakketten samen installeren helpt Composer soms conflicten op te lossen)',
     'includes_transitive' => '(Inclusief transitieve afhankelijkheden die nodig zijn om conflicten op te lossen)',
     'update_transitive_first' => '(Werk eerst deze transitieve afhankelijkheden bij, probeer dan opnieuw de gefilterde pakketten bij te werken)',
     
@@ -28,6 +30,10 @@ return [
     'all_outdated_before' => 'Alle verouderde pakketten (voor afhankelijkheidscontrole):',
     'filtered_by_conflicts' => 'Gefilterd door afhankelijkheidsconflicten:',
     'suggested_transitive' => 'Voorgestelde transitieve afhankelijkheidsupdates om conflicten op te lossen:',
+    'no_compatible_dependent_versions' => 'Geen compatibele versies van afhankelijke pakketten gevonden:',
+    'no_compatible_version_explanation' => '     - {depPackage}: Geen versie gevonden die {requiredBy} ondersteunt',
+    'latest_checked_constraint' => '       (Laatst gecontroleerde versie vereist: {constraint})',
+    'all_versions_require' => '       (Alle beschikbare versies vereisen: {constraint})',
     'packages_passed_check' => 'Pakketten die de afhankelijkheidscontrole hebben doorstaan:',
     'none' => '(geen)',
     'conflicts_with' => 'conflicteert met:',

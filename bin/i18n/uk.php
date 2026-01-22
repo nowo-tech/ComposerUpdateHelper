@@ -17,6 +17,8 @@ return [
     // Commands
     'suggested_commands' => 'Рекомендовані команди:',
     'suggested_commands_conflicts' => 'Рекомендовані команди для вирішення конфліктів залежностей:',
+    'suggested_commands_grouped' => 'Рекомендовані команди (спробуйте встановити разом - Composer може краще вирішити конфлікти):',
+    'grouped_install_explanation' => '(Встановлення кількох пакетів разом іноді допомагає Composer вирішити конфлікти)',
     'includes_transitive' => '(Включає транзитивні залежності, необхідні для вирішення конфліктів)',
     'update_transitive_first' => '(Спочатку оновіть ці транзитивні залежності, потім повторіть оновлення відфільтрованих пакетів)',
     
@@ -28,6 +30,10 @@ return [
     'all_outdated_before' => 'Всі застарілі пакети (перед перевіркою залежностей):',
     'filtered_by_conflicts' => 'Відфільтровано за конфліктами залежностей:',
     'suggested_transitive' => 'Рекомендовані оновлення транзитивних залежностей для вирішення конфліктів:',
+    'no_compatible_dependent_versions' => 'Сумісні версії залежних пакетів не знайдено:',
+    'no_compatible_version_explanation' => '     - {depPackage}: Версію, що підтримує {requiredBy}, не знайдено',
+    'latest_checked_constraint' => '       (Остання перевірена версія вимагає: {constraint})',
+    'all_versions_require' => '       (Всі доступні версії вимагають: {constraint})',
     'packages_passed_check' => 'Пакети, які пройшли перевірку залежностей:',
     'none' => '(немає)',
     'conflicts_with' => 'конфліктує з:',

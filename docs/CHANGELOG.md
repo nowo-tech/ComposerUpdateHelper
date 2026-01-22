@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.27] - 2026-01-20
+
+### Added
+- **Grouped Package Installation Suggestions**: When multiple packages are filtered by conflicts, suggests installing them together
+  - Sometimes Composer can resolve conflicts better when multiple packages are installed simultaneously
+  - Automatically groups filtered packages (2 or more) into a single `composer require` command
+  - Also includes packages that passed dependency checks in the grouped command, as installing everything together can help resolve conflicts
+  - Example: Instead of just showing filtered packages, suggests: `composer require --dev rector/rector:2.3.4 phpstan/phpstan:2.1.36 phpstan/phpstan-symfony:2.0.10 --with-all-dependencies`
+  - Shows explanatory message: "Suggested commands (try installing together - Composer may resolve conflicts better)"
+  - Helps users discover that installing packages together can sometimes resolve conflicts that individual installations cannot
+  - Works for both production and development packages separately
+  - Integrated into the command generation flow when no transitive updates are available
+
 ## [2.0.26] - 2026-01-20
 
 ### Added
@@ -19,6 +32,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Significantly improves conflict resolution by automatically detecting when both packages need to be updated together
   - Reduces manual intervention required to resolve dependency conflicts
   - Integrated into the conflict detection flow before fallback version search
+- **Edge Cases Documentation**: Added comprehensive documentation for edge cases where no compatible versions are available
+  - New section in `UPDATE_CASES.md` (Case #20) explaining scenarios where dependent packages don't have compatible versions
+  - Documents real-world examples: `zircote/swagger-php:6.0.2` vs `nelmio/api-doc-bundle`, `phpdocumentor/reflection-docblock:6.0.1` vs `a2lix/auto-form-bundle`
+  - Explains why these cases occur and what users can do (use fallbacks, wait for updates, contact maintainers, consider alternatives)
+  - Provides clear guidance on manual resolution strategies
 
 ### Changed
 - **Enhanced Conflict Resolution**: Improved conflict resolution strategy to check dependent packages for compatible versions before suggesting fallback versions
@@ -28,6 +46,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     3. If still not found, suggest alternative packages or maintainer contact
   - Provides more comprehensive solutions to dependency conflicts
   - Better user experience with actionable suggestions
+- **Improved Output Messages**: Enhanced output messages to better explain why no automatic solution is available
+  - When no compatible versions of dependent packages are found, shows clear explanation
+  - Displays which dependent packages were checked and what constraints they require
+  - Explains that all available versions of dependent packages require incompatible constraints
+  - Example: `ℹ️  No compatible versions of dependent packages found: - nelmio/api-doc-bundle: No version found that supports zircote/swagger-php:6.0.2 (All available versions require: ^4.11.1 || ^5.0)`
+  - Helps users understand why updates are filtered and what they can do about it
 
 ## [2.0.25] - 2026-01-20
 
@@ -50,6 +74,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     3. If still not found, suggest alternative packages or maintainer contact
   - Provides more comprehensive solutions to dependency conflicts
   - Better user experience with actionable suggestions
+
+**Note**: This version was superseded by 2.0.26 which includes additional improvements to output messages and edge case documentation.
 
 ## [2.0.24] - 2026-01-19
 

@@ -36,6 +36,8 @@ class OutputFormatter
         $filteredPackageMaintainerContacts = $data['filteredPackageMaintainerContacts'] ?? [];
         $filteredPackageImpact = $data['filteredPackageImpact'] ?? [];
         $requiredTransitiveUpdates = $data['requiredTransitiveUpdates'] ?? [];
+        $packagesWithCompatibleDependents = $data['packagesWithCompatibleDependents'] ?? [];
+        $checkedDependentsWithoutCompatible = $data['checkedDependentsWithoutCompatible'] ?? [];
         $releaseInfo = $data['releaseInfo'] ?? [];
         $devSet = $data['devSet'] ?? [];
         $allInstalledAbandoned = $data['allInstalledAbandoned'] ?? [];
@@ -108,15 +110,15 @@ class OutputFormatter
             if ($debug) {
                 error_log("DEBUG: i18n - Using translation for 'all_installed_abandoned_section': " . $msg);
             }
-            
+
             // Separate abandoned packages by prod/dev
             $abandonedProd = [];
             $abandonedDev = [];
-            
+
             foreach ($allInstalledAbandoned as $packageString => $abandonedInfo) {
                 $packageName = explode(':', $packageString)[0];
                 $isDev = $abandonedInfo['is_dev'] ?? false;
-                
+
                 $abandonedMsg = function_exists('t') ? t('package_abandoned', [], $detectedLang) : 'Package is abandoned';
                 $info = " (⚠️ " . $abandonedMsg;
                 if ($abandonedInfo['replacement']) {
@@ -124,14 +126,14 @@ class OutputFormatter
                     $info .= ", " . $replacedByMsg;
                 }
                 $info .= ")";
-                
+
                 if ($isDev) {
                     $abandonedDev[] = $packageString . " " . LABEL_DEV . $info;
                 } else {
                     $abandonedProd[] = $packageString . " " . LABEL_PROD . $info;
                 }
             }
-            
+
             if (!empty($abandonedProd)) {
                 foreach ($abandonedProd as $pkg) {
                     $output[] = "     - " . $pkg;
@@ -177,16 +179,16 @@ class OutputFormatter
                 if ($debug) {
                     error_log("DEBUG: i18n - Using translation for 'abandoned_packages_section': " . $msg);
                 }
-                
+
                 // Separate abandoned packages by prod/dev
                 $abandonedProd = [];
                 $abandonedDev = [];
                 $devSet = $data['devSet'] ?? [];
-                
+
                 foreach ($filteredPackageAbandoned as $packageString => $abandonedInfo) {
                     $packageName = explode(':', $packageString)[0];
                     $isDev = isset($devSet[$packageName]);
-                    
+
                     $abandonedMsg = function_exists('t') ? t('package_abandoned', [], $detectedLang) : 'Package is abandoned';
                     $info = " (⚠️ " . $abandonedMsg;
                     if ($abandonedInfo['replacement']) {
@@ -194,14 +196,14 @@ class OutputFormatter
                         $info .= ", " . $replacedByMsg;
                     }
                     $info .= ")";
-                    
+
                     if ($isDev) {
                         $abandonedDev[] = $packageString . " " . LABEL_DEV . $info;
                     } else {
                         $abandonedProd[] = $packageString . " " . LABEL_PROD . $info;
                     }
                 }
-                
+
                 if (!empty($abandonedProd)) {
                     foreach ($abandonedProd as $pkg) {
                         $output[] = "     - " . $pkg;
@@ -240,6 +242,36 @@ class OutputFormatter
                 }
                 $output[] = "";
 
+                // Show explanation when no compatible dependent versions were found
+                if (!empty($checkedDependentsWithoutCompatible)) {
+                    $infoMsg = function_exists('t') ? t('no_compatible_dependent_versions', [], $detectedLang) : 'No compatible versions of dependent packages found:';
+                    $output[] = "  " . E_INFO . " " . $infoMsg;
+                    if ($debug) {
+                        error_log("DEBUG: i18n - Using translation for 'no_compatible_dependent_versions': " . $infoMsg);
+                    }
+
+                    foreach ($checkedDependentsWithoutCompatible as $depPackage => $info) {
+                        $requiredBy = $info['required_by'];
+                        $currentConstraint = $info['current_constraint'];
+                        $latestConstraint = $info['latest_checked_constraint'];
+
+                        $explanationMsg = function_exists('t') ? t('no_compatible_version_explanation', ['depPackage' => $depPackage, 'requiredBy' => $requiredBy, 'constraint' => $latestConstraint], $detectedLang) :
+                            "     - {$depPackage}: No version found that supports {$requiredBy}";
+                        $output[] = $explanationMsg;
+
+                        if ($latestConstraint !== $currentConstraint) {
+                            $constraintMsg = function_exists('t') ? t('latest_checked_constraint', ['constraint' => $latestConstraint], $detectedLang) :
+                                "       (Latest checked version requires: {$latestConstraint})";
+                            $output[] = $constraintMsg;
+                        } else {
+                            $allVersionsMsg = function_exists('t') ? t('all_versions_require', ['constraint' => $currentConstraint], $detectedLang) :
+                                "       (All available versions require: {$currentConstraint})";
+                            $output[] = $allVersionsMsg;
+                        }
+                    }
+                    $output[] = "";
+                }
+
                 // Show impact analysis if available and enabled
                 if ($showImpactAnalysis && !empty($filteredPackageImpact)) {
                     foreach ($filteredPackageImpact as $packageString => $impact) {
@@ -249,12 +281,12 @@ class OutputFormatter
                             $impactMsg = function_exists('t') ? t('impact_analysis', [], $detectedLang) : 'Impact analysis: Updating {package} to {version} would affect:';
                             $impactMsg = str_replace(['{package}', '{version}'], [$packageName, $newVersion], $impactMsg);
                             $output[] = "  " . E_CLIPBOARD . " " . $impactMsg;
-                            
+
                             // Show direct affected packages
                             foreach ($impact['direct_affected'] as $affected) {
                                 $output[] = "     - {$affected['package']} ({$affected['reason']})";
                             }
-                            
+
                             // Show transitive affected packages
                             foreach ($impact['transitive_affected'] as $affected) {
                                 $output[] = "     - {$affected['package']} ({$affected['reason']})";
@@ -296,7 +328,7 @@ class OutputFormatter
                         } elseif (isset($altInfo['reason']) && $altInfo['reason'] === 'similar_packages') {
                             $reasonMsg = ' (' . (function_exists('t') ? t('similar_functionality', [], $detectedLang) : 'similar functionality') . ')';
                         }
-                        
+
                         foreach ($altInfo['alternatives'] as $alt) {
                             $altName = $alt['name'];
                             $altDesc = !empty($alt['description']) ? " - {$alt['description']}" : '';
@@ -316,10 +348,10 @@ class OutputFormatter
                     foreach ($filteredPackageMaintainerContacts as $packageString => $contactInfo) {
                         // Extract package name from packageString (format: "name:version")
                         $packageName = explode(':', $packageString)[0];
-                        
+
                         $packageMsg = function_exists('t') ? t('package', [], $detectedLang) : 'Package:';
                         $output[] = "     " . E_PACKAGE . " {$packageMsg} {$packageName}";
-                        
+
                         // Show maintainers
                         if (!empty($contactInfo['maintainers'])) {
                             $maintainersMsg = function_exists('t') ? t('contact_maintainers', [], $detectedLang) : 'Contact package maintainer(s):';
@@ -335,7 +367,7 @@ class OutputFormatter
                                 $output[] = $maintainerLine;
                             }
                         }
-                        
+
                         // Show repository issue URL
                         if (!empty($contactInfo['repository_url']) && !empty($contactInfo['repository_type'])) {
                             $issueUrl = MaintainerContactFinder::generateIssueUrl(
@@ -348,7 +380,7 @@ class OutputFormatter
                                 $output[] = "        - {$issueUrl}";
                             }
                         }
-                        
+
                         // Show stale package warning
                         if (!empty($contactInfo['is_stale']) && !empty($contactInfo['last_update'])) {
                             $lastUpdateDate = date('Y-m-d', strtotime($contactInfo['last_update']));
@@ -357,7 +389,7 @@ class OutputFormatter
                             $staleSuggestionsMsg = function_exists('t') ? t('stale_package_suggestions', [], $detectedLang) : "Consider: Finding an alternative package, Forking and maintaining yourself, or Contacting maintainer about maintenance status";
                             $output[] = "        " . $staleSuggestionsMsg;
                         }
-                        
+
                         $output[] = "";
                     }
                     $output[] = "";
@@ -405,7 +437,8 @@ class OutputFormatter
         }
 
         // Build commands list
-        $commandsList = self::buildCommandsList($prod, $dev, $filteredByDependenciesProd, $filteredByDependenciesDev, $requiredTransitiveUpdates, $devSet, $debug);
+        $hasGroupedFilteredCommands = [];
+        $commandsList = self::buildCommandsList($prod, $dev, $filteredByDependenciesProd, $filteredByDependenciesDev, $requiredTransitiveUpdates, $packagesWithCompatibleDependents, $devSet, $debug, $hasGroupedFilteredCommands);
 
         // Add commands output
         $output = array_merge($output, self::formatCommandsOutput($commandsList, $prod, $dev, $requiredTransitiveUpdates, $allOutdatedProd, $allOutdatedDev, $filteredByDependenciesProd, $filteredByDependenciesDev, $ignoredProd, $ignoredDev, $detectedLang, $debug));
@@ -474,7 +507,7 @@ class OutputFormatter
      * @param bool $debug Debug mode
      * @return array Commands list
      */
-    private static function buildCommandsList(array $prod, array $dev, array $filteredByDependenciesProd, array $filteredByDependenciesDev, array $requiredTransitiveUpdates, array $devSet, bool $debug): array
+    private static function buildCommandsList(array $prod, array $dev, array $filteredByDependenciesProd, array $filteredByDependenciesDev, array $requiredTransitiveUpdates, array $packagesWithCompatibleDependents, array $devSet, bool $debug, ?array &$hasGroupedFilteredCommands = null): array
     {
         $commandsList = [];
         $prodCommand = Utils::buildComposerCommand($prod, false);
@@ -504,10 +537,30 @@ class OutputFormatter
 
             // If there are filtered packages, include them in the same command as transitive dependencies
             // This ensures all related packages are updated together
-            if (!empty($filteredByDependenciesProd) || !empty($filteredByDependenciesDev)) {
-                // Merge filtered packages with transitive dependencies and remove duplicates
-                $allProd = array_unique(array_merge($transitiveProd, $filteredByDependenciesProd));
-                $allDev = array_unique(array_merge($transitiveDev, $filteredByDependenciesDev));
+            // Also include packages that have compatible dependent versions found
+            $filteredProdWithCompatible = $filteredByDependenciesProd;
+            $filteredDevWithCompatible = $filteredByDependenciesDev;
+
+            // Add packages with compatible dependents to the filtered lists (they should be included in commands)
+            foreach ($packagesWithCompatibleDependents as $packageString => $hasCompatible) {
+                if ($hasCompatible) {
+                    $packageName = explode(':', $packageString)[0];
+                    if (isset($devSet[$packageName])) {
+                        if (!in_array($packageString, $filteredDevWithCompatible)) {
+                            $filteredDevWithCompatible[] = $packageString;
+                        }
+                    } else {
+                        if (!in_array($packageString, $filteredProdWithCompatible)) {
+                            $filteredProdWithCompatible[] = $packageString;
+                        }
+                    }
+                }
+            }
+
+            if (!empty($filteredProdWithCompatible) || !empty($filteredDevWithCompatible)) {
+                // Merge filtered packages (including those with compatible dependents) with transitive dependencies and remove duplicates
+                $allProd = array_unique(array_merge($transitiveProd, $filteredProdWithCompatible));
+                $allDev = array_unique(array_merge($transitiveDev, $filteredDevWithCompatible));
 
                 if (!empty($allProd)) {
                     $commandsList[] = "composer require --with-all-dependencies " . implode(' ', $allProd);
@@ -524,6 +577,56 @@ class OutputFormatter
                 $transitiveDevCommand = Utils::buildComposerCommand($transitiveDev, true);
                 if ($transitiveDevCommand !== null) {
                     $commandsList[] = $transitiveDevCommand;
+                }
+            }
+        } else {
+            // No transitive updates, but we might have filtered packages that could be installed together
+            // Sometimes Composer can resolve conflicts better when multiple packages are installed together
+            // Group filtered packages and suggest commands to try installing them together
+            if (!empty($filteredByDependenciesProd) || !empty($filteredByDependenciesDev)) {
+                // Add packages with compatible dependents to the filtered lists
+                $filteredProdWithCompatible = $filteredByDependenciesProd;
+                $filteredDevWithCompatible = $filteredByDependenciesDev;
+
+                foreach ($packagesWithCompatibleDependents as $packageString => $hasCompatible) {
+                    if ($hasCompatible) {
+                        $packageName = explode(':', $packageString)[0];
+                        if (isset($devSet[$packageName])) {
+                            if (!in_array($packageString, $filteredDevWithCompatible)) {
+                                $filteredDevWithCompatible[] = $packageString;
+                            }
+                        } else {
+                            if (!in_array($packageString, $filteredProdWithCompatible)) {
+                                $filteredProdWithCompatible[] = $packageString;
+                            }
+                        }
+                    }
+                }
+
+                // Suggest grouped commands for filtered packages
+                // Composer might be able to resolve conflicts when packages are installed together
+                // Include packages that passed dependency checks in the grouped command
+                // Installing filtered packages together with packages that passed checks can help resolve conflicts
+                $allProdForGrouping = array_unique(array_merge($filteredProdWithCompatible, $prod));
+                $allDevForGrouping = array_unique(array_merge($filteredDevWithCompatible, $dev));
+
+                if (!empty($filteredProdWithCompatible) && count($allProdForGrouping) > 1) {
+                    $commandsList[] = "composer require --with-all-dependencies " . implode(' ', $allProdForGrouping);
+                    if ($hasGroupedFilteredCommands !== null) {
+                        $hasGroupedFilteredCommands['prod'] = true;
+                    }
+                    if ($debug) {
+                        error_log("DEBUG: Suggesting grouped command for " . count($allProdForGrouping) . " prod packages (" . count($filteredProdWithCompatible) . " filtered + " . count($prod) . " passed checks)");
+                    }
+                }
+                if (!empty($filteredDevWithCompatible) && count($allDevForGrouping) > 1) {
+                    $commandsList[] = "composer require --dev --with-all-dependencies " . implode(' ', $allDevForGrouping);
+                    if ($hasGroupedFilteredCommands !== null) {
+                        $hasGroupedFilteredCommands['dev'] = true;
+                    }
+                    if ($debug) {
+                        error_log("DEBUG: Suggesting grouped command for " . count($allDevForGrouping) . " dev packages (" . count($filteredDevWithCompatible) . " filtered + " . count($dev) . " passed checks)");
+                    }
                 }
             }
         }
@@ -614,6 +717,15 @@ class OutputFormatter
                 $output[] = "  " . $msg2;
                 if ($debug) {
                     error_log("DEBUG: i18n - Using translation for 'suggested_commands_conflicts': " . $msg);
+                }
+            } elseif (!empty($hasGroupedFilteredCommands)) {
+                // Commands for grouped filtered packages (no transitive updates)
+                $msg = function_exists('t') ? t('suggested_commands_grouped', [], $detectedLang) : 'Suggested commands (try installing together - Composer may resolve conflicts better):';
+                $output[] = " " . E_WRENCH . "  " . $msg;
+                $msg2 = function_exists('t') ? t('grouped_install_explanation', [], $detectedLang) : '(Installing multiple packages together sometimes helps Composer resolve conflicts)';
+                $output[] = "  " . $msg2;
+                if ($debug) {
+                    error_log("DEBUG: i18n - Using translation for 'suggested_commands_grouped': " . $msg);
                 }
             } else {
                 $msg = function_exists('t') ? t('suggested_commands', [], $detectedLang) : 'Suggested commands:';

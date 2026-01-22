@@ -17,6 +17,8 @@ return [
     // Commands
     'suggested_commands' => 'Predložene naredbe:',
     'suggested_commands_conflicts' => 'Predložene naredbe za rješavanje konflikata ovisnosti:',
+    'suggested_commands_grouped' => 'Predložene naredbe (pokušajte instalirati zajedno - Composer može bolje riješiti konflikte):',
+    'grouped_install_explanation' => '(Instaliranje više paketa zajedno ponekad pomaže Composeru riješiti konflikte)',
     'includes_transitive' => '(Uključuje tranzitivne ovisnosti potrebne za rješavanje konflikata)',
     'update_transitive_first' => '(Prvo ažurirajte ove tranzitivne ovisnosti, zatim pokušajte ponovno ažurirati filtrirane pakete)',
     
@@ -28,6 +30,10 @@ return [
     'all_outdated_before' => 'Svi zastarjeli paketi (prije provjere ovisnosti):',
     'filtered_by_conflicts' => 'Filtrirano po konfliktima ovisnosti:',
     'suggested_transitive' => 'Predložena ažuriranja tranzitivnih ovisnosti za rješavanje konflikata:',
+    'no_compatible_dependent_versions' => 'Nisu pronađene kompatibilne verzije ovisnih paketa:',
+    'no_compatible_version_explanation' => '     - {depPackage}: Nije pronađena verzija koja podržava {requiredBy}',
+    'latest_checked_constraint' => '       (Posljednja provjerena verzija zahtijeva: {constraint})',
+    'all_versions_require' => '       (Sve dostupne verzije zahtijevaju: {constraint})',
     'packages_passed_check' => 'Paketi koji su prošli provjeru ovisnosti:',
     'none' => '(nema)',
     'conflicts_with' => 'u konfliktu s:',

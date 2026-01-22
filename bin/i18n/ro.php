@@ -17,6 +17,8 @@ return [
     // Commands
     'suggested_commands' => 'Comenzi sugerate:',
     'suggested_commands_conflicts' => 'Comenzi sugerate pentru rezolvarea conflictelor de dependențe:',
+    'suggested_commands_grouped' => 'Comenzi sugerate (încercați să instalați împreună - Composer poate rezolva mai bine conflictele):',
+    'grouped_install_explanation' => '(Instalarea mai multor pachete împreună ajută uneori Composer să rezolve conflictele)',
     'includes_transitive' => '(Include dependențele transitive necesare pentru rezolvarea conflictelor)',
     'update_transitive_first' => '(Actualizați mai întâi aceste dependențe transitive, apoi încercați din nou să actualizați pachetele filtrate)',
     
@@ -28,6 +30,10 @@ return [
     'all_outdated_before' => 'Toate pachetele învechite (înainte de verificarea dependențelor):',
     'filtered_by_conflicts' => 'Filtrate după conflicte de dependențe:',
     'suggested_transitive' => 'Actualizări de dependențe transitive sugerate pentru rezolvarea conflictelor:',
+    'no_compatible_dependent_versions' => 'Nu au fost găsite versiuni compatibile ale pachetelor dependente:',
+    'no_compatible_version_explanation' => '     - {depPackage}: Nu a fost găsită nicio versiune care să suporte {requiredBy}',
+    'latest_checked_constraint' => '       (Ultima versiune verificată necesită: {constraint})',
+    'all_versions_require' => '       (Toate versiunile disponibile necesită: {constraint})',
     'packages_passed_check' => 'Pachete care au trecut verificarea dependențelor:',
     'none' => '(niciunul)',
     'conflicts_with' => 'conflict cu:',
