@@ -19,6 +19,13 @@ return [
     'suggested_commands_conflicts' => 'Predložene naredbe za rješavanje konflikata ovisnosti:',
     'suggested_commands_grouped' => 'Predložene naredbe (pokušajte instalirati zajedno - Composer može bolje riješiti konflikte):',
     'grouped_install_explanation' => '(Instaliranje više paketa zajedno ponekad pomaže Composeru riješiti konflikte)',
+    'grouped_install_warning' => '(Napomena: Ovo još uvijek može ne uspjeti ako postoje konflikti s instaliranim paketima koji se ne mogu ažurirati)',
+    'copy_command_hint' => '(Click to copy or select the command)',
+    'packages_need_maintainer_update' => '(The following packages need updates from their maintainers)',
+    'package_needs_update_for_grouped' => '%s (installed: %s) needs update to support: %s (requires: %s)',
+    'suggest_contact_maintainer' => '💡 Consider contacting the maintainer of %s',
+    'repository_url' => '📦 Repository: %s',
+    'maintainers' => '👤 Maintainers: %s',
     'includes_transitive' => '(Uključuje tranzitivne ovisnosti potrebne za rješavanje konflikata)',
     'update_transitive_first' => '(Prvo ažurirajte ove tranzitivne ovisnosti, zatim pokušajte ponovno ažurirati filtrirane pakete)',
     

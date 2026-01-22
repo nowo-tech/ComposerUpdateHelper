@@ -49,3 +49,63 @@ INFORMACIÓN DE RELEASES:
     Usa --release-detail para ver el changelog completo del release.
     Usa --no-release-info para omitir explícitamente la información de releases (comportamiento por defecto).
 
+CARACTERÍSTICAS DE RESOLUCIÓN DE CONFLICTOS:
+    El script maneja automáticamente varios escenarios de conflictos de dependencias:
+
+    1. Detección de Actualización de Paquetes Dependientes:
+       - Cuando una actualización de paquete entra en conflicto con un paquete
+         dependiente, el sistema verifica automáticamente si el paquete dependiente
+         tiene una versión más nueva que soporte la actualización propuesta.
+       - Si se encuentra, ambos paquetes se incluyen en el mismo comando de
+         actualización.
+       - Ejemplo: Si actualizar zircote/swagger-php:6.0.2 entra en conflicto con
+         nelmio/api-doc-bundle que requiere ^5.0, el sistema verifica si
+         nelmio/api-doc-bundle:6.0.0 existe y soporta ^6.0.
+
+    2. Instalación Agrupada de Paquetes:
+       - Cuando múltiples paquetes están filtrados por conflictos, el sistema
+         sugiere instalarlos juntos en un solo comando.
+       - A veces Composer puede resolver conflictos mejor cuando múltiples paquetes
+         se instalan simultáneamente.
+       - El sistema también incluye paquetes que pasaron la verificación de
+         dependencias en comandos agrupados, ya que instalar todo junto puede
+         ayudar a resolver conflictos.
+
+    3. Detección de Paquetes Instalados Compatibles:
+       - Al agrupar paquetes, el sistema verifica si los paquetes instalados
+         necesitan actualizaciones para soportar los paquetes agrupados.
+       - Si se encuentran versiones más nuevas compatibles, se incluyen
+         automáticamente en el comando agrupado.
+
+    4. Sugerencias de Contacto con Mantenedores:
+       - Cuando no hay solución automática disponible, el sistema identifica
+         paquetes que necesitan actualizaciones de sus mantenedores.
+       - Proporciona información de contacto del mantenedor (email, URL del
+         repositorio) y sugiere contactarlos para solicitar soporte para las
+         versiones requeridas.
+
+    5. Actualizaciones de Dependencias Transitivas:
+       - Detecta automáticamente cuando las dependencias transitivas necesitan
+         actualizaciones para resolver conflictos.
+       - Sugiere actualizar estas dependencias primero, luego reintentar la
+         actualización principal.
+
+    6. Versiones de Respaldo:
+       - Cuando la última versión causa conflictos, busca versiones anteriores
+         compatibles que no tengan conflictos.
+
+    7. Sugerencias de Paquetes Alternativos:
+       - Para paquetes abandonados o cuando no existen versiones compatibles,
+         sugiere paquetes alternativos con funcionalidad similar.
+
+    8. Documentación de Casos Límite:
+       - Cuando no hay solución automática disponible, proporciona explicaciones
+         claras de por qué las actualizaciones están filtradas y qué se puede
+         hacer al respecto.
+
+CARACTERÍSTICAS DE SALIDA:
+    - Los comandos se muestran con un icono 📋 para facilitar la copia
+    - Comandos clickeables en terminales modernos (soporte de hyperlinks OSC 8)
+    - Indicadores visuales claros para diferentes tipos de paquetes (prod/dev)
+    - Información detallada de conflictos mostrando qué paquetes causan conflictos
+    - Información de contacto del mantenedor cuando se requiere intervención manual

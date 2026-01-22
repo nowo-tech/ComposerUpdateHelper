@@ -19,6 +19,13 @@ return [
     'suggested_commands_conflicts' => 'Foreslåede kommandoer til at løse afhængighedskonflikter:',
     'suggested_commands_grouped' => 'Foreslåede kommandoer (prøv at installere sammen - Composer kan måske løse konflikter bedre):',
     'grouped_install_explanation' => '(At installere flere pakker sammen hjælper nogle gange Composer med at løse konflikter)',
+    'grouped_install_warning' => '(Bemærk: Dette kan stadig fejle, hvis der er konflikter med installerede pakker, der ikke kan opdateres)',
+    'copy_command_hint' => '(Click to copy or select the command)',
+    'packages_need_maintainer_update' => '(The following packages need updates from their maintainers)',
+    'package_needs_update_for_grouped' => '%s (installed: %s) needs update to support: %s (requires: %s)',
+    'suggest_contact_maintainer' => '💡 Consider contacting the maintainer of %s',
+    'repository_url' => '📦 Repository: %s',
+    'maintainers' => '👤 Maintainers: %s',
     'includes_transitive' => '(Inkluderer transitive afhængigheder, der er nødvendige for at løse konflikter)',
     'update_transitive_first' => '(Opdater først disse transitive afhængigheder, og prøv derefter igen at opdatere de filtrerede pakker)',
     

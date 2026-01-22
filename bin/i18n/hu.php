@@ -19,6 +19,13 @@ return [
     'suggested_commands_conflicts' => 'Javasolt parancsok a függőségi konfliktusok megoldásához:',
     'suggested_commands_grouped' => 'Javasolt parancsok (próbálja együtt telepíteni - a Composer jobban megoldhatja a konfliktusokat):',
     'grouped_install_explanation' => '(Több csomag együttes telepítése néha segít a Composernek megoldani a konfliktusokat)',
+    'grouped_install_warning' => '(Megjegyzés: Ez továbbra is meghiúsulhat, ha vannak konfliktusok a nem frissíthető telepített csomagokkal)',
+    'copy_command_hint' => '(Click to copy or select the command)',
+    'packages_need_maintainer_update' => '(The following packages need updates from their maintainers)',
+    'package_needs_update_for_grouped' => '%s (installed: %s) needs update to support: %s (requires: %s)',
+    'suggest_contact_maintainer' => '💡 Consider contacting the maintainer of %s',
+    'repository_url' => '📦 Repository: %s',
+    'maintainers' => '👤 Maintainers: %s',
     'includes_transitive' => '(Tartalmazza a konfliktusok megoldásához szükséges tranzitív függőségeket)',
     'update_transitive_first' => '(Először frissítse ezeket a tranzitív függőségeket, majd próbálja újra frissíteni a szűrt csomagokat)',
     

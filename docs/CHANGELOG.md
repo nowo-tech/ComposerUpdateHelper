@@ -7,6 +7,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.28] - 2026-01-20
+
+### Added
+- **Automatic Solution Search for Grouped Packages**: Enhanced grouped package installation to automatically search for compatible versions of installed packages that cause conflicts
+  - When grouping packages for installation, the system now checks if installed packages need updates to support the grouped packages
+  - Automatically searches for newer compatible versions of conflicting installed packages
+  - If found, includes them automatically in the grouped command
+  - Example: When grouping `phpdocumentor/reflection-docblock:6.0.1` and `zircote/swagger-php:6.0.2`, if `a2lix/auto-form-bundle:1.0.0` requires `^5.6`, the system searches for `a2lix/auto-form-bundle:1.1.0` (or newer) that supports `^6.0` and includes it in the command
+  - Significantly improves success rate of grouped installations by proactively resolving conflicts
+- **Maintainer Contact Suggestions for Grouped Packages**: When no automatic solution is available for grouped packages, suggests contacting maintainers
+  - Identifies packages that need updates from their maintainers to support grouped installations
+  - Automatically fetches maintainer contact information (email, repository URL)
+  - Provides actionable guidance on how to contact maintainers
+  - Shows repository URLs and issue creation links when available
+  - Example output: "The following packages need updates from their maintainers: - a2lix/auto-form-bundle (installed: 1.0.0) needs update to support: phpdocumentor/reflection-docblock:6.0.1 (requires: ^6.0) 💡 Consider contacting the maintainer..."
+- **Copy-Friendly Command Display**: Enhanced command output for easier copying
+  - Commands are displayed with a 📋 icon to indicate they can be copied
+  - Clickable commands in modern terminals using OSC 8 hyperlink protocol (iTerm2, Windows Terminal, VS Code, GNOME Terminal, etc.)
+  - Helpful hint message: "(Click to copy or select the command)"
+  - Fallback for terminals that don't support hyperlinks (commands are still selectable)
+  - Improves user experience when copying long commands with multiple packages
+- **Comprehensive Help Documentation**: Updated help files to document all conflict resolution features
+  - Added "CONFLICT RESOLUTION FEATURES" section documenting 8 key features
+  - Added "OUTPUT FEATURES" section documenting 5 output enhancements
+  - Explains all supported conflict resolution strategies
+  - Documents edge cases and manual intervention scenarios
+  - Available in 31 languages
+
+### Changed
+- **Enhanced Grouped Package Resolution**: Improved grouped package installation to be more proactive in finding solutions
+  - Now searches for compatible versions of installed packages before suggesting grouped commands
+  - Provides maintainer contact information when no automatic solution is available
+  - Better success rate for grouped installations
+- **Improved User Guidance**: Better explanations when no automatic solution is available
+  - Clear identification of packages that need maintainer updates
+  - Actionable suggestions with contact information
+  - Repository URLs and issue creation links provided
+
 ## [2.0.27] - 2026-01-20
 
 ### Added

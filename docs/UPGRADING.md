@@ -18,6 +18,47 @@ This guide will help you upgrade Composer Update Helper to newer versions.
 
 ## Version-Specific Upgrade Notes
 
+### Upgrading to 2.0.28+ (2026-01-20)
+
+#### What's New
+This release significantly enhances grouped package installation by automatically searching for solutions and providing maintainer contact information when needed. It also improves command copying with clickable links and comprehensive help documentation.
+
+**New Features:**
+- **Automatic Solution Search for Grouped Packages**: When grouping packages, the system now automatically searches for compatible versions of installed packages that cause conflicts
+  - Checks if installed packages need updates to support grouped packages
+  - Searches for newer compatible versions automatically
+  - Includes compatible versions in grouped commands automatically
+  - Example: If `a2lix/auto-form-bundle:1.0.0` conflicts with grouped packages, searches for `a2lix/auto-form-bundle:1.1.0` that supports them
+- **Maintainer Contact Suggestions**: When no automatic solution is available, provides maintainer contact information
+  - Identifies packages needing maintainer updates
+  - Fetches maintainer emails and repository URLs
+  - Provides issue creation links when available
+  - Actionable guidance on contacting maintainers
+- **Copy-Friendly Command Display**: Enhanced command output for easier copying
+  - 📋 icon indicates copyable commands
+  - Clickable commands in modern terminals (OSC 8 hyperlink support)
+  - Helpful hint messages
+  - Works in all terminals (with fallback for older ones)
+- **Comprehensive Help Documentation**: Updated help files with all features
+  - Documents 8 conflict resolution features
+  - Documents 5 output features
+  - Explains all supported scenarios
+
+**Changed:**
+- **Enhanced Grouped Package Resolution**: More proactive in finding solutions
+  - Searches for compatible installed package versions before suggesting grouped commands
+  - Provides maintainer contact information when needed
+  - Better success rate for grouped installations
+
+**No Breaking Changes:**
+- No breaking changes in this release
+- All existing functionality remains unchanged
+- New features are automatically enabled
+
+**Migration Steps:**
+- No migration steps required
+- Simply update to the new version and the features will be available
+
 ### Upgrading to 2.0.27+ (2026-01-20)
 
 #### What's New

@@ -19,6 +19,13 @@ return [
     'suggested_commands_conflicts' => 'Lệnh được đề xuất để giải quyết xung đột phụ thuộc:',
     'suggested_commands_grouped' => 'Lệnh được đề xuất (thử cài đặt cùng nhau - Composer có thể giải quyết xung đột tốt hơn):',
     'grouped_install_explanation' => '(Cài đặt nhiều gói cùng nhau đôi khi giúp Composer giải quyết xung đột)',
+    'grouped_install_warning' => '(Lưu ý: Điều này vẫn có thể thất bại nếu có xung đột với các gói đã cài đặt không thể cập nhật)',
+    'copy_command_hint' => '(Click to copy or select the command)',
+    'packages_need_maintainer_update' => '(The following packages need updates from their maintainers)',
+    'package_needs_update_for_grouped' => '%s (installed: %s) needs update to support: %s (requires: %s)',
+    'suggest_contact_maintainer' => '💡 Consider contacting the maintainer of %s',
+    'repository_url' => '📦 Repository: %s',
+    'maintainers' => '👤 Maintainers: %s',
     'includes_transitive' => '(Bao gồm các phụ thuộc chuyển tiếp cần thiết để giải quyết xung đột)',
     'update_transitive_first' => '(Cập nhật các phụ thuộc chuyển tiếp này trước, sau đó thử lại cập nhật các gói đã lọc)',
     

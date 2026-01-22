@@ -19,6 +19,13 @@ return [
     'suggested_commands_conflicts' => 'Bağımlılık çakışmalarını çözmek için önerilen komutlar:',
     'suggested_commands_grouped' => 'Önerilen komutlar (birlikte yüklemeyi deneyin - Composer çakışmaları daha iyi çözebilir):',
     'grouped_install_explanation' => '(Birden fazla paketi birlikte yüklemek bazen Composer\'ın çakışmaları çözmesine yardımcı olur)',
+    'grouped_install_warning' => '(Not: Güncellenemeyen yüklü paketlerle çakışmalar varsa, bu hala başarısız olabilir)',
+    'copy_command_hint' => '(Click to copy or select the command)',
+    'packages_need_maintainer_update' => '(The following packages need updates from their maintainers)',
+    'package_needs_update_for_grouped' => '%s (installed: %s) needs update to support: %s (requires: %s)',
+    'suggest_contact_maintainer' => '💡 Consider contacting the maintainer of %s',
+    'repository_url' => '📦 Repository: %s',
+    'maintainers' => '👤 Maintainers: %s',
     'includes_transitive' => '(Çakışmaları çözmek için gerekli geçişli bağımlılıkları içerir)',
     'update_transitive_first' => '(Önce bu geçişli bağımlılıkları güncelleyin, ardından filtrelenmiş paketleri güncellemeyi tekrar deneyin)',
     
