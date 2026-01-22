@@ -17,6 +17,8 @@ return [
     // Commands
     'suggested_commands' => 'Suggested commands:',
     'suggested_commands_conflicts' => 'Suggested commands to resolve dependency conflicts:',
+    'suggested_commands_grouped' => 'Suggested commands (try installing together - Composer may resolve conflicts better):',
+    'grouped_install_explanation' => '(Installing multiple packages together sometimes helps Composer resolve conflicts)',
     'includes_transitive' => '(Includes transitive dependencies needed to resolve conflicts)',
     'update_transitive_first' => '(Update these transitive dependencies first, then retry updating the filtered packages)',
     
@@ -28,6 +30,10 @@ return [
     'all_outdated_before' => 'All outdated packages (before dependency check):',
     'filtered_by_conflicts' => 'Filtered by dependency conflicts:',
     'suggested_transitive' => 'Suggested transitive dependency updates to resolve conflicts:',
+    'no_compatible_dependent_versions' => 'No compatible versions of dependent packages found:',
+    'no_compatible_version_explanation' => '     - {depPackage}: No version found that supports {requiredBy}',
+    'latest_checked_constraint' => '       (Latest checked version requires: {constraint})',
+    'all_versions_require' => '       (All available versions require: {constraint})',
     'packages_passed_check' => 'Packages that passed dependency check:',
     'none' => '(none)',
     'conflicts_with' => 'conflicts with:',

@@ -17,6 +17,8 @@ return [
     // Commands
     'suggested_commands' => 'Foreslåede kommandoer:',
     'suggested_commands_conflicts' => 'Foreslåede kommandoer til at løse afhængighedskonflikter:',
+    'suggested_commands_grouped' => 'Foreslåede kommandoer (prøv at installere sammen - Composer kan måske løse konflikter bedre):',
+    'grouped_install_explanation' => '(At installere flere pakker sammen hjælper nogle gange Composer med at løse konflikter)',
     'includes_transitive' => '(Inkluderer transitive afhængigheder, der er nødvendige for at løse konflikter)',
     'update_transitive_first' => '(Opdater først disse transitive afhængigheder, og prøv derefter igen at opdatere de filtrerede pakker)',
     
@@ -28,6 +30,10 @@ return [
     'all_outdated_before' => 'Alle forældede pakker (før afhængighedstjek):',
     'filtered_by_conflicts' => 'Filtreret efter afhængighedskonflikter:',
     'suggested_transitive' => 'Foreslåede opdateringer af transitive afhængigheder til at løse konflikter:',
+    'no_compatible_dependent_versions' => 'Ingen kompatible versioner af afhængige pakker fundet:',
+    'no_compatible_version_explanation' => '     - {depPackage}: Ingen version fundet, der understøtter {requiredBy}',
+    'latest_checked_constraint' => '       (Seneste kontrollerede version kræver: {constraint})',
+    'all_versions_require' => '       (Alle tilgængelige versioner kræver: {constraint})',
     'packages_passed_check' => 'Pakker, der bestod afhængighedstjekket:',
     'none' => '(ingen)',
     'conflicts_with' => 'konflikt med:',

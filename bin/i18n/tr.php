@@ -17,6 +17,8 @@ return [
     // Commands
     'suggested_commands' => 'Önerilen komutlar:',
     'suggested_commands_conflicts' => 'Bağımlılık çakışmalarını çözmek için önerilen komutlar:',
+    'suggested_commands_grouped' => 'Önerilen komutlar (birlikte yüklemeyi deneyin - Composer çakışmaları daha iyi çözebilir):',
+    'grouped_install_explanation' => '(Birden fazla paketi birlikte yüklemek bazen Composer\'ın çakışmaları çözmesine yardımcı olur)',
     'includes_transitive' => '(Çakışmaları çözmek için gerekli geçişli bağımlılıkları içerir)',
     'update_transitive_first' => '(Önce bu geçişli bağımlılıkları güncelleyin, ardından filtrelenmiş paketleri güncellemeyi tekrar deneyin)',
     
@@ -28,6 +30,10 @@ return [
     'all_outdated_before' => 'Tüm eski paketler (bağımlılık kontrolünden önce):',
     'filtered_by_conflicts' => 'Bağımlılık çakışmalarına göre filtrelendi:',
     'suggested_transitive' => 'Çakışmaları çözmek için önerilen geçişli bağımlılık güncellemeleri:',
+    'no_compatible_dependent_versions' => 'Bağımlı paketlerin uyumlu sürümleri bulunamadı:',
+    'no_compatible_version_explanation' => '     - {depPackage}: {requiredBy} destekleyen sürüm bulunamadı',
+    'latest_checked_constraint' => '       (Son kontrol edilen sürüm gerektirir: {constraint})',
+    'all_versions_require' => '       (Tüm mevcut sürümler gerektirir: {constraint})',
     'packages_passed_check' => 'Bağımlılık kontrolünü geçen paketler:',
     'none' => '(yok)',
     'conflicts_with' => 'ile çakışıyor:',

@@ -17,6 +17,8 @@ return [
     // Commands
     'suggested_commands' => 'Perintah yang disarankan:',
     'suggested_commands_conflicts' => 'Perintah yang disarankan untuk menyelesaikan konflik dependensi:',
+    'suggested_commands_grouped' => 'Perintah yang disarankan (coba instal bersama - Composer mungkin dapat menyelesaikan konflik dengan lebih baik):',
+    'grouped_install_explanation' => '(Menginstal beberapa paket bersama terkadang membantu Composer menyelesaikan konflik)',
     'includes_transitive' => '(Termasuk dependensi transitif yang diperlukan untuk menyelesaikan konflik)',
     'update_transitive_first' => '(Perbarui dependensi transitif ini terlebih dahulu, lalu coba lagi memperbarui paket yang difilter)',
     
@@ -28,6 +30,10 @@ return [
     'all_outdated_before' => 'Semua paket usang (sebelum pemeriksaan dependensi):',
     'filtered_by_conflicts' => 'Difilter berdasarkan konflik dependensi:',
     'suggested_transitive' => 'Pembaruan dependensi transitif yang disarankan untuk menyelesaikan konflik:',
+    'no_compatible_dependent_versions' => 'Versi kompatibel dari paket dependen tidak ditemukan:',
+    'no_compatible_version_explanation' => '     - {depPackage}: Versi yang mendukung {requiredBy} tidak ditemukan',
+    'latest_checked_constraint' => '       (Versi terakhir yang diperiksa memerlukan: {constraint})',
+    'all_versions_require' => '       (Semua versi yang tersedia memerlukan: {constraint})',
     'packages_passed_check' => 'Paket yang lulus pemeriksaan dependensi:',
     'none' => '(tidak ada)',
     'conflicts_with' => 'berkonflik dengan:',

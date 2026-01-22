@@ -17,6 +17,8 @@ return [
     // Commands
     'suggested_commands' => 'Javasolt parancsok:',
     'suggested_commands_conflicts' => 'Javasolt parancsok a függőségi konfliktusok megoldásához:',
+    'suggested_commands_grouped' => 'Javasolt parancsok (próbálja együtt telepíteni - a Composer jobban megoldhatja a konfliktusokat):',
+    'grouped_install_explanation' => '(Több csomag együttes telepítése néha segít a Composernek megoldani a konfliktusokat)',
     'includes_transitive' => '(Tartalmazza a konfliktusok megoldásához szükséges tranzitív függőségeket)',
     'update_transitive_first' => '(Először frissítse ezeket a tranzitív függőségeket, majd próbálja újra frissíteni a szűrt csomagokat)',
     
@@ -28,6 +30,10 @@ return [
     'all_outdated_before' => 'Minden elavult csomag (függőség ellenőrzés előtt):',
     'filtered_by_conflicts' => 'Függőségi konfliktusok szerint szűrve:',
     'suggested_transitive' => 'Javasolt tranzitív függőség frissítések a konfliktusok megoldásához:',
+    'no_compatible_dependent_versions' => 'Nem találhatók kompatibilis verziók a függő csomagokhoz:',
+    'no_compatible_version_explanation' => '     - {depPackage}: Nem található olyan verzió, amely támogatja a {requiredBy}',
+    'latest_checked_constraint' => '       (A legutóbb ellenőrzött verzió követelménye: {constraint})',
+    'all_versions_require' => '       (Az összes elérhető verzió követelménye: {constraint})',
     'packages_passed_check' => 'A függőség ellenőrzést átlépő csomagok:',
     'none' => '(nincs)',
     'conflicts_with' => 'konfliktus:',

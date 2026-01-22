@@ -345,6 +345,10 @@ $filteredPackageMaintainerContacts = []; // Format: 'package:version' => ['maint
 $filteredPackageImpact = []; // Format: 'package:version' => ['direct' => [...], 'transitive' => [...], 'total_affected' => int]
 // Track transitive dependencies that need updates to resolve conflicts
 $requiredTransitiveUpdates = [];
+// Track packages that have compatible dependent versions found (so they can be included in commands)
+$packagesWithCompatibleDependents = []; // Format: 'package:version' => true
+// Track dependent packages that were checked but don't have compatible versions
+$checkedDependentsWithoutCompatible = []; // Format: 'dependent-package' => ['required_by' => 'package:version', 'current_constraint' => '...', 'latest_checked_constraint' => '...', 'installed_version' => '...']
 
 foreach ($report['installed'] as $pkg) {
     if (!isset($pkg['name'])) continue;
@@ -475,7 +479,15 @@ foreach ($report['installed'] as $pkg) {
         // If no compatible version but we have conflicts, check if dependent packages can be updated
         if ($compatibleVersion === null && !empty($conflictingDependents)) {
             // Check if conflicting dependent packages have newer versions that support the proposed version
-            VersionResolver::findCompatibleDependentVersions($name, $constraint, $conflictingDependents, $requiredTransitiveUpdates, $debug);
+            $beforeCount = count($requiredTransitiveUpdates);
+            VersionResolver::findCompatibleDependentVersions($name, $constraint, $conflictingDependents, $requiredTransitiveUpdates, $checkedDependentsWithoutCompatible, $debug);
+            // If we found compatible dependent versions, mark this package to be included in commands
+            if (count($requiredTransitiveUpdates) > $beforeCount) {
+                $packagesWithCompatibleDependents[$packageString] = true;
+                if ($debug) {
+                    error_log("DEBUG: Found compatible dependent versions for {$packageString}, will include in commands");
+                }
+            }
         }
 
         // If still no compatible version but we have conflicts, try fallback
@@ -738,6 +750,8 @@ $outputData = [
     'filteredPackageMaintainerContacts' => $filteredPackageMaintainerContacts,
     'filteredPackageImpact' => $filteredPackageImpact,
     'requiredTransitiveUpdates' => $requiredTransitiveUpdates,
+    'packagesWithCompatibleDependents' => $packagesWithCompatibleDependents,
+    'checkedDependentsWithoutCompatible' => $checkedDependentsWithoutCompatible,
     'releaseInfo' => $releaseInfo,
     'devSet' => $devSet,
     'allInstalledAbandoned' => $allInstalledAbandoned,

@@ -17,6 +17,8 @@ return [
     // Commands
     'suggested_commands' => 'Doporučené příkazy:',
     'suggested_commands_conflicts' => 'Doporučené příkazy k vyřešení konfliktů závislostí:',
+    'suggested_commands_grouped' => 'Doporučené příkazy (zkuste nainstalovat společně - Composer může lépe vyřešit konflikty):',
+    'grouped_install_explanation' => '(Instalace více balíčků společně někdy pomáhá Composeru vyřešit konflikty)',
     'includes_transitive' => '(Zahrnuje tranzitivní závislosti potřebné k vyřešení konfliktů)',
     'update_transitive_first' => '(Nejprve aktualizujte tyto tranzitivní závislosti, poté zkuste znovu aktualizovat filtrované balíčky)',
     
@@ -28,6 +30,10 @@ return [
     'all_outdated_before' => 'Všechny zastaralé balíčky (před kontrolou závislostí):',
     'filtered_by_conflicts' => 'Filtrováno podle konfliktů závislostí:',
     'suggested_transitive' => 'Doporučené aktualizace tranzitivních závislostí k vyřešení konfliktů:',
+    'no_compatible_dependent_versions' => 'Nebyly nalezeny kompatibilní verze závislých balíčků:',
+    'no_compatible_version_explanation' => '     - {depPackage}: Nebyla nalezena verze, která podporuje {requiredBy}',
+    'latest_checked_constraint' => '       (Nejnovější zkontrolovaná verze vyžaduje: {constraint})',
+    'all_versions_require' => '       (Všechny dostupné verze vyžadují: {constraint})',
     'packages_passed_check' => 'Balíčky, které prošly kontrolou závislostí:',
     'none' => '(žádné)',
     'conflicts_with' => 'konfliktuje s:',

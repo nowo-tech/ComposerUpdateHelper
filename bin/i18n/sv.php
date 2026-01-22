@@ -17,6 +17,8 @@ return [
     // Commands
     'suggested_commands' => 'Föreslagna kommandon:',
     'suggested_commands_conflicts' => 'Föreslagna kommandon för att lösa beroendekonflikter:',
+    'suggested_commands_grouped' => 'Föreslagna kommandon (försök installera tillsammans - Composer kan lösa konflikter bättre):',
+    'grouped_install_explanation' => '(Att installera flera paket tillsammans hjälper ibland Composer att lösa konflikter)',
     'includes_transitive' => '(Inkluderar transitiva beroenden som behövs för att lösa konflikter)',
     'update_transitive_first' => '(Uppdatera dessa transitiva beroenden först, försök sedan uppdatera de filtrerade paketen)',
     
@@ -28,6 +30,10 @@ return [
     'all_outdated_before' => 'Alla föråldrade paket (före beroendekontroll):',
     'filtered_by_conflicts' => 'Filtrerade av beroendekonflikter:',
     'suggested_transitive' => 'Föreslagna uppdateringar av transitiva beroenden för att lösa konflikter:',
+    'no_compatible_dependent_versions' => 'Inga kompatibla versioner av beroende paket hittades:',
+    'no_compatible_version_explanation' => '     - {depPackage}: Ingen version hittades som stöder {requiredBy}',
+    'latest_checked_constraint' => '       (Senaste kontrollerade versionen kräver: {constraint})',
+    'all_versions_require' => '       (Alla tillgängliga versioner kräver: {constraint})',
     'packages_passed_check' => 'Paket som klarade beroendekontrollen:',
     'none' => '(inga)',
     'conflicts_with' => 'konfliktar med:',

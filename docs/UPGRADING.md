@@ -18,10 +18,36 @@ This guide will help you upgrade Composer Update Helper to newer versions.
 
 ## Version-Specific Upgrade Notes
 
-### Upgrading to 2.0.26+ (Unreleased)
+### Upgrading to 2.0.27+ (2026-01-20)
 
 #### What's New
-This release significantly improves conflict resolution by automatically detecting when dependent packages can be updated to support proposed package updates.
+This release adds support for suggesting grouped package installations when multiple packages are filtered by conflicts, helping users discover that installing packages together can sometimes resolve conflicts that individual installations cannot.
+
+**New Features:**
+- **Grouped Package Installation Suggestions**: When multiple packages are filtered by conflicts, suggests installing them together
+  - Sometimes Composer can resolve conflicts better when multiple packages are installed simultaneously
+  - Automatically groups filtered packages (2 or more) into a single `composer require` command
+  - Example: When `rector/rector:2.3.4` and `phpstan/phpstan:2.1.36` are both filtered, suggests:
+    ```
+    🔧 Suggested commands (try installing together - Composer may resolve conflicts better):
+       composer require --dev rector/rector:2.3.4 phpstan/phpstan:2.1.36 --with-all-dependencies
+    ```
+  - Helps users discover that installing packages together can sometimes resolve conflicts
+  - Works automatically - no configuration needed
+
+**No Breaking Changes:**
+- No breaking changes in this release
+- All existing functionality remains unchanged
+- New feature is automatically enabled
+
+**Migration Steps:**
+- No migration steps required
+- Simply update to the new version and the feature will be available
+
+### Upgrading to 2.0.26+ (2026-01-20)
+
+#### What's New
+This release significantly improves conflict resolution by automatically detecting when dependent packages can be updated to support proposed package updates. It also provides better explanations when no automatic solutions are available.
 
 **New Features:**
 - **Dependent Package Update Detection**: Automatically detects when conflicting dependent packages have newer versions that support the proposed update
@@ -34,17 +60,34 @@ This release significantly improves conflict resolution by automatically detecti
     - Suggested command: `composer require --with-all-dependencies zircote/swagger-php:6.0.2 nelmio/api-doc-bundle:6.0.0`
   - Reduces manual intervention and provides actionable solutions
   - Works automatically - no configuration needed
+- **Edge Cases Documentation**: Comprehensive documentation for scenarios where no compatible versions are available
+  - New section in `UPDATE_CASES.md` (Case #20) explaining edge cases
+  - Documents real-world examples and provides guidance on manual resolution strategies
+  - Helps users understand when and why automatic solutions aren't available
 
 **Changed:**
 - **Enhanced Conflict Resolution Flow**: Improved conflict resolution strategy with better ordering
   - Now checks dependent packages for compatible versions first
   - Falls back to searching for compatible older versions if no dependent updates found
   - Provides more comprehensive solutions before suggesting alternatives
+- **Improved Output Messages**: Enhanced messages to better explain why no automatic solution is available
+  - When no compatible versions of dependent packages are found, shows clear explanation
+  - Displays which dependent packages were checked and what constraints they require
+  - Explains that all available versions require incompatible constraints
+  - Example output:
+    ```
+    ℹ️  No compatible versions of dependent packages found:
+       - nelmio/api-doc-bundle: No version found that supports zircote/swagger-php:6.0.2
+         (All available versions require: ^4.11.1 || ^5.0)
+    ```
+  - Helps users understand why updates are filtered and what they can do about it
 
 #### Migration Notes
 - **No action required**: This is an automatic enhancement to conflict resolution
 - **Better conflict resolution**: You'll now see more actionable suggestions when conflicts occur
 - **Automatic detection**: The system automatically detects compatible dependent package versions - no manual configuration needed
+- **Clearer explanations**: When no automatic solution is available, you'll see detailed explanations about why and what you can do
+- **Edge cases guidance**: See `UPDATE_CASES.md` Case #20 for detailed information about scenarios where no compatible versions exist
 
 #### Breaking Changes
 - None

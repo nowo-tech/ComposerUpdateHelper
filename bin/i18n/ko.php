@@ -17,6 +17,8 @@ return [
     // Commands
     'suggested_commands' => '권장 명령:',
     'suggested_commands_conflicts' => '종속성 충돌을 해결하기 위한 권장 명령:',
+    'suggested_commands_grouped' => '권장 명령 (함께 설치해 보세요 - Composer가 충돌을 더 잘 해결할 수 있습니다):',
+    'grouped_install_explanation' => '(여러 패키지를 함께 설치하면 때때로 Composer가 충돌을 해결하는 데 도움이 됩니다)',
     'includes_transitive' => '(충돌을 해결하는 데 필요한 전이 종속성 포함)',
     'update_transitive_first' => '(먼저 이러한 전이 종속성을 업데이트한 다음 필터링된 패키지 업데이트를 다시 시도하세요)',
     
@@ -28,6 +30,10 @@ return [
     'all_outdated_before' => '모든 오래된 패키지 (종속성 확인 전):',
     'filtered_by_conflicts' => '종속성 충돌로 필터링됨:',
     'suggested_transitive' => '충돌을 해결하기 위한 권장 전이 종속성 업데이트:',
+    'no_compatible_dependent_versions' => '호환 가능한 종속 패키지 버전을 찾을 수 없음:',
+    'no_compatible_version_explanation' => '     - {depPackage}: {requiredBy}를 지원하는 버전을 찾을 수 없음',
+    'latest_checked_constraint' => '       (최신 확인된 버전에는 다음이 필요함: {constraint})',
+    'all_versions_require' => '       (사용 가능한 모든 버전에는 다음이 필요함: {constraint})',
     'packages_passed_check' => '종속성 확인을 통과한 패키지:',
     'none' => '(없음)',
     'conflicts_with' => '다음과 충돌:',

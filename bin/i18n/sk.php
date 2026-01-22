@@ -17,6 +17,8 @@ return [
     // Commands
     'suggested_commands' => 'Odporúčané príkazy:',
     'suggested_commands_conflicts' => 'Odporúčané príkazy na vyriešenie konfliktov závislostí:',
+    'suggested_commands_grouped' => 'Odporúčané príkazy (skúste nainštalovať spolu - Composer môže lepšie vyriešiť konflikty):',
+    'grouped_install_explanation' => '(Inštalácia viacerých balíčkov spolu niekedy pomáha Composeru vyriešiť konflikty)',
     'includes_transitive' => '(Zahŕňa tranzitívne závislosti potrebné na vyriešenie konfliktov)',
     'update_transitive_first' => '(Najprv aktualizujte tieto tranzitívne závislosti, potom skúste znova aktualizovať filtrované balíčky)',
     
@@ -28,6 +30,10 @@ return [
     'all_outdated_before' => 'Všetky zastaralé balíčky (pred kontrolou závislostí):',
     'filtered_by_conflicts' => 'Filtrované podľa konfliktov závislostí:',
     'suggested_transitive' => 'Odporúčané aktualizácie tranzitívnych závislostí na vyriešenie konfliktov:',
+    'no_compatible_dependent_versions' => 'Neboli nájdené kompatibilné verzie závislých balíčkov:',
+    'no_compatible_version_explanation' => '     - {depPackage}: Nebola nájdená verzia, ktorá podporuje {requiredBy}',
+    'latest_checked_constraint' => '       (Posledná skontrolovaná verzia vyžaduje: {constraint})',
+    'all_versions_require' => '       (Všetky dostupné verzie vyžadujú: {constraint})',
     'packages_passed_check' => 'Balíčky, ktoré prešli kontrolou závislostí:',
     'none' => '(žiadne)',
     'conflicts_with' => 'konfliktuje s:',

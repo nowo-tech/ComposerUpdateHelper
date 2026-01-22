@@ -17,6 +17,8 @@ return [
     // Commands
     'suggested_commands' => '建议的命令:',
     'suggested_commands_conflicts' => '解决依赖冲突的建议命令:',
+    'suggested_commands_grouped' => '建议的命令 (尝试一起安装 - Composer 可能更好地解决冲突):',
+    'grouped_install_explanation' => '(一起安装多个包有时有助于 Composer 解决冲突)',
     'includes_transitive' => '(包括解决冲突所需的传递依赖)',
     'update_transitive_first' => '(首先更新这些传递依赖，然后重试更新过滤的包)',
     
@@ -28,6 +30,10 @@ return [
     'all_outdated_before' => '所有过时的包 (依赖检查之前):',
     'filtered_by_conflicts' => '按依赖冲突过滤:',
     'suggested_transitive' => '建议的传递依赖更新以解决冲突:',
+    'no_compatible_dependent_versions' => '未找到兼容的依赖包版本:',
+    'no_compatible_version_explanation' => '     - {depPackage}: 未找到支持 {requiredBy} 的版本',
+    'latest_checked_constraint' => '       (最新检查的版本需要: {constraint})',
+    'all_versions_require' => '       (所有可用版本都需要: {constraint})',
     'packages_passed_check' => '通过依赖检查的包:',
     'none' => '(无)',
     'conflicts_with' => '与以下冲突:',

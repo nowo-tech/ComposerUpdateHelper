@@ -394,6 +394,7 @@ class VersionResolver
         string $proposedVersion,
         array $conflictingDependents,
         ?array &$requiredTransitiveUpdates,
+        ?array &$checkedDependentsWithoutCompatible = null,
         bool $debug = false
     ): void {
         if (empty($conflictingDependents) || $requiredTransitiveUpdates === null) {
@@ -455,6 +456,9 @@ class VersionResolver
             });
 
             // Find the highest version that requires a version of $packageName compatible with $proposedVersion
+            $foundCompatible = false;
+            $latestCheckedConstraint = null;
+            
             foreach ($stableVersions as $depVersion) {
                 // Skip if this version is not newer than installed
                 if (version_compare($depVersion, ltrim($installedVersion, 'v'), '<=')) {
@@ -468,6 +472,7 @@ class VersionResolver
                 }
 
                 $depRequiresConstraint = $depRequirements[$packageName];
+                $latestCheckedConstraint = $depRequiresConstraint; // Track the latest constraint checked
 
                 // Check if this constraint is compatible with the proposed version
                 if (DependencyAnalyzer::versionSatisfiesConstraint($proposedVersion, $depRequiresConstraint)) {
@@ -485,9 +490,23 @@ class VersionResolver
                         ];
                     }
                     $requiredTransitiveUpdates[$depPackage]['required_by'][] = "{$packageName}:{$proposedVersion}";
+                    $foundCompatible = true;
                     break; // Found compatible version, no need to check older ones
                 } elseif ($debug) {
                     error_log("DEBUG: Version {$depVersion} of {$depPackage} requires {$packageName}:{$depRequiresConstraint} (NOT compatible with proposed {$proposedVersion})");
+                }
+            }
+            
+            // If no compatible version found, track this for informative output
+            if (!$foundCompatible && $checkedDependentsWithoutCompatible !== null) {
+                $checkedDependentsWithoutCompatible[$depPackage] = [
+                    'required_by' => "{$packageName}:{$proposedVersion}",
+                    'current_constraint' => $oldConstraint,
+                    'latest_checked_constraint' => $latestCheckedConstraint ?? $oldConstraint,
+                    'installed_version' => $installedVersion
+                ];
+                if ($debug) {
+                    error_log("DEBUG: No compatible version of {$depPackage} found that supports {$packageName}:{$proposedVersion}");
                 }
             }
         }

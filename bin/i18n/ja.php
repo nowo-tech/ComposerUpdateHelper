@@ -17,6 +17,8 @@ return [
     // Commands
     'suggested_commands' => '推奨コマンド:',
     'suggested_commands_conflicts' => '依存関係の競合を解決するための推奨コマンド:',
+    'suggested_commands_grouped' => '推奨コマンド (一緒にインストールしてみてください - Composerが競合をより良く解決できる場合があります):',
+    'grouped_install_explanation' => '(複数のパッケージを一緒にインストールすると、Composerが競合を解決しやすくなることがあります)',
     'includes_transitive' => '(競合を解決するために必要な推移的依存関係を含む)',
     'update_transitive_first' => '(まずこれらの推移的依存関係を更新し、次にフィルタリングされたパッケージの更新を再試行してください)',
     
@@ -28,6 +30,10 @@ return [
     'all_outdated_before' => 'すべての古いパッケージ (依存関係チェック前):',
     'filtered_by_conflicts' => '依存関係の競合でフィルタリング:',
     'suggested_transitive' => '競合を解決するための推奨推移的依存関係更新:',
+    'no_compatible_dependent_versions' => '互換性のある依存パッケージのバージョンが見つかりませんでした:',
+    'no_compatible_version_explanation' => '     - {depPackage}: {requiredBy} をサポートするバージョンが見つかりませんでした',
+    'latest_checked_constraint' => '       (最新の確認済みバージョンには以下が必要です: {constraint})',
+    'all_versions_require' => '       (利用可能なすべてのバージョンには以下が必要です: {constraint})',
     'packages_passed_check' => '依存関係チェックを通過したパッケージ:',
     'none' => '(なし)',
     'conflicts_with' => 'と競合:',

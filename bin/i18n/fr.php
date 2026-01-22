@@ -17,6 +17,8 @@ return [
     // Commands
     'suggested_commands' => 'Commandes suggérées:',
     'suggested_commands_conflicts' => 'Commandes suggérées pour résoudre les conflits de dépendances:',
+    'suggested_commands_grouped' => 'Commandes suggérées (essayez d\'installer ensemble - Composer peut mieux résoudre les conflits):',
+    'grouped_install_explanation' => '(Installer plusieurs paquets ensemble aide parfois Composer à résoudre les conflits)',
     'includes_transitive' => '(Inclut les dépendances transitives nécessaires pour résoudre les conflits)',
     'update_transitive_first' => '(Mettez à jour ces dépendances transitives d\'abord, puis réessayez de mettre à jour les paquets filtrés)',
     
@@ -28,6 +30,10 @@ return [
     'all_outdated_before' => 'Tous les paquets obsolètes (avant la vérification des dépendances):',
     'filtered_by_conflicts' => 'Filtrés par conflits de dépendances:',
     'suggested_transitive' => 'Mises à jour de dépendances transitives suggérées pour résoudre les conflits:',
+    'no_compatible_dependent_versions' => 'Aucune version compatible de paquets dépendants trouvée:',
+    'no_compatible_version_explanation' => '     - {depPackage}: Aucune version trouvée qui prend en charge {requiredBy}',
+    'latest_checked_constraint' => '       (La dernière version vérifiée nécessite: {constraint})',
+    'all_versions_require' => '       (Toutes les versions disponibles nécessitent: {constraint})',
     'packages_passed_check' => 'Paquets qui ont passé la vérification des dépendances:',
     'none' => '(aucun)',
     'conflicts_with' => 'conflit avec:',
