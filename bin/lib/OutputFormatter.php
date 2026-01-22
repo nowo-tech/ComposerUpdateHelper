@@ -272,6 +272,54 @@ class OutputFormatter
                     $output[] = "";
                 }
 
+                // Show packages that need maintainer updates for grouped installation
+                $groupedMaintainerContacts = $data['groupedMaintainerContacts'] ?? [];
+                if (!empty($groupedMaintainerContacts)) {
+                    $maintainerMsg = function_exists('t') ? t('packages_need_maintainer_update', [], $detectedLang) : 'The following packages need updates from their maintainers to support the grouped installation:';
+                    $output[] = "  " . E_INFO . " " . $maintainerMsg;
+                    if ($debug) {
+                        error_log("DEBUG: i18n - Using translation for 'packages_need_maintainer_update': " . $maintainerMsg);
+                    }
+
+                    foreach ($groupedMaintainerContacts as $pkgName => $maintainerInfo) {
+                        $conflictInfo = $maintainerInfo['conflict_info'] ?? [];
+                        $requiredBy = !empty($conflictInfo['required_by']) ? implode(', ', array_unique($conflictInfo['required_by'])) : '';
+                        $constraints = !empty($conflictInfo['required_constraints']) ? implode(' OR ', $conflictInfo['required_constraints']) : '';
+                        $installedVersion = $conflictInfo['installed_version'] ?? 'unknown';
+
+                        $pkgMsg = function_exists('t') ? t('package_needs_update_for_grouped', ['pkgName' => $pkgName, 'installedVersion' => $installedVersion, 'requiredBy' => $requiredBy, 'constraints' => $constraints], $detectedLang) :
+                            "     - {$pkgName} (installed: {$installedVersion}) needs update to support: {$requiredBy} (requires: {$constraints})";
+                        $output[] = $pkgMsg;
+
+                        $contactMsg = function_exists('t') ? t('suggest_contact_maintainer', ['pkgName' => $pkgName], $detectedLang) :
+                            "       💡 Consider contacting the maintainer of {$pkgName} to request support for these versions";
+                        $output[] = $contactMsg;
+
+                        if (!empty($maintainerInfo['repository_url'])) {
+                            $repoMsg = function_exists('t') ? t('repository_url', ['url' => $maintainerInfo['repository_url']], $detectedLang) :
+                                "       📦 Repository: {$maintainerInfo['repository_url']}";
+                            $output[] = $repoMsg;
+                        }
+
+                        if (!empty($maintainerInfo['maintainers'])) {
+                            $maintainers = [];
+                            foreach ($maintainerInfo['maintainers'] as $maint) {
+                                if (!empty($maint['email'])) {
+                                    $maintainers[] = $maint['name'] . ' <' . $maint['email'] . '>';
+                                } else {
+                                    $maintainers[] = $maint['name'];
+                                }
+                            }
+                            if (!empty($maintainers)) {
+                                $maintMsg = function_exists('t') ? t('maintainers', ['maintainers' => implode(', ', $maintainers)], $detectedLang) :
+                                    "       👤 Maintainers: " . implode(', ', $maintainers);
+                                $output[] = $maintMsg;
+                            }
+                        }
+                    }
+                    $output[] = "";
+                }
+
                 // Show impact analysis if available and enabled
                 if ($showImpactAnalysis && !empty($filteredPackageImpact)) {
                     foreach ($filteredPackageImpact as $packageString => $impact) {
@@ -438,10 +486,18 @@ class OutputFormatter
 
         // Build commands list
         $hasGroupedFilteredCommands = [];
-        $commandsList = self::buildCommandsList($prod, $dev, $filteredByDependenciesProd, $filteredByDependenciesDev, $requiredTransitiveUpdates, $packagesWithCompatibleDependents, $devSet, $debug, $hasGroupedFilteredCommands);
+        $allInstalledPackages = $data['allInstalledPackages'] ?? [];
+        $groupedMaintainerContacts = [];
+        $commandsList = self::buildCommandsList($prod, $dev, $filteredByDependenciesProd, $filteredByDependenciesDev, $requiredTransitiveUpdates, $packagesWithCompatibleDependents, $devSet, $debug, $hasGroupedFilteredCommands, $allInstalledPackages, $groupedMaintainerContacts);
+
+        // Add grouped maintainer contacts to data for output
+        $data['groupedMaintainerContacts'] = $groupedMaintainerContacts;
+
+        // Add grouped maintainer contacts to data for output formatting
+        $data['groupedMaintainerContacts'] = $groupedMaintainerContacts;
 
         // Add commands output
-        $output = array_merge($output, self::formatCommandsOutput($commandsList, $prod, $dev, $requiredTransitiveUpdates, $allOutdatedProd, $allOutdatedDev, $filteredByDependenciesProd, $filteredByDependenciesDev, $ignoredProd, $ignoredDev, $detectedLang, $debug));
+        $output = array_merge($output, self::formatCommandsOutput($commandsList, $prod, $dev, $requiredTransitiveUpdates, $allOutdatedProd, $allOutdatedDev, $filteredByDependenciesProd, $filteredByDependenciesDev, $ignoredProd, $ignoredDev, $detectedLang, $debug, $data));
 
         // Add release information
         if ($showReleaseInfo && !empty($releaseInfo)) {
@@ -507,7 +563,7 @@ class OutputFormatter
      * @param bool $debug Debug mode
      * @return array Commands list
      */
-    private static function buildCommandsList(array $prod, array $dev, array $filteredByDependenciesProd, array $filteredByDependenciesDev, array $requiredTransitiveUpdates, array $packagesWithCompatibleDependents, array $devSet, bool $debug, ?array &$hasGroupedFilteredCommands = null): array
+    private static function buildCommandsList(array $prod, array $dev, array $filteredByDependenciesProd, array $filteredByDependenciesDev, array $requiredTransitiveUpdates, array $packagesWithCompatibleDependents, array $devSet, bool $debug, ?array &$hasGroupedFilteredCommands = null, array $allInstalledPackages = [], ?array &$groupedMaintainerContacts = null): array
     {
         $commandsList = [];
         $prodCommand = Utils::buildComposerCommand($prod, false);
@@ -610,13 +666,58 @@ class OutputFormatter
                 $allProdForGrouping = array_unique(array_merge($filteredProdWithCompatible, $prod));
                 $allDevForGrouping = array_unique(array_merge($filteredDevWithCompatible, $dev));
 
+                // Check if installed packages need updates to support grouped packages
+                $additionalUpdatesForGrouped = [];
+                $packagesNeedingMaintainerUpdate = [];
+                if (!empty($allProdForGrouping) && !empty($allInstalledPackages)) {
+                    VersionResolver::findCompatibleInstalledVersionsForGrouped($allProdForGrouping, $allInstalledPackages, $additionalUpdatesForGrouped, $packagesNeedingMaintainerUpdate, $debug);
+                }
+                if (!empty($allDevForGrouping) && !empty($allInstalledPackages)) {
+                    VersionResolver::findCompatibleInstalledVersionsForGrouped($allDevForGrouping, $allInstalledPackages, $additionalUpdatesForGrouped, $packagesNeedingMaintainerUpdate, $debug);
+                }
+
+                // Get maintainer info for packages that need updates
+                if (!empty($packagesNeedingMaintainerUpdate) && $groupedMaintainerContacts !== null) {
+                    foreach ($packagesNeedingMaintainerUpdate as $pkgName => $info) {
+                        $maintainerInfo = MaintainerContactFinder::getMaintainerInfo($pkgName, $debug);
+                        if (!empty($maintainerInfo['maintainers']) || !empty($maintainerInfo['repository_url'])) {
+                            $groupedMaintainerContacts[$pkgName] = array_merge($maintainerInfo, [
+                                'conflict_info' => $info
+                            ]);
+                        }
+                    }
+                }
+
+                // Add compatible installed package updates to grouped commands
+                if (!empty($additionalUpdatesForGrouped)) {
+                    foreach ($additionalUpdatesForGrouped as $pkgName => $info) {
+                        $pkgString = $pkgName . ':' . $info['suggested_version'];
+                        if (isset($devSet[$pkgName])) {
+                            if (!in_array($pkgString, $allDevForGrouping)) {
+                                $allDevForGrouping[] = $pkgString;
+                                if ($debug) {
+                                    error_log("DEBUG: Adding compatible installed package update {$pkgString} to grouped dev command");
+                                }
+                            }
+                        } else {
+                            if (!in_array($pkgString, $allProdForGrouping)) {
+                                $allProdForGrouping[] = $pkgString;
+                                if ($debug) {
+                                    error_log("DEBUG: Adding compatible installed package update {$pkgString} to grouped prod command");
+                                }
+                            }
+                        }
+                    }
+                }
+
                 if (!empty($filteredProdWithCompatible) && count($allProdForGrouping) > 1) {
                     $commandsList[] = "composer require --with-all-dependencies " . implode(' ', $allProdForGrouping);
                     if ($hasGroupedFilteredCommands !== null) {
                         $hasGroupedFilteredCommands['prod'] = true;
                     }
                     if ($debug) {
-                        error_log("DEBUG: Suggesting grouped command for " . count($allProdForGrouping) . " prod packages (" . count($filteredProdWithCompatible) . " filtered + " . count($prod) . " passed checks)");
+                        $additionalCount = count($additionalUpdatesForGrouped);
+                        error_log("DEBUG: Suggesting grouped command for " . count($allProdForGrouping) . " prod packages (" . count($filteredProdWithCompatible) . " filtered + " . count($prod) . " passed checks" . ($additionalCount > 0 ? " + {$additionalCount} compatible installed updates" : "") . ")");
                     }
                 }
                 if (!empty($filteredDevWithCompatible) && count($allDevForGrouping) > 1) {
@@ -625,7 +726,8 @@ class OutputFormatter
                         $hasGroupedFilteredCommands['dev'] = true;
                     }
                     if ($debug) {
-                        error_log("DEBUG: Suggesting grouped command for " . count($allDevForGrouping) . " dev packages (" . count($filteredDevWithCompatible) . " filtered + " . count($dev) . " passed checks)");
+                        $additionalCount = count($additionalUpdatesForGrouped);
+                        error_log("DEBUG: Suggesting grouped command for " . count($allDevForGrouping) . " dev packages (" . count($filteredDevWithCompatible) . " filtered + " . count($dev) . " passed checks" . ($additionalCount > 0 ? " + {$additionalCount} compatible installed updates" : "") . ")");
                     }
                 }
             }
@@ -651,7 +753,7 @@ class OutputFormatter
      * @param bool $debug Debug mode
      * @return array Output lines for commands
      */
-    private static function formatCommandsOutput(array $commandsList, array $prod, array $dev, array $requiredTransitiveUpdates, array $allOutdatedProd, array $allOutdatedDev, array $filteredByDependenciesProd, array $filteredByDependenciesDev, array $ignoredProd, array $ignoredDev, ?string $detectedLang, bool $debug): array
+    private static function formatCommandsOutput(array $commandsList, array $prod, array $dev, array $requiredTransitiveUpdates, array $allOutdatedProd, array $allOutdatedDev, array $filteredByDependenciesProd, array $filteredByDependenciesDev, array $ignoredProd, array $ignoredDev, ?string $detectedLang, bool $debug, array $data = []): array
     {
         $output = [];
 
@@ -724,6 +826,54 @@ class OutputFormatter
                 $output[] = " " . E_WRENCH . "  " . $msg;
                 $msg2 = function_exists('t') ? t('grouped_install_explanation', [], $detectedLang) : '(Installing multiple packages together sometimes helps Composer resolve conflicts)';
                 $output[] = "  " . $msg2;
+
+                // Get grouped maintainer contacts from data if available
+                $groupedMaintainerContacts = $data['groupedMaintainerContacts'] ?? [];
+
+                if (!empty($groupedMaintainerContacts)) {
+                    $msg4 = function_exists('t') ? t('grouped_install_maintainer_needed', [], $detectedLang) : 'Some installed packages need updates from their maintainers:';
+                    $output[] = "  " . E_INFO . " " . $msg4;
+
+                    foreach ($groupedMaintainerContacts as $pkgName => $contactInfo) {
+                        $conflictInfo = $contactInfo['conflict_info'] ?? [];
+                        $requiredBy = !empty($conflictInfo['required_by']) ? implode(', ', array_unique($conflictInfo['required_by'])) : 'grouped packages';
+                        $constraints = !empty($conflictInfo['required_constraints']) ? implode(' OR ', $conflictInfo['required_constraints']) : '';
+
+                        $pkgMsg = function_exists('t') ? t('package_needs_update', ['package' => $pkgName, 'requiredBy' => $requiredBy, 'constraints' => $constraints], $detectedLang) :
+                            "     - {$pkgName}: Needs update to support {$requiredBy} (requires: {$constraints})";
+                        $output[] = $pkgMsg;
+
+                        // Show maintainer contact info
+                        if (!empty($contactInfo['maintainers'])) {
+                            $maintainersMsg = function_exists('t') ? t('contact_maintainers', [], $detectedLang) : 'Contact maintainer(s):';
+                            $output[] = "       " . E_BULB . " {$maintainersMsg}";
+                            foreach ($contactInfo['maintainers'] as $maintainer) {
+                                $maintainerLine = "          - " . ($maintainer['name'] ?? 'Unknown');
+                                if (!empty($maintainer['email'])) {
+                                    $maintainerLine .= " ({$maintainer['email']})";
+                                }
+                                if (!empty($maintainer['homepage'])) {
+                                    $maintainerLine .= " - {$maintainer['homepage']}";
+                                }
+                                $output[] = $maintainerLine;
+                            }
+                        }
+
+                        // Show repository issue URL
+                        if (!empty($contactInfo['repository_url']) && !empty($contactInfo['repository_type'])) {
+                            $issueUrl = MaintainerContactFinder::generateIssueUrl($contactInfo['repository_url'], $contactInfo['repository_type']);
+                            if ($issueUrl) {
+                                $issueMsg = function_exists('t') ? t('create_issue', [], $detectedLang) : 'Create issue:';
+                                $output[] = "       " . E_LINK . " {$issueMsg} {$issueUrl}";
+                            }
+                        }
+                    }
+                    $output[] = "";
+                } else {
+                    $msg3 = function_exists('t') ? t('grouped_install_warning', [], $detectedLang) : '(Note: This may still fail if there are conflicts with installed packages that cannot be updated)';
+                    $output[] = "  " . E_WARNING . " " . $msg3;
+                }
+
                 if ($debug) {
                     error_log("DEBUG: i18n - Using translation for 'suggested_commands_grouped': " . $msg);
                 }
@@ -735,8 +885,17 @@ class OutputFormatter
                 }
             }
 
+            // Add copy hint message
+            $copyHint = function_exists('t') ? t('copy_command_hint', [], $detectedLang) : '(Click to copy or select the command)';
+            $output[] = "  " . E_INFO . " " . $copyHint;
+            $output[] = "";
+
             foreach ($commandsList as $cmd) {
-                $output[] = "  " . $cmd;
+                // Create clickable link using OSC 8 (supported by many modern terminals)
+                // Format: \033]8;;<url>\033\\<text>\033]8;;\033\\
+                // For terminal commands, we use a special protocol or just make it selectable
+                $clickableCmd = self::makeCommandClickable($cmd);
+                $output[] = "  📋 " . $clickableCmd;
             }
 
             // Add special markers for command extraction (for --run flag)
@@ -748,6 +907,41 @@ class OutputFormatter
         }
 
         return $output;
+    }
+
+    /**
+     * Make a command clickable/copyable in terminal using ANSI escape codes
+     * Uses OSC 8 hyperlink protocol for modern terminals
+     *
+     * @param string $cmd Command to make clickable
+     * @return string Command with ANSI escape codes for clickable link
+     */
+    private static function makeCommandClickable(string $cmd): string
+    {
+        // Use OSC 8 hyperlink protocol for modern terminals
+        // Supported by: iTerm2, Terminal.app, Windows Terminal, VS Code, GNOME Terminal, Konsole, etc.
+        // Format: \033]8;;<uri>\033\\<text>\033]8;;\033\\
+
+        // For terminal commands, we create a clickable link
+        // The command itself is the "URL" - clicking will select it for copying
+        // Some terminals support special protocols, but for maximum compatibility
+        // we'll use a data URI or just make it visually distinct
+
+        // Check if we should use hyperlinks (can be controlled by env var)
+        $useHyperlinks = getenv('ENABLE_CLICKABLE_COMMANDS') !== 'false';
+
+        if ($useHyperlinks) {
+            // Create hyperlink using OSC 8
+            // We use the command as both the URI and the text
+            // This makes it clickable in supported terminals
+            $escapedCmd = rawurlencode($cmd);
+            // Use a simple scheme that terminals can handle
+            $hyperlink = "\033]8;;{$escapedCmd}\033\\{$cmd}\033]8;;\033\\";
+            return $hyperlink;
+        }
+
+        // Fallback: just return the command (icon already indicates it's copyable)
+        return $cmd;
     }
 
     /**

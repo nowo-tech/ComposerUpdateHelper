@@ -19,6 +19,13 @@ return [
     'suggested_commands_conflicts' => 'Perintah yang disarankan untuk menyelesaikan konflik dependensi:',
     'suggested_commands_grouped' => 'Perintah yang disarankan (coba instal bersama - Composer mungkin dapat menyelesaikan konflik dengan lebih baik):',
     'grouped_install_explanation' => '(Menginstal beberapa paket bersama terkadang membantu Composer menyelesaikan konflik)',
+    'grouped_install_warning' => '(Catatan: Ini masih bisa gagal jika ada konflik dengan paket yang diinstal yang tidak dapat diperbarui)',
+    'copy_command_hint' => '(Click to copy or select the command)',
+    'packages_need_maintainer_update' => '(The following packages need updates from their maintainers)',
+    'package_needs_update_for_grouped' => '%s (installed: %s) needs update to support: %s (requires: %s)',
+    'suggest_contact_maintainer' => '💡 Consider contacting the maintainer of %s',
+    'repository_url' => '📦 Repository: %s',
+    'maintainers' => '👤 Maintainers: %s',
     'includes_transitive' => '(Termasuk dependensi transitif yang diperlukan untuk menyelesaikan konflik)',
     'update_transitive_first' => '(Perbarui dependensi transitif ini terlebih dahulu, lalu coba lagi memperbarui paket yang difilter)',
     

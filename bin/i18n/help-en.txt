@@ -55,3 +55,59 @@ RELEASE INFORMATION:
     Use --release-detail to see the full release changelog.
     Use --no-release-info to explicitly skip release information (default behavior).
 
+CONFLICT RESOLUTION FEATURES:
+    The script automatically handles various dependency conflict scenarios:
+
+    1. Dependent Package Update Detection:
+       - When a package update conflicts with a dependent package, the system
+         automatically checks if the dependent package has a newer version that
+         supports the proposed update.
+       - If found, both packages are included in the same update command.
+       - Example: If updating zircote/swagger-php:6.0.2 conflicts with
+         nelmio/api-doc-bundle requiring ^5.0, the system checks if
+         nelmio/api-doc-bundle:6.0.0 exists and supports ^6.0.
+
+    2. Grouped Package Installation:
+       - When multiple packages are filtered by conflicts, the system suggests
+         installing them together in a single command.
+       - Sometimes Composer can resolve conflicts better when multiple packages
+         are installed simultaneously.
+       - The system also includes packages that passed dependency checks in
+         grouped commands, as installing everything together can help resolve
+         conflicts.
+
+    3. Compatible Installed Package Detection:
+       - When grouping packages, the system checks if installed packages need
+         updates to support the grouped packages.
+       - If compatible newer versions are found, they are automatically included
+         in the grouped command.
+
+    4. Maintainer Contact Suggestions:
+       - When no automatic solution is available, the system identifies packages
+         that need updates from their maintainers.
+       - Provides maintainer contact information (email, repository URL) and
+         suggests contacting them to request support for required versions.
+
+    5. Transitive Dependency Updates:
+       - Automatically detects when transitive dependencies need updates to
+         resolve conflicts.
+       - Suggests updating these dependencies first, then retrying the main update.
+
+    6. Fallback Versions:
+       - When the latest version causes conflicts, searches for compatible
+         older versions that don't have conflicts.
+
+    7. Alternative Package Suggestions:
+       - For abandoned packages or when no compatible versions exist, suggests
+         alternative packages with similar functionality.
+
+    8. Edge Cases Documentation:
+       - When no automatic solution is available, provides clear explanations
+         of why updates are filtered and what can be done about it.
+
+OUTPUT FEATURES:
+    - Commands are displayed with a 📋 icon for easy copying
+    - Clickable commands in modern terminals (OSC 8 hyperlink support)
+    - Clear visual indicators for different types of packages (prod/dev)
+    - Detailed conflict information showing which packages cause conflicts
+    - Maintainer contact information when manual intervention is needed

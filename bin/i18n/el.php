@@ -19,6 +19,13 @@ return [
     'suggested_commands_conflicts' => 'Προτεινόμενες εντολές για επίλυση συγκρούσεων εξαρτήσεων:',
     'suggested_commands_grouped' => 'Προτεινόμενες εντολές (δοκιμάστε να εγκαταστήσετε μαζί - το Composer μπορεί να λύσει καλύτερα τις συγκρούσεις):',
     'grouped_install_explanation' => '(Η εγκατάσταση πολλών πακέτων μαζί βοηθά μερικές φορές το Composer να λύσει συγκρούσεις)',
+    'grouped_install_warning' => '(Σημείωση: Αυτό μπορεί ακόμα να αποτύχει εάν υπάρχουν συγκρούσεις με εγκατεστημένα πακέτα που δεν μπορούν να ενημερωθούν)',
+    'copy_command_hint' => '(Click to copy or select the command)',
+    'packages_need_maintainer_update' => '(The following packages need updates from their maintainers)',
+    'package_needs_update_for_grouped' => '%s (installed: %s) needs update to support: %s (requires: %s)',
+    'suggest_contact_maintainer' => '💡 Consider contacting the maintainer of %s',
+    'repository_url' => '📦 Repository: %s',
+    'maintainers' => '👤 Maintainers: %s',
     'includes_transitive' => '(Περιλαμβάνει μεταβατικές εξαρτήσεις απαραίτητες για επίλυση συγκρούσεων)',
     'update_transitive_first' => '(Ενημερώστε πρώτα αυτές τις μεταβατικές εξαρτήσεις, στη συνέχεια δοκιμάστε ξανά να ενημερώσετε τα φιλτραρισμένα πακέτα)',
     

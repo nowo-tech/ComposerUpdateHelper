@@ -752,6 +752,7 @@ $outputData = [
     'requiredTransitiveUpdates' => $requiredTransitiveUpdates,
     'packagesWithCompatibleDependents' => $packagesWithCompatibleDependents,
     'checkedDependentsWithoutCompatible' => $checkedDependentsWithoutCompatible,
+    'allInstalledPackages' => array_keys($allDeps), // List of all installed package names
     'releaseInfo' => $releaseInfo,
     'devSet' => $devSet,
     'allInstalledAbandoned' => $allInstalledAbandoned,

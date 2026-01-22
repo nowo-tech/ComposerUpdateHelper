@@ -19,6 +19,13 @@ return [
     'suggested_commands_conflicts' => 'Рекомендовані команди для вирішення конфліктів залежностей:',
     'suggested_commands_grouped' => 'Рекомендовані команди (спробуйте встановити разом - Composer може краще вирішити конфлікти):',
     'grouped_install_explanation' => '(Встановлення кількох пакетів разом іноді допомагає Composer вирішити конфлікти)',
+    'grouped_install_warning' => '(Примітка: Це все ще може не спрацювати, якщо є конфлікти з встановленими пакетами, які неможливо оновити)',
+    'copy_command_hint' => '(Click to copy or select the command)',
+    'packages_need_maintainer_update' => '(The following packages need updates from their maintainers)',
+    'package_needs_update_for_grouped' => '%s (installed: %s) needs update to support: %s (requires: %s)',
+    'suggest_contact_maintainer' => '💡 Consider contacting the maintainer of %s',
+    'repository_url' => '📦 Repository: %s',
+    'maintainers' => '👤 Maintainers: %s',
     'includes_transitive' => '(Включає транзитивні залежності, необхідні для вирішення конфліктів)',
     'update_transitive_first' => '(Спочатку оновіть ці транзитивні залежності, потім повторіть оновлення відфільтрованих пакетів)',
     

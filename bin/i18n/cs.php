@@ -19,6 +19,13 @@ return [
     'suggested_commands_conflicts' => 'Doporučené příkazy k vyřešení konfliktů závislostí:',
     'suggested_commands_grouped' => 'Doporučené příkazy (zkuste nainstalovat společně - Composer může lépe vyřešit konflikty):',
     'grouped_install_explanation' => '(Instalace více balíčků společně někdy pomáhá Composeru vyřešit konflikty)',
+    'grouped_install_warning' => '(Poznámka: To může stále selhat, pokud existují konflikty s nainstalovanými balíčky, které nelze aktualizovat)',
+    'copy_command_hint' => '(Click to copy or select the command)',
+    'packages_need_maintainer_update' => '(The following packages need updates from their maintainers)',
+    'package_needs_update_for_grouped' => '%s (installed: %s) needs update to support: %s (requires: %s)',
+    'suggest_contact_maintainer' => '💡 Consider contacting the maintainer of %s',
+    'repository_url' => '📦 Repository: %s',
+    'maintainers' => '👤 Maintainers: %s',
     'includes_transitive' => '(Zahrnuje tranzitivní závislosti potřebné k vyřešení konfliktů)',
     'update_transitive_first' => '(Nejprve aktualizujte tyto tranzitivní závislosti, poté zkuste znovu aktualizovat filtrované balíčky)',
     
