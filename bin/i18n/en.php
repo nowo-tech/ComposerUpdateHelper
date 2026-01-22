@@ -20,7 +20,7 @@ return [
     'suggested_commands_grouped' => 'Suggested commands (try installing together - Composer may resolve conflicts better):',
     'grouped_install_explanation' => '(Installing multiple packages together sometimes helps Composer resolve conflicts)',
     'grouped_install_warning' => '(Note: This may still fail if there are conflicts with installed packages that cannot be updated)',
-    'copy_command_hint' => '(Click to copy or select the command)',
+    'copy_command_hint' => '(Select the command to copy)',
     'packages_need_maintainer_update' => 'The following packages need updates from their maintainers to support the grouped installation:',
     'package_needs_update_for_grouped' => '%s (installed: %s) needs update to support: %s (requires: %s)',
     'suggest_contact_maintainer' => '💡 Consider contacting the maintainer of %s to request support for these versions',

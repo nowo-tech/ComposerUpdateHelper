@@ -20,7 +20,7 @@ return [
     'suggested_commands_grouped' => 'Comandi suggeriti (prova a installare insieme - Composer può risolvere meglio i conflitti):',
     'grouped_install_explanation' => '(Installare più pacchetti insieme a volte aiuta Composer a risolvere i conflitti)',
     'grouped_install_warning' => '(Nota: Questo può ancora fallire se ci sono conflitti con pacchetti installati che non possono essere aggiornati)',
-    'copy_command_hint' => '(Click to copy or select the command)',
+    'copy_command_hint' => '(Select the command to copy)',
     'packages_need_maintainer_update' => 'I seguenti pacchetti necessitano di aggiornamenti dai loro maintainer per supportare l\'installazione raggruppata:',
     'package_needs_update_for_grouped' => '%s (installato: %s) necessita di aggiornamento per supportare: %s (richiede: %s)',
     'suggest_contact_maintainer' => '💡 Considera di contattare il maintainer di %s per richiedere il supporto per queste versioni',
@@ -29,7 +29,7 @@ return [
     'grouped_install_maintainer_needed' => 'Alcuni pacchetti installati necessitano di aggiornamenti dai loro maintainer:',
     'package_needs_update' => '%s: Richiede aggiornamento per supportare %s (richiede: %s)',
     'grouped_install_warning' => '(Note: This may still fail if there are conflicts with installed packages that cannot be updated)',
-    'copy_command_hint' => '(Click to copy or select the command)',
+    'copy_command_hint' => '(Select the command to copy)',
     'includes_transitive' => '(Include le dipendenze transitive necessarie per risolvere i conflitti)',
     'update_transitive_first' => '(Aggiorna prima queste dipendenze transitive, poi riprova ad aggiornare i pacchetti filtrati)',
     

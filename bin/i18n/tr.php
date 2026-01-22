@@ -20,7 +20,7 @@ return [
     'suggested_commands_grouped' => 'Önerilen komutlar (birlikte yüklemeyi deneyin - Composer çakışmaları daha iyi çözebilir):',
     'grouped_install_explanation' => '(Birden fazla paketi birlikte yüklemek bazen Composer\'ın çakışmaları çözmesine yardımcı olur)',
     'grouped_install_warning' => '(Not: Güncellenemeyen yüklü paketlerle çakışmalar varsa, bu hala başarısız olabilir)',
-    'copy_command_hint' => '(Click to copy or select the command)',
+    'copy_command_hint' => '(Select the command to copy)',
     'packages_need_maintainer_update' => '(The following packages need updates from their maintainers)',
     'package_needs_update_for_grouped' => '%s (installed: %s) needs update to support: %s (requires: %s)',
     'suggest_contact_maintainer' => '💡 Consider contacting the maintainer of %s',

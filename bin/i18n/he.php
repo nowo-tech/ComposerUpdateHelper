@@ -20,7 +20,7 @@ return [
     'suggested_commands_grouped' => 'פקודות מומלצות (נסה להתקין יחד - Composer עשוי לפתור התנגשויות טוב יותר):',
     'grouped_install_explanation' => '(התקנת מספר חבילות יחד עוזרת לפעמים ל-Composer לפתור התנגשויות)',
     'grouped_install_warning' => '(הערה: זה עדיין עלול להיכשל אם יש התנגשויות עם חבילות מותקנות שלא ניתן לעדכן)',
-    'copy_command_hint' => '(Click to copy or select the command)',
+    'copy_command_hint' => '(Select the command to copy)',
     'packages_need_maintainer_update' => '(The following packages need updates from their maintainers)',
     'package_needs_update_for_grouped' => '%s (installed: %s) needs update to support: %s (requires: %s)',
     'suggest_contact_maintainer' => '💡 Consider contacting the maintainer of %s',

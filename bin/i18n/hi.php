@@ -20,7 +20,7 @@ return [
     'suggested_commands_grouped' => 'सुझाए गए कमांड (एक साथ स्थापित करने का प्रयास करें - Composer संघर्षों को बेहतर तरीके से हल कर सकता है):',
     'grouped_install_explanation' => '(कई पैकेजों को एक साथ स्थापित करना कभी-कभी Composer को संघर्षों को हल करने में मदद करता है)',
     'grouped_install_warning' => '(नोट: यदि अपडेट नहीं किए जा सकने वाले इंस्टॉल किए गए पैकेजों के साथ संघर्ष हैं, तो यह अभी भी विफल हो सकता है)',
-    'copy_command_hint' => '(Click to copy or select the command)',
+    'copy_command_hint' => '(Select the command to copy)',
     'packages_need_maintainer_update' => '(The following packages need updates from their maintainers)',
     'package_needs_update_for_grouped' => '%s (installed: %s) needs update to support: %s (requires: %s)',
     'suggest_contact_maintainer' => '💡 Consider contacting the maintainer of %s',

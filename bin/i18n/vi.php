@@ -20,7 +20,7 @@ return [
     'suggested_commands_grouped' => 'Lệnh được đề xuất (thử cài đặt cùng nhau - Composer có thể giải quyết xung đột tốt hơn):',
     'grouped_install_explanation' => '(Cài đặt nhiều gói cùng nhau đôi khi giúp Composer giải quyết xung đột)',
     'grouped_install_warning' => '(Lưu ý: Điều này vẫn có thể thất bại nếu có xung đột với các gói đã cài đặt không thể cập nhật)',
-    'copy_command_hint' => '(Click to copy or select the command)',
+    'copy_command_hint' => '(Select the command to copy)',
     'packages_need_maintainer_update' => '(The following packages need updates from their maintainers)',
     'package_needs_update_for_grouped' => '%s (installed: %s) needs update to support: %s (requires: %s)',
     'suggest_contact_maintainer' => '💡 Consider contacting the maintainer of %s',

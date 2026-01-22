@@ -20,7 +20,7 @@ return [
     'suggested_commands_grouped' => 'Ehdotetut komennot (kokeile asentaa yhdessä - Composer voi ratkaista konfliktit paremmin):',
     'grouped_install_explanation' => '(Useiden pakettien asentaminen yhdessä auttaa joskus Composeria ratkaisemaan konfliktit)',
     'grouped_install_warning' => '(Huom: Tämä voi silti epäonnistua, jos on konflikteja asennettujen pakettien kanssa, joita ei voida päivittää)',
-    'copy_command_hint' => '(Click to copy or select the command)',
+    'copy_command_hint' => '(Select the command to copy)',
     'packages_need_maintainer_update' => '(The following packages need updates from their maintainers)',
     'package_needs_update_for_grouped' => '%s (installed: %s) needs update to support: %s (requires: %s)',
     'suggest_contact_maintainer' => '💡 Consider contacting the maintainer of %s',

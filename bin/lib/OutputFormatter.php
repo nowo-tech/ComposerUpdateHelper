@@ -886,16 +886,12 @@ class OutputFormatter
             }
 
             // Add copy hint message
-            $copyHint = function_exists('t') ? t('copy_command_hint', [], $detectedLang) : '(Click to copy or select the command)';
+            $copyHint = function_exists('t') ? t('copy_command_hint', [], $detectedLang) : '(Select the command to copy)';
             $output[] = "  " . E_INFO . " " . $copyHint;
             $output[] = "";
 
             foreach ($commandsList as $cmd) {
-                // Create clickable link using OSC 8 (supported by many modern terminals)
-                // Format: \033]8;;<url>\033\\<text>\033]8;;\033\\
-                // For terminal commands, we use a special protocol or just make it selectable
-                $clickableCmd = self::makeCommandClickable($cmd);
-                $output[] = "  📋 " . $clickableCmd;
+                $output[] = "  📋 " . $cmd;
             }
 
             // Add special markers for command extraction (for --run flag)
@@ -909,40 +905,6 @@ class OutputFormatter
         return $output;
     }
 
-    /**
-     * Make a command clickable/copyable in terminal using ANSI escape codes
-     * Uses OSC 8 hyperlink protocol for modern terminals
-     *
-     * @param string $cmd Command to make clickable
-     * @return string Command with ANSI escape codes for clickable link
-     */
-    private static function makeCommandClickable(string $cmd): string
-    {
-        // Use OSC 8 hyperlink protocol for modern terminals
-        // Supported by: iTerm2, Terminal.app, Windows Terminal, VS Code, GNOME Terminal, Konsole, etc.
-        // Format: \033]8;;<uri>\033\\<text>\033]8;;\033\\
-
-        // For terminal commands, we create a clickable link
-        // The command itself is the "URL" - clicking will select it for copying
-        // Some terminals support special protocols, but for maximum compatibility
-        // we'll use a data URI or just make it visually distinct
-
-        // Check if we should use hyperlinks (can be controlled by env var)
-        $useHyperlinks = getenv('ENABLE_CLICKABLE_COMMANDS') !== 'false';
-
-        if ($useHyperlinks) {
-            // Create hyperlink using OSC 8
-            // We use the command as both the URI and the text
-            // This makes it clickable in supported terminals
-            $escapedCmd = rawurlencode($cmd);
-            // Use a simple scheme that terminals can handle
-            $hyperlink = "\033]8;;{$escapedCmd}\033\\{$cmd}\033]8;;\033\\";
-            return $hyperlink;
-        }
-
-        // Fallback: just return the command (icon already indicates it's copyable)
-        return $cmd;
-    }
 
     /**
      * Format release information output
