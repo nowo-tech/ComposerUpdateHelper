@@ -34,3 +34,11 @@ coverage.xml
 
 # Impact analysis output
 composer-update-impact.txt
+
+# Archives / compressed
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.rar
+*.7z
