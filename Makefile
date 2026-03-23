@@ -1,7 +1,7 @@
 # Makefile for Composer Update Helper
 # Simplifies Docker commands for development
 
-.PHONY: help up down shell install test test-coverage cs-check cs-fix qa clean setup-hooks
+.PHONY: help up down shell install test test-coverage cs-check cs-fix qa clean setup-hooks ensure-up
 
 # Default target
 help:
@@ -35,33 +35,42 @@ up:
 down:
 	docker-compose down
 
+# Ensure root container is running (start if not). Used by cs-fix, cs-check, qa, install, test, test-coverage.
+ensure-up:
+	@if ! docker-compose exec -T php true 2>/dev/null; then \
+		echo "Starting container (root docker-compose)..."; \
+		docker-compose up -d; \
+		sleep 3; \
+		docker-compose exec -T php composer install --no-interaction; \
+	fi
+
 # Open shell in container
 shell:
 	docker-compose exec php sh
 
 # Install dependencies
-install:
-	docker-compose exec php composer install
+install: ensure-up
+	docker-compose exec -T php composer install
 
 # Run tests
-test:
-	docker-compose exec php composer test
+test: ensure-up
+	docker-compose exec -T php composer test
 
 # Run tests with coverage
-test-coverage:
-	docker-compose exec php composer test-coverage
+test-coverage: ensure-up
+	docker-compose exec -T php composer test-coverage
 
 # Check code style
-cs-check:
-	docker-compose exec php composer cs-check
+cs-check: ensure-up
+	docker-compose exec -T php composer cs-check
 
 # Fix code style
-cs-fix:
-	docker-compose exec php composer cs-fix
+cs-fix: ensure-up
+	docker-compose exec -T php composer cs-fix
 
 # Run all QA
-qa:
-	docker-compose exec php composer qa
+qa: ensure-up
+	docker-compose exec -T php composer qa
 
 # Clean vendor and cache
 clean:
