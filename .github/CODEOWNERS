@@ -1,7 +1,5 @@
-# Code Owners for Composer Update Helper
-# These users will be automatically requested for review when someone opens a pull request
-
-# Default owner for everything in the repo
+# CODEOWNERS for ComposerUpdateHelper
+# Default owner for everything in the repository
 * @HecFranco
 
 # GitHub Actions workflows

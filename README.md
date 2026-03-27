@@ -1,8 +1,8 @@
 # Composer Update Helper
 
-![CI](https://github.com/nowo-tech/ComposerUpdateHelper/actions/workflows/ci.yml/badge.svg) ![Latest Stable Version](https://poser.pugx.org/nowo-tech/composer-update-helper/v) ![License](https://poser.pugx.org/nowo-tech/composer-update-helper/license) ![PHP Version Require](https://poser.pugx.org/nowo-tech/composer-update-helper/require/php) ![GitHub stars](https://img.shields.io/github/stars/nowo-tech/ComposerUpdateHelper.svg?style=social&label=Star)
+[![CI](https://github.com/nowo-tech/ComposerUpdateHelper/actions/workflows/ci.yml/badge.svg)](https://github.com/nowo-tech/ComposerUpdateHelper/actions/workflows/ci.yml) [![Packagist Version](https://img.shields.io/packagist/v/nowo-tech/composer-update-helper.svg?style=flat)](https://packagist.org/packages/nowo-tech/composer-update-helper) [![Packagist Downloads](https://img.shields.io/packagist/dt/nowo-tech/composer-update-helper.svg)](https://packagist.org/packages/nowo-tech/composer-update-helper) [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE) [![PHP](https://img.shields.io/badge/PHP-8.1%2B-777BB4?logo=php)](https://php.net) [![Symfony](https://img.shields.io/badge/Symfony-6%20%7C%207%20%7C%208-000000?logo=symfony)](https://symfony.com) [![GitHub stars](https://img.shields.io/github/stars/nowo-tech/composer-update-helper.svg?style=social&label=Star)](https://github.com/nowo-tech/ComposerUpdateHelper) [![Coverage](https://img.shields.io/badge/Coverage-100%25-brightgreen)](#tests-and-coverage)
 
-> ⭐ **Found this project useful?** Give it a star on GitHub! It helps us maintain and improve the project.
+> ⭐ **Found this useful?** Install from [Packagist](https://packagist.org/packages/nowo-tech/composer-update-helper) and give the repo a [star on GitHub](https://github.com/nowo-tech/ComposerUpdateHelper) if it helps you.
 
 Generates `composer require` commands from outdated dependencies. Works with any PHP project: **Symfony**, **Laravel**, **Yii**, **CodeIgniter**, **Slim**, **Laminas**, etc.
 
@@ -13,13 +13,13 @@ Generates `composer require` commands from outdated dependencies. Works with any
 - ✅ Shows ignored packages with available versions
 - ✅ **Force include packages**: Override ignore list to force specific packages to be included
 - ✅ **Multi-framework support** with version constraints:
-  - **Symfony**: respects `extra.symfony.require`
-  - **Laravel**: respects `laravel/framework` + `illuminate/*` versions
-  - **Yii**: respects `yiisoft/yii2` version
-  - **CakePHP**: respects `cakephp/cakephp` version
-  - **Laminas**: respects `laminas/*` versions
-  - **CodeIgniter**: respects `codeigniter4/framework` version
-  - **Slim**: respects `slim/slim` version
+ - **Symfony**: respects `extra.symfony.require`
+ - **Laravel**: respects `laravel/framework` + `illuminate/*` versions
+ - **Yii**: respects `yiisoft/yii2` version
+ - **CakePHP**: respects `cakephp/cakephp` version
+ - **Laminas**: respects `laminas/*` versions
+ - **CodeIgniter**: respects `codeigniter4/framework` version
+ - **Slim**: respects `slim/slim` version
 - ✅ Compares versions to avoid unnecessary updates
 - ✅ **Dependency compatibility checking**: Automatically detects and prevents dependency conflicts before suggesting updates
 - ✅ **Transitive dependency suggestions**: When conflicts are detected, automatically suggests updating required transitive dependencies with ready-to-use commands
@@ -56,20 +56,20 @@ After installation, two files will be copied to your project root:
 
 The script uses a lightweight architecture for better maintainability:
 
-- **`generate-composer-require.sh`** (in your repo): A lightweight wrapper script (~283 lines) that handles:
-  - Command-line argument parsing
-  - Configuration file detection
-  - Executing `composer outdated`
-  - Calling the PHP processor
-  - Displaying formatted output from PHP
-  - Extracting and executing commands for `--run` flag
+- **`generate-composer-require.sh`** (in your repo): A lightweight wrapper script (about **350** lines; size may change between releases) that handles:
+ - Command-line argument parsing
+ - Configuration file detection
+ - Executing `composer outdated`
+ - Calling the PHP processor
+ - Displaying formatted output from PHP
+ - Extracting and executing commands for `--run` flag
 
-- **`process-updates.php`** (in vendor): Contains all the complex logic (~643 lines) including:
-  - Package processing and filtering
-  - Framework detection and version constraints
-  - Release information fetching
-  - Command generation
-  - **Output formatting** (emojis, sections, formatting, etc.)
+- **`process-updates.php`** (in vendor): Contains the heavy processing logic (about **900** lines; size may change between releases), including:
+ - Package processing and filtering
+ - Framework detection and version constraints
+ - Release information fetching
+ - Command generation
+ - **Output formatting** (emojis, sections, formatting, etc.)
 
 The script automatically detects `process-updates.php` in `vendor/nowo-tech/composer-update-helper/bin/` and uses it. This architecture ensures:
 - ✅ **Lightweight script in your repo**: Easy to read and understand
@@ -113,12 +113,12 @@ The script automatically detects `process-updates.php` in `vendor/nowo-tech/comp
 Example output:
 
 ```
-⏭️  Ignored packages (prod):
-  - doctrine/doctrine-bundle:2.13.2
+⏭️ Ignored packages (prod):
+ - doctrine/doctrine-bundle:2.13.2
 
 🔧 Suggested commands:
-  composer require --with-all-dependencies vendor/package:1.2.3 another/package:4.5.6
-  composer require --dev --with-all-dependencies phpstan/phpstan:2.0.0
+ composer require --with-all-dependencies vendor/package:1.2.3 another/package:4.5.6
+ composer require --dev --with-all-dependencies phpstan/phpstan:2.0.0
 ```
 
 > **Note:** By default, release information is **not shown** (no API calls are made). Use `--release-info` or `--release-detail` to enable it.
@@ -155,37 +155,37 @@ Edit `generate-composer-require.yaml` to configure which packages to ignore or f
 check-dependencies: true
 
 # Language for output messages
-# Supported: en (English), es (Spanish), pt (Portuguese), it (Italian), fr (French), de (German), pl (Polish), ru (Russian), ro (Romanian), el (Greek), da (Danish)
+# Supported: many locales (see docs/CONFIGURATION.md — currently 31+ languages in i18n)
 # If not set, will auto-detect from system (LANG, LC_ALL, LC_MESSAGES)
 # Default: en (English)
-# ⚠️  WARNING: i18n feature is currently in DEVELOPMENT MODE
+# ⚠️ WARNING: i18n feature is currently in DEVELOPMENT MODE
 #language: es
 
 # Command-line options defaults (can be overridden via command-line arguments)
 # Set your preferred defaults here, then override them when needed via command-line flags
-show-release-info: false          # Show release information by default
-show-release-detail: false        # Show full changelog by default
-show-impact-analysis: false       # Show impact analysis by default
-save-impact-to-file: false       # Save impact analysis to file by default
-verbose: false                    # Verbose output by default
-debug: false                     # Debug mode by default
+show-release-info: false     # Show release information by default
+show-release-detail: false    # Show full changelog by default
+show-impact-analysis: false    # Show impact analysis by default
+save-impact-to-file: false    # Save impact analysis to file by default
+verbose: false          # Verbose output by default
+debug: false           # Debug mode by default
 
 # List of packages to ignore during update
 # Ignored packages will still be displayed in the output with their available versions,
 # but won't be included in the composer require commands.
 ignore:
-  - doctrine/orm
-  - symfony/security-bundle
-  - laravel/framework
-  # - package/name  # You can add inline comments
+ - doctrine/orm
+ - symfony/security-bundle
+ - laravel/framework
+ # - package/name # You can add inline comments
 
 # List of packages to force include during update
 # Included packages will be added to the composer require commands even if they are
 # in the ignore list.
 # The include section has priority over the ignore section.
 include:
-  - some/package
-  - another/package
+ - some/package
+ - another/package
 ```
 
 > 💡 **Tip**: Command-line arguments always override YAML configuration. For example, if you set `show-release-info: true` in YAML but run `./generate-composer-require.sh --no-release-info`, the release info will be disabled for that run.
@@ -203,13 +203,13 @@ Composer Update Helper fetches package information from Packagist to analyze dep
 The tool uses a two-tier approach for fetching package information:
 
 1. **Primary Method**: Direct Packagist API calls (`https://packagist.org/packages/{package}.json`)
-   - Fast and efficient for most use cases
-   - Used for: package requirements, versions, abandoned status, maintainer info, alternative package search
+  - Fast and efficient for most use cases
+  - Used for: package requirements, versions, abandoned status, maintainer info, alternative package search
 
 2. **Fallback Method**: `composer show` command
-   - Automatically used when Packagist API is unavailable or returns incomplete data
-   - **Respects your project's repository configuration** in `composer.json`
-   - Supports mirrors, private repositories, and custom repository setups
+  - Automatically used when Packagist API is unavailable or returns incomplete data
+  - **Respects your project's repository configuration** in `composer.json`
+  - Supports mirrors, private repositories, and custom repository setups
 
 ### Improving Packagist Access
 
@@ -219,13 +219,13 @@ If you're experiencing slow API responses or rate limiting, you can configure a 
 
 ```json
 {
-    "repositories": [
-        {
-            "type": "composer",
-            "url": "https://mirror.packagist.com",
-            "only": ["packagist"]
-        }
-    ]
+  "repositories": [
+    {
+      "type": "composer",
+      "url": "https://mirror.packagist.com",
+      "only": ["packagist"]
+    }
+  ]
 }
 ```
 
@@ -237,12 +237,12 @@ For private packages or internal repositories, simply configure them in your `co
 
 ```json
 {
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/your-org/private-package"
-        }
-    ]
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/your-org/private-package"
+    }
+  ]
 }
 ```
 
@@ -260,42 +260,34 @@ When the Packagist API doesn't have information about these packages, the tool a
 
 ## Requirements
 
-- PHP >= 7.4
+- PHP `>=8.1 <8.6`
 - Composer 2.x
+
+## Version information
+
+Supported PHP versions follow `composer.json` (`>=8.1 <8.6`). Release history is in [docs/CHANGELOG.md](docs/CHANGELOG.md).
 
 ## Documentation
 
-All documentation is available in the [`docs/`](docs/) directory:
+- [Installation](docs/INSTALLATION.md)
+- [Configuration](docs/CONFIGURATION.md)
+- [Usage](docs/USAGE.md)
+- [Contributing](docs/CONTRIBUTING.md)
+- [Changelog](docs/CHANGELOG.md)
+- [Upgrading](docs/UPGRADING.md)
+- [Release](docs/RELEASE.md)
+- [Security](docs/SECURITY.md)
+- [Engram](docs/ENGRAM.md)
 
-### User Guides
-- **[Usage Guide](docs/USAGE.md)** - Complete usage instructions and options
-- **[Configuration Guide](docs/CONFIGURATION.md)** - Configuration options and settings
-- **[Framework Support](docs/FRAMEWORKS.md)** - Framework version constraints and support
-- **[Update Cases and Scenarios](docs/UPDATE_CASES.md)** - Comprehensive guide to all supported update scenarios and use cases
+### Additional documentation
 
-### Project Documentation
-- **[CHANGELOG.md](docs/CHANGELOG.md)** - Version history and all notable changes
-- **[UPGRADING.md](docs/UPGRADING.md)** - Upgrade instructions and migration notes
-- **[Testing Documentation](docs/TESTING.md)** - Comprehensive testing guide including tests for new features
-- **[Implementation Roadmap](docs/IMPLEMENTATION_ROADMAP.md)** - Action plan for implementing not-yet-supported features, ordered by complexity and feasibility
-- **[Development Guide](docs/DEVELOPMENT.md)** - Development setup, testing, and CI/CD
-- **[CONTRIBUTING.md](docs/CONTRIBUTING.md)** - Guidelines for contributing to the project
-- **[BRANCHING.md](docs/BRANCHING.md)** - Branching strategy and workflow
-- **[I18N_STRATEGY.md](docs/I18N_STRATEGY.md)** - Internationalization (i18n) implementation strategy
-
-## Contributing
-
-Please see [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) for details.
-
-For branching strategy, see [docs/BRANCHING.md](docs/BRANCHING.md).
-
-## Changelog
-
-Please see [docs/CHANGELOG.md](docs/CHANGELOG.md) for version history.
-
-## Upgrading
-
-Please see [docs/UPGRADING.md](docs/UPGRADING.md) for upgrade instructions and migration notes.
+- [Framework support](docs/FRAMEWORKS.md)
+- [Update cases and scenarios](docs/UPDATE_CASES.md)
+- [Testing](docs/TESTING.md)
+- [Implementation roadmap](docs/IMPLEMENTATION_ROADMAP.md)
+- [Development](docs/DEVELOPMENT.md)
+- [Branching](docs/BRANCHING.md)
+- [I18N strategy](docs/I18N_STRATEGY.md)
 
 ## Related Packages
 
@@ -319,20 +311,27 @@ composer require --dev nowo-tech/code-review-guardian
 Together with Composer Update Helper, you get a complete development workflow:
 
 1. **Composer Update Helper** → Keeps your dependencies up to date
-   - Automatically detects outdated packages
-   - Generates update commands
-   - Respects framework version constraints
+  - Automatically detects outdated packages
+  - Generates update commands
+  - Respects framework version constraints
 
 2. **Code Review Guardian** → Ensures code quality in your pull requests
-   - Runs code quality checks automatically
-   - Validates code style and standards
-   - Prevents merging low-quality code
+  - Runs code quality checks automatically
+  - Validates code style and standards
+  - Prevents merging low-quality code
 
 **Perfect combination for maintaining high-quality PHP projects!** 🚀
 
 ## Author
 
 Created by [Héctor Franco Aceituno](https://github.com/HecFranco) at [Nowo.tech](https://nowo.tech)
+
+## Tests and coverage
+
+- Tests: PHPUnit (`tests/Unit`, `tests/Integration`).
+- PHP: **100%** line coverage on `src/` (refresh with `make test-coverage`).
+- TS/JS: N/A
+- Python: N/A
 
 ## License
 

@@ -20,6 +20,7 @@ Thumbs.db
 .phpunit.cache/
 coverage/
 coverage.xml
+/coverage-php.txt
 
 # PHP-CS-Fixer
 .php-cs-fixer.cache

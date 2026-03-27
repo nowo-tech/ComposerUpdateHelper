@@ -1,88 +1,116 @@
 # Makefile for Composer Update Helper
-# Simplifies Docker commands for development
+# All dev targets use the root docker-compose.yml.
 
-.PHONY: help up down shell install test test-coverage cs-check cs-fix qa clean setup-hooks ensure-up
+COMPOSE_FILE := docker-compose.yml
+COMPOSE     := docker-compose -f $(COMPOSE_FILE)
+SERVICE_PHP := php
 
-# Default target
+.PHONY: help up down build shell install ensure-up test test-coverage cs-check cs-fix rector rector-dry phpstan qa \
+	release-check release-check-demos composer-sync clean update validate assets setup-hooks
+
 help:
 	@echo "Composer Update Helper - Development Commands"
 	@echo ""
 	@echo "Usage: make <target>"
 	@echo ""
 	@echo "Targets:"
-	@echo "  up            Start Docker container"
-	@echo "  down          Stop Docker container"
-	@echo "  shell         Open shell in container"
-	@echo "  install       Install Composer dependencies"
-	@echo "  test          Run PHPUnit tests"
-	@echo "  test-coverage Run tests with code coverage"
-	@echo "  cs-check      Check code style"
-	@echo "  cs-fix        Fix code style"
-	@echo "  qa            Run all QA checks (cs-check + test)"
-	@echo "  clean         Remove vendor and cache"
-	@echo "  setup-hooks   Install git pre-commit hooks"
+	@echo "  up              Start Docker container"
+	@echo "  down            Stop Docker container"
+	@echo "  build           Rebuild Docker image (no cache)"
+	@echo "  shell           Open shell in container"
+	@echo "  install         Install Composer dependencies"
+	@echo "  assets          No-op (no frontend in this bundle)"
+	@echo "  test            Run PHPUnit tests"
+	@echo "  test-coverage   Run tests with code coverage"
+	@echo "  cs-check        Check code style"
+	@echo "  cs-fix          Fix code style"
+	@echo "  rector          Apply Rector refactoring"
+	@echo "  rector-dry      Run Rector in dry-run mode"
+	@echo "  phpstan         Run PHPStan static analysis"
+	@echo "  qa              Run QA (cs-check + test)"
+	@echo "  release-check   Pre-release pipeline (ensure-up, sync, style, analysis, coverage)"
+	@echo "  composer-sync   Validate composer.json and align composer.lock"
+	@echo "  clean           Remove vendor and local artifacts"
+	@echo "  update          composer update in container"
+	@echo "  validate        composer validate --strict"
+	@echo "  setup-hooks     Install git hooks (pre-commit)"
 	@echo ""
 
-# Build and start container
+build:
+	$(COMPOSE) build --no-cache
+
 up:
-	docker-compose build
-	docker-compose up -d
+	$(COMPOSE) build
+	$(COMPOSE) up -d
 	@echo "Installing dependencies..."
-	docker-compose exec php composer install --no-interaction
+	$(COMPOSE) exec $(SERVICE_PHP) composer install --no-interaction
 	@echo "✅ Container ready!"
 
-# Stop container
 down:
-	docker-compose down
+	$(COMPOSE) down
 
-# Ensure root container is running (start if not). Used by cs-fix, cs-check, qa, install, test, test-coverage.
+shell:
+	$(COMPOSE) exec $(SERVICE_PHP) sh
+
+install: ensure-up
+	$(COMPOSE) exec -T $(SERVICE_PHP) composer install
+
 ensure-up:
-	@if ! docker-compose exec -T php true 2>/dev/null; then \
+	@if ! $(COMPOSE) exec -T $(SERVICE_PHP) true 2>/dev/null; then \
 		echo "Starting container (root docker-compose)..."; \
-		docker-compose up -d; \
+		$(COMPOSE) up -d; \
 		sleep 3; \
-		docker-compose exec -T php composer install --no-interaction; \
+		$(COMPOSE) exec -T $(SERVICE_PHP) composer install --no-interaction; \
 	fi
 
-# Open shell in container
-shell:
-	docker-compose exec php sh
-
-# Install dependencies
-install: ensure-up
-	docker-compose exec -T php composer install
-
-# Run tests
 test: ensure-up
-	docker-compose exec -T php composer test
+	$(COMPOSE) exec -T $(SERVICE_PHP) composer test
 
-# Run tests with coverage
 test-coverage: ensure-up
-	docker-compose exec -T php composer test-coverage
+	$(COMPOSE) exec -T $(SERVICE_PHP) composer test-coverage | tee coverage-php.txt
+	@./.scripts/php-coverage-percent.sh coverage-php.txt
 
-# Check code style
 cs-check: ensure-up
-	docker-compose exec -T php composer cs-check
+	$(COMPOSE) exec -T $(SERVICE_PHP) composer cs-check
 
-# Fix code style
 cs-fix: ensure-up
-	docker-compose exec -T php composer cs-fix
+	$(COMPOSE) exec -T $(SERVICE_PHP) composer cs-fix
 
-# Run all QA
+rector: ensure-up
+	$(COMPOSE) exec -T $(SERVICE_PHP) composer rector
+
+rector-dry: ensure-up
+	$(COMPOSE) exec -T $(SERVICE_PHP) composer rector-dry
+
+phpstan: ensure-up
+	$(COMPOSE) exec -T $(SERVICE_PHP) composer phpstan
+
 qa: ensure-up
-	docker-compose exec -T php composer qa
+	$(COMPOSE) exec -T $(SERVICE_PHP) composer qa
 
-# Clean vendor and cache
+update: ensure-up
+	$(COMPOSE) exec -T $(SERVICE_PHP) composer update --no-interaction
+
+validate: ensure-up
+	$(COMPOSE) exec -T $(SERVICE_PHP) composer validate --strict
+
+composer-sync: ensure-up
+	$(COMPOSE) exec -T $(SERVICE_PHP) composer validate --strict
+	$(COMPOSE) exec -T $(SERVICE_PHP) composer update --no-install
+
+release-check: ensure-up composer-sync cs-fix cs-check rector-dry phpstan test-coverage release-check-demos
+
+release-check-demos:
+	@if [ -f demo/Makefile ]; then $(MAKE) -C demo release-check; else echo "No demo/Makefile — skip release-check-demos"; fi
+
 clean:
-	rm -rf vendor
-	rm -rf .phpunit.cache
-	rm -rf coverage
-	rm -f coverage.xml
-	rm -f .php-cs-fixer.cache
+	rm -rf vendor .phpunit.cache coverage coverage.xml .php-cs-fixer.cache
+	rm -f coverage-php.txt
 
-# Setup git hooks for pre-commit checks
+assets:
+	@echo "No frontend assets in this bundle."
+
 setup-hooks:
 	chmod +x .githooks/pre-commit
 	git config core.hooksPath .githooks
 	@echo "✅ Git hooks installed! CS-check and tests will run before each commit."
-
