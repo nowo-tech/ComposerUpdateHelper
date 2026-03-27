@@ -17,15 +17,15 @@ echo "==========================================\n\n";
 $lockData = [
     'packages' => [
         [
-            'name' => 'scheb/2fa-email',
+            'name'    => 'scheb/2fa-email',
             'version' => '8.1.0',
             'require' => [
-                'php' => '^7.4|^8.0',
+                'php'              => '^7.4|^8.0',
                 'scheb/2fa-bundle' => '8.1.*',
             ],
         ],
         [
-            'name' => 'scheb/2fa-bundle',
+            'name'    => 'scheb/2fa-bundle',
             'version' => '8.1.0',
             'require' => [
                 'php' => '^7.4|^8.0',
@@ -34,10 +34,10 @@ $lockData = [
     ],
 ];
 
-file_put_contents($tempDir . '/composer.lock', json_encode($lockData, JSON_PRETTY_PRINT));
+file_put_contents($tempDir . '/composer.lock', json_encode($lockData, \JSON_PRETTY_PRINT));
 
 // Load the processor functions
-$processorPath = __DIR__ . '/../bin/process-updates.php';
+$processorPath    = __DIR__ . '/../bin/process-updates.php';
 $processorContent = file_get_contents($processorPath);
 
 // Extract just the functions we need (avoid executing the main script)
@@ -49,9 +49,9 @@ chdir($tempDir);
 file_put_contents($tempDir . '/composer.json', json_encode([
     'require' => [
         'scheb/2fa-bundle' => '8.1.0',
-        'scheb/2fa-email' => '8.1.0',
+        'scheb/2fa-email'  => '8.1.0',
     ],
-], JSON_PRETTY_PRINT));
+], \JSON_PRETTY_PRINT));
 
 // Define functions manually for testing (extracted from process-updates.php)
 function versionSatisfiesConstraint($version, $constraint)
@@ -61,39 +61,39 @@ function versionSatisfiesConstraint($version, $constraint)
     }
 
     $normalizedVersion = ltrim($version, 'v');
-    $constraint = trim($constraint);
+    $constraint        = trim($constraint);
 
     // Handle wildcard constraints (e.g., "8.1.*")
     if (preg_match('/^(\d+\.\d+)\.\*$/', $constraint, $matches)) {
         $baseVersion = $matches[1];
 
-        return strpos($normalizedVersion, $baseVersion . '.') === 0;
+        return str_starts_with($normalizedVersion, $baseVersion . '.');
     }
 
     // Handle caret constraints (e.g., "^8.1.0")
     if (preg_match('/^\^(\d+\.\d+\.\d+)/', $constraint, $matches)) {
         $minVersion = $matches[1];
-        $parts = explode('.', $minVersion);
-        $nextMajor = (int) $parts[0] + 1;
+        $parts      = explode('.', $minVersion);
+        $nextMajor  = (int) $parts[0] + 1;
         $maxVersion = $nextMajor . '.0.0';
 
-        return version_compare($normalizedVersion, $minVersion, '>=') &&
-               version_compare($normalizedVersion, $maxVersion, '<');
+        return version_compare($normalizedVersion, $minVersion, '>=')
+               && version_compare($normalizedVersion, $maxVersion, '<');
     }
 
     // Handle tilde constraints (e.g., "~8.1.0")
     if (preg_match('/^~(\d+\.\d+\.\d+)/', $constraint, $matches)) {
         $minVersion = $matches[1];
-        $parts = explode('.', $minVersion);
-        $nextMinor = (int) $parts[1] + 1;
+        $parts      = explode('.', $minVersion);
+        $nextMinor  = (int) $parts[1] + 1;
         $maxVersion = $parts[0] . '.' . $nextMinor . '.0';
 
-        return version_compare($normalizedVersion, $minVersion, '>=') &&
-               version_compare($normalizedVersion, $maxVersion, '<');
+        return version_compare($normalizedVersion, $minVersion, '>=')
+               && version_compare($normalizedVersion, $maxVersion, '<');
     }
 
     // Handle range constraints with pipe (OR)
-    if (strpos($constraint, '|') !== false) {
+    if (str_contains($constraint, '|')) {
         $ranges = explode('|', $constraint);
         foreach ($ranges as $range) {
             $range = trim($range);
@@ -106,7 +106,7 @@ function versionSatisfiesConstraint($version, $constraint)
     }
 
     // Handle range constraints with comma (AND)
-    if (strpos($constraint, ',') !== false) {
+    if (str_contains($constraint, ',')) {
         $ranges = explode(',', $constraint);
         foreach ($ranges as $range) {
             $range = trim($range);
@@ -120,7 +120,7 @@ function versionSatisfiesConstraint($version, $constraint)
 
     // Handle comparison operators
     if (preg_match('/^(>=|<=|>|<|==|!=)\s*(.+)$/', $constraint, $matches)) {
-        $operator = $matches[1];
+        $operator      = $matches[1];
         $targetVersion = ltrim($matches[2], 'v');
 
         if ($operator === '!=') {
@@ -139,7 +139,7 @@ function versionSatisfiesConstraint($version, $constraint)
     if (preg_match('/^(\d+\.\d+)$/', $constraint, $matches)) {
         $baseVersion = $matches[1];
 
-        return strpos($normalizedVersion, $baseVersion . '.') === 0;
+        return str_starts_with($normalizedVersion, $baseVersion . '.');
     }
 
     return false;
@@ -158,7 +158,7 @@ function getPackageConstraintsFromLock($packageName)
 
     $allPackages = array_merge(
         $lock['packages'] ?? [],
-        $lock['packages-dev'] ?? []
+        $lock['packages-dev'] ?? [],
     );
 
     $constraints = [];
@@ -171,7 +171,7 @@ function getPackageConstraintsFromLock($packageName)
         // Dependencies can be in 'require', 'require-dev', or both
         $requires = array_merge(
             $pkg['require'] ?? [],
-            $pkg['require-dev'] ?? []
+            $pkg['require-dev'] ?? [],
         );
 
         if (isset($requires[$packageName])) {
@@ -199,16 +199,16 @@ if (isset($constraints['scheb/2fa-email'])) {
 
 echo "\nTest 2: Checking version compatibility\n";
 $testVersions = ['8.1.0', '8.1.5', '8.2.0', '9.0.0'];
-$constraint = $constraints['scheb/2fa-email'];
+$constraint   = $constraints['scheb/2fa-email'];
 
 foreach ($testVersions as $version) {
     $satisfies = versionSatisfiesConstraint($version, $constraint);
-    $status = $satisfies ? '✅' : '❌';
+    $status    = $satisfies ? '✅' : '❌';
     echo "   {$status} Version {$version} " . ($satisfies ? 'satisfies' : 'does NOT satisfy') . " constraint '{$constraint}'\n";
 }
 
 echo "\nTest 3: Simulating conflict scenario\n";
-$proposedVersion = '8.2.0';
+$proposedVersion    = '8.2.0';
 $requiredConstraint = $constraints['scheb/2fa-email'];
 
 if (!versionSatisfiesConstraint($proposedVersion, $requiredConstraint)) {
@@ -254,7 +254,7 @@ function removeDirectory($dir)
     }
     $files = new RecursiveIteratorIterator(
         new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS),
-        RecursiveIteratorIterator::CHILD_FIRST
+        RecursiveIteratorIterator::CHILD_FIRST,
     );
     foreach ($files as $fileinfo) {
         $todo = ($fileinfo->isDir() ? 'rmdir' : 'unlink');

@@ -8,11 +8,16 @@ use Composer\Composer;
 use Composer\EventDispatcher\EventSubscriberInterface;
 use Composer\IO\IOInterface;
 use Composer\Plugin\PluginInterface;
-use Composer\Script\{Event, ScriptEvents};
+use Composer\Script\Event;
+use Composer\Script\ScriptEvents;
+
+use function count;
+use function dirname;
+use function sprintf;
 
 /**
  * Composer plugin that installs the generate-composer-require script.
- * Works with any PHP project (Symfony, Laravel, Yii, CodeIgniter, etc.)
+ * Works with any PHP project (Symfony, Laravel, Yii, CodeIgniter, etc.).
  *
  * @author Héctor Franco Aceituno <hectorfranco@nowo.tech>
  *
@@ -22,9 +27,6 @@ class Plugin implements PluginInterface, EventSubscriberInterface
 {
     /** @var Composer The Composer instance */
     private Composer $composer;
-
-    /** @var IOInterface The IO interface */
-    private IOInterface $io;
 
     /**
      * Get the octal permission mode compatible with the current PHP version.
@@ -39,26 +41,25 @@ class Plugin implements PluginInterface, EventSubscriberInterface
         // Instead, we calculate the value: 0755 = 7*64 + 5*8 + 5 = 493
         // For PHP 8.1+, we could use 0o755, but to maintain compatibility with 7.4/8.0,
         // we use the decimal equivalent or calculate from octal string
-        return octdec('755');
+        return (int) octdec('755');
     }
 
     /**
      * Activate the plugin.
      *
-     * @param Composer    $composer The Composer instance
-     * @param IOInterface $io       The IO interface
+     * @param Composer $composer The Composer instance
+     * @param IOInterface $io The IO interface
      */
     public function activate(Composer $composer, IOInterface $io): void
     {
         $this->composer = $composer;
-        $this->io = $io;
     }
 
     /**
      * Deactivate the plugin.
      *
-     * @param Composer    $composer The Composer instance
-     * @param IOInterface $io       The IO interface
+     * @param Composer $composer The Composer instance
+     * @param IOInterface $io The IO interface
      */
     public function deactivate(Composer $composer, IOInterface $io): void
     {
@@ -67,8 +68,8 @@ class Plugin implements PluginInterface, EventSubscriberInterface
     /**
      * Uninstall the plugin.
      *
-     * @param Composer    $composer The Composer instance
-     * @param IOInterface $io       The IO interface
+     * @param Composer $composer The Composer instance
+     * @param IOInterface $io The IO interface
      */
     public function uninstall(Composer $composer, IOInterface $io): void
     {
@@ -84,7 +85,7 @@ class Plugin implements PluginInterface, EventSubscriberInterface
     {
         return [
             ScriptEvents::POST_INSTALL_CMD => 'onPostInstall',
-            ScriptEvents::POST_UPDATE_CMD => 'onPostUpdate',
+            ScriptEvents::POST_UPDATE_CMD  => 'onPostUpdate',
         ];
     }
 
@@ -114,15 +115,16 @@ class Plugin implements PluginInterface, EventSubscriberInterface
     }
 
     /**
-     * Install files to the project root.
-     * Only installs files if they don't exist (first installation only).
+     * Install or update the wrapper script in the project root.
+     * Copies `generate-composer-require.sh` from the package; if the file already exists, updates it when content differs (MD5).
+     * YAML config is created separately only when missing (see handleConfigMigration).
      *
-     * @param IOInterface $io          The IO interface
-     * @param bool        $forceUpdate Force update even if files exist
+     * @param IOInterface $io The IO interface
+     * @param bool $forceUpdate Force update even if files exist
      */
     private function installFiles(IOInterface $io, bool $forceUpdate = false): void
     {
-        $vendorDir = $this->composer->getConfig()->get('vendor-dir');
+        $vendorDir  = $this->composer->getConfig()->get('vendor-dir');
         $projectDir = dirname((string) $vendorDir);
         $packageDir = $vendorDir . '/nowo-tech/composer-update-helper';
 
@@ -138,7 +140,7 @@ class Plugin implements PluginInterface, EventSubscriberInterface
 
         foreach ($files as $source => $dest) {
             $sourcePath = $packageDir . '/' . $source;
-            $destPath = $projectDir . '/' . $dest;
+            $destPath   = $projectDir . '/' . $dest;
 
             if (!file_exists($sourcePath)) {
                 $io->writeError(sprintf('<warning>Source file not found: %s</warning>', $sourcePath));
@@ -179,7 +181,7 @@ class Plugin implements PluginInterface, EventSubscriberInterface
      */
     private function handleConfigMigration(IOInterface $io): void
     {
-        $vendorDir = $this->composer->getConfig()->get('vendor-dir');
+        $vendorDir  = $this->composer->getConfig()->get('vendor-dir');
         $projectDir = dirname((string) $vendorDir);
         $packageDir = $vendorDir . '/nowo-tech/composer-update-helper';
 
@@ -188,41 +190,41 @@ class Plugin implements PluginInterface, EventSubscriberInterface
             $packageDir = __DIR__ . '/..';
         }
 
-        $oldIgnoreTxt = $projectDir . '/generate-composer-require.ignore.txt';
+        $oldIgnoreTxt  = $projectDir . '/generate-composer-require.ignore.txt';
         $newIgnoreYaml = $projectDir . '/generate-composer-require.yaml';
-        $yamlSource = $packageDir . '/bin/generate-composer-require.yaml';
+        $yamlSource    = $packageDir . '/bin/generate-composer-require.yaml';
 
         // Migrate old TXT file to YAML if it exists
         // Migrate if: TXT exists AND (YAML doesn't exist OR YAML is empty/template only OR packages match)
         if (file_exists($oldIgnoreTxt)) {
             // Read packages from TXT
-            $txtContent = file_get_contents($oldIgnoreTxt);
-            $txtLines = explode("\n", $txtContent);
+            $txtContent  = file_get_contents($oldIgnoreTxt);
+            $txtLines    = explode("\n", $txtContent);
             $txtPackages = [];
             foreach ($txtLines as $line) {
                 $line = trim($line);
-                if (!empty($line) && strpos($line, '#') !== 0) {
+                if ($line !== '' && $line !== '0' && !str_starts_with($line, '#')) {
                     $txtPackages[] = $line;
                 }
             }
 
-            $shouldMigrate = false;
+            $shouldMigrate   = false;
             $shouldDeleteTxt = false;
 
             if (!file_exists($newIgnoreYaml)) {
                 // YAML doesn't exist, migrate
                 $shouldMigrate = true;
-            } elseif ($this->isYamlEmptyOrTemplate($newIgnoreYaml, $yamlSource)) {
+            } elseif ($this->isYamlEmptyOrTemplate($newIgnoreYaml)) {
                 // YAML exists but is empty or just the template, safe to migrate
                 $shouldMigrate = true;
             } else {
                 // YAML exists and has content (user-defined packages)
                 // Check if TXT packages are already in ignore section
-                $yamlContent = file_get_contents($newIgnoreYaml);
+                $yamlContent  = file_get_contents($newIgnoreYaml);
                 $yamlPackages = $this->extractPackagesFromYamlIgnoreSection($yamlContent);
 
                 // Verify packages match (order doesn't matter)
-                $txtPackagesSorted = array_unique(array_filter($txtPackages));
+                $txtPackagesSorted  = array_unique(array_filter($txtPackages));
                 $yamlPackagesSorted = array_unique(array_filter($yamlPackages));
                 sort($txtPackagesSorted);
                 sort($yamlPackagesSorted);
@@ -243,11 +245,11 @@ class Plugin implements PluginInterface, EventSubscriberInterface
 
                 // Verify migration was successful before deleting TXT
                 if (file_exists($newIgnoreYaml)) {
-                    $yamlContent = file_get_contents($newIgnoreYaml);
+                    $yamlContent  = file_get_contents($newIgnoreYaml);
                     $yamlPackages = $this->extractPackagesFromYamlIgnoreSection($yamlContent);
 
                     // Verify packages match (order doesn't matter)
-                    $txtPackagesSorted = array_unique(array_filter($txtPackages));
+                    $txtPackagesSorted  = array_unique(array_filter($txtPackages));
                     $yamlPackagesSorted = array_unique(array_filter($yamlPackages));
                     sort($txtPackagesSorted);
                     sort($yamlPackagesSorted);
@@ -277,12 +279,11 @@ class Plugin implements PluginInterface, EventSubscriberInterface
     /**
      * Check if YAML file is empty or contains only the template (no user packages).
      *
-     * @param string $yamlPath     Path to the YAML file
-     * @param string $templatePath Path to the template YAML file
+     * @param string $yamlPath Path to the YAML file
      *
      * @return bool True if YAML is empty or template-only
      */
-    private function isYamlEmptyOrTemplate(string $yamlPath, string $templatePath): bool
+    private function isYamlEmptyOrTemplate(string $yamlPath): bool
     {
         if (!file_exists($yamlPath)) {
             return true;
@@ -292,22 +293,22 @@ class Plugin implements PluginInterface, EventSubscriberInterface
         $yamlContent = trim($yamlContent);
 
         // If file is empty, it's safe to migrate
-        if (empty($yamlContent)) {
+        if ($yamlContent === '' || $yamlContent === '0') {
             return true;
         }
 
         // Check if YAML has any actual packages in the ignore section (not just comments)
         // Only check ignore section - include section doesn't prevent migration
-        $lines = explode("\n", $yamlContent);
+        $lines             = explode("\n", $yamlContent);
         $hasIgnorePackages = false;
-        $inIgnore = false;
+        $inIgnore          = false;
 
         foreach ($lines as $line) {
-            $trimmedLine = trim($line);
+            $trimmedLine  = trim($line);
             $originalLine = $line;
 
             // Skip empty lines and pure comment lines
-            if (empty($trimmedLine) || strpos($trimmedLine, '#') === 0) {
+            if ($trimmedLine === '' || $trimmedLine === '0' || str_starts_with($trimmedLine, '#')) {
                 continue;
             }
 
@@ -324,14 +325,14 @@ class Plugin implements PluginInterface, EventSubscriberInterface
             // If we find a line starting with "- " (package entry) in ignore section, it has content
             if ($inIgnore && preg_match('/^\s*-\s+([^#]+)/', $originalLine, $matches)) {
                 $package = trim($matches[1]);
-                if (!empty($package)) {
+                if ($package !== '' && $package !== '0') {
                     $hasIgnorePackages = true;
                     break;
                 }
             }
 
             // End of section: new top-level key
-            if ($inIgnore && preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*:\s*$/', $trimmedLine)) {
+            if ($inIgnore && preg_match('/^[a-zA-Z_]\w*:\s*$/', $trimmedLine)) {
                 $inIgnore = false;
             }
         }
@@ -347,7 +348,7 @@ class Plugin implements PluginInterface, EventSubscriberInterface
      */
     private function updateGitignoreOnUpdate(IOInterface $io): void
     {
-        $vendorDir = $this->composer->getConfig()->get('vendor-dir');
+        $vendorDir  = $this->composer->getConfig()->get('vendor-dir');
         $projectDir = dirname((string) $vendorDir);
         $this->updateGitignore($projectDir, $io);
     }
@@ -355,31 +356,29 @@ class Plugin implements PluginInterface, EventSubscriberInterface
     /**
      * Migrate old TXT configuration file to YAML format.
      *
-     * @param string      $txtPath  Path to the old TXT file
-     * @param string      $yamlPath Path to the new YAML file
-     * @param IOInterface $io       The IO interface
+     * @param string $txtPath Path to the old TXT file
+     * @param string $yamlPath Path to the new YAML file
+     * @param IOInterface $io The IO interface
      */
     private function migrateTxtToYaml(string $txtPath, string $yamlPath, IOInterface $io): void
     {
         $content = file_get_contents($txtPath);
-        $lines = explode("\n", $content);
+        $lines   = explode("\n", $content);
 
         $packages = [];
         foreach ($lines as $line) {
             $line = trim($line);
             // Skip comments and empty lines
-            if (empty($line) || strpos($line, '#') === 0) {
+            if ($line === '' || $line === '0' || str_starts_with($line, '#')) {
                 continue;
             }
             // Add package to ignore list
-            if (!empty($line)) {
-                $packages[] = $line;
-            }
+            $packages[] = $line;
         }
 
         // If YAML already exists, merge instead of overwriting
         if (file_exists($yamlPath)) {
-            $yamlContent = file_get_contents($yamlPath);
+            $yamlContent            = file_get_contents($yamlPath);
             $existingIgnorePackages = $this->extractPackagesFromYamlIgnoreSection($yamlContent);
 
             // Merge packages (avoid duplicates)
@@ -387,19 +386,19 @@ class Plugin implements PluginInterface, EventSubscriberInterface
             sort($allPackages);
 
             // Rebuild YAML preserving structure and include section
-            $yamlLines = explode("\n", $yamlContent);
-            $newYamlLines = [];
-            $inIgnore = false;
+            $yamlLines              = explode("\n", $yamlContent);
+            $newYamlLines           = [];
+            $inIgnore               = false;
             $ignoreSectionProcessed = false;
-            $inInclude = false;
+            $inInclude              = false;
 
             foreach ($yamlLines as $line) {
                 $trimmedLine = trim($line);
 
                 // Detect section headers
                 if (preg_match('/^ignore:\s*$/', $trimmedLine)) {
-                    $inIgnore = true;
-                    $inInclude = false;
+                    $inIgnore       = true;
+                    $inInclude      = false;
                     $newYamlLines[] = $line;
                     // Insert merged packages
                     if (!$ignoreSectionProcessed) {
@@ -411,8 +410,8 @@ class Plugin implements PluginInterface, EventSubscriberInterface
                     continue;
                 }
                 if (preg_match('/^include:\s*$/', $trimmedLine)) {
-                    $inInclude = true;
-                    $inIgnore = false;
+                    $inInclude      = true;
+                    $inIgnore       = false;
                     $newYamlLines[] = $line;
                     continue;
                 }
@@ -421,8 +420,8 @@ class Plugin implements PluginInterface, EventSubscriberInterface
                 $newYamlLines[] = $line;
 
                 // Detect end of section
-                if (($inIgnore || $inInclude) && preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*:\s*$/', $trimmedLine)) {
-                    $inIgnore = false;
+                if (($inIgnore || $inInclude) && preg_match('/^[a-zA-Z_]\w*:\s*$/', $trimmedLine)) {
+                    $inIgnore  = false;
                     $inInclude = false;
                 }
             }
@@ -431,7 +430,8 @@ class Plugin implements PluginInterface, EventSubscriberInterface
             if (!$ignoreSectionProcessed) {
                 // Find a good place to insert (before include or at the end)
                 $insertPos = count($newYamlLines);
-                for ($i = 0; $i < count($newYamlLines); $i++) {
+                $counter   = count($newYamlLines);
+                for ($i = 0; $i < $counter; ++$i) {
                     if (preg_match('/^include:\s*$/', trim($newYamlLines[$i]))) {
                         $insertPos = $i;
                         break;
@@ -459,7 +459,7 @@ class Plugin implements PluginInterface, EventSubscriberInterface
             $yamlContent .= "# but won't be included in the composer require commands.\n";
             $yamlContent .= "ignore:\n";
 
-            if (empty($packages)) {
+            if ($packages === []) {
                 $yamlContent .= "  # Add packages to ignore (one per line)\n";
                 $yamlContent .= "  # - doctrine/orm\n";
                 $yamlContent .= "  # - symfony/security-bundle\n";
@@ -492,7 +492,7 @@ class Plugin implements PluginInterface, EventSubscriberInterface
     private function extractPackagesFromYamlIgnoreSection(string $yamlContent): array
     {
         $packages = [];
-        $lines = explode("\n", $yamlContent);
+        $lines    = explode("\n", $yamlContent);
         $inIgnore = false;
 
         foreach ($lines as $line) {
@@ -511,13 +511,13 @@ class Plugin implements PluginInterface, EventSubscriberInterface
             // Extract packages from ignore section only
             if ($inIgnore && preg_match('/^\s*-\s+([^#]+)/', $line, $matches)) {
                 $package = trim($matches[1]);
-                if (!empty($package)) {
+                if ($package !== '' && $package !== '0') {
                     $packages[] = $package;
                 }
             }
 
             // End of section: new top-level key
-            if ($inIgnore && preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*:\s*$/', $trimmedLine)) {
+            if ($inIgnore && preg_match('/^[a-zA-Z_]\w*:\s*$/', $trimmedLine)) {
                 $inIgnore = false;
             }
         }
@@ -529,8 +529,8 @@ class Plugin implements PluginInterface, EventSubscriberInterface
      * Update .gitignore to remove old TXT entry (if exists).
      * Note: .sh and .yaml files should NOT be in .gitignore as they should be committed to the repository.
      *
-     * @param string      $projectDir The project root directory
-     * @param IOInterface $io         The IO interface
+     * @param string $projectDir The project root directory
+     * @param IOInterface $io The IO interface
      */
     private function updateGitignore(string $projectDir, IOInterface $io): void
     {
@@ -552,10 +552,10 @@ class Plugin implements PluginInterface, EventSubscriberInterface
             return; // No .gitignore file, nothing to do
         }
 
-        $content = file_get_contents($gitignorePath);
-        $lines = explode("\n", $content);
+        $content         = file_get_contents($gitignorePath);
+        $lines           = explode("\n", $content);
         $existingEntries = array_map('trim', $lines);
-        $updated = false;
+        $updated         = false;
 
         // Remove old TXT entry if it exists
         foreach ($entriesToRemove as $entry) {
@@ -563,7 +563,7 @@ class Plugin implements PluginInterface, EventSubscriberInterface
             if ($key !== false) {
                 unset($lines[$key]);
                 $existingEntries = array_map('trim', $lines);
-                $updated = true;
+                $updated         = true;
             }
         }
 
@@ -573,7 +573,7 @@ class Plugin implements PluginInterface, EventSubscriberInterface
             if ($key !== false) {
                 unset($lines[$key]);
                 $existingEntries = array_map('trim', $lines);
-                $updated = true;
+                $updated         = true;
             }
         }
 
@@ -590,7 +590,7 @@ class Plugin implements PluginInterface, EventSubscriberInterface
      */
     private function removeFiles(IOInterface $io): void
     {
-        $vendorDir = $this->composer->getConfig()->get('vendor-dir');
+        $vendorDir  = $this->composer->getConfig()->get('vendor-dir');
         $projectDir = dirname((string) $vendorDir);
 
         $files = [

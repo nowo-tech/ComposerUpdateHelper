@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace NowoTech\ComposerUpdateHelper\Tests;
 
-use Composer\{Composer, Config};
+use Composer\Composer;
+use Composer\Config;
 use Composer\IO\IOInterface;
 use Composer\Script\Event;
 use NowoTech\ComposerUpdateHelper\Installer;
@@ -12,6 +13,11 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use ReflectionClass;
+
+use function dirname;
+
+use const FILE_APPEND;
 
 /**
  * Test suite for the Installer class.
@@ -30,7 +36,7 @@ final class InstallerTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->tempDir = sys_get_temp_dir() . '/composer-update-helper-test-' . uniqid();
+        $this->tempDir   = sys_get_temp_dir() . '/composer-update-helper-test-' . uniqid();
         $this->vendorDir = $this->tempDir . '/vendor';
 
         mkdir($this->vendorDir, 0777, true);
@@ -173,7 +179,7 @@ final class InstallerTest extends TestCase
 
     public function testInstallHandlesMissingSourceFile(): void
     {
-        $event = $this->createMockEvent();
+        $event      = $this->createMockEvent();
         $packageDir = $this->vendorDir . '/nowo-tech/composer-update-helper';
         mkdir($packageDir . '/bin', 0777, true);
 
@@ -196,8 +202,8 @@ final class InstallerTest extends TestCase
         // Create a scenario where package is not in vendor (development mode)
         // by using a vendor path that doesn't contain the package
         $nonExistentVendor = $this->tempDir . '/non-existent-vendor';
-        $composer = $this->createMock(Composer::class);
-        $config = $this->createMock(Config::class);
+        $composer          = $this->createMock(Composer::class);
+        $config            = $this->createMock(Config::class);
         $config->method('get')->with('vendor-dir')->willReturn($nonExistentVendor);
         $composer->method('getConfig')->willReturn($config);
         $io = $this->createMock(IOInterface::class);
@@ -215,8 +221,8 @@ final class InstallerTest extends TestCase
 
         // Create source file in development directory (parent of src)
         // Installer will use __DIR__ . '/..' when package is not in vendor
-        $devPackageDir = dirname(__DIR__);
-        $devBinDir = $devPackageDir . '/bin';
+        $devPackageDir = dirname(__DIR__, 2);
+        $devBinDir     = $devPackageDir . '/bin';
 
         if (!is_dir($devBinDir) || !file_exists($devBinDir . '/generate-composer-require.sh')) {
             $this->markTestSkipped('Development bin directory or script does not exist');
@@ -392,7 +398,7 @@ final class InstallerTest extends TestCase
 
         $items = new RecursiveIteratorIterator(
             new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS),
-            RecursiveIteratorIterator::CHILD_FIRST
+            RecursiveIteratorIterator::CHILD_FIRST,
         );
 
         foreach ($items as $item) {
@@ -415,25 +421,25 @@ final class InstallerTest extends TestCase
         file_put_contents($packageDir . '/bin/generate-composer-require.yaml', '# YAML config');
 
         // Use reflection to call private isYamlEmptyOrTemplate method
-        $reflection = new \ReflectionClass(Installer::class);
-        $method = $reflection->getMethod('isYamlEmptyOrTemplate');
+        $reflection = new ReflectionClass(Installer::class);
+        $method     = $reflection->getMethod('isYamlEmptyOrTemplate');
         $method->setAccessible(true);
 
         // Test with YAML that has only include section (should be considered empty for migration)
         $yamlFile = $this->tempDir . '/generate-composer-require.yaml';
         file_put_contents($yamlFile, "ignore:\n  # - package1\ninclude:\n  # - package2\n");
-        $result = $method->invoke(null, $yamlFile, $packageDir . '/bin/generate-composer-require.yaml');
+        $result = $method->invoke(null, $yamlFile);
         $this->assertTrue($result, 'YAML with only commented packages should be considered empty');
 
         // Test with YAML that has packages in include section (should be considered empty for ignore section)
         // Include section doesn't prevent migration - only ignore section matters
         file_put_contents($yamlFile, "ignore:\n  # - package1\ninclude:\n  - included/package\n");
-        $result = $method->invoke(null, $yamlFile, $packageDir . '/bin/generate-composer-require.yaml');
+        $result = $method->invoke(null, $yamlFile);
         $this->assertTrue($result, 'YAML with packages in include section should be considered empty for ignore section (migration allowed)');
 
         // Test with YAML that has packages in ignore section (should NOT be considered empty)
         file_put_contents($yamlFile, "ignore:\n  - ignored/package\ninclude:\n  # - package2\n");
-        $result = $method->invoke(null, $yamlFile, $packageDir . '/bin/generate-composer-require.yaml');
+        $result = $method->invoke(null, $yamlFile);
         $this->assertFalse($result, 'YAML with packages in ignore section should NOT be considered empty');
 
         // Cleanup
@@ -486,15 +492,15 @@ final class InstallerTest extends TestCase
 
         // Simulate development mode (package not in vendor)
         // Create source files in development directory (parent of src)
-        $devPackageDir = dirname(__DIR__);
-        $devBinDir = $devPackageDir . '/bin';
+        $devPackageDir = dirname(__DIR__, 2);
+        $devBinDir     = $devPackageDir . '/bin';
 
         if (!is_dir($devBinDir)) {
             $this->markTestSkipped('Development bin directory does not exist');
         }
 
         // Create source file in development directory
-        $sourceFile = $devBinDir . '/generate-composer-require.sh';
+        $sourceFile      = $devBinDir . '/generate-composer-require.sh';
         $originalContent = null;
         if (file_exists($sourceFile)) {
             $originalContent = file_get_contents($sourceFile);
@@ -886,7 +892,7 @@ final class InstallerTest extends TestCase
         $this->assertStringContainsString('included/package', $yamlContent);
 
         // Verify ignore section comes before include section
-        $ignorePos = strpos($yamlContent, 'ignore:');
+        $ignorePos  = strpos($yamlContent, 'ignore:');
         $includePos = strpos($yamlContent, 'include:');
         $this->assertNotFalse($ignorePos);
         $this->assertNotFalse($includePos);
@@ -949,7 +955,7 @@ final class InstallerTest extends TestCase
         $event = $this->createMockEvent();
 
         // Create .gitignore without any Composer Update Helper entries
-        $gitignorePath = $this->tempDir . '/.gitignore';
+        $gitignorePath   = $this->tempDir . '/.gitignore';
         $originalContent = "vendor/\nnode_modules/\n";
         file_put_contents($gitignorePath, $originalContent);
 
@@ -1117,7 +1123,7 @@ final class InstallerTest extends TestCase
         $this->assertStringContainsString('included/package', $yamlContent);
 
         // Verify ignore comes before include
-        $ignorePos = strpos($yamlContent, 'ignore:');
+        $ignorePos  = strpos($yamlContent, 'ignore:');
         $includePos = strpos($yamlContent, 'include:');
         $this->assertLessThan($includePos, $ignorePos);
 
@@ -1284,14 +1290,14 @@ final class InstallerTest extends TestCase
         file_put_contents($packageDir . '/bin/generate-composer-require.yaml', '# YAML config');
 
         // Use reflection to call private isYamlEmptyOrTemplate method
-        $reflection = new \ReflectionClass(Installer::class);
-        $method = $reflection->getMethod('isYamlEmptyOrTemplate');
+        $reflection = new ReflectionClass(Installer::class);
+        $method     = $reflection->getMethod('isYamlEmptyOrTemplate');
         $method->setAccessible(true);
 
         // Test with YAML that has ignore section followed by another section (tests end of section detection)
         $yamlFile = $this->tempDir . '/generate-composer-require.yaml';
         file_put_contents($yamlFile, "ignore:\n  # - package1\nother_section:\n  - value\n");
-        $result = $method->invoke(null, $yamlFile, $packageDir . '/bin/generate-composer-require.yaml');
+        $result = $method->invoke(null, $yamlFile);
         $this->assertTrue($result, 'YAML with only commented packages should be considered empty');
 
         // Cleanup
@@ -1433,8 +1439,8 @@ final class InstallerTest extends TestCase
         file_put_contents($packageDir . '/bin/generate-composer-require.yaml', '# YAML config');
 
         // Use reflection to call private isYamlEmptyOrTemplate method
-        $reflection = new \ReflectionClass(Installer::class);
-        $method = $reflection->getMethod('isYamlEmptyOrTemplate');
+        $reflection = new ReflectionClass(Installer::class);
+        $method     = $reflection->getMethod('isYamlEmptyOrTemplate');
         $method->setAccessible(true);
 
         // Test when YAML doesn't exist (line 357: return true)
@@ -1443,7 +1449,7 @@ final class InstallerTest extends TestCase
             @unlink($yamlFile);
         }
 
-        $result = $method->invoke(null, $yamlFile, $packageDir . '/bin/generate-composer-require.yaml');
+        $result = $method->invoke(null, $yamlFile);
         $this->assertTrue($result, 'YAML that does not exist should be considered empty/template');
 
         // Cleanup
@@ -1555,7 +1561,7 @@ final class InstallerTest extends TestCase
         file_put_contents($yamlFile, "ignore:\n  # - commented\n");
 
         // Use reflection to call migrateTxtToYaml directly
-        $reflection = new \ReflectionClass(Installer::class);
+        $reflection    = new ReflectionClass(Installer::class);
         $migrateMethod = $reflection->getMethod('migrateTxtToYaml');
         $migrateMethod->setAccessible(true);
 
@@ -1574,17 +1580,17 @@ final class InstallerTest extends TestCase
         $extractMethod->setAccessible(true);
         $yamlPackages = $extractMethod->invoke(null, file_get_contents($yamlFile));
 
-        $txtContent = file_get_contents($oldTxtFile);
-        $txtLines = explode("\n", $txtContent);
+        $txtContent  = file_get_contents($oldTxtFile);
+        $txtLines    = explode("\n", $txtContent);
         $txtPackages = [];
         foreach ($txtLines as $line) {
             $line = trim($line);
-            if (!empty($line) && strpos($line, '#') !== 0) {
+            if (!empty($line) && !str_starts_with($line, '#')) {
                 $txtPackages[] = $line;
             }
         }
 
-        $txtPackagesSorted = array_unique(array_filter($txtPackages));
+        $txtPackagesSorted  = array_unique(array_filter($txtPackages));
         $yamlPackagesSorted = array_unique(array_filter($yamlPackages));
         sort($txtPackagesSorted);
         sort($yamlPackagesSorted);
@@ -1621,8 +1627,8 @@ final class InstallerTest extends TestCase
         file_put_contents($packageDir . '/bin/generate-composer-require.yaml', '# YAML config');
 
         // Use reflection to call migrateTxtToYaml directly to test line 235
-        $reflection = new \ReflectionClass(Installer::class);
-        $method = $reflection->getMethod('migrateTxtToYaml');
+        $reflection = new ReflectionClass(Installer::class);
+        $method     = $reflection->getMethod('migrateTxtToYaml');
         $method->setAccessible(true);
 
         $io = $this->createMock(IOInterface::class);
@@ -1708,8 +1714,8 @@ final class InstallerTest extends TestCase
         file_put_contents($packageDir . '/bin/generate-composer-require.yaml', '# YAML config');
 
         // Use reflection to call migrateTxtToYaml directly to test line 235
-        $reflection = new \ReflectionClass(Installer::class);
-        $method = $reflection->getMethod('migrateTxtToYaml');
+        $reflection = new ReflectionClass(Installer::class);
+        $method     = $reflection->getMethod('migrateTxtToYaml');
         $method->setAccessible(true);
 
         $io = $this->createMock(IOInterface::class);
@@ -1752,7 +1758,7 @@ final class InstallerTest extends TestCase
         file_put_contents($yamlFile, "ignore:\n  # - commented\n");
 
         // Use reflection to call migrateTxtToYaml
-        $reflection = new \ReflectionClass(Installer::class);
+        $reflection    = new ReflectionClass(Installer::class);
         $migrateMethod = $reflection->getMethod('migrateTxtToYaml');
         $migrateMethod->setAccessible(true);
 
@@ -1771,17 +1777,17 @@ final class InstallerTest extends TestCase
         $extractMethod->setAccessible(true);
         $yamlPackages = $extractMethod->invoke(null, file_get_contents($yamlFile));
 
-        $txtContent = file_get_contents($oldTxtFile);
-        $txtLines = explode("\n", $txtContent);
+        $txtContent  = file_get_contents($oldTxtFile);
+        $txtLines    = explode("\n", $txtContent);
         $txtPackages = [];
         foreach ($txtLines as $line) {
             $line = trim($line);
-            if (!empty($line) && strpos($line, '#') !== 0) {
+            if (!empty($line) && !str_starts_with($line, '#')) {
                 $txtPackages[] = $line;
             }
         }
 
-        $txtPackagesSorted = array_unique(array_filter($txtPackages));
+        $txtPackagesSorted  = array_unique(array_filter($txtPackages));
         $yamlPackagesSorted = array_unique(array_filter($yamlPackages));
         sort($txtPackagesSorted);
         sort($yamlPackagesSorted);
@@ -1843,8 +1849,8 @@ final class InstallerTest extends TestCase
         mkdir($packageDir . '/bin', 0777, true);
         file_put_contents($packageDir . '/bin/generate-composer-require.yaml', '# YAML config');
 
-        $reflection = new \ReflectionClass(Installer::class);
-        $method = $reflection->getMethod('migrateTxtToYaml');
+        $reflection = new ReflectionClass(Installer::class);
+        $method     = $reflection->getMethod('migrateTxtToYaml');
         $method->setAccessible(true);
 
         $io = $this->createMock(IOInterface::class);
@@ -1862,36 +1868,26 @@ final class InstallerTest extends TestCase
         @rmdir($packageDir);
     }
 
-    public function testMigrationVerificationFailureExecutesWriteError(): void
+    public function testInstallWritesErrorWhenMigrationVerificationFails(): void
     {
-        // Test line 154: Migration verification failure - actually execute writeError
-        // To trigger this, we need packages to not match after migration
-        // But the migration always succeeds, so we need to manipulate the result
-
-        $event = $this->createMockEvent();
-
-        // Create old TXT file with packages
-        $oldTxtFile = $this->tempDir . '/generate-composer-require.ignore.txt';
-        file_put_contents($oldTxtFile, "package1/one\npackage2/two\n");
+        $yamlDest = $this->tempDir . '/generate-composer-require.yaml';
+        $oldTxt   = $this->tempDir . '/generate-composer-require.ignore.txt';
+        file_put_contents($oldTxt, "pkg/one\npkg/two\n");
 
         $packageDir = $this->vendorDir . '/nowo-tech/composer-update-helper';
         mkdir($packageDir . '/bin', 0777, true);
         file_put_contents($packageDir . '/bin/generate-composer-require.sh', '#!/bin/sh');
-        file_put_contents($packageDir . '/bin/generate-composer-require.yaml', '# YAML config');
+        file_put_contents(
+            $packageDir . '/bin/generate-composer-require.yaml',
+            "# template\nignore:\n  # placeholder\ninclude:\n",
+        );
 
-        // Create YAML file that is empty/template (allows migration)
-        $yamlFile = $this->tempDir . '/generate-composer-require.yaml';
-        file_put_contents($yamlFile, "ignore:\n  # - commented\n");
+        $GLOBALS['__cuh_yaml_verify_target'] = $yamlDest;
+        $GLOBALS['__cuh_verify_mode']        = 'installer';
+        $GLOBALS['__cuh_yaml_read_count']    = [];
 
-        // Create IO mock that expects writeError to be called (line 154)
         $io = $this->createMock(IOInterface::class);
-        $io->expects($this->atLeastOnce())
-            ->method('write')
-            ->with($this->logicalOr(
-                $this->stringContains('Migrating configuration from TXT to YAML format'),
-                $this->stringContains('Configuration migrated to')
-            ));
-        $io->expects($this->atLeastOnce())
+        $io->expects($this->once())
             ->method('writeError')
             ->with($this->stringContains('Migration verification failed'));
 
@@ -1910,56 +1906,12 @@ final class InstallerTest extends TestCase
         $event->method('getComposer')
             ->willReturn($composer);
 
-        // Use reflection to manually trigger migration and then verification failure
-        $reflection = new \ReflectionClass(Installer::class);
-        $migrateMethod = $reflection->getMethod('migrateTxtToYaml');
-        $migrateMethod->setAccessible(true);
-
-        // Call migration
-        $migrateMethod->invoke(null, $oldTxtFile, $yamlFile, $io);
-
-        // Now manipulate YAML to cause verification failure
-        $yamlContent = file_get_contents($yamlFile);
-        // Remove one package to make verification fail
-        $yamlContent = preg_replace('/\s+-\s+package2\/two\n/', "\n", $yamlContent);
-        file_put_contents($yamlFile, $yamlContent);
-
-        // Now manually call the verification logic from install() method
-        // We need to simulate the verification check that would trigger line 154
-        $extractMethod = $reflection->getMethod('extractPackagesFromYamlIgnoreSection');
-        $extractMethod->setAccessible(true);
-        $yamlPackages = $extractMethod->invoke(null, file_get_contents($yamlFile));
-
-        $txtContent = file_get_contents($oldTxtFile);
-        $txtLines = explode("\n", $txtContent);
-        $txtPackages = [];
-        foreach ($txtLines as $line) {
-            $line = trim($line);
-            if (!empty($line) && strpos($line, '#') !== 0) {
-                $txtPackages[] = $line;
-            }
+        try {
+            Installer::install($event);
+        } finally {
+            unset($GLOBALS['__cuh_yaml_verify_target'], $GLOBALS['__cuh_verify_mode'], $GLOBALS['__cuh_yaml_read_count']);
         }
 
-        $txtPackagesSorted = array_unique(array_filter($txtPackages));
-        $yamlPackagesSorted = array_unique(array_filter($yamlPackages));
-        sort($txtPackagesSorted);
-        sort($yamlPackagesSorted);
-
-        // Manually execute the verification failure path (line 154)
-        if ($txtPackagesSorted !== $yamlPackagesSorted) {
-            $io->writeError('<warning>Migration verification failed. TXT file preserved for safety.</warning>');
-        }
-
-        // Verify TXT file still exists (verification failed)
-        $this->assertFileExists($oldTxtFile);
-
-        // Cleanup
-        @unlink($oldTxtFile);
-        @unlink($yamlFile);
-        @unlink($this->tempDir . '/generate-composer-require.sh');
-        @unlink($packageDir . '/bin/generate-composer-require.sh');
-        @unlink($packageDir . '/bin/generate-composer-require.yaml');
-        @rmdir($packageDir . '/bin');
-        @rmdir($packageDir);
+        $this->assertFileExists($oldTxt);
     }
 }

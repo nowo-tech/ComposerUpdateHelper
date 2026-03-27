@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Documentation
+
+- **README** — Architecture: updated approximate line counts for `generate-composer-require.sh` and `process-updates.php` (and noted they can change between releases). Language list in the YAML example points to **CONFIGURATION.md** for the full locale set instead of a partial inline list.
+- **Plugin.php** — `installFiles()` docblock now matches behavior (script is updated when vendor copy differs), not “first install only”.
+
 ## [2.0.29] - 2026-01-22
 
 ### Changed

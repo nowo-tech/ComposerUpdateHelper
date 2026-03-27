@@ -6,6 +6,9 @@ namespace NowoTech\ComposerUpdateHelper\Tests;
 
 use PHPUnit\Framework\TestCase;
 
+use function dirname;
+use function strlen;
+
 /**
  * Test suite for the generate-composer-require.sh script.
  * Tests script existence, executability, and functionality including
@@ -21,7 +24,7 @@ final class ScriptTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->scriptPath = dirname(__DIR__) . '/bin/generate-composer-require.sh';
+        $this->scriptPath = dirname(__DIR__, 2) . '/bin/generate-composer-require.sh';
     }
 
     public function testScriptExists(): void
@@ -88,7 +91,7 @@ final class ScriptTest extends TestCase
     {
         // Framework logic is now in FrameworkDetector class, not directly in process-updates.php
         // This test verifies the FrameworkDetector class contains framework support
-        $frameworkDetectorPath = dirname(__DIR__) . '/bin/lib/FrameworkDetector.php';
+        $frameworkDetectorPath = dirname(__DIR__, 2) . '/bin/lib/FrameworkDetector.php';
 
         if (!file_exists($frameworkDetectorPath)) {
             $this->markTestSkipped('FrameworkDetector PHP file does not exist');
@@ -113,7 +116,7 @@ final class ScriptTest extends TestCase
     public function testScriptDetectsFrameworkConstraints(): void
     {
         // Framework detection logic is now in FrameworkDetector class
-        $frameworkDetectorPath = dirname(__DIR__) . '/bin/lib/FrameworkDetector.php';
+        $frameworkDetectorPath = dirname(__DIR__, 2) . '/bin/lib/FrameworkDetector.php';
 
         if (!file_exists($frameworkDetectorPath)) {
             $this->markTestSkipped('FrameworkDetector PHP file does not exist');
@@ -135,7 +138,7 @@ final class ScriptTest extends TestCase
     public function testScriptSupportsLaravelIlluminatePackages(): void
     {
         // Laravel/Illuminate logic is now in FrameworkDetector class
-        $frameworkDetectorPath = dirname(__DIR__) . '/bin/lib/FrameworkDetector.php';
+        $frameworkDetectorPath = dirname(__DIR__, 2) . '/bin/lib/FrameworkDetector.php';
 
         if (!file_exists($frameworkDetectorPath)) {
             $this->markTestSkipped('FrameworkDetector PHP file does not exist');
@@ -234,7 +237,7 @@ final class ScriptTest extends TestCase
 
     public function testIgnoreFileTemplateExists(): void
     {
-        $ignoreFile = dirname(__DIR__) . '/bin/generate-composer-require.ignore.txt';
+        $ignoreFile = dirname(__DIR__, 2) . '/bin/generate-composer-require.ignore.txt';
 
         if (!file_exists($ignoreFile)) {
             $this->markTestSkipped('Ignore file template does not exist (optional file)');
@@ -247,7 +250,7 @@ final class ScriptTest extends TestCase
 
     public function testIgnoreFileHasCorrectFormat(): void
     {
-        $ignoreFile = dirname(__DIR__) . '/bin/generate-composer-require.ignore.txt';
+        $ignoreFile = dirname(__DIR__, 2) . '/bin/generate-composer-require.ignore.txt';
 
         if (!file_exists($ignoreFile)) {
             $this->markTestSkipped('Ignore file template does not exist');

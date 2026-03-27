@@ -4,7 +4,17 @@ declare(strict_types=1);
 
 namespace NowoTech\ComposerUpdateHelper\Tests;
 
+use ConfigLoader;
+use DependencyAnalyzer;
 use PHPUnit\Framework\TestCase;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
+use Utils;
+
+use function count;
+use function dirname;
+
+use const JSON_PRETTY_PRINT;
 
 /**
  * Test suite for dependency compatibility checking.
@@ -21,8 +31,8 @@ final class DependencyCompatibilityTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->tempDir = sys_get_temp_dir() . '/composer-update-helper-compat-test-' . uniqid();
-        $this->processorPath = dirname(__DIR__) . '/bin/process-updates.php';
+        $this->tempDir       = sys_get_temp_dir() . '/composer-update-helper-compat-test-' . uniqid();
+        $this->processorPath = dirname(__DIR__, 2) . '/bin/process-updates.php';
 
         mkdir($this->tempDir, 0777, true);
     }
@@ -100,15 +110,15 @@ final class DependencyCompatibilityTest extends TestCase
         $lockData = [
             'packages' => [
                 [
-                    'name' => 'scheb/2fa-email',
+                    'name'    => 'scheb/2fa-email',
                     'version' => '8.1.0',
                     'require' => [
-                        'php' => '^7.4|^8.0',
+                        'php'              => '^7.4|^8.0',
                         'scheb/2fa-bundle' => '8.1.*',
                     ],
                 ],
                 [
-                    'name' => 'scheb/2fa-bundle',
+                    'name'    => 'scheb/2fa-bundle',
                     'version' => '8.1.0',
                     'require' => [
                         'php' => '^7.4|^8.0',
@@ -138,15 +148,15 @@ final class DependencyCompatibilityTest extends TestCase
         $lockData = [
             'packages' => [
                 [
-                    'name' => 'scheb/2fa-email',
+                    'name'    => 'scheb/2fa-email',
                     'version' => '8.1.0',
                     'require' => [
-                        'php' => '^7.4|^8.0',
+                        'php'              => '^7.4|^8.0',
                         'scheb/2fa-bundle' => '8.1.*',
                     ],
                 ],
                 [
-                    'name' => 'scheb/2fa-bundle',
+                    'name'    => 'scheb/2fa-bundle',
                     'version' => '8.1.0',
                     'require' => [
                         'php' => '^7.4|^8.0',
@@ -161,7 +171,7 @@ final class DependencyCompatibilityTest extends TestCase
         file_put_contents($this->tempDir . '/composer.json', json_encode([
             'require' => [
                 'scheb/2fa-bundle' => '8.1.0',
-                'scheb/2fa-email' => '8.1.0',
+                'scheb/2fa-email'  => '8.1.0',
             ],
         ], JSON_PRETTY_PRINT));
 
@@ -190,7 +200,7 @@ final class DependencyCompatibilityTest extends TestCase
         $lockData = [
             'packages' => [
                 [
-                    'name' => 'some/package',
+                    'name'    => 'some/package',
                     'version' => '1.0.0',
                     'require' => [
                         'php' => '^7.4|^8.0',
@@ -249,9 +259,9 @@ final class DependencyCompatibilityTest extends TestCase
             return;
         }
 
-        $files = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator($dir, \RecursiveDirectoryIterator::SKIP_DOTS),
-            \RecursiveIteratorIterator::CHILD_FIRST
+        $files = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS),
+            RecursiveIteratorIterator::CHILD_FIRST,
         );
 
         foreach ($files as $fileinfo) {
@@ -271,7 +281,7 @@ final class DependencyCompatibilityTest extends TestCase
         if ($loaded) {
             return;
         }
-        $libPath = dirname(__DIR__) . '/bin/lib/autoload.php';
+        $libPath = dirname(__DIR__, 2) . '/bin/lib/autoload.php';
         if (file_exists($libPath)) {
             require_once $libPath;
             $loaded = true;
@@ -285,7 +295,7 @@ final class DependencyCompatibilityTest extends TestCase
     {
         $this->loadClasses();
 
-        return \DependencyAnalyzer::versionSatisfiesConstraint($version, $constraint);
+        return DependencyAnalyzer::versionSatisfiesConstraint($version, $constraint);
     }
 
     /**
@@ -295,13 +305,13 @@ final class DependencyCompatibilityTest extends TestCase
     {
         $this->loadClasses();
 
-        return \DependencyAnalyzer::getPackageConstraintsFromLock($packageName);
+        return DependencyAnalyzer::getPackageConstraintsFromLock($packageName);
     }
 
     public function testReadConfigValue(): void
     {
         // Create a test YAML file
-        $yamlFile = $this->tempDir . '/test-config.yaml';
+        $yamlFile    = $this->tempDir . '/test-config.yaml';
         $yamlContent = <<<'YAML'
             # Test configuration
             check-dependencies: true
@@ -335,9 +345,7 @@ final class DependencyCompatibilityTest extends TestCase
     /**
      * Use ConfigLoader::readConfigValue for testing.
      *
-     * @param string $yamlPath
-     * @param string $key
-     * @param mixed  $default
+     * @param mixed $default
      *
      * @return mixed
      */
@@ -345,7 +353,7 @@ final class DependencyCompatibilityTest extends TestCase
     {
         $this->loadClasses();
 
-        return \ConfigLoader::readConfigValue($yamlPath, $key, $default);
+        return ConfigLoader::readConfigValue($yamlPath, $key, $default);
     }
 
     public function testNormalizeVersion(): void
@@ -363,7 +371,7 @@ final class DependencyCompatibilityTest extends TestCase
     {
         // Test formatPackageList function
         $packages = ['package1:1.0.0', 'package2:2.0.0'];
-        $result = $this->formatPackageList($packages, '(prod)');
+        $result   = $this->formatPackageList($packages, '(prod)');
 
         $this->assertCount(2, $result);
         $this->assertEquals('     - package1:1.0.0 (prod)', $result[0]);
@@ -401,8 +409,8 @@ final class DependencyCompatibilityTest extends TestCase
     public function testAddPackageToArray(): void
     {
         // Test addPackageToArray function
-        $prod = [];
-        $dev = [];
+        $prod   = [];
+        $dev    = [];
         $devSet = ['dev-package' => true];
 
         // Add prod package
@@ -425,7 +433,7 @@ final class DependencyCompatibilityTest extends TestCase
     {
         $this->loadClasses();
 
-        return \Utils::normalizeVersion($version);
+        return Utils::normalizeVersion($version);
     }
 
     /**
@@ -435,7 +443,7 @@ final class DependencyCompatibilityTest extends TestCase
     {
         $this->loadClasses();
 
-        return \Utils::formatPackageList($packages, $label, $indent);
+        return Utils::formatPackageList($packages, $label, $indent);
     }
 
     /**
@@ -445,7 +453,7 @@ final class DependencyCompatibilityTest extends TestCase
     {
         $this->loadClasses();
 
-        return \Utils::buildComposerCommand($packages, $isDev);
+        return Utils::buildComposerCommand($packages, $isDev);
     }
 
     /**
@@ -454,7 +462,7 @@ final class DependencyCompatibilityTest extends TestCase
     private function addPackageToArray(string $name, string $constraint, array $devSet, array &$prod, array &$dev, bool $debug = false): void
     {
         $this->loadClasses();
-        \Utils::addPackageToArray($name, $constraint, $devSet, $prod, $dev, $debug);
+        Utils::addPackageToArray($name, $constraint, $devSet, $prod, $dev, $debug);
     }
 
     public function testFindCompatibleVersionRejectsVersionNotSatisfyingDependentConstraints(): void
@@ -464,23 +472,23 @@ final class DependencyCompatibilityTest extends TestCase
         $lockData = [
             'packages' => [
                 [
-                    'name' => 'a2lix/auto-form-bundle',
+                    'name'    => 'a2lix/auto-form-bundle',
                     'version' => '1.0.0',
                     'require' => [
-                        'php' => '^7.4|^8.0',
+                        'php'                               => '^7.4|^8.0',
                         'phpdocumentor/reflection-docblock' => '^5.6',
                     ],
                 ],
                 [
-                    'name' => 'nelmio/api-doc-bundle',
+                    'name'    => 'nelmio/api-doc-bundle',
                     'version' => '5.9.0',
                     'require' => [
-                        'php' => '^7.4|^8.0',
+                        'php'                               => '^7.4|^8.0',
                         'phpdocumentor/reflection-docblock' => '^5.0',
                     ],
                 ],
                 [
-                    'name' => 'phpdocumentor/reflection-docblock',
+                    'name'    => 'phpdocumentor/reflection-docblock',
                     'version' => '5.6.6',
                     'require' => [
                         'php' => '^7.4|^8.0',
@@ -495,8 +503,8 @@ final class DependencyCompatibilityTest extends TestCase
         file_put_contents($this->tempDir . '/composer.json', json_encode([
             'require' => [
                 'phpdocumentor/reflection-docblock' => '5.6.6',
-                'a2lix/auto-form-bundle' => '1.0.0',
-                'nelmio/api-doc-bundle' => '5.9.0',
+                'a2lix/auto-form-bundle'            => '1.0.0',
+                'nelmio/api-doc-bundle'             => '5.9.0',
             ],
         ], JSON_PRETTY_PRINT));
 
@@ -535,26 +543,26 @@ final class DependencyCompatibilityTest extends TestCase
         $lockData = [
             'packages' => [
                 [
-                    'name' => 'some/prod-package',
+                    'name'    => 'some/prod-package',
                     'version' => '1.0.0',
                     'require' => [
-                        'php' => '^7.4|^8.0',
+                        'php'            => '^7.4|^8.0',
                         'target/package' => '^2.0',
                     ],
                 ],
             ],
             'packages-dev' => [
                 [
-                    'name' => 'some/dev-package',
+                    'name'    => 'some/dev-package',
                     'version' => '1.0.0',
                     'require' => [
-                        'php' => '^7.4|^8.0',
+                        'php'            => '^7.4|^8.0',
                         'target/package' => '^3.0',
                     ],
                 ],
                 [
-                    'name' => 'another/dev-package',
-                    'version' => '2.0.0',
+                    'name'        => 'another/dev-package',
+                    'version'     => '2.0.0',
                     'require-dev' => [
                         'target/package' => '^2.5',
                     ],
@@ -592,7 +600,7 @@ final class DependencyCompatibilityTest extends TestCase
      */
     public function testIsPackageAbandoned(): void
     {
-        $processorPath = dirname(__DIR__) . '/bin/process-updates.php';
+        $processorPath = dirname(__DIR__, 2) . '/bin/process-updates.php';
 
         // Test with a package that doesn't exist (should return null gracefully)
         // Note: This is an integration test that uses the actual function
@@ -623,7 +631,7 @@ final class DependencyCompatibilityTest extends TestCase
 
         // Test that abandoned detection structure is correct
         $abandonedInfo = [
-            'abandoned' => true,
+            'abandoned'   => true,
             'replacement' => 'new/package-name',
         ];
 
@@ -632,7 +640,7 @@ final class DependencyCompatibilityTest extends TestCase
 
         // Test abandoned without replacement
         $abandonedInfoNoReplacement = [
-            'abandoned' => true,
+            'abandoned'   => true,
             'replacement' => null,
         ];
 
@@ -650,7 +658,7 @@ final class DependencyCompatibilityTest extends TestCase
         // Given: target version 2.0 conflicts with constraint ^1.5
         // Expected: fallback version 1.9.x should satisfy ^1.5
 
-        $targetVersion = '2.0.0';
+        $targetVersion         = '2.0.0';
         $conflictingConstraint = '^1.5';
 
         // Test that 1.9.5 satisfies ^1.5
@@ -710,7 +718,7 @@ final class DependencyCompatibilityTest extends TestCase
         foreach ($validFallbacks as $fallback) {
             $this->assertTrue(
                 version_compare($fallback, $targetVersion, '<'),
-                "Fallback {$fallback} should be less than target {$targetVersion}"
+                "Fallback {$fallback} should be less than target {$targetVersion}",
             );
         }
 
@@ -719,7 +727,7 @@ final class DependencyCompatibilityTest extends TestCase
         foreach ($invalidFallbacks as $fallback) {
             $this->assertFalse(
                 version_compare($fallback, $targetVersion, '<'),
-                "Fallback {$fallback} should NOT be less than target {$targetVersion}"
+                "Fallback {$fallback} should NOT be less than target {$targetVersion}",
             );
         }
     }
@@ -735,7 +743,7 @@ final class DependencyCompatibilityTest extends TestCase
 
         // Test that fallback searches in descending order (finds highest compatible version)
         $versions = ['1.9.9', '1.8.0', '1.5.0', '1.0.0'];
-        usort($versions, function ($a, $b) {
+        usort($versions, static function ($a, $b) {
             return version_compare($b, $a); // Descending
         });
 
@@ -754,10 +762,10 @@ final class DependencyCompatibilityTest extends TestCase
         $alternativesInfo = [
             'alternatives' => [
                 [
-                    'name' => 'new/package-name',
+                    'name'        => 'new/package-name',
                     'description' => 'A new maintained package',
-                    'downloads' => 1000,
-                    'favers' => 10,
+                    'downloads'   => 1000,
+                    'favers'      => 10,
                 ],
             ],
             'reason' => 'abandoned_replacement',
@@ -773,16 +781,16 @@ final class DependencyCompatibilityTest extends TestCase
         $similarAlternatives = [
             'alternatives' => [
                 [
-                    'name' => 'similar/package-1',
+                    'name'        => 'similar/package-1',
                     'description' => 'Similar functionality package 1',
-                    'downloads' => 500,
-                    'favers' => 5,
+                    'downloads'   => 500,
+                    'favers'      => 5,
                 ],
                 [
-                    'name' => 'similar/package-2',
+                    'name'        => 'similar/package-2',
                     'description' => 'Similar functionality package 2',
-                    'downloads' => 300,
-                    'favers' => 3,
+                    'downloads'   => 300,
+                    'favers'      => 3,
                 ],
             ],
             'reason' => 'similar_packages',
@@ -805,7 +813,7 @@ final class DependencyCompatibilityTest extends TestCase
         // Test with empty alternatives array
         $alternativesWithEmptyArray = [
             'alternatives' => [],
-            'reason' => 'similar_packages',
+            'reason'       => 'similar_packages',
         ];
         $this->assertEmpty($alternativesWithEmptyArray['alternatives'], 'Alternatives array should be empty');
     }

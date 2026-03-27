@@ -4,7 +4,7 @@
 declare(strict_types=1);
 /**
  * Script to validate code coverage is 99%
- * Same logic as CI/CD pipeline
+ * Same logic as CI/CD pipeline.
  */
 $coverageFile = __DIR__ . '/../coverage.xml';
 if (!file_exists($coverageFile)) {
@@ -19,8 +19,8 @@ if ($coverage === false) {
     exit(1);
 }
 
-$metrics = $coverage->project->metrics;
-$elements = (float) $metrics['elements'];
+$metrics         = $coverage->project->metrics;
+$elements        = (float) $metrics['elements'];
 $coveredElements = (float) $metrics['coveredelements'];
 
 if ($elements == 0) {
@@ -38,9 +38,9 @@ if ($percentage < 99) {
     // Show which files are not fully covered
     echo "\n📋 Files with incomplete coverage:\n";
     foreach ($coverage->project->file as $file) {
-        $fileMetrics = $file->metrics;
+        $fileMetrics  = $file->metrics;
         $fileElements = (float) $fileMetrics['elements'];
-        $fileCovered = (float) $fileMetrics['coveredelements'];
+        $fileCovered  = (float) $fileMetrics['coveredelements'];
 
         if ($fileElements > 0) {
             $filePercentage = ($fileCovered / $fileElements) * 100;
@@ -50,7 +50,7 @@ if ($percentage < 99) {
                     $file['name'],
                     $filePercentage,
                     (int) $fileCovered,
-                    (int) $fileElements
+                    (int) $fileElements,
                 );
             }
         }

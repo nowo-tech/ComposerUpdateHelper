@@ -4,11 +4,16 @@ declare(strict_types=1);
 
 namespace NowoTech\ComposerUpdateHelper\Tests;
 
-use Composer\{Composer, Config};
+use Composer\Composer;
+use Composer\Config;
 use Composer\IO\IOInterface;
-use Composer\Script\{Event, ScriptEvents};
+use Composer\Script\Event;
+use Composer\Script\ScriptEvents;
 use NowoTech\ComposerUpdateHelper\Plugin;
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
+
+use function dirname;
 
 /**
  * Test suite for the Plugin class.
@@ -34,9 +39,9 @@ final class PluginTest extends TestCase
 
     public function testActivateStoresComposerAndIo(): void
     {
-        $plugin = new Plugin();
+        $plugin   = new Plugin();
         $composer = $this->createMock(Composer::class);
-        $io = $this->createMock(IOInterface::class);
+        $io       = $this->createMock(IOInterface::class);
 
         // Should not throw any exception
         $plugin->activate($composer, $io);
@@ -46,9 +51,9 @@ final class PluginTest extends TestCase
 
     public function testDeactivateDoesNothing(): void
     {
-        $plugin = new Plugin();
+        $plugin   = new Plugin();
         $composer = $this->createMock(Composer::class);
-        $io = $this->createMock(IOInterface::class);
+        $io       = $this->createMock(IOInterface::class);
 
         // Should not throw any exception
         $plugin->deactivate($composer, $io);
@@ -58,7 +63,7 @@ final class PluginTest extends TestCase
 
     public function testUninstallRemovesFiles(): void
     {
-        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $tempDir   = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
         $vendorDir = $tempDir . '/vendor';
         mkdir($vendorDir, 0777, true);
 
@@ -89,10 +94,10 @@ final class PluginTest extends TestCase
 
     public function testOnPostInstallInstallsFiles(): void
     {
-        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
-        $vendorDir = $tempDir . '/vendor';
+        $tempDir    = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir  = $tempDir . '/vendor';
         $packageDir = $vendorDir . '/nowo-tech/composer-update-helper';
-        $binDir = $packageDir . '/bin';
+        $binDir     = $packageDir . '/bin';
         mkdir($binDir, 0777, true);
 
         // Create source file in temporary package directory (not in real project)
@@ -116,7 +121,7 @@ final class PluginTest extends TestCase
             ->with($this->logicalOr(
                 $this->stringContains('Installing'),
                 $this->stringContains('Creating generate-composer-require.yaml'),
-                $this->stringContains('Updated .gitignore')
+                $this->stringContains('Updated .gitignore'),
             ));
 
         $event = $this->createMock(Event::class);
@@ -146,10 +151,10 @@ final class PluginTest extends TestCase
 
     public function testOnPostUpdateUpdatesGitignore(): void
     {
-        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
-        $vendorDir = $tempDir . '/vendor';
+        $tempDir    = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir  = $tempDir . '/vendor';
         $packageDir = $vendorDir . '/nowo-tech/composer-update-helper';
-        $binDir = $packageDir . '/bin';
+        $binDir     = $packageDir . '/bin';
         mkdir($binDir, 0777, true);
 
         // Create source script in vendor
@@ -175,7 +180,7 @@ final class PluginTest extends TestCase
                 $this->stringContains('Updated .gitignore'),
                 $this->stringContains('Creating generate-composer-require.yaml'),
                 $this->stringContains('Installing'),
-                $this->stringContains('Updating')
+                $this->stringContains('Updating'),
             ));
 
         $event = $this->createMock(Event::class);
@@ -210,10 +215,10 @@ final class PluginTest extends TestCase
 
     public function testInstallFilesSkipsWhenFileExists(): void
     {
-        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
-        $vendorDir = $tempDir . '/vendor';
+        $tempDir    = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir  = $tempDir . '/vendor';
         $packageDir = $vendorDir . '/nowo-tech/composer-update-helper';
-        $binDir = $packageDir . '/bin';
+        $binDir     = $packageDir . '/bin';
         mkdir($binDir, 0777, true);
 
         // Create existing file with different content
@@ -242,7 +247,7 @@ final class PluginTest extends TestCase
                 $this->stringContains('Updating generate-composer-require.sh'),
                 $this->stringContains('Creating generate-composer-require.yaml'),
                 $this->stringContains('Updated .gitignore'),
-                $this->stringContains('updated .gitignore')
+                $this->stringContains('updated .gitignore'),
             ));
 
         $event = $this->createMock(Event::class);
@@ -266,10 +271,10 @@ final class PluginTest extends TestCase
 
     public function testInstallFilesSkipsWhenContentMatches(): void
     {
-        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
-        $vendorDir = $tempDir . '/vendor';
+        $tempDir    = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir  = $tempDir . '/vendor';
         $packageDir = $vendorDir . '/nowo-tech/composer-update-helper';
-        $binDir = $packageDir . '/bin';
+        $binDir     = $packageDir . '/bin';
         mkdir($binDir, 0777, true);
 
         $content = '#!/bin/sh\necho "same"';
@@ -317,10 +322,10 @@ final class PluginTest extends TestCase
 
     public function testInstallFilesHandlesMissingSourceFile(): void
     {
-        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
-        $vendorDir = $tempDir . '/vendor';
+        $tempDir    = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir  = $tempDir . '/vendor';
         $packageDir = $vendorDir . '/nowo-tech/composer-update-helper';
-        $binDir = $packageDir . '/bin';
+        $binDir     = $packageDir . '/bin';
         mkdir($binDir, 0777, true);
 
         // Ensure source file doesn't exist (don't create it)
@@ -359,7 +364,7 @@ final class PluginTest extends TestCase
 
     public function testInstallFilesCreatesYamlConfigFileIfNotExists(): void
     {
-        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $tempDir   = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
         $vendorDir = $tempDir . '/vendor';
         // Simulate package is in vendor (not development mode) to avoid using real project directory
         $packageDir = $vendorDir . '/nowo-tech/composer-update-helper';
@@ -393,7 +398,7 @@ final class PluginTest extends TestCase
             ->with($this->logicalOr(
                 $this->stringContains('Installing'),
                 $this->stringContains('Creating generate-composer-require.yaml'),
-                $this->stringContains('Updated .gitignore')
+                $this->stringContains('Updated .gitignore'),
             ));
 
         $event = $this->createMock(Event::class);
@@ -424,10 +429,10 @@ final class PluginTest extends TestCase
 
     public function testInstallFilesUpdatesGitignore(): void
     {
-        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
-        $vendorDir = $tempDir . '/vendor';
+        $tempDir    = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir  = $tempDir . '/vendor';
         $packageDir = $vendorDir . '/nowo-tech/composer-update-helper';
-        $binDir = $packageDir . '/bin';
+        $binDir     = $packageDir . '/bin';
         mkdir($binDir, 0777, true);
 
         // Create source file in temporary package directory (not in real project)
@@ -449,7 +454,7 @@ final class PluginTest extends TestCase
             ->with($this->logicalOr(
                 $this->stringContains('Installing'),
                 $this->stringContains('Creating generate-composer-require.yaml'),
-                $this->stringContains('Updated .gitignore')
+                $this->stringContains('Updated .gitignore'),
             ));
 
         $event = $this->createMock(Event::class);
@@ -481,10 +486,10 @@ final class PluginTest extends TestCase
 
     public function testInstallFilesDoesNotDuplicateGitignoreEntries(): void
     {
-        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
-        $vendorDir = $tempDir . '/vendor';
+        $tempDir    = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir  = $tempDir . '/vendor';
         $packageDir = $vendorDir . '/nowo-tech/composer-update-helper';
-        $binDir = $packageDir . '/bin';
+        $binDir     = $packageDir . '/bin';
         mkdir($binDir, 0777, true);
 
         // Create existing .gitignore with old entries (should be removed)
@@ -535,10 +540,10 @@ final class PluginTest extends TestCase
 
     public function testInstallFilesForceUpdate(): void
     {
-        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
-        $vendorDir = $tempDir . '/vendor';
+        $tempDir    = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir  = $tempDir . '/vendor';
         $packageDir = $vendorDir . '/nowo-tech/composer-update-helper';
-        $binDir = $packageDir . '/bin';
+        $binDir     = $packageDir . '/bin';
         mkdir($binDir, 0777, true);
 
         // Create existing file with old content
@@ -564,15 +569,15 @@ final class PluginTest extends TestCase
             ->method('write')
             ->with($this->logicalOr(
                 $this->stringContains('Updating'),
-                $this->stringContains('Creating generate-composer-require.yaml')
+                $this->stringContains('Creating generate-composer-require.yaml'),
             ));
 
         $plugin = new Plugin();
         $plugin->activate($composer, $io);
 
         // Use reflection to call private installFiles method with forceUpdate = true
-        $reflection = new \ReflectionClass($plugin);
-        $method = $reflection->getMethod('installFiles');
+        $reflection = new ReflectionClass($plugin);
+        $method     = $reflection->getMethod('installFiles');
         $method->setAccessible(true);
         $method->invoke($plugin, $io, true);
 
@@ -598,10 +603,10 @@ final class PluginTest extends TestCase
 
     public function testMigratesTxtToYamlWhenTxtExists(): void
     {
-        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
-        $vendorDir = $tempDir . '/vendor';
+        $tempDir    = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir  = $tempDir . '/vendor';
         $packageDir = $vendorDir . '/nowo-tech/composer-update-helper';
-        $binDir = $packageDir . '/bin';
+        $binDir     = $packageDir . '/bin';
         mkdir($binDir, 0777, true);
 
         // Create source files
@@ -629,7 +634,7 @@ final class PluginTest extends TestCase
                 $this->stringContains('Migrating configuration from TXT to YAML format'),
                 $this->stringContains('Configuration migrated to'),
                 $this->stringContains('Removed old generate-composer-require.ignore.txt file'),
-                $this->stringContains('Updated .gitignore')
+                $this->stringContains('Updated .gitignore'),
             ));
 
         $event = $this->createMock(Event::class);
@@ -669,10 +674,10 @@ final class PluginTest extends TestCase
 
     public function testOnPostUpdateMigratesTxtToYaml(): void
     {
-        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
-        $vendorDir = $tempDir . '/vendor';
+        $tempDir    = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir  = $tempDir . '/vendor';
         $packageDir = $vendorDir . '/nowo-tech/composer-update-helper';
-        $binDir = $packageDir . '/bin';
+        $binDir     = $packageDir . '/bin';
         mkdir($binDir, 0777, true);
 
         file_put_contents($binDir . '/generate-composer-require.yaml', '# YAML config');
@@ -697,7 +702,7 @@ final class PluginTest extends TestCase
                 $this->stringContains('Migrating configuration from TXT to YAML format'),
                 $this->stringContains('Configuration migrated to'),
                 $this->stringContains('Removed old generate-composer-require.ignore.txt file'),
-                $this->stringContains('Updated .gitignore')
+                $this->stringContains('Updated .gitignore'),
             ));
 
         $event = $this->createMock(Event::class);
@@ -727,10 +732,10 @@ final class PluginTest extends TestCase
 
     public function testMigratesTxtToYamlWhenYamlExistsButIsEmpty(): void
     {
-        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
-        $vendorDir = $tempDir . '/vendor';
+        $tempDir    = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir  = $tempDir . '/vendor';
         $packageDir = $vendorDir . '/nowo-tech/composer-update-helper';
-        $binDir = $packageDir . '/bin';
+        $binDir     = $packageDir . '/bin';
         mkdir($binDir, 0777, true);
 
         file_put_contents($binDir . '/generate-composer-require.yaml', '# YAML config');
@@ -759,7 +764,7 @@ final class PluginTest extends TestCase
                 $this->stringContains('Migrating configuration from TXT to YAML format'),
                 $this->stringContains('Configuration migrated to'),
                 $this->stringContains('Removed old generate-composer-require.ignore.txt file'),
-                $this->stringContains('Updated .gitignore')
+                $this->stringContains('Updated .gitignore'),
             ));
 
         $event = $this->createMock(Event::class);
@@ -792,10 +797,10 @@ final class PluginTest extends TestCase
 
     public function testMigratesTxtToYamlWhenYamlExistsButIsTemplateOnly(): void
     {
-        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
-        $vendorDir = $tempDir . '/vendor';
+        $tempDir    = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir  = $tempDir . '/vendor';
         $packageDir = $vendorDir . '/nowo-tech/composer-update-helper';
-        $binDir = $packageDir . '/bin';
+        $binDir     = $packageDir . '/bin';
         mkdir($binDir, 0777, true);
 
         file_put_contents($binDir . '/generate-composer-require.yaml', '# YAML config');
@@ -824,7 +829,7 @@ final class PluginTest extends TestCase
                 $this->stringContains('Migrating configuration from TXT to YAML format'),
                 $this->stringContains('Configuration migrated to'),
                 $this->stringContains('Removed old generate-composer-require.ignore.txt file'),
-                $this->stringContains('Updated .gitignore')
+                $this->stringContains('Updated .gitignore'),
             ));
 
         $event = $this->createMock(Event::class);
@@ -857,10 +862,10 @@ final class PluginTest extends TestCase
 
     public function testDoesNotMigrateTxtWhenYamlHasUserPackages(): void
     {
-        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
-        $vendorDir = $tempDir . '/vendor';
+        $tempDir    = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir  = $tempDir . '/vendor';
         $packageDir = $vendorDir . '/nowo-tech/composer-update-helper';
-        $binDir = $packageDir . '/bin';
+        $binDir     = $packageDir . '/bin';
         mkdir($binDir, 0777, true);
 
         file_put_contents($binDir . '/generate-composer-require.yaml', '# YAML config');
@@ -919,10 +924,10 @@ final class PluginTest extends TestCase
 
     public function testMigrationReadsIncludeSectionFromYaml(): void
     {
-        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
-        $vendorDir = $tempDir . '/vendor';
+        $tempDir    = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir  = $tempDir . '/vendor';
         $packageDir = $vendorDir . '/nowo-tech/composer-update-helper';
-        $binDir = $packageDir . '/bin';
+        $binDir     = $packageDir . '/bin';
         mkdir($binDir, 0777, true);
 
         file_put_contents($binDir . '/generate-composer-require.yaml', '# YAML config');
@@ -950,7 +955,7 @@ final class PluginTest extends TestCase
             ->with($this->logicalOr(
                 $this->stringContains('Migrating configuration from TXT to YAML format'),
                 $this->stringContains('Configuration migrated to'),
-                $this->stringContains('Removed old generate-composer-require.ignore.txt file')
+                $this->stringContains('Removed old generate-composer-require.ignore.txt file'),
             ));
 
         $event = $this->createMock(Event::class);
@@ -985,10 +990,10 @@ final class PluginTest extends TestCase
 
     public function testIsYamlEmptyOrTemplateDetectsIncludeSection(): void
     {
-        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
-        $vendorDir = $tempDir . '/vendor';
+        $tempDir    = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir  = $tempDir . '/vendor';
         $packageDir = $vendorDir . '/nowo-tech/composer-update-helper';
-        $binDir = $packageDir . '/bin';
+        $binDir     = $packageDir . '/bin';
         mkdir($binDir, 0777, true);
 
         file_put_contents($binDir . '/generate-composer-require.yaml', '# YAML config');
@@ -1008,25 +1013,25 @@ final class PluginTest extends TestCase
         $plugin->activate($composer, $io);
 
         // Use reflection to call private isYamlEmptyOrTemplate method
-        $reflection = new \ReflectionClass($plugin);
-        $method = $reflection->getMethod('isYamlEmptyOrTemplate');
+        $reflection = new ReflectionClass($plugin);
+        $method     = $reflection->getMethod('isYamlEmptyOrTemplate');
         $method->setAccessible(true);
 
         // Test with YAML that has only include section (should be considered empty for migration)
         $yamlFile = $tempDir . '/generate-composer-require.yaml';
         file_put_contents($yamlFile, "ignore:\n  # - package1\ninclude:\n  # - package2\n");
-        $result = $method->invoke($plugin, $yamlFile, $binDir . '/generate-composer-require.yaml');
+        $result = $method->invoke($plugin, $yamlFile);
         $this->assertTrue($result, 'YAML with only commented packages should be considered empty');
 
         // Test with YAML that has packages in include section (should be considered empty for ignore section)
         // Include section doesn't prevent migration - only ignore section matters
         file_put_contents($yamlFile, "ignore:\n  # - package1\ninclude:\n  - included/package\n");
-        $result = $method->invoke($plugin, $yamlFile, $binDir . '/generate-composer-require.yaml');
+        $result = $method->invoke($plugin, $yamlFile);
         $this->assertTrue($result, 'YAML with packages in include section should be considered empty for ignore section (migration allowed)');
 
         // Test with YAML that has packages in ignore section (should NOT be considered empty)
         file_put_contents($yamlFile, "ignore:\n  - ignored/package\ninclude:\n  # - package2\n");
-        $result = $method->invoke($plugin, $yamlFile, $binDir . '/generate-composer-require.yaml');
+        $result = $method->invoke($plugin, $yamlFile);
         $this->assertFalse($result, 'YAML with packages in ignore section should NOT be considered empty');
 
         // Cleanup
@@ -1041,10 +1046,10 @@ final class PluginTest extends TestCase
 
     public function testInstallFilesDoesNotCopyProcessUpdatesPhp(): void
     {
-        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
-        $vendorDir = $tempDir . '/vendor';
+        $tempDir    = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir  = $tempDir . '/vendor';
         $packageDir = $vendorDir . '/nowo-tech/composer-update-helper';
-        $binDir = $packageDir . '/bin';
+        $binDir     = $packageDir . '/bin';
         mkdir($binDir, 0777, true);
 
         // Create all files in vendor
@@ -1066,7 +1071,7 @@ final class PluginTest extends TestCase
             ->method('write')
             ->with($this->logicalOr(
                 $this->stringContains('Installing'),
-                $this->stringContains('Creating generate-composer-require.yaml')
+                $this->stringContains('Creating generate-composer-require.yaml'),
             ));
 
         $event = $this->createMock(Event::class);
@@ -1110,10 +1115,10 @@ final class PluginTest extends TestCase
 
     public function testMigrationCreatesNewYamlWhenYamlDoesNotExist(): void
     {
-        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
-        $vendorDir = $tempDir . '/vendor';
+        $tempDir    = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir  = $tempDir . '/vendor';
         $packageDir = $vendorDir . '/nowo-tech/composer-update-helper';
-        $binDir = $packageDir . '/bin';
+        $binDir     = $packageDir . '/bin';
         mkdir($binDir, 0777, true);
 
         file_put_contents($binDir . '/generate-composer-require.yaml', '# YAML config');
@@ -1139,7 +1144,7 @@ final class PluginTest extends TestCase
             ->with($this->logicalOr(
                 $this->stringContains('Migrating configuration from TXT to YAML format'),
                 $this->stringContains('Configuration migrated to'),
-                $this->stringContains('Removed old generate-composer-require.ignore.txt file')
+                $this->stringContains('Removed old generate-composer-require.ignore.txt file'),
             ));
 
         $event = $this->createMock(Event::class);
@@ -1172,10 +1177,10 @@ final class PluginTest extends TestCase
 
     public function testMigrationHandlesYamlWithoutIgnoreSection(): void
     {
-        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
-        $vendorDir = $tempDir . '/vendor';
+        $tempDir    = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir  = $tempDir . '/vendor';
         $packageDir = $vendorDir . '/nowo-tech/composer-update-helper';
-        $binDir = $packageDir . '/bin';
+        $binDir     = $packageDir . '/bin';
         mkdir($binDir, 0777, true);
 
         file_put_contents($binDir . '/generate-composer-require.yaml', '# YAML config');
@@ -1203,7 +1208,7 @@ final class PluginTest extends TestCase
             ->with($this->logicalOr(
                 $this->stringContains('Migrating configuration from TXT to YAML format'),
                 $this->stringContains('Configuration migrated to'),
-                $this->stringContains('Removed old generate-composer-require.ignore.txt file')
+                $this->stringContains('Removed old generate-composer-require.ignore.txt file'),
             ));
 
         $event = $this->createMock(Event::class);
@@ -1238,10 +1243,10 @@ final class PluginTest extends TestCase
 
     public function testMigrationHandlesEmptyTxtFile(): void
     {
-        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
-        $vendorDir = $tempDir . '/vendor';
+        $tempDir    = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir  = $tempDir . '/vendor';
         $packageDir = $vendorDir . '/nowo-tech/composer-update-helper';
-        $binDir = $packageDir . '/bin';
+        $binDir     = $packageDir . '/bin';
         mkdir($binDir, 0777, true);
 
         file_put_contents($binDir . '/generate-composer-require.yaml', '# YAML config');
@@ -1265,7 +1270,7 @@ final class PluginTest extends TestCase
             ->with($this->logicalOr(
                 $this->stringContains('Migrating configuration from TXT to YAML format'),
                 $this->stringContains('Configuration migrated to'),
-                $this->stringContains('Removed old generate-composer-require.ignore.txt file')
+                $this->stringContains('Removed old generate-composer-require.ignore.txt file'),
             ));
 
         $event = $this->createMock(Event::class);
@@ -1299,10 +1304,10 @@ final class PluginTest extends TestCase
 
     public function testMigrationHandlesYamlWithIgnoreSectionButNoPackages(): void
     {
-        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
-        $vendorDir = $tempDir . '/vendor';
+        $tempDir    = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir  = $tempDir . '/vendor';
         $packageDir = $vendorDir . '/nowo-tech/composer-update-helper';
-        $binDir = $packageDir . '/bin';
+        $binDir     = $packageDir . '/bin';
         mkdir($binDir, 0777, true);
 
         file_put_contents($binDir . '/generate-composer-require.yaml', '# YAML config');
@@ -1330,7 +1335,7 @@ final class PluginTest extends TestCase
             ->with($this->logicalOr(
                 $this->stringContains('Migrating configuration from TXT to YAML format'),
                 $this->stringContains('Configuration migrated to'),
-                $this->stringContains('Removed old generate-composer-require.ignore.txt file')
+                $this->stringContains('Removed old generate-composer-require.ignore.txt file'),
             ));
 
         $event = $this->createMock(Event::class);
@@ -1365,10 +1370,10 @@ final class PluginTest extends TestCase
 
     public function testHandleConfigMigrationCreatesYamlWhenNotExists(): void
     {
-        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
-        $vendorDir = $tempDir . '/vendor';
+        $tempDir    = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir  = $tempDir . '/vendor';
         $packageDir = $vendorDir . '/nowo-tech/composer-update-helper';
-        $binDir = $packageDir . '/bin';
+        $binDir     = $packageDir . '/bin';
         mkdir($binDir, 0777, true);
 
         file_put_contents($binDir . '/generate-composer-require.yaml', '# YAML config');
@@ -1391,8 +1396,8 @@ final class PluginTest extends TestCase
         $plugin->activate($composer, $io);
 
         // Use reflection to call private handleConfigMigration method
-        $reflection = new \ReflectionClass($plugin);
-        $method = $reflection->getMethod('handleConfigMigration');
+        $reflection = new ReflectionClass($plugin);
+        $method     = $reflection->getMethod('handleConfigMigration');
         $method->setAccessible(true);
         $method->invoke($plugin, $io);
 
@@ -1412,16 +1417,16 @@ final class PluginTest extends TestCase
 
     public function testHandleConfigMigrationDoesNotOverwriteExistingYaml(): void
     {
-        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
-        $vendorDir = $tempDir . '/vendor';
+        $tempDir    = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir  = $tempDir . '/vendor';
         $packageDir = $vendorDir . '/nowo-tech/composer-update-helper';
-        $binDir = $packageDir . '/bin';
+        $binDir     = $packageDir . '/bin';
         mkdir($binDir, 0777, true);
 
         file_put_contents($binDir . '/generate-composer-require.yaml', '# YAML config');
 
         // Create existing YAML with custom content
-        $yamlFile = $tempDir . '/generate-composer-require.yaml';
+        $yamlFile      = $tempDir . '/generate-composer-require.yaml';
         $customContent = "# Custom YAML\nignore:\n  - custom/package\n";
         file_put_contents($yamlFile, $customContent);
 
@@ -1443,8 +1448,8 @@ final class PluginTest extends TestCase
         $plugin->activate($composer, $io);
 
         // Use reflection to call private handleConfigMigration method
-        $reflection = new \ReflectionClass($plugin);
-        $method = $reflection->getMethod('handleConfigMigration');
+        $reflection = new ReflectionClass($plugin);
+        $method     = $reflection->getMethod('handleConfigMigration');
         $method->setAccessible(true);
         $method->invoke($plugin, $io);
 
@@ -1464,10 +1469,10 @@ final class PluginTest extends TestCase
 
     public function testHandleConfigMigrationMigratesTxtToYaml(): void
     {
-        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
-        $vendorDir = $tempDir . '/vendor';
+        $tempDir    = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir  = $tempDir . '/vendor';
         $packageDir = $vendorDir . '/nowo-tech/composer-update-helper';
-        $binDir = $packageDir . '/bin';
+        $binDir     = $packageDir . '/bin';
         mkdir($binDir, 0777, true);
 
         file_put_contents($binDir . '/generate-composer-require.yaml', '# YAML config');
@@ -1491,15 +1496,15 @@ final class PluginTest extends TestCase
             ->with($this->logicalOr(
                 $this->stringContains('Migrating configuration from TXT to YAML format'),
                 $this->stringContains('Configuration migrated to'),
-                $this->stringContains('Removed old generate-composer-require.ignore.txt file')
+                $this->stringContains('Removed old generate-composer-require.ignore.txt file'),
             ));
 
         $plugin = new Plugin();
         $plugin->activate($composer, $io);
 
         // Use reflection to call private handleConfigMigration method
-        $reflection = new \ReflectionClass($plugin);
-        $method = $reflection->getMethod('handleConfigMigration');
+        $reflection = new ReflectionClass($plugin);
+        $method     = $reflection->getMethod('handleConfigMigration');
         $method->setAccessible(true);
         $method->invoke($plugin, $io);
 
@@ -1525,10 +1530,10 @@ final class PluginTest extends TestCase
 
     public function testHandleConfigMigrationWithYamlHavingDifferentPackages(): void
     {
-        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
-        $vendorDir = $tempDir . '/vendor';
+        $tempDir    = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir  = $tempDir . '/vendor';
         $packageDir = $vendorDir . '/nowo-tech/composer-update-helper';
-        $binDir = $packageDir . '/bin';
+        $binDir     = $packageDir . '/bin';
         mkdir($binDir, 0777, true);
 
         file_put_contents($binDir . '/generate-composer-require.yaml', '# YAML config');
@@ -1560,8 +1565,8 @@ final class PluginTest extends TestCase
         $plugin->activate($composer, $io);
 
         // Use reflection to call private handleConfigMigration method
-        $reflection = new \ReflectionClass($plugin);
-        $method = $reflection->getMethod('handleConfigMigration');
+        $reflection = new ReflectionClass($plugin);
+        $method     = $reflection->getMethod('handleConfigMigration');
         $method->setAccessible(true);
         $method->invoke($plugin, $io);
 
@@ -1587,10 +1592,10 @@ final class PluginTest extends TestCase
 
     public function testHandleConfigMigrationWithMatchingPackagesDeletesTxt(): void
     {
-        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
-        $vendorDir = $tempDir . '/vendor';
+        $tempDir    = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir  = $tempDir . '/vendor';
         $packageDir = $vendorDir . '/nowo-tech/composer-update-helper';
-        $binDir = $packageDir . '/bin';
+        $binDir     = $packageDir . '/bin';
         mkdir($binDir, 0777, true);
 
         file_put_contents($binDir . '/generate-composer-require.yaml', '# YAML config');
@@ -1621,8 +1626,8 @@ final class PluginTest extends TestCase
         $plugin->activate($composer, $io);
 
         // Use reflection to call private handleConfigMigration method
-        $reflection = new \ReflectionClass($plugin);
-        $method = $reflection->getMethod('handleConfigMigration');
+        $reflection = new ReflectionClass($plugin);
+        $method     = $reflection->getMethod('handleConfigMigration');
         $method->setAccessible(true);
         $method->invoke($plugin, $io);
 
@@ -1641,10 +1646,10 @@ final class PluginTest extends TestCase
 
     public function testIsYamlEmptyOrTemplateHandlesFileNotExists(): void
     {
-        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
-        $vendorDir = $tempDir . '/vendor';
+        $tempDir    = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir  = $tempDir . '/vendor';
         $packageDir = $vendorDir . '/nowo-tech/composer-update-helper';
-        $binDir = $packageDir . '/bin';
+        $binDir     = $packageDir . '/bin';
         mkdir($binDir, 0777, true);
 
         file_put_contents($binDir . '/generate-composer-require.yaml', '# YAML config');
@@ -1674,15 +1679,15 @@ final class PluginTest extends TestCase
             ->with($this->logicalOr(
                 $this->stringContains('Migrating configuration from TXT to YAML format'),
                 $this->stringContains('Configuration migrated to'),
-                $this->stringContains('Removed old generate-composer-require.ignore.txt file')
+                $this->stringContains('Removed old generate-composer-require.ignore.txt file'),
             ));
 
         $plugin = new Plugin();
         $plugin->activate($composer, $io);
 
         // Use reflection to call private handleConfigMigration method
-        $reflection = new \ReflectionClass($plugin);
-        $method = $reflection->getMethod('handleConfigMigration');
+        $reflection = new ReflectionClass($plugin);
+        $method     = $reflection->getMethod('handleConfigMigration');
         $method->setAccessible(true);
         $method->invoke($plugin, $io);
 
@@ -1707,10 +1712,10 @@ final class PluginTest extends TestCase
 
     public function testIsYamlEmptyOrTemplateHandlesEmptyFile(): void
     {
-        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
-        $vendorDir = $tempDir . '/vendor';
+        $tempDir    = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir  = $tempDir . '/vendor';
         $packageDir = $vendorDir . '/nowo-tech/composer-update-helper';
-        $binDir = $packageDir . '/bin';
+        $binDir     = $packageDir . '/bin';
         mkdir($binDir, 0777, true);
 
         file_put_contents($binDir . '/generate-composer-require.yaml', '# YAML config');
@@ -1738,15 +1743,15 @@ final class PluginTest extends TestCase
             ->with($this->logicalOr(
                 $this->stringContains('Migrating configuration from TXT to YAML format'),
                 $this->stringContains('Configuration migrated to'),
-                $this->stringContains('Removed old generate-composer-require.ignore.txt file')
+                $this->stringContains('Removed old generate-composer-require.ignore.txt file'),
             ));
 
         $plugin = new Plugin();
         $plugin->activate($composer, $io);
 
         // Use reflection to call private handleConfigMigration method
-        $reflection = new \ReflectionClass($plugin);
-        $method = $reflection->getMethod('handleConfigMigration');
+        $reflection = new ReflectionClass($plugin);
+        $method     = $reflection->getMethod('handleConfigMigration');
         $method->setAccessible(true);
         $method->invoke($plugin, $io);
 
@@ -1770,10 +1775,10 @@ final class PluginTest extends TestCase
 
     public function testExtractPackagesFromYamlHandlesEndOfSectionDetection(): void
     {
-        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
-        $vendorDir = $tempDir . '/vendor';
+        $tempDir    = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir  = $tempDir . '/vendor';
         $packageDir = $vendorDir . '/nowo-tech/composer-update-helper';
-        $binDir = $packageDir . '/bin';
+        $binDir     = $packageDir . '/bin';
         mkdir($binDir, 0777, true);
 
         file_put_contents($binDir . '/generate-composer-require.yaml', '# YAML config');
@@ -1801,8 +1806,8 @@ final class PluginTest extends TestCase
         $plugin->activate($composer, $io);
 
         // Use reflection to call private handleConfigMigration method
-        $reflection = new \ReflectionClass($plugin);
-        $method = $reflection->getMethod('handleConfigMigration');
+        $reflection = new ReflectionClass($plugin);
+        $method     = $reflection->getMethod('handleConfigMigration');
         $method->setAccessible(true);
         $method->invoke($plugin, $io);
 
@@ -1821,10 +1826,10 @@ final class PluginTest extends TestCase
 
     public function testIsYamlEmptyOrTemplateHandlesEndOfSectionDetection(): void
     {
-        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
-        $vendorDir = $tempDir . '/vendor';
+        $tempDir    = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir  = $tempDir . '/vendor';
         $packageDir = $vendorDir . '/nowo-tech/composer-update-helper';
-        $binDir = $packageDir . '/bin';
+        $binDir     = $packageDir . '/bin';
         mkdir($binDir, 0777, true);
 
         file_put_contents($binDir . '/generate-composer-require.yaml', '# YAML config');
@@ -1844,14 +1849,14 @@ final class PluginTest extends TestCase
         $plugin->activate($composer, $io);
 
         // Use reflection to call private isYamlEmptyOrTemplate method
-        $reflection = new \ReflectionClass($plugin);
-        $method = $reflection->getMethod('isYamlEmptyOrTemplate');
+        $reflection = new ReflectionClass($plugin);
+        $method     = $reflection->getMethod('isYamlEmptyOrTemplate');
         $method->setAccessible(true);
 
         // Test with YAML that has ignore section followed by another section (tests end of section detection)
         $yamlFile = $tempDir . '/generate-composer-require.yaml';
         file_put_contents($yamlFile, "ignore:\n  # - package1\nother_section:\n  - value\n");
-        $result = $method->invoke($plugin, $yamlFile, $binDir . '/generate-composer-require.yaml');
+        $result = $method->invoke($plugin, $yamlFile);
         $this->assertTrue($result, 'YAML with only commented packages should be considered empty');
 
         // Cleanup
@@ -1866,10 +1871,10 @@ final class PluginTest extends TestCase
 
     public function testMigrationSkipsOldIgnoreEntriesWhenMerging(): void
     {
-        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
-        $vendorDir = $tempDir . '/vendor';
+        $tempDir    = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir  = $tempDir . '/vendor';
         $packageDir = $vendorDir . '/nowo-tech/composer-update-helper';
-        $binDir = $packageDir . '/bin';
+        $binDir     = $packageDir . '/bin';
         mkdir($binDir, 0777, true);
 
         file_put_contents($binDir . '/generate-composer-require.yaml', '# YAML config');
@@ -1898,15 +1903,15 @@ final class PluginTest extends TestCase
             ->with($this->logicalOr(
                 $this->stringContains('Migrating configuration from TXT to YAML format'),
                 $this->stringContains('Configuration migrated to'),
-                $this->stringContains('Removed old generate-composer-require.ignore.txt file')
+                $this->stringContains('Removed old generate-composer-require.ignore.txt file'),
             ));
 
         $plugin = new Plugin();
         $plugin->activate($composer, $io);
 
         // Use reflection to call private handleConfigMigration method
-        $reflection = new \ReflectionClass($plugin);
-        $method = $reflection->getMethod('handleConfigMigration');
+        $reflection = new ReflectionClass($plugin);
+        $method     = $reflection->getMethod('handleConfigMigration');
         $method->setAccessible(true);
         $method->invoke($plugin, $io);
 
@@ -1933,10 +1938,10 @@ final class PluginTest extends TestCase
 
     public function testUpdateGitignoreRemovesOldTxtEntry(): void
     {
-        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
-        $vendorDir = $tempDir . '/vendor';
+        $tempDir    = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir  = $tempDir . '/vendor';
         $packageDir = $vendorDir . '/nowo-tech/composer-update-helper';
-        $binDir = $packageDir . '/bin';
+        $binDir     = $packageDir . '/bin';
         mkdir($binDir, 0777, true);
 
         file_put_contents($binDir . '/generate-composer-require.sh', '#!/bin/sh');
@@ -1985,10 +1990,10 @@ final class PluginTest extends TestCase
 
     public function testIsYamlEmptyOrTemplateWhenFileNotExists(): void
     {
-        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
-        $vendorDir = $tempDir . '/vendor';
+        $tempDir    = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir  = $tempDir . '/vendor';
         $packageDir = $vendorDir . '/nowo-tech/composer-update-helper';
-        $binDir = $packageDir . '/bin';
+        $binDir     = $packageDir . '/bin';
         mkdir($binDir, 0777, true);
 
         file_put_contents($binDir . '/generate-composer-require.yaml', '# YAML config');
@@ -2008,8 +2013,8 @@ final class PluginTest extends TestCase
         $plugin->activate($composer, $io);
 
         // Use reflection to call private isYamlEmptyOrTemplate method
-        $reflection = new \ReflectionClass($plugin);
-        $method = $reflection->getMethod('isYamlEmptyOrTemplate');
+        $reflection = new ReflectionClass($plugin);
+        $method     = $reflection->getMethod('isYamlEmptyOrTemplate');
         $method->setAccessible(true);
 
         // Test when YAML doesn't exist (line 288: return true)
@@ -2018,7 +2023,7 @@ final class PluginTest extends TestCase
             @unlink($yamlFile);
         }
 
-        $result = $method->invoke($plugin, $yamlFile, $binDir . '/generate-composer-require.yaml');
+        $result = $method->invoke($plugin, $yamlFile);
         $this->assertTrue($result, 'YAML that does not exist should be considered empty/template');
 
         // Cleanup
@@ -2032,10 +2037,10 @@ final class PluginTest extends TestCase
 
     public function testMigrationSkipsOldIgnoreEntriesWhenMergingWithExistingPackages(): void
     {
-        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
-        $vendorDir = $tempDir . '/vendor';
+        $tempDir    = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir  = $tempDir . '/vendor';
         $packageDir = $vendorDir . '/nowo-tech/composer-update-helper';
-        $binDir = $packageDir . '/bin';
+        $binDir     = $packageDir . '/bin';
         mkdir($binDir, 0777, true);
 
         file_put_contents($binDir . '/generate-composer-require.yaml', '# YAML config');
@@ -2064,15 +2069,15 @@ final class PluginTest extends TestCase
             ->with($this->logicalOr(
                 $this->stringContains('Migrating configuration from TXT to YAML format'),
                 $this->stringContains('Configuration migrated to'),
-                $this->stringContains('Removed old generate-composer-require.ignore.txt file')
+                $this->stringContains('Removed old generate-composer-require.ignore.txt file'),
             ));
 
         $plugin = new Plugin();
         $plugin->activate($composer, $io);
 
         // Use reflection to call private handleConfigMigration method
-        $reflection = new \ReflectionClass($plugin);
-        $method = $reflection->getMethod('handleConfigMigration');
+        $reflection = new ReflectionClass($plugin);
+        $method     = $reflection->getMethod('handleConfigMigration');
         $method->setAccessible(true);
         $method->invoke($plugin, $io);
 
@@ -2103,12 +2108,12 @@ final class PluginTest extends TestCase
         $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
         // Use a vendor path that doesn't exist to simulate development mode
         $nonExistentVendor = $tempDir . '/non-existent-vendor';
-        $projectDir = dirname($nonExistentVendor);
+        $projectDir        = dirname($nonExistentVendor);
         mkdir($projectDir, 0777, true);
 
         // Create source files in development directory (parent of src)
-        $devPackageDir = dirname(__DIR__);
-        $devBinDir = $devPackageDir . '/bin';
+        $devPackageDir = dirname(__DIR__, 2);
+        $devBinDir     = $devPackageDir . '/bin';
 
         if (!is_dir($devBinDir) || !file_exists($devBinDir . '/generate-composer-require.sh')) {
             $this->markTestSkipped('Development bin directory or script does not exist');
@@ -2130,7 +2135,7 @@ final class PluginTest extends TestCase
             ->method('write')
             ->with($this->logicalOr(
                 $this->stringContains('Installing'),
-                $this->stringContains('Creating generate-composer-require.yaml')
+                $this->stringContains('Creating generate-composer-require.yaml'),
             ));
 
         $event = $this->createMock(Event::class);
@@ -2156,12 +2161,12 @@ final class PluginTest extends TestCase
         $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
         // Use a vendor path that doesn't exist to simulate development mode
         $nonExistentVendor = $tempDir . '/non-existent-vendor';
-        $projectDir = dirname($nonExistentVendor);
+        $projectDir        = dirname($nonExistentVendor);
         mkdir($projectDir, 0777, true);
 
         // Create source files in development directory (parent of src)
-        $devPackageDir = dirname(__DIR__);
-        $devBinDir = $devPackageDir . '/bin';
+        $devPackageDir = dirname(__DIR__, 2);
+        $devBinDir     = $devPackageDir . '/bin';
 
         if (!is_dir($devBinDir) || !file_exists($devBinDir . '/generate-composer-require.yaml')) {
             $this->markTestSkipped('Development bin directory or YAML config does not exist');
@@ -2187,8 +2192,8 @@ final class PluginTest extends TestCase
         $plugin->activate($composer, $io);
 
         // Use reflection to call private handleConfigMigration method
-        $reflection = new \ReflectionClass($plugin);
-        $method = $reflection->getMethod('handleConfigMigration');
+        $reflection = new ReflectionClass($plugin);
+        $method     = $reflection->getMethod('handleConfigMigration');
         $method->setAccessible(true);
         $method->invoke($plugin, $io);
 
@@ -2203,10 +2208,10 @@ final class PluginTest extends TestCase
 
     public function testMigrationSkipsOldIgnoreEntriesWhenMergingWithExistingIgnoreSection(): void
     {
-        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
-        $vendorDir = $tempDir . '/vendor';
+        $tempDir    = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir  = $tempDir . '/vendor';
         $packageDir = $vendorDir . '/nowo-tech/composer-update-helper';
-        $binDir = $packageDir . '/bin';
+        $binDir     = $packageDir . '/bin';
         mkdir($binDir, 0777, true);
 
         file_put_contents($binDir . '/generate-composer-require.yaml', '# YAML config');
@@ -2235,8 +2240,8 @@ final class PluginTest extends TestCase
         $plugin->activate($composer, $io);
 
         // Use reflection to call migrateTxtToYaml directly to test line 422
-        $reflection = new \ReflectionClass($plugin);
-        $method = $reflection->getMethod('migrateTxtToYaml');
+        $reflection = new ReflectionClass($plugin);
+        $method     = $reflection->getMethod('migrateTxtToYaml');
         $method->setAccessible(true);
         $method->invoke($plugin, $oldTxtFile, $yamlFile, $io);
 
@@ -2263,10 +2268,10 @@ final class PluginTest extends TestCase
     public function testMigrationSkipsOldIgnoreEntriesWhenIgnoreSectionProcessed(): void
     {
         // Test line 422: Skip old ignore entries when merging
-        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
-        $vendorDir = $tempDir . '/vendor';
+        $tempDir    = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir  = $tempDir . '/vendor';
         $packageDir = $vendorDir . '/nowo-tech/composer-update-helper';
-        $binDir = $packageDir . '/bin';
+        $binDir     = $packageDir . '/bin';
         mkdir($binDir, 0777, true);
 
         file_put_contents($binDir . '/generate-composer-require.yaml', '# YAML config');
@@ -2294,8 +2299,8 @@ final class PluginTest extends TestCase
         $plugin->activate($composer, $io);
 
         // Use reflection to call migrateTxtToYaml directly to test line 422
-        $reflection = new \ReflectionClass($plugin);
-        $method = $reflection->getMethod('migrateTxtToYaml');
+        $reflection = new ReflectionClass($plugin);
+        $method     = $reflection->getMethod('migrateTxtToYaml');
         $method->setAccessible(true);
         $method->invoke($plugin, $oldTxtFile, $yamlFile, $io);
 
@@ -2320,10 +2325,10 @@ final class PluginTest extends TestCase
     {
         // Test line 260: Migration verification failure in Plugin
         // This is difficult to test in a real scenario, but we can test the path
-        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
-        $vendorDir = $tempDir . '/vendor';
+        $tempDir    = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir  = $tempDir . '/vendor';
         $packageDir = $vendorDir . '/nowo-tech/composer-update-helper';
-        $binDir = $packageDir . '/bin';
+        $binDir     = $packageDir . '/bin';
         mkdir($binDir, 0777, true);
 
         file_put_contents($binDir . '/generate-composer-require.yaml', '# YAML config');
@@ -2351,7 +2356,7 @@ final class PluginTest extends TestCase
         $plugin->activate($composer, $io);
 
         // Use reflection to call migrateTxtToYaml directly
-        $reflection = new \ReflectionClass($plugin);
+        $reflection    = new ReflectionClass($plugin);
         $migrateMethod = $reflection->getMethod('migrateTxtToYaml');
         $migrateMethod->setAccessible(true);
         $migrateMethod->invoke($plugin, $oldTxtFile, $yamlFile, $io);
@@ -2367,17 +2372,17 @@ final class PluginTest extends TestCase
         $extractMethod->setAccessible(true);
         $yamlPackages = $extractMethod->invoke($plugin, file_get_contents($yamlFile));
 
-        $txtContent = file_get_contents($oldTxtFile);
-        $txtLines = explode("\n", $txtContent);
+        $txtContent  = file_get_contents($oldTxtFile);
+        $txtLines    = explode("\n", $txtContent);
         $txtPackages = [];
         foreach ($txtLines as $line) {
             $line = trim($line);
-            if (!empty($line) && strpos($line, '#') !== 0) {
+            if (!empty($line) && !str_starts_with($line, '#')) {
                 $txtPackages[] = $line;
             }
         }
 
-        $txtPackagesSorted = array_unique(array_filter($txtPackages));
+        $txtPackagesSorted  = array_unique(array_filter($txtPackages));
         $yamlPackagesSorted = array_unique(array_filter($yamlPackages));
         sort($txtPackagesSorted);
         sort($yamlPackagesSorted);
@@ -2400,10 +2405,10 @@ final class PluginTest extends TestCase
     public function testMigrationSkipsOldIgnoreEntriesWhenAllPackagesEmpty(): void
     {
         // Test line 422: Similar to Installer test, trying to trigger the skip logic
-        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
-        $vendorDir = $tempDir . '/vendor';
+        $tempDir    = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir  = $tempDir . '/vendor';
         $packageDir = $vendorDir . '/nowo-tech/composer-update-helper';
-        $binDir = $packageDir . '/bin';
+        $binDir     = $packageDir . '/bin';
         mkdir($binDir, 0777, true);
 
         file_put_contents($binDir . '/generate-composer-require.yaml', '# YAML config');
@@ -2428,8 +2433,8 @@ final class PluginTest extends TestCase
         $plugin = new Plugin();
         $plugin->activate($composer, $io);
 
-        $reflection = new \ReflectionClass($plugin);
-        $method = $reflection->getMethod('migrateTxtToYaml');
+        $reflection = new ReflectionClass($plugin);
+        $method     = $reflection->getMethod('migrateTxtToYaml');
         $method->setAccessible(true);
         $method->invoke($plugin, $oldTxtFile, $yamlFile, $io);
 
@@ -2447,22 +2452,29 @@ final class PluginTest extends TestCase
         @rmdir($tempDir);
     }
 
-    public function testMigrationVerificationFailureExecutesWriteError(): void
+    public function testOnPostInstallWritesErrorWhenMigrationVerificationFails(): void
     {
-        // Test line 260: Migration verification failure - actually execute writeError
-        $tempDir = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
-        $vendorDir = $tempDir . '/vendor';
+        $tempDir    = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir  = $tempDir . '/vendor';
         $packageDir = $vendorDir . '/nowo-tech/composer-update-helper';
-        $binDir = $packageDir . '/bin';
+        $binDir     = $packageDir . '/bin';
         mkdir($binDir, 0777, true);
 
+        file_put_contents($binDir . '/generate-composer-require.sh', '#!/bin/sh\necho test');
         file_put_contents($binDir . '/generate-composer-require.yaml', '# YAML config');
 
-        $oldTxtFile = $tempDir . '/generate-composer-require.ignore.txt';
-        file_put_contents($oldTxtFile, "package1/one\npackage2/two\n");
-
         $yamlFile = $tempDir . '/generate-composer-require.yaml';
-        file_put_contents($yamlFile, "ignore:\n  # - commented\n");
+        $oldTxt   = $tempDir . '/generate-composer-require.ignore.txt';
+        file_put_contents($oldTxt, "pkg/one\npkg/two\n");
+
+        $GLOBALS['__cuh_yaml_verify_target'] = $yamlFile;
+        $GLOBALS['__cuh_verify_mode']        = 'plugin';
+        $GLOBALS['__cuh_yaml_read_count']    = [];
+
+        $io = $this->createMock(IOInterface::class);
+        $io->expects($this->once())
+            ->method('writeError')
+            ->with($this->stringContains('Migration verification failed'));
 
         $config = $this->createMock(Config::class);
         $config->method('get')
@@ -2473,59 +2485,25 @@ final class PluginTest extends TestCase
         $composer->method('getConfig')
             ->willReturn($config);
 
-        $io = $this->createMock(IOInterface::class);
-        $io->expects($this->atLeastOnce())
-            ->method('write')
-            ->with($this->logicalOr(
-                $this->stringContains('Migrating configuration from TXT to YAML format'),
-                $this->stringContains('Configuration migrated to')
-            ));
-        $io->expects($this->atLeastOnce())
-            ->method('writeError')
-            ->with($this->stringContains('Migration verification failed'));
+        $event = $this->createMock(Event::class);
+        $event->method('getIO')
+            ->willReturn($io);
 
         $plugin = new Plugin();
         $plugin->activate($composer, $io);
 
-        $reflection = new \ReflectionClass($plugin);
-        $migrateMethod = $reflection->getMethod('migrateTxtToYaml');
-        $migrateMethod->setAccessible(true);
-        $migrateMethod->invoke($plugin, $oldTxtFile, $yamlFile, $io);
-
-        // Manipulate YAML to cause verification failure
-        $yamlContent = file_get_contents($yamlFile);
-        $yamlContent = preg_replace('/\s+-\s+package2\/two\n/', "\n", $yamlContent);
-        file_put_contents($yamlFile, $yamlContent);
-
-        // Manually execute the verification failure path (line 260)
-        $extractMethod = $reflection->getMethod('extractPackagesFromYamlIgnoreSection');
-        $extractMethod->setAccessible(true);
-        $yamlPackages = $extractMethod->invoke($plugin, file_get_contents($yamlFile));
-
-        $txtContent = file_get_contents($oldTxtFile);
-        $txtLines = explode("\n", $txtContent);
-        $txtPackages = [];
-        foreach ($txtLines as $line) {
-            $line = trim($line);
-            if (!empty($line) && strpos($line, '#') !== 0) {
-                $txtPackages[] = $line;
-            }
+        try {
+            $plugin->onPostInstall($event);
+        } finally {
+            unset($GLOBALS['__cuh_yaml_verify_target'], $GLOBALS['__cuh_verify_mode'], $GLOBALS['__cuh_yaml_read_count']);
         }
 
-        $txtPackagesSorted = array_unique(array_filter($txtPackages));
-        $yamlPackagesSorted = array_unique(array_filter($yamlPackages));
-        sort($txtPackagesSorted);
-        sort($yamlPackagesSorted);
+        $this->assertFileExists($oldTxt);
 
-        if ($txtPackagesSorted !== $yamlPackagesSorted) {
-            $io->writeError('<warning>Migration verification failed. TXT file preserved for safety.</warning>');
-        }
-
-        $this->assertFileExists($oldTxtFile);
-
-        // Cleanup
-        @unlink($oldTxtFile);
+        @unlink($oldTxt);
         @unlink($yamlFile);
+        @unlink($tempDir . '/generate-composer-require.sh');
+        @unlink($binDir . '/generate-composer-require.sh');
         @unlink($binDir . '/generate-composer-require.yaml');
         @rmdir($binDir);
         @rmdir($packageDir);
