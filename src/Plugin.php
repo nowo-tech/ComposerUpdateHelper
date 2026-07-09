@@ -116,7 +116,7 @@ class Plugin implements PluginInterface, EventSubscriberInterface
 
     /**
      * Install or update the wrapper script in the project root.
-     * Copies `generate-composer-require.sh` from the package; if the file already exists, updates it when content differs (MD5).
+     * Copies `generate-composer-require.sh` on first install; overwrites when opt-in or content differs with force.
      * YAML config is created separately only when missing (see handleConfigMigration).
      *
      * @param IOInterface $io The IO interface
@@ -147,14 +147,20 @@ class Plugin implements PluginInterface, EventSubscriberInterface
                 continue;
             }
 
-            // Always update the script if content differs (even if file exists)
-            // This ensures users get the latest version when updating the package
             if (file_exists($destPath) && !$forceUpdate) {
-                // Check if content differs using MD5
                 if (md5_file($sourcePath) === md5_file($destPath)) {
-                    continue; // Same content, skip
+                    continue;
                 }
-                // Content differs, will update below
+
+                if (!$this->isAutoUpdateWrapperEnabled()) {
+                    $io->write(sprintf(
+                        '<comment>%s differs from the package version (local MD5: %s, package MD5: %s). Set extra.composer-update-helper.auto_update_wrapper to true in composer.json to overwrite.</comment>',
+                        $dest,
+                        md5_file($destPath),
+                        md5_file($sourcePath),
+                    ));
+                    continue;
+                }
             }
 
             if (file_exists($destPath)) {
@@ -606,5 +612,34 @@ class Plugin implements PluginInterface, EventSubscriberInterface
                 unlink($path);
             }
         }
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function readProjectComposerJson(): array
+    {
+        $vendorDir = $this->composer->getConfig()->get('vendor-dir');
+        $composerJsonPath = dirname((string) $vendorDir) . '/composer.json';
+
+        if (!file_exists($composerJsonPath)) {
+            return [];
+        }
+
+        $content = file_get_contents($composerJsonPath);
+        if ($content === false) {
+            return [];
+        }
+
+        $decoded = json_decode($content, true);
+
+        return is_array($decoded) ? $decoded : [];
+    }
+
+    private function isAutoUpdateWrapperEnabled(): bool
+    {
+        $extra = $this->readProjectComposerJson()['extra'] ?? [];
+
+        return (bool) ($extra['composer-update-helper']['auto_update_wrapper'] ?? false);
     }
 }

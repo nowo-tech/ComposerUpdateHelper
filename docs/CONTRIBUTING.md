@@ -12,7 +12,7 @@ This project is maintained by [Héctor Franco Aceituno](https://github.com/HecFr
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/nowo-tech/composer-update-helper.git
+   git clone https://github.com/nowo-tech/ComposerUpdateHelper.git
    cd composer-update-helper
    ```
 
@@ -40,7 +40,7 @@ This project is maintained by [Héctor Franco Aceituno](https://github.com/HecFr
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/nowo-tech/composer-update-helper.git
+   git clone https://github.com/nowo-tech/ComposerUpdateHelper.git
    cd composer-update-helper
    ```
 

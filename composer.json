@@ -15,7 +15,7 @@
         "codeigniter",
         "php"
     ],
-    "homepage": "https://github.com/nowo-tech/composer-update-helper",
+    "homepage": "https://github.com/nowo-tech/ComposerUpdateHelper",
     "archive": {
         "exclude": [
             "/demo",
@@ -23,8 +23,8 @@
         ]
     },
     "support": {
-        "issues": "https://github.com/nowo-tech/composer-update-helper/issues",
-        "source": "https://github.com/nowo-tech/composer-update-helper"
+        "issues": "https://github.com/nowo-tech/ComposerUpdateHelper/issues",
+        "source": "https://github.com/nowo-tech/ComposerUpdateHelper"
     },
     "authors": [
         {
