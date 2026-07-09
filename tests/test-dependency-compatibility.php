@@ -247,7 +247,7 @@ foreach ($testCases as [$version, $constraint, $expected]) {
 chdir($originalDir);
 
 // Cleanup
-function removeDirectory($dir)
+function removeDirectory($dir): void
 {
     if (!is_dir($dir)) {
         return;
