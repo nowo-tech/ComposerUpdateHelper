@@ -18,6 +18,44 @@ This guide will help you upgrade Composer Update Helper to newer versions.
 
 ## Version-Specific Upgrade Notes
 
+### Upgrading to 2.0.30+ (2026-07-09)
+
+#### Breaking Changes
+
+- **PHP `>=8.1 <8.6` required**: Upgrade your runtime before updating the package. PHP 7.4 and 8.0 are no longer supported.
+
+#### What's Changed
+
+- **Wrapper auto-update is opt-in**: The plugin no longer silently overwrites a customized `generate-composer-require.sh` on `composer update`. By default, if your local wrapper differs from the package copy, Composer prints a comment with MD5 hashes and keeps your file.
+
+  To allow automatic overwrite again, add to your project's `composer.json`:
+
+  ```json
+  {
+    "extra": {
+      "composer-update-helper": {
+        "auto_update_wrapper": true
+      }
+    }
+  }
+  ```
+
+- **Development tooling**: Maintainers and contributors can run `make release-check` (PHP-CS-Fixer, Rector dry-run, PHPStan, PHPUnit with coverage).
+
+#### Migration Steps
+
+1. Confirm PHP `>=8.1` on your machine and CI.
+2. Update the package: `composer update nowo-tech/composer-update-helper`.
+3. If you customized `generate-composer-require.sh`, decide whether to keep your version or enable `auto_update_wrapper`.
+4. Review new docs: [INSTALLATION.md](INSTALLATION.md), [SECURITY.md](SECURITY.md).
+
+#### Breaking Changes Summary
+
+| Change | Action |
+|--------|--------|
+| PHP >=8.1 required | Upgrade PHP before updating the package |
+| Wrapper overwrite opt-in | Set `auto_update_wrapper: true` if you want silent updates |
+
 ### Upgrading to 2.0.29+ (2026-01-22)
 
 #### What's Changed

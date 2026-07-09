@@ -2,6 +2,31 @@
 
 This guide covers all configuration options for Composer Update Helper.
 
+## Composer plugin options
+
+These settings live in the **consuming project's** `composer.json` under `extra.composer-update-helper` (not in `generate-composer-require.yaml`).
+
+### `auto_update_wrapper`
+
+Controls whether `composer install` / `composer update` may overwrite an existing `generate-composer-require.sh` when it differs from the package copy.
+
+| Value | Behavior |
+|-------|----------|
+| `false` (default) | Keep the local wrapper; show a comment with MD5 hashes when versions differ |
+| `true` | Overwrite the local wrapper with the package version |
+
+```json
+{
+  "extra": {
+    "composer-update-helper": {
+      "auto_update_wrapper": true
+    }
+  }
+}
+```
+
+Use `true` when you want the wrapper to track package updates automatically. Leave the default when you maintain local customizations to the shell script.
+
 ## Package Configuration
 
 The script searches for configuration files in the current directory (where `composer.json` is located). It supports both `.yaml` and `.yml` extensions, with `.yaml` taking priority.

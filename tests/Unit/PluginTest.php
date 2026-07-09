@@ -15,6 +15,8 @@ use ReflectionClass;
 
 use function dirname;
 
+use const JSON_THROW_ON_ERROR;
+
 /**
  * Test suite for the Plugin class.
  * Tests the Composer plugin functionality including file installation,
@@ -213,7 +215,7 @@ final class PluginTest extends TestCase
         @rmdir($tempDir);
     }
 
-    public function testInstallFilesSkipsWhenFileExists(): void
+    public function testInstallFilesSkipsWhenFileExistsWithoutAutoUpdateOptIn(): void
     {
         $tempDir    = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
         $vendorDir  = $tempDir . '/vendor';
@@ -224,6 +226,7 @@ final class PluginTest extends TestCase
         // Create existing file with different content
         $existingContent = '#!/bin/sh\necho "old"';
         file_put_contents($tempDir . '/generate-composer-require.sh', $existingContent);
+        file_put_contents($tempDir . '/composer.json', json_encode(['name' => 'test/project'], JSON_THROW_ON_ERROR));
 
         // Create source file in package with new content
         $sourceFile = $binDir . '/generate-composer-require.sh';
@@ -239,16 +242,9 @@ final class PluginTest extends TestCase
             ->willReturn($config);
 
         $io = $this->createMock(IOInterface::class);
-        // When content differs, file should be updated
-        // Allow any of these messages (at least one must appear)
-        $io->expects($this->atLeastOnce())
+        $io->expects($this->once())
             ->method('write')
-            ->with($this->logicalOr(
-                $this->stringContains('Updating generate-composer-require.sh'),
-                $this->stringContains('Creating generate-composer-require.yaml'),
-                $this->stringContains('Updated .gitignore'),
-                $this->stringContains('updated .gitignore'),
-            ));
+            ->with($this->stringContains('auto_update_wrapper'));
 
         $event = $this->createMock(Event::class);
         $event->method('getIO')
@@ -258,13 +254,71 @@ final class PluginTest extends TestCase
         $plugin->activate($composer, $io);
         $plugin->onPostInstall($event);
 
-        // File should be updated with new content
+        // File should be preserved when auto-update is not enabled
         $this->assertFileExists($tempDir . '/generate-composer-require.sh');
-        $this->assertStringContainsString('new', (string) file_get_contents($tempDir . '/generate-composer-require.sh'));
+        $this->assertStringContainsString('old', (string) file_get_contents($tempDir . '/generate-composer-require.sh'));
 
         // Cleanup
+        @unlink($tempDir . '/composer.json');
         @unlink($tempDir . '/generate-composer-require.sh');
         @unlink($tempDir . '/generate-composer-require.yaml');
+        @rmdir($binDir);
+        @rmdir($packageDir);
+        @rmdir($vendorDir);
+        @rmdir($tempDir);
+    }
+
+    public function testInstallFilesUpdatesWhenAutoUpdateWrapperEnabled(): void
+    {
+        $tempDir    = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir  = $tempDir . '/vendor';
+        $packageDir = $vendorDir . '/nowo-tech/composer-update-helper';
+        $binDir     = $packageDir . '/bin';
+        mkdir($binDir, 0777, true);
+
+        $existingContent = '#!/bin/sh\necho "old"';
+        file_put_contents($tempDir . '/generate-composer-require.sh', $existingContent);
+        file_put_contents($tempDir . '/composer.json', json_encode([
+            'name'  => 'test/project',
+            'extra' => [
+                'composer-update-helper' => [
+                    'auto_update_wrapper' => true,
+                ],
+            ],
+        ], JSON_THROW_ON_ERROR));
+
+        $sourceFile = $binDir . '/generate-composer-require.sh';
+        file_put_contents($sourceFile, '#!/bin/sh\necho "new"');
+
+        $config = $this->createMock(Config::class);
+        $config->method('get')
+            ->with('vendor-dir')
+            ->willReturn($vendorDir);
+
+        $composer = $this->createMock(Composer::class);
+        $composer->method('getConfig')
+            ->willReturn($config);
+
+        $io = $this->createMock(IOInterface::class);
+        $io->expects($this->atLeastOnce())
+            ->method('write')
+            ->with($this->stringContains('Updating generate-composer-require.sh'));
+
+        $event = $this->createMock(Event::class);
+        $event->method('getIO')
+            ->willReturn($io);
+
+        $plugin = new Plugin();
+        $plugin->activate($composer, $io);
+        $plugin->onPostInstall($event);
+
+        $this->assertStringContainsString('new', (string) file_get_contents($tempDir . '/generate-composer-require.sh'));
+
+        @unlink($tempDir . '/composer.json');
+        @unlink($tempDir . '/generate-composer-require.sh');
+        @unlink($tempDir . '/generate-composer-require.yaml');
+        @rmdir($binDir);
+        @rmdir($packageDir);
         @rmdir($vendorDir);
         @rmdir($tempDir);
     }

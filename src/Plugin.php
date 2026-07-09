@@ -13,6 +13,7 @@ use Composer\Script\ScriptEvents;
 
 use function count;
 use function dirname;
+use function is_array;
 use function sprintf;
 
 /**
@@ -619,7 +620,7 @@ class Plugin implements PluginInterface, EventSubscriberInterface
      */
     private function readProjectComposerJson(): array
     {
-        $vendorDir = $this->composer->getConfig()->get('vendor-dir');
+        $vendorDir        = $this->composer->getConfig()->get('vendor-dir');
         $composerJsonPath = dirname((string) $vendorDir) . '/composer.json';
 
         if (!file_exists($composerJsonPath)) {

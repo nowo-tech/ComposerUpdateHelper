@@ -7,10 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.30] - 2026-07-09
+
+### Breaking Changes
+
+- **PHP requirement**: Minimum PHP version is now `>=8.1 <8.6` (previously `>=7.4`). Projects on PHP 7.4 or 8.0 must upgrade PHP before updating this package.
+
+### Added
+
+- **Opt-in wrapper auto-update**: New `extra.composer-update-helper.auto_update_wrapper` flag in the consuming project's `composer.json` to overwrite a customized `generate-composer-require.sh` when the package copy differs (disabled by default to protect local changes).
+- **Static analysis and refactoring toolchain**: PHPStan and Rector added to `require-dev`, with `composer phpstan`, `composer rector`, and `composer rector-dry` scripts.
+- **Pre-release pipeline**: `make release-check` runs composer sync, code style, Rector dry-run, PHPStan, and coverage validation.
+- **Documentation**: [INSTALLATION.md](INSTALLATION.md), [SECURITY.md](SECURITY.md), [SPEC-DRIVEN-DEVELOPMENT.md](SPEC-DRIVEN-DEVELOPMENT.md), and [SPEC-KIT.md](SPEC-KIT.md).
+- **CI/CD integrations**: CodeRabbit workflow, PR lint, stale issue management, Scrutinizer configuration, and expanded GitHub Actions CI matrix.
+- **Spec Kit / Specify**: Project scaffolding for spec-driven development (`.specify/`, baseline spec `specs/001-baseline/`).
+- **Composer archive exclusions**: `demo/` and `.cursor/` excluded from distribution archives.
+
+### Changed
+
+- **Plugin wrapper install behavior**: The plugin installs the wrapper on first run; subsequent updates only overwrite when `auto_update_wrapper` is `true` or content already matches. When skipped, a comment explains how to enable overwrite.
+- **Test layout**: PHPUnit tests reorganized into `tests/Unit/` and `tests/Integration/`.
+- **README**: Packagist badges, documentation index, PHP 8.1+ requirement, and wrapper update policy.
+- **Plugin and Installer**: Code quality pass (PHPStan/Rector/PHP-CS-Fixer), modern string checks (`str_starts_with`), and clearer PHPDoc.
+- **composer.json**: Corrected GitHub homepage/support URLs; Symfony FrameworkBundle added as dev dependency for static analysis.
+
 ### Documentation
 
 - **README** — Architecture: updated approximate line counts for `generate-composer-require.sh` and `process-updates.php` (and noted they can change between releases). Language list in the YAML example points to **CONFIGURATION.md** for the full locale set instead of a partial inline list.
-- **Plugin.php** — `installFiles()` docblock now matches behavior (script is updated when vendor copy differs), not “first install only”.
+- **Plugin.php** — `installFiles()` docblock documents first-install copy and opt-in overwrite behavior.
+- **CONFIGURATION.md** — Documents `extra.composer-update-helper.auto_update_wrapper`.
+
+> **Note**: See [UPGRADING.md](UPGRADING.md#upgrading-to-2030-2026-07-09) for migration notes.
 
 ## [2.0.29] - 2026-01-22
 

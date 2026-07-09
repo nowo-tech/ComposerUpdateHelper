@@ -50,7 +50,19 @@ After installation, two files will be copied to your project root:
 
 **Note:** These files should be committed to your repository so they're available to all team members. The plugin will remove any old `.ignore.txt` entries from `.gitignore` if they exist.
 
-**Auto-update:** The `generate-composer-require.sh` script is automatically updated when you run `composer update` if the content differs from the version in vendor. This ensures you always have the latest version of the script.
+**Wrapper updates:** On first install, `generate-composer-require.sh` is copied to your project root. On later `composer update` runs, the plugin **does not overwrite** a local wrapper that differs from the package copy unless you opt in:
+
+```json
+{
+  "extra": {
+    "composer-update-helper": {
+      "auto_update_wrapper": true
+    }
+  }
+}
+```
+
+When opt-in is disabled (default), Composer shows a comment with MD5 hashes if the wrapper differs. See [Configuration](docs/CONFIGURATION.md#composer-plugin-options).
 
 ### Architecture
 
