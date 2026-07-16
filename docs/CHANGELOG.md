@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.31] - 2026-07-16
+
+### Added
+
+- **REQ-GIT-001 (no Cursor co-author)**: Scripts `.scripts/check-no-cursor-coauthor.sh` and `.scripts/strip-cursor-coauthor-from-history.sh`, git hook `.githooks/commit-msg`, Makefile targets `check-no-cursor-coauthor` / `strip-cursor-coauthor-from-history`, and CI job `git-hygiene` (full history checkout).
+- **Documentation**: [GITHUB_CI.md](GITHUB_CI.md) (CI requirements for REQ-GIT-001), [Contributor Covenant Code of Conduct](../CODE_OF_CONDUCT.md).
+- **Cursor / IDE**: Shared Cursor rules under `.cursor/rules/`, `.cursorignore`, and ignore for `.cursor/sandbox.json`.
+
+### Changed
+
+- **`make release-check`**: Runs `check-no-cursor-coauthor` before the rest of the pre-release pipeline.
+- **`make setup-hooks`**: Installs both `pre-commit` and `commit-msg` via `core.hooksPath`.
+- **README / CONTRIBUTING / RELEASE**: Links and maintainer notes for Code of Conduct, GitHub CI requirements, and re-checking git hygiene after the release commit.
+
+> **Note**: No consumer-facing migration. See [UPGRADING.md](UPGRADING.md#upgrading-to-2031-2026-07-16).
+
 ## [2.0.30] - 2026-07-09
 
 ### Breaking Changes

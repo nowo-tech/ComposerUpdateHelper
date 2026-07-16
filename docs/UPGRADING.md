@@ -18,6 +18,22 @@ This guide will help you upgrade Composer Update Helper to newer versions.
 
 ## Version-Specific Upgrade Notes
 
+### Upgrading to 2.0.31+ (2026-07-16)
+
+#### What's Changed
+
+Maintainer/CI hygiene only. Package behavior for consumers is unchanged.
+
+- Contributors should run `make setup-hooks` once per clone so `.githooks/commit-msg` strips Cursor co-author trailers.
+- CI enforces clean history via the `git-hygiene` job (`docs/GITHUB_CI.md`).
+
+#### Migration Steps
+
+1. Update the package: `composer update nowo-tech/composer-update-helper` (optional for consumers; no runtime changes).
+2. Contributors: `make setup-hooks` and `make check-no-cursor-coauthor`.
+
+**No Breaking Changes** for package consumers.
+
 ### Upgrading to 2.0.30+ (2026-07-09)
 
 #### Breaking Changes
