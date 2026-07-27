@@ -268,6 +268,99 @@ final class PluginTest extends TestCase
         @rmdir($tempDir);
     }
 
+    public function testInstallFilesSkipsWhenComposerJsonMissing(): void
+    {
+        $tempDir    = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir  = $tempDir . '/vendor';
+        $packageDir = $vendorDir . '/nowo-tech/composer-update-helper';
+        $binDir     = $packageDir . '/bin';
+        mkdir($binDir, 0777, true);
+
+        file_put_contents($tempDir . '/generate-composer-require.sh', "#!/bin/sh\necho \"old\"\n");
+        file_put_contents($binDir . '/generate-composer-require.sh', "#!/bin/sh\necho \"new\"\n");
+
+        $config = $this->createMock(Config::class);
+        $config->method('get')
+            ->with('vendor-dir')
+            ->willReturn($vendorDir);
+
+        $composer = $this->createMock(Composer::class);
+        $composer->method('getConfig')
+            ->willReturn($config);
+
+        $io = $this->createMock(IOInterface::class);
+        $io->expects($this->once())
+            ->method('write')
+            ->with($this->stringContains('auto_update_wrapper'));
+
+        $event = $this->createMock(Event::class);
+        $event->method('getIO')
+            ->willReturn($io);
+
+        $plugin = new Plugin();
+        $plugin->activate($composer, $io);
+        $plugin->onPostInstall($event);
+
+        $this->assertStringContainsString('old', (string) file_get_contents($tempDir . '/generate-composer-require.sh'));
+
+        @unlink($tempDir . '/generate-composer-require.sh');
+        @unlink($binDir . '/generate-composer-require.sh');
+        @rmdir($binDir);
+        @rmdir($packageDir);
+        @rmdir($vendorDir);
+        @rmdir($tempDir);
+    }
+
+    public function testInstallFilesSkipsWhenComposerJsonUnreadable(): void
+    {
+        $tempDir    = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();
+        $vendorDir  = $tempDir . '/vendor';
+        $packageDir = $vendorDir . '/nowo-tech/composer-update-helper';
+        $binDir     = $packageDir . '/bin';
+        mkdir($binDir, 0777, true);
+
+        $composerJsonPath = $tempDir . '/composer.json';
+        file_put_contents($composerJsonPath, '{"name":"test/project"}');
+        // Force namespaced file_get_contents stub to simulate read failure (REQ-TEST-003)
+        $GLOBALS['__cuh_force_fgc_false'] = $composerJsonPath;
+
+        file_put_contents($tempDir . '/generate-composer-require.sh', "#!/bin/sh\necho \"old\"\n");
+        file_put_contents($binDir . '/generate-composer-require.sh', "#!/bin/sh\necho \"new\"\n");
+
+        $config = $this->createMock(Config::class);
+        $config->method('get')
+            ->with('vendor-dir')
+            ->willReturn($vendorDir);
+
+        $composer = $this->createMock(Composer::class);
+        $composer->method('getConfig')
+            ->willReturn($config);
+
+        $io = $this->createMock(IOInterface::class);
+        $io->expects($this->once())
+            ->method('write')
+            ->with($this->stringContains('auto_update_wrapper'));
+
+        $event = $this->createMock(Event::class);
+        $event->method('getIO')
+            ->willReturn($io);
+
+        $plugin = new Plugin();
+        $plugin->activate($composer, $io);
+        $plugin->onPostInstall($event);
+
+        $this->assertStringContainsString('old', (string) file_get_contents($tempDir . '/generate-composer-require.sh'));
+
+        unset($GLOBALS['__cuh_force_fgc_false']);
+        @unlink($composerJsonPath);
+        @unlink($tempDir . '/generate-composer-require.sh');
+        @unlink($binDir . '/generate-composer-require.sh');
+        @rmdir($binDir);
+        @rmdir($packageDir);
+        @rmdir($vendorDir);
+        @rmdir($tempDir);
+    }
+
     public function testInstallFilesUpdatesWhenAutoUpdateWrapperEnabled(): void
     {
         $tempDir    = sys_get_temp_dir() . '/composer-update-helper-plugin-test-' . uniqid();

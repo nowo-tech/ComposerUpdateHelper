@@ -349,7 +349,7 @@ Created by [Héctor Franco Aceituno](https://github.com/HecFranco) at [Nowo.tech
 ## Tests and coverage
 
 - Tests: PHPUnit (`tests/Unit`, `tests/Integration`).
-- PHP: **≥99%** line coverage on `src/` (refresh with `make test-coverage`; gate with `make coverage-check`).
+- PHP: **100%** line coverage on `src/` (refresh with `make test-coverage`; gate with `make coverage-check`; minimum gate **≥99%**).
 - TS/JS: N/A
 - Python: N/A
 

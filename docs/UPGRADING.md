@@ -18,6 +18,22 @@ This guide will help you upgrade Composer Update Helper to newer versions.
 
 ## Version-Specific Upgrade Notes
 
+### Upgrading to 2.0.33+ (2026-07-27)
+
+#### What's Changed
+
+Maintainer/CI and QA hardening only. Package runtime behavior for consumers is unchanged.
+
+- CI Symfony matrix correctly pins `symfony/framework-bundle` in `require-dev` and installs without a committed lock file.
+- `src/` line coverage is 100%; PHPStan covers unit tests with a documented baseline.
+
+#### Migration Steps
+
+1. Update the package: `composer update nowo-tech/composer-update-helper`.
+2. Contributors: `make release-check` (optional; no consumer action required).
+
+**No Breaking Changes** for package consumers.
+
 ### Upgrading to 2.0.32+ (2026-07-27)
 
 #### What's Changed

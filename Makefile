@@ -7,7 +7,7 @@ SERVICE_PHP := php
 
 .PHONY: help up down down-dev build shell install ensure-up test test-coverage coverage-check cs-check cs-fix rector rector-dry phpstan qa \
 	check-no-cursor-coauthor check-open-prs strip-cursor-coauthor-from-history \
-	release-check release-check-demos composer-sync clean update validate assets setup-hooks
+	release-check release-check-demos composer-sync clean update validate assets setup-hooks update-deps update-deps-demos
 
 help:
 	@echo "Composer Update Helper - Development Commands"

@@ -41,7 +41,7 @@ vendor/bin/phpunit --filter testIsPackageAbandoned tests/DependencyCompatibility
 
 ## Test Coverage
 
-The test suite maintains **99% code coverage** requirement. Current coverage is **99.20%**.
+The test suite maintains **≥99%** line coverage on `src/` (REQ-TEST-003). Current coverage is **100%**.
 
 ### Coverage Report
 

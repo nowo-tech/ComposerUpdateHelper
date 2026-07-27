@@ -71,8 +71,9 @@ jobs:
 
       - name: Install dependencies with Symfony ${{ matrix.symfony }}
         run: |
-          composer require symfony/framework-bundle:^${{ matrix.symfony }} --no-interaction --no-update
-          composer update symfony/* --with-all-dependencies --no-interaction --prefer-dist --no-progress
+          # framework-bundle is require-dev; lock is gitignored so partial update is impossible
+          composer require --dev symfony/framework-bundle:^${{ matrix.symfony }} --no-interaction --no-update
+          composer update --no-interaction --prefer-dist --no-progress
 
       - name: Run tests
         run: |

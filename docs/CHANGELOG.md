@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.33] - 2026-07-27
+
+### Fixed
+
+- **CI (REQ-SF-002)**: Install Symfony matrix dependencies with `composer require --dev` (keeps `symfony/framework-bundle` in `require-dev`) and a full `composer update` when `composer.lock` is gitignored (partial `symfony/*` updates failed with exit code 3).
+
+### Changed
+
+- **REQ-TEST-003 / TEST-007**: PHPUnit coverage on `src/` is **100%**; README and `docs/TESTING.md` report the measured percentage.
+- **REQ-CS-003 / CS-006**: PHPStan analyses `src` and `tests/Unit` (with `phpstan-phpunit`); baseline comments justify ignores and a removal plan.
+
+### Added
+
+- Unit tests for missing / unreadable project `composer.json` when deciding wrapper auto-update (`Plugin::readProjectComposerJson`).
+
+> **Note**: No consumer-facing migration. See [UPGRADING.md](UPGRADING.md#upgrading-to-2033-2026-07-27).
+
 ## [2.0.32] - 2026-07-27
 
 ### Added

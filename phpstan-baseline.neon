@@ -1,23 +1,24 @@
 # PHPStan baseline justifications (REQ-CS-006)
 #
-# Baseline entries below are intentional for Composer IO / filesystem edges where
-# file_get_contents() and similar APIs return string|false. Call sites already
-# guard existence; PHPStan still sees the union. Prefer keeping these ignores
-# until the helpers are refactored to typed readers that throw on failure.
+# src/: file_get_contents() / explode edges after is_file checks; array_filter on
+# already-filtered package name lists. Prefer typed FileReader helpers later.
 #
-# Removal plan: replace with a small FileReader helper that returns string or
-# throws RuntimeException, then drop the matching ignore rows.
+# tests/Unit/: PHPUnit asserts on file_get_contents() (string|false); intentional
+# $GLOBALS hooks in namespace-stubs for YAML verify / FGC failure simulation
+# (FrankenPHP worker rule noise in CLI unit tests); a few always-true asserts and
+# unreachable cleanup paths after early returns in fixtures.
+#
+# Removal plan: cast/assert file reads in tests; replace src IO with throwing readers;
+# drop matching ignore rows in dedicated baseline PRs.
 
 parameters:
 	ignoreErrors:
-		# Installer: array_filter on already-filtered non-empty package name lists
 		-
 			message: '#^Parameter \#1 \$array \(list\<non\-falsy\-string\>\) to function array_filter does not contain falsy values, the array will always stay the same\.$#'
 			identifier: arrayFilter.same
 			count: 2
 			path: src/Installer.php
 
-		# Installer: file_get_contents / explode edges after is_file checks
 		-
 			message: '#^Parameter \#1 \$string of function trim expects string, string\|false given\.$#'
 			identifier: argument.type
@@ -36,14 +37,12 @@ parameters:
 			count: 4
 			path: src/Installer.php
 
-		# Plugin: same array_filter pattern as Installer
 		-
 			message: '#^Parameter \#1 \$array \(list\<non\-falsy\-string\>\) to function array_filter does not contain falsy values, the array will always stay the same\.$#'
 			identifier: arrayFilter.same
 			count: 2
 			path: src/Plugin.php
 
-		# Plugin: same file_get_contents / explode edges as Installer
 		-
 			message: '#^Parameter \#1 \$string of function trim expects string, string\|false given\.$#'
 			identifier: argument.type
@@ -61,3 +60,117 @@ parameters:
 			identifier: argument.type
 			count: 4
 			path: src/Plugin.php
+
+		-
+			message: '#^Call to method PHPUnit\\Framework\\Assert\:\:assertTrue\(\) with true will always evaluate to true\.$#'
+			identifier: method.alreadyNarrowedType
+			count: 1
+			path: tests/Unit/InstallerTest.php
+
+		-
+			message: '#^Parameter \#1 \$array \(list\<non\-falsy\-string\>\) to function array_filter does not contain falsy values, the array will always stay the same\.$#'
+			identifier: arrayFilter.same
+			count: 2
+			path: tests/Unit/InstallerTest.php
+
+		-
+			message: '#^Parameter \#1 \$haystack of function strpos expects string, string\|false given\.$#'
+			identifier: argument.type
+			count: 4
+			path: tests/Unit/InstallerTest.php
+
+		-
+			message: '#^Parameter \#1 \$haystack of function substr_count expects string, string\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: tests/Unit/InstallerTest.php
+
+		-
+			message: '#^Parameter \#2 \$haystack of method PHPUnit\\Framework\\Assert\:\:assertStringContainsString\(\) expects string, string\|false given\.$#'
+			identifier: argument.type
+			count: 84
+			path: tests/Unit/InstallerTest.php
+
+		-
+			message: '#^Parameter \#2 \$haystack of method PHPUnit\\Framework\\Assert\:\:assertStringNotContainsString\(\) expects string, string\|false given\.$#'
+			identifier: argument.type
+			count: 10
+			path: tests/Unit/InstallerTest.php
+
+		-
+			message: '#^Parameter \#2 \$string of function explode expects string, string\|false given\.$#'
+			identifier: argument.type
+			count: 2
+			path: tests/Unit/InstallerTest.php
+
+		-
+			message: '#^Parameter \#3 \$subject of function preg_replace expects array\<float\|int\|string\>\|string, string\|false given\.$#'
+			identifier: argument.type
+			count: 2
+			path: tests/Unit/InstallerTest.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
+			count: 1
+			path: tests/Unit/InstallerTest.php
+
+		-
+			message: '#^Writing to \$GLOBALS persists across FrankenPHP worker requests\. Prefer dependency injection or request attributes\.$#'
+			identifier: frankenphp.worker.noGlobalStateWrite
+			count: 3
+			path: tests/Unit/InstallerTest.php
+
+		-
+			message: '#^Call to method PHPUnit\\Framework\\Assert\:\:assertIsArray\(\) with array\<string, string\> will always evaluate to true\.$#'
+			identifier: method.alreadyNarrowedType
+			count: 1
+			path: tests/Unit/PluginTest.php
+
+		-
+			message: '#^Call to method PHPUnit\\Framework\\Assert\:\:assertTrue\(\) with true will always evaluate to true\.$#'
+			identifier: method.alreadyNarrowedType
+			count: 2
+			path: tests/Unit/PluginTest.php
+
+		-
+			message: '#^Parameter \#1 \$array \(list\<non\-falsy\-string\>\) to function array_filter does not contain falsy values, the array will always stay the same\.$#'
+			identifier: arrayFilter.same
+			count: 1
+			path: tests/Unit/PluginTest.php
+
+		-
+			message: '#^Parameter \#2 \$haystack of method PHPUnit\\Framework\\Assert\:\:assertStringContainsString\(\) expects string, string\|false given\.$#'
+			identifier: argument.type
+			count: 56
+			path: tests/Unit/PluginTest.php
+
+		-
+			message: '#^Parameter \#2 \$haystack of method PHPUnit\\Framework\\Assert\:\:assertStringNotContainsString\(\) expects string, string\|false given\.$#'
+			identifier: argument.type
+			count: 10
+			path: tests/Unit/PluginTest.php
+
+		-
+			message: '#^Parameter \#2 \$string of function explode expects string, string\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: tests/Unit/PluginTest.php
+
+		-
+			message: '#^Parameter \#3 \$subject of function preg_replace expects array\<float\|int\|string\>\|string, string\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: tests/Unit/PluginTest.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
+			count: 3
+			path: tests/Unit/PluginTest.php
+
+		-
+			message: '#^Writing to \$GLOBALS persists across FrankenPHP worker requests\. Prefer dependency injection or request attributes\.$#'
+			identifier: frankenphp.worker.noGlobalStateWrite
+			count: 4
+			path: tests/Unit/PluginTest.php

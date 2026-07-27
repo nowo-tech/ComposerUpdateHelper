@@ -1,12 +1,16 @@
 parameters:
   level: 8
+  # Unit tests included (REQ-CS-003). Integration suite exercises bin/ CLI scripts
+  # with looser fixtures; keep it out of the PHPStan graph until those tests are typed.
   paths:
     - src
+    - tests/Unit
   excludePaths:
     - demo/*
 
 includes:
   - vendor/phpstan/phpstan-symfony/extension.neon
+  - vendor/phpstan/phpstan-phpunit/extension.neon
   - phpstan-baseline.neon
   - vendor/nowo-tech/phpstan-frankenphp/extension.neon
   - vendor/nowo-tech/phpstan-frankenphp/ruleset-classic.neon
