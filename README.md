@@ -1,10 +1,14 @@
 # Composer Update Helper
 
-[![CI](https://github.com/nowo-tech/ComposerUpdateHelper/actions/workflows/ci.yml/badge.svg)](https://github.com/nowo-tech/ComposerUpdateHelper/actions/workflows/ci.yml) [![Packagist Version](https://img.shields.io/packagist/v/nowo-tech/composer-update-helper.svg?style=flat)](https://packagist.org/packages/nowo-tech/composer-update-helper) [![Packagist Downloads](https://img.shields.io/packagist/dt/nowo-tech/composer-update-helper.svg)](https://packagist.org/packages/nowo-tech/composer-update-helper) [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE) [![PHP](https://img.shields.io/badge/PHP-8.1%2B-777BB4?logo=php)](https://php.net) [![Symfony](https://img.shields.io/badge/Symfony-6.0%2B%20%7C%207.4%2B%20%7C%208.0%20%7C%208.1%2B-000000?logo=symfony)](https://symfony.com)
+[![CI](https://github.com/nowo-tech/ComposerUpdateHelper/actions/workflows/ci.yml/badge.svg)](https://github.com/nowo-tech/ComposerUpdateHelper/actions/workflows/ci.yml) [![Packagist Version](https://img.shields.io/packagist/v/nowo-tech/composer-update-helper.svg?style=flat)](https://packagist.org/packages/nowo-tech/composer-update-helper) [![Packagist Downloads](https://img.shields.io/packagist/dt/nowo-tech/composer-update-helper.svg)](https://packagist.org/packages/nowo-tech/composer-update-helper) [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE) [![PHP](https://img.shields.io/badge/PHP-8.1%2B-777BB4?logo=php)](https://php.net) [![Symfony](https://img.shields.io/badge/Symfony-6%20%7C%207.4%2B%20%7C%208.0%20%7C%208.1%2B-000000?logo=symfony)](https://symfony.com) [![GitHub stars](https://img.shields.io/github/stars/nowo-tech/composer-update-helper.svg?style=social&label=Star)](https://github.com/nowo-tech/ComposerUpdateHelper) [![Coverage](https://img.shields.io/badge/Coverage-100%25-brightgreen)](#tests-and-coverage)
 
 > ⭐ **Found this useful?** Install from [Packagist](https://packagist.org/packages/nowo-tech/composer-update-helper) and give the repo a [star on GitHub](https://github.com/nowo-tech/ComposerUpdateHelper) if it helps you.
 
 Generates `composer require` commands from outdated dependencies. Works with any PHP project: **Symfony**, **Laravel**, **Yii**, **CodeIgniter**, **Slim**, **Laminas**, etc.
+
+![FrankenPHP Friendly Worker Mode](docs/images/frankenphp-friendly.png)
+
+This bundle is **FrankenPHP worker mode friendly**.
 
 ## Features
 
@@ -281,7 +285,6 @@ Supported PHP versions follow `composer.json` (`>=8.1 <8.6`). Release history is
 
 ## Documentation
 
-- [GitHub Actions CI requirements](docs/GITHUB_CI.md)
 - [Installation](docs/INSTALLATION.md)
 - [Configuration](docs/CONFIGURATION.md)
 - [Usage](docs/USAGE.md)
@@ -294,8 +297,10 @@ Supported PHP versions follow `composer.json` (`>=8.1 <8.6`). Release history is
 - [Engram](docs/ENGRAM.md)
 - [Spec-driven development](docs/SPEC-DRIVEN-DEVELOPMENT.md)
 - [GitHub Spec Kit](docs/SPEC-KIT.md)
+
 ### Additional documentation
 
+- [GitHub Actions CI requirements](docs/GITHUB_CI.md)
 - [Framework support](docs/FRAMEWORKS.md)
 - [Update cases and scenarios](docs/UPDATE_CASES.md)
 - [Testing](docs/TESTING.md)
@@ -344,7 +349,7 @@ Created by [Héctor Franco Aceituno](https://github.com/HecFranco) at [Nowo.tech
 ## Tests and coverage
 
 - Tests: PHPUnit (`tests/Unit`, `tests/Integration`).
-- PHP: **100%** line coverage on `src/` (refresh with `make test-coverage`).
+- PHP: **≥99%** line coverage on `src/` (refresh with `make test-coverage`; gate with `make coverage-check`).
 - TS/JS: N/A
 - Python: N/A
 

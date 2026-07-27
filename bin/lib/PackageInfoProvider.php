@@ -4,26 +4,26 @@ declare(strict_types=1);
 
 /**
  * Package Info Provider
- * Provides package information from external APIs (Packagist, GitHub)
+ * Provides package information from external APIs (Packagist, GitHub).
  *
  * @author Héctor Franco Aceituno <hectorfranco@nowo.tech>
  */
 class PackageInfoProvider
 {
     /**
-     * Get package requirements from Packagist
+     * Get package requirements from Packagist.
      *
      * @param string $packageName Package name
-     * @param string $version     Version to check
+     * @param string $version Version to check
      *
      * @return array Package requirements
      */
     public static function getPackageRequirements(string $packageName, string $version): array
     {
-        $url = "https://packagist.org/packages/{$packageName}.json";
+        $url     = "https://packagist.org/packages/{$packageName}.json";
         $context = stream_context_create([
             'http' => [
-                'timeout' => 5,
+                'timeout'    => 5,
                 'user_agent' => 'Composer Update Helper',
             ],
         ]);
@@ -56,16 +56,17 @@ class PackageInfoProvider
     }
 
     /**
-     * Get package requirements from composer show (fallback)
+     * Get package requirements from composer show (fallback).
      *
      * @param string $packageName Package name
      * @param string $version Version to check
+     *
      * @return array Package requirements
      */
     public static function getPackageRequirementsFromComposer(string $packageName, string $version): array
     {
         $composerBin = getenv('COMPOSER_BIN') ?: 'composer';
-        $phpBin = getenv('PHP_BIN') ?: 'php';
+        $phpBin      = getenv('PHP_BIN') ?: 'php';
 
         $cmd = escapeshellarg($phpBin) . ' -d date.timezone=UTC ' . escapeshellarg($composerBin) .
                ' show ' . escapeshellarg($packageName . ':' . $version) . ' --format=json 2>/dev/null';
@@ -84,19 +85,20 @@ class PackageInfoProvider
     }
 
     /**
-     * Get GitHub repository URL from Packagist
+     * Get GitHub repository URL from Packagist.
      *
      * @param string $packageName Package name
+     *
      * @return string|null GitHub repository (format: user/repo) or null
      */
     public static function getGitHubRepoFromPackagist(string $packageName): ?string
     {
-        $url = "https://packagist.org/packages/{$packageName}.json";
+        $url     = "https://packagist.org/packages/{$packageName}.json";
         $context = stream_context_create([
             'http' => [
-                'timeout' => 5,
+                'timeout'    => 5,
                 'user_agent' => 'Composer Update Helper',
-            ]
+            ],
         ]);
 
         $json = @file_get_contents($url, false, $context);
@@ -119,10 +121,11 @@ class PackageInfoProvider
     }
 
     /**
-     * Get release information from GitHub
+     * Get release information from GitHub.
      *
      * @param string $githubRepo GitHub repository (format: user/repo)
      * @param string $version Version to check
+     *
      * @return array|null Release information or null
      */
     public static function getReleaseInfo(string $githubRepo, string $version): ?array
@@ -136,44 +139,44 @@ class PackageInfoProvider
 
         $context = stream_context_create([
             'http' => [
-                'timeout' => 5,
+                'timeout'    => 5,
                 'user_agent' => 'Composer Update Helper',
-                'header' => 'Accept: application/vnd.github.v3+json',
-            ]
+                'header'     => 'Accept: application/vnd.github.v3+json',
+            ],
         ]);
 
         // Try to get release by tag
-        $url = "https://api.github.com/repos/{$githubRepo}/releases/tags/v{$normalizedVersion}";
+        $url  = "https://api.github.com/repos/{$githubRepo}/releases/tags/v{$normalizedVersion}";
         $json = @file_get_contents($url, false, $context);
         if ($json) {
             $release = json_decode($json, true);
             if ($release && isset($release['html_url'])) {
                 return [
-                    'url' => $release['html_url'],
-                    'name' => $release['name'] ?? $release['tag_name'] ?? $version,
-                    'body' => $release['body'] ?? '',
+                    'url'          => $release['html_url'],
+                    'name'         => $release['name'] ?? $release['tag_name'] ?? $version,
+                    'body'         => $release['body'] ?? '',
                     'published_at' => $release['published_at'] ?? null,
                 ];
             }
         }
 
         // If not found, try without 'v' prefix
-        $url = "https://api.github.com/repos/{$githubRepo}/releases/tags/{$normalizedVersion}";
+        $url  = "https://api.github.com/repos/{$githubRepo}/releases/tags/{$normalizedVersion}";
         $json = @file_get_contents($url, false, $context);
         if ($json) {
             $release = json_decode($json, true);
             if ($release && isset($release['html_url'])) {
                 return [
-                    'url' => $release['html_url'],
-                    'name' => $release['name'] ?? $release['tag_name'] ?? $version,
-                    'body' => $release['body'] ?? '',
+                    'url'          => $release['html_url'],
+                    'name'         => $release['name'] ?? $release['tag_name'] ?? $version,
+                    'body'         => $release['body'] ?? '',
                     'published_at' => $release['published_at'] ?? null,
                 ];
             }
         }
 
         // Try latest release if exact version not found
-        $url = "https://api.github.com/repos/{$githubRepo}/releases/latest";
+        $url  = "https://api.github.com/repos/{$githubRepo}/releases/latest";
         $json = @file_get_contents($url, false, $context);
         if ($json) {
             $release = json_decode($json, true);
@@ -181,9 +184,9 @@ class PackageInfoProvider
                 $latestVersion = ltrim($release['tag_name'] ?? '', 'v');
                 if ($latestVersion === $normalizedVersion) {
                     return [
-                        'url' => $release['html_url'],
-                        'name' => $release['name'] ?? $release['tag_name'] ?? $version,
-                        'body' => $release['body'] ?? '',
+                        'url'          => $release['html_url'],
+                        'name'         => $release['name'] ?? $release['tag_name'] ?? $version,
+                        'body'         => $release['body'] ?? '',
                         'published_at' => $release['published_at'] ?? null,
                     ];
                 }

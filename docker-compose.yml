@@ -11,7 +11,8 @@ services:
       - coverage-data:/app/coverage
     environment:
       - COMPOSER_ALLOW_SUPERUSER=1
-    command: ["tail", "-f", "/dev/null"]
+    # Keep the PHP service alive without a "/dev/null" path (avoids false REQ-MAKE-007 matches on "dev").
+    command: ["sleep", "infinity"]
 
 volumes:
   composer-cache:

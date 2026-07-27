@@ -4,63 +4,63 @@ declare(strict_types=1);
 
 /**
  * Framework Detector
- * Handles framework detection and version constraint limiting
+ * Handles framework detection and version constraint limiting.
  *
  * @author Héctor Franco Aceituno <hectorfranco@nowo.tech>
  */
-
 class FrameworkDetector
 {
     private static array $frameworkConfigs = [
         'symfony' => [
-            'prefix' => 'symfony/',
+            'prefix'      => 'symfony/',
             'corePackage' => null, // Uses extra.symfony.require
-            'extraKey' => ['extra', 'symfony', 'require'],
+            'extraKey'    => ['extra', 'symfony', 'require'],
         ],
         'laravel' => [
-            'prefix' => 'laravel/',
+            'prefix'      => 'laravel/',
             'corePackage' => 'laravel/framework',
-            'related' => ['illuminate/'],
+            'related'     => ['illuminate/'],
         ],
         'yii' => [
-            'prefix' => 'yiisoft/',
+            'prefix'      => 'yiisoft/',
             'corePackage' => 'yiisoft/yii2',
         ],
         'cakephp' => [
-            'prefix' => 'cakephp/',
+            'prefix'      => 'cakephp/',
             'corePackage' => 'cakephp/cakephp',
         ],
         'laminas' => [
-            'prefix' => 'laminas/',
-            'corePackage' => 'laminas/laminas-mvc',
+            'prefix'       => 'laminas/',
+            'corePackage'  => 'laminas/laminas-mvc',
             'fallbackCore' => 'laminas/laminas-servicemanager',
         ],
         'codeigniter' => [
-            'prefix' => 'codeigniter4/',
+            'prefix'      => 'codeigniter4/',
             'corePackage' => 'codeigniter4/framework',
         ],
         'slim' => [
-            'prefix' => 'slim/',
+            'prefix'      => 'slim/',
             'corePackage' => 'slim/slim',
         ],
     ];
 
     /**
-     * Extract the base version from a constraint or version (e.g.: "7.4.*" -> "7.4", "^8.0" -> "8.0")
+     * Extract the base version from a constraint or version (e.g.: "7.4.*" -> "7.4", "^8.0" -> "8.0").
      */
     public static function extractBaseVersion($constraint): ?string
     {
         // Remove special characters and get the main numeric part
         $constraint = ltrim($constraint, '^~>=<vV');
-        $parts = preg_split('/[^0-9]/', $constraint, 3);
+        $parts      = preg_split('/[^0-9]/', $constraint, 3);
         if (count($parts) >= 2 && is_numeric($parts[0]) && is_numeric($parts[1])) {
             return $parts[0] . '.' . $parts[1];
         }
+
         return null;
     }
 
     /**
-     * Detect framework constraints from composer.json and installed packages
+     * Detect framework constraints from composer.json and installed packages.
      */
     public static function detectFrameworkConstraints(array $composer, array $allDeps, bool $debug = false): array
     {
@@ -79,10 +79,14 @@ class FrameworkDetector
 
         // Detect other frameworks from installed versions
         foreach (self::$frameworkConfigs as $name => $config) {
-            if ($name === 'symfony') continue; // Already handled above
+            if ($name === 'symfony') {
+                continue;
+            } // Already handled above
 
             $prefix = $config['prefix'];
-            if (isset($frameworkConstraints[$prefix])) continue;
+            if (isset($frameworkConstraints[$prefix])) {
+                continue;
+            }
 
             // Try core package
             $corePackage = $config['corePackage'] ?? null;
@@ -120,20 +124,21 @@ class FrameworkDetector
     }
 
     /**
-     * Get framework constraint for a package name
+     * Get framework constraint for a package name.
      */
     public static function getFrameworkConstraint(string $packageName, array $frameworkConstraints): ?string
     {
         foreach ($frameworkConstraints as $prefix => $baseVersion) {
-            if (strpos($packageName, $prefix) === 0) {
+            if (str_starts_with($packageName, $prefix)) {
                 return $baseVersion;
             }
         }
+
         return null;
     }
 
     /**
-     * Check if a version exceeds the framework constraint
+     * Check if a version exceeds the framework constraint.
      */
     public static function shouldLimitVersion(string $packageName, string $latestVersion, array $frameworkConstraints): bool
     {
@@ -143,7 +148,7 @@ class FrameworkDetector
         }
 
         // Normalize latest version
-        $latest = ltrim($latestVersion, 'v');
+        $latest     = ltrim($latestVersion, 'v');
         $latestBase = self::extractBaseVersion($latest);
         if (!$latestBase) {
             return false;
@@ -151,13 +156,13 @@ class FrameworkDetector
 
         // Compare base versions
         $latestParts = explode('.', $latestBase);
-        $baseParts = explode('.', $constraintBase);
+        $baseParts   = explode('.', $constraintBase);
 
         if (count($latestParts) >= 2 && count($baseParts) >= 2) {
-            $latestMajor = (int)$latestParts[0];
-            $latestMinor = (int)$latestParts[1];
-            $baseMajor = (int)$baseParts[0];
-            $baseMinor = (int)$baseParts[1];
+            $latestMajor = (int) $latestParts[0];
+            $latestMinor = (int) $latestParts[1];
+            $baseMajor   = (int) $baseParts[0];
+            $baseMinor   = (int) $baseParts[1];
 
             // If latest exceeds the constraint
             if ($latestMajor > $baseMajor || ($latestMajor === $baseMajor && $latestMinor > $baseMinor)) {
@@ -169,12 +174,12 @@ class FrameworkDetector
     }
 
     /**
-     * Get the latest specific version that meets a constraint
+     * Get the latest specific version that meets a constraint.
      */
     public static function getLatestVersionInConstraint(string $packageName, string $baseVersion): ?string
     {
         $composerBin = getenv('COMPOSER_BIN') ?: 'composer';
-        $phpBin = getenv('PHP_BIN') ?: 'php';
+        $phpBin      = getenv('PHP_BIN') ?: 'php';
 
         // Run composer show to get available versions
         $cmd = escapeshellarg($phpBin) . ' -d date.timezone=UTC ' . escapeshellarg($composerBin) .
@@ -196,7 +201,7 @@ class FrameworkDetector
         $matchingVersions = [];
         foreach ($data['versions'] as $version) {
             $normalized = ltrim($version, 'v');
-            if (strpos($normalized, $basePrefix) === 0) {
+            if (str_starts_with($normalized, $basePrefix)) {
                 // Exclude dev/alpha/beta/RC versions
                 if (!preg_match('/(dev|alpha|beta|rc)/i', $version)) {
                     $matchingVersions[] = $normalized;
@@ -210,6 +215,7 @@ class FrameworkDetector
 
         // Sort versions and take the latest one
         usort($matchingVersions, 'version_compare');
+
         return end($matchingVersions);
     }
 }

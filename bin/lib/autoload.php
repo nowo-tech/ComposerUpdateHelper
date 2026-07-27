@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 /**
  * Autoloader for lib classes
- * Loads all library classes used by process-updates.php
+ * Loads all library classes used by process-updates.php.
  *
  * @author Héctor Franco Aceituno <hectorfranco@nowo.tech>
  */

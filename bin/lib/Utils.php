@@ -4,19 +4,18 @@ declare(strict_types=1);
 
 /**
  * Utility Functions
- * General utility functions for the update helper
+ * General utility functions for the update helper.
  *
  * @author Héctor Franco Aceituno <hectorfranco@nowo.tech>
  */
-
 class Utils
 {
-    const DEBUG_PREFIX = 'DEBUG: ';
+    public const DEBUG_PREFIX = 'DEBUG: ';
 
     private static array $progressMessagesShown = [];
 
     /**
-     * Log debug message
+     * Log debug message.
      */
     public static function debugLog(string $message, bool $debug = false): void
     {
@@ -24,9 +23,9 @@ class Utils
             error_log(self::DEBUG_PREFIX . $message);
         }
     }
-    
+
     /**
-     * Show progress message (only once per message type, and only if not in debug mode)
+     * Show progress message (only once per message type, and only if not in debug mode).
      *
      * @param string $messageType Unique identifier for this message type
      * @param string $message Message to show
@@ -39,32 +38,33 @@ class Utils
         if ($debug) {
             return;
         }
-        
+
         // Don't show if already shown
         if (isset(self::$progressMessagesShown[$messageType])) {
             return;
         }
-        
+
         // Mark as shown
         self::$progressMessagesShown[$messageType] = true;
-        
+
         // Show the message (use error_log to stderr to not interfere with output)
         error_log($message);
     }
 
     /**
-     * Normalize version (remove 'v' prefix)
+     * Normalize version (remove 'v' prefix).
      */
     public static function normalizeVersion(?string $version): ?string
     {
         if ($version === null) {
             return null;
         }
+
         return ltrim($version, 'v');
     }
 
     /**
-     * Format package list output
+     * Format package list output.
      */
     public static function formatPackageList(array $packages, string $label, string $indent = '     '): array
     {
@@ -72,11 +72,12 @@ class Utils
         foreach ($packages as $pkg) {
             $output[] = $indent . '- ' . $pkg . ' ' . $label;
         }
+
         return $output;
     }
 
     /**
-     * Add packages to prod or dev arrays
+     * Add packages to prod or dev arrays.
      */
     public static function addPackageToArray(string $name, string $constraint, array $devSet, array &$prod, array &$dev, bool $debug = false): void
     {
@@ -91,7 +92,7 @@ class Utils
     }
 
     /**
-     * Build composer require command
+     * Build composer require command.
      */
     public static function buildComposerCommand(array $packages, bool $isDev = false): ?string
     {
@@ -109,8 +110,9 @@ class Utils
         if (!defined('COMPOSER_REQUIRE_FLAGS')) {
             define('COMPOSER_REQUIRE_FLAGS', '--with-all-dependencies');
         }
-        
+
         $baseCommand = $isDev ? COMPOSER_REQUIRE_DEV : COMPOSER_REQUIRE;
+
         return $baseCommand . ' ' . COMPOSER_REQUIRE_FLAGS . ' ' . implode(' ', $packages);
     }
 }

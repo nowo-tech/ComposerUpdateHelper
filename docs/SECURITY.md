@@ -36,6 +36,22 @@ Composer Update Helper is a **development-time** Composer plugin that reads `com
 
 Report security issues **privately** (see `composer.json` maintainers). Do not disclose exploit details in public issues before a fix is available.
 
+## AI security audit (REQ-SEC-004)
+
+| Field | Value |
+|-------|--------|
+| **Date** | 2026-07-27 |
+| **Method** | Monorepo static review + prior [BUNDLES_SECURITY_ANALYSIS.md](../../BUNDLES_SECURITY_ANALYSIS.md) posture (Medium: opt-in wrapper overwrite) |
+| **Grade** | **Pass (conditional)** |
+| **Overall residual risk** | Medium |
+
+### Residuals (accepted)
+
+- Wrapper overwrite is **opt-in** (`extra.composer-update-helper.auto_update_wrapper`). Misconfiguration can replace a customized `generate-composer-require.sh`; default remains non-destructive.
+- `--run` executes Composer in the project root — only trusted projects/CI should enable it.
+
+No Critical/High findings remain open for shipping.
+
 ## Release security checklist (12.4.1)
 
 Before tagging a release, confirm:

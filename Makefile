@@ -5,8 +5,8 @@ COMPOSE_FILE := docker-compose.yml
 COMPOSE     := docker-compose -f $(COMPOSE_FILE)
 SERVICE_PHP := php
 
-.PHONY: help up down build shell install ensure-up test test-coverage cs-check cs-fix rector rector-dry phpstan qa \
-	check-no-cursor-coauthor strip-cursor-coauthor-from-history \
+.PHONY: help up down down-dev build shell install ensure-up test test-coverage coverage-check cs-check cs-fix rector rector-dry phpstan qa \
+	check-no-cursor-coauthor check-open-prs strip-cursor-coauthor-from-history \
 	release-check release-check-demos composer-sync clean update validate assets setup-hooks
 
 help:
@@ -17,20 +17,23 @@ help:
 	@echo "Targets:"
 	@echo "  up              Start Docker container"
 	@echo "  down            Stop Docker container"
+	@echo "  down-dev        Stop containers (keep volumes; REQ-MAKE-007)"
 	@echo "  build           Rebuild Docker image (no cache)"
 	@echo "  shell           Open shell in container"
 	@echo "  install         Install Composer dependencies"
-	@echo "  assets          No-op (no frontend in this bundle)"
+	@echo "  assets          No-op (no frontend in this package)"
 	@echo "  test            Run PHPUnit tests"
 	@echo "  test-coverage   Run tests with code coverage"
+	@echo "  coverage-check  Fail if PHP line coverage is below 99%"
 	@echo "  cs-check        Check code style"
 	@echo "  cs-fix          Fix code style"
 	@echo "  rector          Apply Rector refactoring"
 	@echo "  rector-dry      Run Rector in dry-run mode"
 	@echo "  phpstan         Run PHPStan static analysis"
 	@echo "  qa              Run QA (cs-check + test)"
-	@echo "  release-check   Pre-release pipeline (git hygiene, sync, style, analysis, coverage)"
+	@echo "  release-check   Pre-release pipeline (git/PR gates, sync, style, analysis, coverage)"
 	@echo "  check-no-cursor-coauthor  Fail if Cursor co-author trailers in history (REQ-GIT-001)"
+	@echo "  check-open-prs  Fail if unresolved open GitHub PRs remain (REQ-REL-003)"
 	@echo "  composer-sync   Validate composer.json and align composer.lock"
 	@echo "  clean           Remove vendor and local artifacts"
 	@echo "  update          composer update in container"
@@ -50,6 +53,10 @@ up:
 
 down:
 	$(COMPOSE) down
+
+# Stop containers without removing volumes (REQ-MAKE-007)
+down-dev:
+	$(COMPOSE) down --remove-orphans
 
 shell:
 	$(COMPOSE) exec $(SERVICE_PHP) sh
@@ -71,6 +78,11 @@ test: ensure-up
 test-coverage: ensure-up
 	$(COMPOSE) exec -T $(SERVICE_PHP) composer test-coverage | tee coverage-php.txt
 	@./.scripts/php-coverage-percent.sh coverage-php.txt
+
+coverage-check: test-coverage
+	@./.scripts/php-coverage-percent.sh coverage-php.txt >/tmp/cuh-cov.txt
+	@pct=$$(sed -n 's/.*Global PHP coverage (Lines):[[:space:]]*\([0-9][0-9]*\.[0-9]*\).*/\1/p' /tmp/cuh-cov.txt | head -1); \
+	awk -v p="$${pct:-0}" 'BEGIN { if ((p+0) < 99) { printf "ERROR: PHP coverage %s%% is below 99%% (REQ-TEST-006)\n", p > "/dev/stderr"; exit 1 } printf "OK: PHP coverage %s%% >= 99%%\n", p }'
 
 cs-check: ensure-up
 	$(COMPOSE) exec -T $(SERVICE_PHP) composer cs-check
@@ -100,7 +112,8 @@ composer-sync: ensure-up
 	$(COMPOSE) exec -T $(SERVICE_PHP) composer validate --strict
 	$(COMPOSE) exec -T $(SERVICE_PHP) composer update --no-install
 
-release-check: check-no-cursor-coauthor ensure-up composer-sync cs-fix cs-check rector-dry phpstan test-coverage release-check-demos
+# Pre-release (REQ-MAKE-002): git/PR gates → composer-sync → QA → demos
+release-check: ensure-up check-no-cursor-coauthor check-open-prs composer-sync cs-fix cs-check rector-dry phpstan test-coverage release-check-demos
 
 release-check-demos:
 	@if [ -f demo/Makefile ]; then $(MAKE) -C demo release-check; else echo "No demo/Makefile — skip release-check-demos"; fi
@@ -110,11 +123,15 @@ clean:
 	rm -f coverage-php.txt
 
 assets:
-	@echo "No frontend assets in this bundle."
+	@echo "No frontend assets in this package."
 
 check-no-cursor-coauthor:
 	@chmod +x .scripts/check-no-cursor-coauthor.sh
 	@./.scripts/check-no-cursor-coauthor.sh HEAD
+
+check-open-prs:
+	@chmod +x .scripts/check-open-prs.sh
+	@bash .scripts/check-open-prs.sh
 
 setup-hooks:
 	@chmod +x .githooks/pre-commit 2>/dev/null || true

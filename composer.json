@@ -24,7 +24,8 @@
     },
     "support": {
         "issues": "https://github.com/nowo-tech/ComposerUpdateHelper/issues",
-        "source": "https://github.com/nowo-tech/ComposerUpdateHelper"
+        "source": "https://github.com/nowo-tech/ComposerUpdateHelper",
+        "docs": "https://github.com/nowo-tech/ComposerUpdateHelper#documentation"
     },
     "authors": [
         {
@@ -44,13 +45,14 @@
     },
     "require-dev": {
         "composer/composer": "^2.0",
-        "phpunit/phpunit": "^9.6 || ^10.0 || ^11.0",
         "friendsofphp/php-cs-fixer": "^3.0",
-        "symfony/framework-bundle": "^6.0 || ^7.0 || ^8.0",
-        "rector/rector": "^2.0",
+        "nowo-tech/phpstan-frankenphp": "^1.0",
         "phpstan/phpstan": "^2.0",
+        "phpstan/phpstan-phpunit": "^2.0",
         "phpstan/phpstan-symfony": "^2.0",
-        "phpstan/phpstan-phpunit": "^2.0"
+        "phpunit/phpunit": "^9.6 || ^10.0 || ^11.0",
+        "rector/rector": "^2.0",
+        "symfony/framework-bundle": "^6.0 || ^7.0 || ^8.0"
     },
     "suggest": {
         "nowo-tech/code-review-guardian": "Provider-agnostic code review guardian that works perfectly with Composer Update Helper. Ensures code quality in your pull requests with PHP-CS-Fixer, PHPStan, PHPUnit, and security checks."

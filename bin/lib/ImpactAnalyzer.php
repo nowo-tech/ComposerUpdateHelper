@@ -4,27 +4,27 @@ declare(strict_types=1);
 
 /**
  * Impact Analyzer
- * Analyzes the impact of updating packages on dependent packages
+ * Analyzes the impact of updating packages on dependent packages.
  *
  * @author Héctor Franco Aceituno <hectorfranco@nowo.tech>
  */
-
 class ImpactAnalyzer
 {
     /**
      * Analyze the impact of updating a package to a new version
-     * Returns all packages that would be affected by the update
+     * Returns all packages that would be affected by the update.
      *
      * @param string $packageName Package name to analyze
      * @param string $newVersion New version to analyze impact for
      * @param bool $debug Enable debug logging
+     *
      * @return array Impact analysis with 'direct' and 'transitive' affected packages
      *               Format: ['direct' => ['package1' => 'constraint1', ...], 'transitive' => ['package2' => 'constraint2', ...]]
      */
     public static function analyzeImpact(string $packageName, string $newVersion, bool $debug = false): array
     {
         $impact = [
-            'direct' => [],
+            'direct'     => [],
             'transitive' => [],
         ];
 
@@ -35,12 +35,13 @@ class ImpactAnalyzer
             if ($debug) {
                 error_log("DEBUG: No dependent packages found for {$packageName}, no impact analysis needed");
             }
+
             return $impact;
         }
 
         if ($debug) {
             error_log("DEBUG: Analyzing impact of updating {$packageName} to {$newVersion}");
-            error_log("DEBUG: Found " . count($dependentConstraints) . " dependent package(s)");
+            error_log('DEBUG: Found ' . count($dependentConstraints) . ' dependent package(s)');
         }
 
         // Check each dependent package to see if it would be affected
@@ -68,20 +69,21 @@ class ImpactAnalyzer
         $impact['transitive'] = array_values(array_unique($impact['transitive']));
 
         if ($debug) {
-            error_log("DEBUG: Impact analysis complete: " . count($impact['direct']) . " direct, " . count($impact['transitive']) . " transitive");
+            error_log('DEBUG: Impact analysis complete: ' . count($impact['direct']) . ' direct, ' . count($impact['transitive']) . ' transitive');
         }
 
         return $impact;
     }
 
     /**
-     * Analyze transitive impact (packages that depend on the affected dependent)
+     * Analyze transitive impact (packages that depend on the affected dependent).
      *
      * @param string $dependentPackage Package that directly depends on the updated package
      * @param string $originalPackage Original package being updated (to avoid cycles)
      * @param bool $debug Enable debug logging
      * @param int $depth Current recursion depth (to prevent infinite loops)
      * @param int $maxDepth Maximum recursion depth
+     *
      * @return array Transitive affected packages
      */
     private static function analyzeTransitiveImpact(
@@ -95,6 +97,7 @@ class ImpactAnalyzer
             if ($debug) {
                 error_log("DEBUG: Max depth reached for transitive impact analysis of {$dependentPackage}");
             }
+
             return [];
         }
 
@@ -138,29 +141,30 @@ class ImpactAnalyzer
     }
 
     /**
-     * Format impact analysis for output
+     * Format impact analysis for output.
      *
      * @param array $impact Impact analysis result from analyzeImpact()
      * @param string $packageName Package name being analyzed
      * @param string $newVersion New version
+     *
      * @return array Formatted impact information
      */
     public static function formatImpactForOutput(array $impact, string $packageName, string $newVersion): array
     {
         $formatted = [
-            'package' => $packageName,
-            'new_version' => $newVersion,
-            'direct_affected' => [],
+            'package'             => $packageName,
+            'new_version'         => $newVersion,
+            'direct_affected'     => [],
             'transitive_affected' => [],
-            'total_affected' => 0,
+            'total_affected'      => 0,
         ];
 
         // Format direct affected packages
         foreach ($impact['direct'] as $dependentPackage => $constraint) {
             $formatted['direct_affected'][] = [
-                'package' => $dependentPackage,
+                'package'    => $dependentPackage,
                 'constraint' => $constraint,
-                'reason' => "requires {$packageName}:{$constraint}",
+                'reason'     => "requires {$packageName}:{$constraint}",
             ];
         }
 
@@ -168,7 +172,7 @@ class ImpactAnalyzer
         foreach ($impact['transitive'] as $transitivePackage) {
             $formatted['transitive_affected'][] = [
                 'package' => $transitivePackage,
-                'reason' => "transitively depends on affected packages",
+                'reason'  => 'transitively depends on affected packages',
             ];
         }
 

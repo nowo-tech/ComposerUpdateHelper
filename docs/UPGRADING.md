@@ -18,6 +18,19 @@ This guide will help you upgrade Composer Update Helper to newer versions.
 
 ## Version-Specific Upgrade Notes
 
+### Upgrading to 2.0.32+ (2026-07-27)
+
+#### What's Changed
+
+Maintainer/compliance hardening (REQ-* standards). Package runtime behavior for consumers is unchanged aside from `Plugin`/`Installer` being `final` (no documented extension points).
+
+#### Migration Steps
+
+1. Update the package: `composer update nowo-tech/composer-update-helper`.
+2. Contributors: `make setup-hooks`, `make check-open-prs`, `make release-check`.
+
+**No Breaking Changes** for typical consumers (do not subclass `Plugin` / `Installer`).
+
 ### Upgrading to 2.0.31+ (2026-07-16)
 
 #### What's Changed

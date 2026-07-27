@@ -4,18 +4,18 @@ declare(strict_types=1);
 
 /**
  * Batch Update Optimizer
- * Optimizes the order of package updates to minimize dependency resolution steps
+ * Optimizes the order of package updates to minimize dependency resolution steps.
  *
  * @author Héctor Franco Aceituno <hectorfranco@nowo.tech>
  */
-
 class BatchUpdateOptimizer
 {
     /**
-     * Optimize update order by analyzing dependencies between packages to update
+     * Optimize update order by analyzing dependencies between packages to update.
      *
      * @param array $packagesToUpdate Array of package strings (format: "package-name:version")
      * @param bool $debug Enable debug logging
+     *
      * @return array Optimized batches (array of arrays, each batch contains packages that can be updated together)
      */
     public static function optimizeUpdateOrder(array $packagesToUpdate, bool $debug = false): array
@@ -40,30 +40,31 @@ class BatchUpdateOptimizer
         $batches = self::groupByDependencyLevel($sorted, $graph, $packagesToUpdate);
 
         if ($debug) {
-            error_log("DEBUG: Batch optimization: " . count($packagesToUpdate) . " packages optimized into " . count($batches) . " batch(es)");
+            error_log('DEBUG: Batch optimization: ' . count($packagesToUpdate) . ' packages optimized into ' . count($batches) . ' batch(es)');
         }
 
         return $batches;
     }
 
     /**
-     * Build dependency graph between packages to update
+     * Build dependency graph between packages to update.
      *
      * @param array $packagesToUpdate Array of package strings (format: "package-name:version")
      * @param bool $debug Enable debug logging
+     *
      * @return array Graph structure: ['package-name' => ['depends-on' => ['other-package-name' => true]]]
      */
     private static function buildDependencyGraph(array $packagesToUpdate, bool $debug = false): array
     {
-        $graph = [];
+        $graph        = [];
         $packageNames = [];
 
         // Extract package names
         foreach ($packagesToUpdate as $packageString) {
-            $parts = explode(':', $packageString, 2);
-            $packageName = $parts[0];
+            $parts                      = explode(':', $packageString, 2);
+            $packageName                = $parts[0];
             $packageNames[$packageName] = $packageString;
-            $graph[$packageName] = ['depends-on' => []];
+            $graph[$packageName]        = ['depends-on' => []];
         }
 
         // Check dependencies between packages using composer.lock (faster than API calls)
@@ -80,7 +81,7 @@ class BatchUpdateOptimizer
 
         $allLockPackages = array_merge(
             $lock['packages'] ?? [],
-            $lock['packages-dev'] ?? []
+            $lock['packages-dev'] ?? [],
         );
 
         // Build a map of installed packages and their requirements
@@ -91,7 +92,7 @@ class BatchUpdateOptimizer
             }
             $installedRequirements[$pkg['name']] = array_merge(
                 $pkg['require'] ?? [],
-                $pkg['require-dev'] ?? []
+                $pkg['require-dev'] ?? [],
             );
         }
 
@@ -121,17 +122,18 @@ class BatchUpdateOptimizer
     }
 
     /**
-     * Perform topological sort to determine update order
+     * Perform topological sort to determine update order.
      *
      * @param array $graph Dependency graph
      * @param array $packagesToUpdate Original packages list
      * @param bool $debug Enable debug logging
+     *
      * @return array Topologically sorted package names
      */
     private static function topologicalSort(array $graph, array $packagesToUpdate, bool $debug = false): array
     {
-        $sorted = [];
-        $visited = [];
+        $sorted   = [];
+        $visited  = [];
         $tempMark = [];
 
         // Initialize all packages as not visited
@@ -146,7 +148,7 @@ class BatchUpdateOptimizer
     }
 
     /**
-     * Visit node for topological sort (DFS)
+     * Visit node for topological sort (DFS).
      *
      * @param string $packageName Package to visit
      * @param array $graph Dependency graph
@@ -168,6 +170,7 @@ class BatchUpdateOptimizer
             if ($debug) {
                 error_log("DEBUG: Cycle detected in dependency graph for {$packageName}, skipping");
             }
+
             return;
         }
 
@@ -188,26 +191,27 @@ class BatchUpdateOptimizer
 
         unset($tempMark[$packageName]);
         $visited[$packageName] = true;
-        $sorted[] = $packageName;
+        $sorted[]              = $packageName;
     }
 
     /**
      * Group sorted packages by dependency level
-     * Packages at the same level have no dependencies on each other and can be updated together
+     * Packages at the same level have no dependencies on each other and can be updated together.
      *
      * @param array $sorted Topologically sorted package names
      * @param array $graph Dependency graph
      * @param array $packagesToUpdate Original packages list (for mapping back to full strings)
+     *
      * @return array Batches grouped by dependency level
      */
     private static function groupByDependencyLevel(array $sorted, array $graph, array $packagesToUpdate): array
     {
-        $batches = [];
+        $batches    = [];
         $packageMap = [];
 
         // Create map of package name to full package string
         foreach ($packagesToUpdate as $packageString) {
-            $parts = explode(':', $packageString, 2);
+            $parts                 = explode(':', $packageString, 2);
             $packageMap[$parts[0]] = $packageString;
         }
 
@@ -236,6 +240,7 @@ class BatchUpdateOptimizer
 
         // Sort by level and return as array
         ksort($batches);
+
         return array_values($batches);
     }
 }

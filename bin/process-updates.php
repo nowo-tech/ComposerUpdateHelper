@@ -15,7 +15,7 @@ declare(strict_types=1);
 $libPaths = [
     __DIR__ . '/lib/autoload.php',  // Development or when in vendor/nowo-tech/composer-update-helper/bin/
     dirname(__DIR__) . '/bin/lib/autoload.php',  // Alternative vendor path
-    dirname(dirname(__DIR__)) . '/nowo-tech/composer-update-helper/bin/lib/autoload.php',  // From project root
+    dirname(__DIR__, 2) . '/nowo-tech/composer-update-helper/bin/lib/autoload.php',  // From project root
 ];
 
 $libLoaded = false;
@@ -32,7 +32,7 @@ foreach ($libPaths as $libPath) {
 $i18nLoaderPaths = [
     __DIR__ . '/i18n/loader.php',  // Development or when in vendor/nowo-tech/composer-update-helper/bin/
     dirname(__DIR__) . '/bin/i18n/loader.php',  // Alternative vendor path
-    dirname(dirname(__DIR__)) . '/nowo-tech/composer-update-helper/bin/i18n/loader.php',  // From project root
+    dirname(__DIR__, 2) . '/nowo-tech/composer-update-helper/bin/i18n/loader.php',  // From project root
 ];
 
 $i18nLoaderLoaded = false;
@@ -46,13 +46,16 @@ foreach ($i18nLoaderPaths as $i18nLoaderPath) {
 
 // Fallback: if loader not found, define a dummy t() function
 if (!$i18nLoaderLoaded && !function_exists('t')) {
-    function t(string $key, array $params = [], ?string $lang = null): string {
+    function t(string $key, array $params = [], ?string $lang = null): string
+    {
         return $key;
     }
-    function detectLanguage(): string {
+    function detectLanguage(): string
+    {
         return 'en';
     }
-    function loadTranslations(string $lang): array {
+    function loadTranslations(string $lang): array
+    {
         return [];
     }
 }
@@ -65,35 +68,35 @@ if ($start === false || $end === false || $end < $start) {
     // Nothing parseable
     exit(0);
 }
-$json = substr($raw, $start, $end - $start + 1);
+$json   = substr($raw, $start, $end - $start + 1);
 $report = json_decode($json, true);
 if (!$report || empty($report['installed'])) {
     exit(0);
 }
 
-$composer = json_decode(file_get_contents('composer.json'), true);
-$require    = $composer['require']     ?? [];
+$composer   = json_decode(file_get_contents('composer.json'), true);
+$require    = $composer['require'] ?? [];
 $requireDev = $composer['require-dev'] ?? [];
-$allDeps = array_merge($require, $requireDev);
-$devSet = array_fill_keys(array_keys($requireDev), true);
+$allDeps    = array_merge($require, $requireDev);
+$devSet     = array_fill_keys(array_keys($requireDev), true);
 
 // Load library classes - functions are now in classes
 // readPackagesFromYaml, readConfigValue, readPackagesFromTxt are in ConfigLoader
 // debugLog, normalizeVersion, formatPackageList, addPackageToArray, buildComposerCommand are in Utils
 
 // Load ignored and included packages from YAML or TXT file
-$configFile = getenv('CONFIG_FILE') ?: '';
-$ignoredPackages = [];
-$includedPackages = [];
+$configFile        = getenv('CONFIG_FILE') ?: '';
+$ignoredPackages   = [];
+$includedPackages  = [];
 $checkDependencies = true; // Default: enabled
 
 if ($configFile) {
     // YAML file provided
-    if (strpos($configFile, '.yaml') !== false || strpos($configFile, '.yml') !== false) {
-        $ignoredPackages = ConfigLoader::readPackagesFromYaml($configFile, 'ignore');
-        $includedPackages = ConfigLoader::readPackagesFromYaml($configFile, 'include');
+    if (str_contains($configFile, '.yaml') || str_contains($configFile, '.yml')) {
+        $ignoredPackages   = ConfigLoader::readPackagesFromYaml($configFile, 'ignore');
+        $includedPackages  = ConfigLoader::readPackagesFromYaml($configFile, 'include');
         $checkDependencies = ConfigLoader::readConfigValue($configFile, 'check-dependencies', true);
-    } elseif (strpos($configFile, '.txt') !== false) {
+    } elseif (str_contains($configFile, '.txt')) {
         // TXT file (backward compatibility)
         $ignoredPackages = ConfigLoader::readPackagesFromTxt($configFile);
     }
@@ -109,26 +112,26 @@ if ($configFile) {
     }
 
     if ($yamlFile) {
-        $ignoredPackages = ConfigLoader::readPackagesFromYaml($yamlFile, 'ignore');
-        $includedPackages = ConfigLoader::readPackagesFromYaml($yamlFile, 'include');
+        $ignoredPackages   = ConfigLoader::readPackagesFromYaml($yamlFile, 'ignore');
+        $includedPackages  = ConfigLoader::readPackagesFromYaml($yamlFile, 'include');
         $checkDependencies = ConfigLoader::readConfigValue($yamlFile, 'check-dependencies', true);
     }
 }
 
 // Convert to associative arrays for faster lookup
-$ignoredPackages = array_flip($ignoredPackages);
+$ignoredPackages  = array_flip($ignoredPackages);
 $includedPackages = array_flip($includedPackages);
 
 // Check if release info should be skipped
-$showReleaseInfo = getenv('SHOW_RELEASE_INFO') === 'true';
-$showReleaseDetail = getenv('SHOW_RELEASE_DETAIL') === 'true';
+$showReleaseInfo    = getenv('SHOW_RELEASE_INFO') === 'true';
+$showReleaseDetail  = getenv('SHOW_RELEASE_DETAIL') === 'true';
 $showImpactAnalysis = getenv('SHOW_IMPACT_ANALYSIS') === 'true';
-$saveImpactToFile = getenv('SAVE_IMPACT_TO_FILE') === 'true';
+$saveImpactToFile   = getenv('SAVE_IMPACT_TO_FILE') === 'true';
 // If save-impact-to-file is enabled, automatically enable show-impact-analysis (like --save-impact flag does)
 if ($saveImpactToFile) {
     $showImpactAnalysis = true;
 }
-$debug = getenv('DEBUG') === 'true';
+$debug   = getenv('DEBUG') === 'true';
 $verbose = getenv('VERBOSE') === 'true';
 
 // Detect and load language for translations
@@ -139,7 +142,7 @@ if (function_exists('detectLanguage')) {
     if ($configFileForLang && file_exists($configFileForLang)) {
         $detectedLang = ConfigLoader::readConfigValue($configFileForLang, 'language');
         if ($debug) {
-            error_log("DEBUG: i18n - Language from config file: " . ($detectedLang ?: 'not set'));
+            error_log('DEBUG: i18n - Language from config file: ' . ($detectedLang ?: 'not set'));
         }
     }
 
@@ -147,32 +150,32 @@ if (function_exists('detectLanguage')) {
     if (empty($detectedLang)) {
         $detectedLang = detectLanguage();
         if ($debug) {
-            error_log("DEBUG: i18n - Language detected from system: " . $detectedLang);
+            error_log('DEBUG: i18n - Language detected from system: ' . $detectedLang);
         }
     }
 
     if ($debug) {
-        error_log("DEBUG: i18n - Final detected language: " . ($detectedLang ?: 'not detected'));
-        error_log("DEBUG: i18n - Config file used: " . ($configFileForLang ?: 'not found'));
-        error_log("DEBUG: i18n - Translation function available: " . (function_exists('t') ? 'yes' : 'no'));
-        error_log("DEBUG: i18n - LoadTranslations function available: " . (function_exists('loadTranslations') ? 'yes' : 'no'));
-        error_log("DEBUG: i18n - i18n loader loaded: " . ($i18nLoaderLoaded ? 'yes' : 'no'));
+        error_log('DEBUG: i18n - Final detected language: ' . ($detectedLang ?: 'not detected'));
+        error_log('DEBUG: i18n - Config file used: ' . ($configFileForLang ?: 'not found'));
+        error_log('DEBUG: i18n - Translation function available: ' . (function_exists('t') ? 'yes' : 'no'));
+        error_log('DEBUG: i18n - LoadTranslations function available: ' . (function_exists('loadTranslations') ? 'yes' : 'no'));
+        error_log('DEBUG: i18n - i18n loader loaded: ' . ($i18nLoaderLoaded ? 'yes' : 'no'));
         if (function_exists('loadTranslations')) {
             $testTranslations = loadTranslations($detectedLang ?: 'en');
-            error_log("DEBUG: i18n - Loaded translations count: " . count($testTranslations));
+            error_log('DEBUG: i18n - Loaded translations count: ' . count($testTranslations));
             if (count($testTranslations) > 0) {
-                error_log("DEBUG: i18n - Sample translation keys: " . implode(', ', array_slice(array_keys($testTranslations), 0, 5)));
+                error_log('DEBUG: i18n - Sample translation keys: ' . implode(', ', array_slice(array_keys($testTranslations), 0, 5)));
                 error_log("DEBUG: i18n - Test translation 'no_packages_update': " . t('no_packages_update', [], $detectedLang));
                 error_log("DEBUG: i18n - Test translation 'suggested_commands': " . t('suggested_commands', [], $detectedLang));
             } else {
-                error_log("DEBUG: i18n - WARNING: No translations loaded! Check i18n file paths.");
+                error_log('DEBUG: i18n - WARNING: No translations loaded! Check i18n file paths.');
             }
         }
     }
 } else {
     if ($debug) {
-        error_log("DEBUG: i18n - WARNING: detectLanguage() function not available! i18n loader may not have loaded correctly.");
-        error_log("DEBUG: i18n - Tried paths: " . implode(', ', $i18nLoaderPaths));
+        error_log('DEBUG: i18n - WARNING: detectLanguage() function not available! i18n loader may not have loaded correctly.');
+        error_log('DEBUG: i18n - Tried paths: ' . implode(', ', $i18nLoaderPaths));
     }
 }
 
@@ -203,28 +206,28 @@ define('COMPOSER_REQUIRE_FLAGS', '--with-all-dependencies');
 // debugLog, normalizeVersion, formatPackageList, addPackageToArray, buildComposerCommand
 
 if ($debug) {
-    Utils::debugLog("showReleaseInfo = " . ($showReleaseInfo ? 'true' : 'false'), $debug);
-    Utils::debugLog("showReleaseDetail = " . ($showReleaseDetail ? 'true' : 'false'), $debug);
-    Utils::debugLog("showImpactAnalysis = " . ($showImpactAnalysis ? 'true' : 'false'), $debug);
-    Utils::debugLog("saveImpactToFile = " . ($saveImpactToFile ? 'true' : 'false'), $debug);
-    Utils::debugLog("checkDependencies = " . ($checkDependencies ? 'true' : 'false'), $debug);
-    Utils::debugLog("verbose = " . ($verbose ? 'true' : 'false'), $debug);
-    Utils::debugLog("ignoredPackages count = " . count($ignoredPackages), $debug);
-    Utils::debugLog("includedPackages count = " . count($includedPackages), $debug);
+    Utils::debugLog('showReleaseInfo = ' . ($showReleaseInfo ? 'true' : 'false'), $debug);
+    Utils::debugLog('showReleaseDetail = ' . ($showReleaseDetail ? 'true' : 'false'), $debug);
+    Utils::debugLog('showImpactAnalysis = ' . ($showImpactAnalysis ? 'true' : 'false'), $debug);
+    Utils::debugLog('saveImpactToFile = ' . ($saveImpactToFile ? 'true' : 'false'), $debug);
+    Utils::debugLog('checkDependencies = ' . ($checkDependencies ? 'true' : 'false'), $debug);
+    Utils::debugLog('verbose = ' . ($verbose ? 'true' : 'false'), $debug);
+    Utils::debugLog('ignoredPackages count = ' . count($ignoredPackages), $debug);
+    Utils::debugLog('includedPackages count = ' . count($includedPackages), $debug);
     if (count($ignoredPackages) > 0) {
-        Utils::debugLog("ignoredPackages list: " . implode(', ', array_keys($ignoredPackages)), $debug);
+        Utils::debugLog('ignoredPackages list: ' . implode(', ', array_keys($ignoredPackages)), $debug);
     }
     if (count($includedPackages) > 0) {
-        Utils::debugLog("includedPackages list: " . implode(', ', array_keys($includedPackages)), $debug);
+        Utils::debugLog('includedPackages list: ' . implode(', ', array_keys($includedPackages)), $debug);
     }
-    Utils::debugLog("Total outdated packages: " . count($report['installed']), $debug);
-    Utils::debugLog("require packages: " . count($require), $debug);
-    Utils::debugLog("require-dev packages: " . count($requireDev), $debug);
+    Utils::debugLog('Total outdated packages: ' . count($report['installed']), $debug);
+    Utils::debugLog('require packages: ' . count($require), $debug);
+    Utils::debugLog('require-dev packages: ' . count($requireDev), $debug);
 
     // Show impact file directory if saving to file
     if ($saveImpactToFile) {
         $impactFileDir = getenv('IMPACT_FILE_DIR');
-        Utils::debugLog("IMPACT_FILE_DIR = " . ($impactFileDir ?: 'not set (will use current directory)'), $debug);
+        Utils::debugLog('IMPACT_FILE_DIR = ' . ($impactFileDir ?: 'not set (will use current directory)'), $debug);
     }
 }
 
@@ -236,84 +239,101 @@ if ($debug) {
 $frameworkConstraints = FrameworkDetector::detectFrameworkConstraints($composer, $allDeps, $debug);
 
 // Functions moved to classes - use wrapper functions for backward compatibility during refactoring
-function versionSatisfiesConstraint($version, $constraint) {
+function versionSatisfiesConstraint($version, $constraint)
+{
     return DependencyAnalyzer::versionSatisfiesConstraint($version, $constraint);
 }
 
-function getInstalledPackageVersion($packageName) {
+function getInstalledPackageVersion($packageName)
+{
     return DependencyAnalyzer::getInstalledPackageVersion($packageName);
 }
 
-function getPackageRequirements($packageName, $version) {
+function getPackageRequirements($packageName, $version)
+{
     return PackageInfoProvider::getPackageRequirements($packageName, $version);
 }
 
-function getPackageRequirementsFromComposer($packageName, $version) {
+function getPackageRequirementsFromComposer($packageName, $version)
+{
     return PackageInfoProvider::getPackageRequirementsFromComposer($packageName, $version);
 }
 
 // Function to find the highest compatible version considering dependent packages
 // NOTE: This is a wrapper for VersionResolver::findCompatibleVersion
-function findCompatibleVersion($packageName, $proposedVersion, $debug = false, $checkDependencies = true, ?array &$requiredTransitiveUpdates = null, ?array &$conflictingDependents = null) {
+function findCompatibleVersion($packageName, $proposedVersion, $debug = false, $checkDependencies = true, ?array &$requiredTransitiveUpdates = null, ?array &$conflictingDependents = null)
+{
     return VersionResolver::findCompatibleVersion(
         $packageName,
         $proposedVersion,
         $debug,
         $checkDependencies,
         $requiredTransitiveUpdates,
-        $conflictingDependents
+        $conflictingDependents,
     );
 }
 
 // Legacy function removed - code is now in VersionResolver class
 
 // Function moved to FrameworkDetector class
-function getLatestVersionInConstraint($packageName, $baseVersion) {
+function getLatestVersionInConstraint($packageName, $baseVersion)
+{
     return FrameworkDetector::getLatestVersionInConstraint($packageName, $baseVersion);
 }
 
-function shouldLimitVersion($packageName, $latestVersion, $frameworkConstraints) {
+function shouldLimitVersion($packageName, $latestVersion, $frameworkConstraints)
+{
     return FrameworkDetector::shouldLimitVersion($packageName, $latestVersion, $frameworkConstraints);
 }
 
-function getFrameworkConstraint($packageName, $frameworkConstraints) {
+function getFrameworkConstraint($packageName, $frameworkConstraints)
+{
     return FrameworkDetector::getFrameworkConstraint($packageName, $frameworkConstraints);
 }
 
-function normalizeVersion($version) {
+function normalizeVersion($version)
+{
     return Utils::normalizeVersion($version);
 }
 
-function addPackageToArray($name, $constraint, $devSet, &$prod, &$dev, $debug = false) {
+function addPackageToArray($name, $constraint, $devSet, &$prod, &$dev, $debug = false)
+{
     return Utils::addPackageToArray($name, $constraint, $devSet, $prod, $dev, $debug);
 }
 
-function buildComposerCommand($packages, $isDev = false) {
+function buildComposerCommand($packages, $isDev = false)
+{
     return Utils::buildComposerCommand($packages, $isDev);
 }
 
-function formatPackageList($packages, $label, $indent = '     ') {
+function formatPackageList($packages, $label, $indent = '     ')
+{
     return Utils::formatPackageList($packages, $label, $indent);
 }
 
 // Functions moved to classes - using wrappers for backward compatibility
-function isPackageAbandoned($packageName, $debug = false) {
+function isPackageAbandoned($packageName, $debug = false)
+{
     return AbandonedPackageDetector::isPackageAbandoned($packageName, $debug);
 }
 
-function findFallbackVersion($packageName, $targetVersion, $conflictingDependents, $debug = false) {
+function findFallbackVersion($packageName, $targetVersion, $conflictingDependents, $debug = false)
+{
     return FallbackVersionFinder::findFallbackVersion($packageName, $targetVersion, $conflictingDependents, $debug);
 }
 
-function findAlternativePackages($packageName, $debug = false) {
+function findAlternativePackages($packageName, $debug = false)
+{
     return AlternativePackageFinder::findAlternatives($packageName, $debug);
 }
 
-function getGitHubRepoFromPackagist($packageName) {
+function getGitHubRepoFromPackagist($packageName)
+{
     return PackageInfoProvider::getGitHubRepoFromPackagist($packageName);
 }
 
-function getReleaseInfo($githubRepo, $version) {
+function getReleaseInfo($githubRepo, $version)
+{
     return PackageInfoProvider::getReleaseInfo($githubRepo, $version);
 }
 
@@ -321,15 +341,15 @@ function getReleaseInfo($githubRepo, $version) {
 // PROCESS PACKAGES
 // ============================================================================
 
-$prod = [];
-$dev  = [];
+$prod        = [];
+$dev         = [];
 $ignoredProd = [];
 $ignoredDev  = [];
 $releaseInfo = []; // Store release information for packages
 
 // Track all outdated packages (before dependency checking) for debug output
-$allOutdatedProd = [];
-$allOutdatedDev  = [];
+$allOutdatedProd            = [];
+$allOutdatedDev             = [];
 $filteredByDependenciesProd = [];
 $filteredByDependenciesDev  = [];
 // Track which dependent packages cause conflicts for filtered packages
@@ -339,7 +359,7 @@ $filteredPackageAbandoned = []; // Format: 'package:version' => ['abandoned' => 
 // Store fallback versions for filtered packages (format: 'package:version' => 'fallbackVersion')
 $filteredPackageFallbacks = []; // Format: 'package:version' => 'fallbackVersion'
 // Store alternative packages for filtered packages (format: 'package:version' => ['alternatives' => [...], 'reason' => '...'])
-$filteredPackageAlternatives = []; // Format: 'package:version' => ['alternatives' => [...], 'reason' => '...']
+$filteredPackageAlternatives       = []; // Format: 'package:version' => ['alternatives' => [...], 'reason' => '...']
 $filteredPackageMaintainerContacts = []; // Format: 'package:version' => ['maintainers' => [...], 'repository_url' => '...', 'is_stale' => bool, ...]
 // Store impact analysis for filtered packages (format: 'package:version' => ['direct' => [...], 'transitive' => [...]])
 $filteredPackageImpact = []; // Format: 'package:version' => ['direct' => [...], 'transitive' => [...], 'total_affected' => int]
@@ -351,10 +371,12 @@ $packagesWithCompatibleDependents = []; // Format: 'package:version' => true
 $checkedDependentsWithoutCompatible = []; // Format: 'dependent-package' => ['required_by' => 'package:version', 'current_constraint' => '...', 'latest_checked_constraint' => '...', 'installed_version' => '...']
 
 foreach ($report['installed'] as $pkg) {
-    if (!isset($pkg['name'])) continue;
-    $name   = $pkg['name'];
+    if (!isset($pkg['name'])) {
+        continue;
+    }
+    $name      = $pkg['name'];
     $installed = $pkg['version'] ?? null;
-    $latest = $pkg['latest'] ?? null;
+    $latest    = $pkg['latest'] ?? null;
 
     if ($debug) {
         error_log("DEBUG: Processing package: {$name} (installed: {$installed}, latest: {$latest})");
@@ -362,17 +384,17 @@ foreach ($report['installed'] as $pkg) {
 
     // Check if package is included (force include even if ignored)
     $isIncluded = isset($includedPackages[$name]);
-    $isIgnored = isset($ignoredPackages[$name]);
+    $isIgnored  = isset($ignoredPackages[$name]);
 
     if ($debug) {
-        error_log("DEBUG:   - isIgnored: " . ($isIgnored ? 'true' : 'false'));
-        error_log("DEBUG:   - isIncluded: " . ($isIncluded ? 'true' : 'false'));
+        error_log('DEBUG:   - isIgnored: ' . ($isIgnored ? 'true' : 'false'));
+        error_log('DEBUG:   - isIncluded: ' . ($isIncluded ? 'true' : 'false'));
     }
 
     // Check if package is ignored (unless it's explicitly included)
     if ($isIgnored && !$isIncluded) {
         if ($debug) {
-            error_log("DEBUG:   - Action: IGNORED (in ignore list and not in include list)");
+            error_log('DEBUG:   - Action: IGNORED (in ignore list and not in include list)');
         }
         if ($latest) {
             $normalized = normalizeVersion($latest);
@@ -386,22 +408,22 @@ foreach ($report['installed'] as $pkg) {
     }
 
     if ($isIncluded && $debug) {
-        error_log("DEBUG:   - Action: INCLUDED (forced include, overriding ignore)");
+        error_log('DEBUG:   - Action: INCLUDED (forced include, overriding ignore)');
     }
 
     if (!$latest) {
         if ($debug) {
-            error_log("DEBUG:   - Action: SKIPPED (no latest version available)");
+            error_log('DEBUG:   - Action: SKIPPED (no latest version available)');
         }
         continue;
     }
 
-    $normalized = normalizeVersion($latest);
+    $normalized          = normalizeVersion($latest);
     $installedNormalized = normalizeVersion($installed);
 
     // Check if this package belongs to a framework and should be limited
     if (shouldLimitVersion($name, $latest, $frameworkConstraints)) {
-        $frameworkBase = getFrameworkConstraint($name, $frameworkConstraints);
+        $frameworkBase   = getFrameworkConstraint($name, $frameworkConstraints);
         $specificVersion = getLatestVersionInConstraint($name, $frameworkBase);
         if ($specificVersion) {
             $constraint = $specificVersion;
@@ -418,7 +440,7 @@ foreach ($report['installed'] as $pkg) {
     if ($installedNormalized) {
         $constraintNormalized = $constraint;
         // If it's a wildcard constraint, we can't compare directly, so we include it
-        if (strpos($constraint, '*') === false && strpos($constraint, '^') === false && strpos($constraint, '~') === false) {
+        if (!str_contains($constraint, '*') && !str_contains($constraint, '^') && !str_contains($constraint, '~')) {
             // It's a specific version, we can compare
             $comparison = version_compare($installedNormalized, $constraintNormalized, '>=');
             if ($debug) {
@@ -427,13 +449,13 @@ foreach ($report['installed'] as $pkg) {
             if ($comparison) {
                 // Already at that version or higher, don't include
                 if ($debug) {
-                    error_log("DEBUG:   - Action: SKIPPED (already at or above target version)");
+                    error_log('DEBUG:   - Action: SKIPPED (already at or above target version)');
                 }
                 continue;
             }
             $needsUpdate = true;
         } elseif ($debug) {
-            error_log("DEBUG:   - Wildcard constraint, including for update");
+            error_log('DEBUG:   - Wildcard constraint, including for update');
             $needsUpdate = true;
         }
     } else {
@@ -460,7 +482,7 @@ foreach ($report['installed'] as $pkg) {
             $filteredPackageAbandoned[$packageString] = $abandonedInfo;
             if ($debug) {
                 error_log("DEBUG: Package {$name} is abandoned" .
-                          ($abandonedInfo['replacement'] ? " (replacement: {$abandonedInfo['replacement']})" : ""));
+                          ($abandonedInfo['replacement'] ? " (replacement: {$abandonedInfo['replacement']})" : ''));
             }
         }
     }
@@ -473,8 +495,8 @@ foreach ($report['installed'] as $pkg) {
         Utils::showProgressMessage('checking_dependency_conflicts', $progressMsg, $debug, $verbose);
 
         $conflictingDependents = [];
-        $fallbackVersion = null; // New variable for fallback versions
-        $compatibleVersion = findCompatibleVersion($name, $constraint, $debug, $checkDependencies, $requiredTransitiveUpdates, $conflictingDependents);
+        $fallbackVersion       = null; // New variable for fallback versions
+        $compatibleVersion     = findCompatibleVersion($name, $constraint, $debug, $checkDependencies, $requiredTransitiveUpdates, $conflictingDependents);
 
         // If no compatible version but we have conflicts, check if dependent packages can be updated
         if ($compatibleVersion === null && !empty($conflictingDependents)) {
@@ -500,11 +522,11 @@ foreach ($report['installed'] as $pkg) {
             if ($fallbackVersion) {
                 // Verify fallback version also satisfies package requirements
                 $fallbackRequirements = getPackageRequirements($name, $fallbackVersion);
-                $fallbackHasConflict = false;
+                $fallbackHasConflict  = false;
 
                 foreach ($fallbackRequirements as $reqPackage => $reqConstraint) {
                     // Skip php and ext-* requirements
-                    if ($reqPackage === 'php' || strpos($reqPackage, 'php-') === 0 || strpos($reqPackage, 'ext-') === 0) {
+                    if ($reqPackage === 'php' || str_starts_with($reqPackage, 'php-') || str_starts_with($reqPackage, 'ext-')) {
                         continue;
                     }
 
@@ -534,7 +556,7 @@ foreach ($report['installed'] as $pkg) {
         if ($compatibleVersion === null) {
             // No compatible version found, skip this update
             if ($debug) {
-                error_log("DEBUG:   - Action: SKIPPED (no compatible version found due to dependency constraints)");
+                error_log('DEBUG:   - Action: SKIPPED (no compatible version found due to dependency constraints)');
                 if (!empty($conflictingDependents)) {
                     error_log("DEBUG:   - Conflicting dependents for {$packageString}: " . json_encode($conflictingDependents));
                 }
@@ -553,12 +575,12 @@ foreach ($report['installed'] as $pkg) {
                 if ($showImpactAnalysis) {
                     $impact = ImpactAnalyzer::analyzeImpact($name, $constraint, $debug);
                     if (!empty($impact['direct']) || !empty($impact['transitive'])) {
-                        $formattedImpact = ImpactAnalyzer::formatImpactForOutput($impact, $name, $constraint);
+                        $formattedImpact                       = ImpactAnalyzer::formatImpactForOutput($impact, $name, $constraint);
                         $filteredPackageImpact[$packageString] = $formattedImpact;
                         if ($debug) {
                             error_log("DEBUG: Impact analysis for {$packageString}: " .
-                                      count($formattedImpact['direct_affected']) . " direct, " .
-                                      count($formattedImpact['transitive_affected']) . " transitive");
+                                      count($formattedImpact['direct_affected']) . ' direct, ' .
+                                      count($formattedImpact['transitive_affected']) . ' transitive');
                         }
                     }
                 }
@@ -575,7 +597,7 @@ foreach ($report['installed'] as $pkg) {
                         if ($alternatives && !empty($alternatives['alternatives'])) {
                             $filteredPackageAlternatives[$packageString] = $alternatives;
                             if ($debug) {
-                                error_log("DEBUG: Found " . count($alternatives['alternatives']) . " alternative(s) for abandoned package {$name}");
+                                error_log('DEBUG: Found ' . count($alternatives['alternatives']) . " alternative(s) for abandoned package {$name}");
                             }
                         }
                     }
@@ -589,13 +611,13 @@ foreach ($report['installed'] as $pkg) {
                     if ($alternatives && !empty($alternatives['alternatives'])) {
                         $filteredPackageAlternatives[$packageString] = $alternatives;
                         if ($debug) {
-                            error_log("DEBUG: Found " . count($alternatives['alternatives']) . " alternative(s) for package {$name}");
+                            error_log('DEBUG: Found ' . count($alternatives['alternatives']) . " alternative(s) for package {$name}");
                         }
                     } else {
                         // No alternatives found - check if we should suggest maintainer contact
                         // Only suggest if we have a conflicting package and constraint
                         if (!empty($conflictingDependents)) {
-                            $firstConflictPackage = array_key_first($conflictingDependents);
+                            $firstConflictPackage    = array_key_first($conflictingDependents);
                             $firstConflictConstraint = $conflictingDependents[$firstConflictPackage];
 
                             // Get current constraint from packageString (format: "package:constraint")
@@ -607,7 +629,7 @@ foreach ($report['installed'] as $pkg) {
                                 $firstConflictPackage,
                                 $currentConstraint,
                                 $firstConflictConstraint,
-                                $debug
+                                $debug,
                             )) {
                                 // Show progress message for maintainer info checking (only once)
                                 $progressMsg = function_exists('t') ? t('checking_maintainer_info', [], $detectedLang) : '⏳ Checking maintainer information...';
@@ -626,7 +648,7 @@ foreach ($report['installed'] as $pkg) {
                 }
 
                 if ($debug) {
-                    error_log("DEBUG:   - Stored conflicts for {$packageString}: " . count($conflictingDependents) . " conflicting dependent(s)");
+                    error_log("DEBUG:   - Stored conflicts for {$packageString}: " . count($conflictingDependents) . ' conflicting dependent(s)');
                 }
             }
             continue;
@@ -641,11 +663,11 @@ foreach ($report['installed'] as $pkg) {
     }
 
     // Get release information for this package (only for specific versions, not wildcards)
-    if ($showReleaseInfo && strpos($constraint, '*') === false && strpos($constraint, '^') === false && strpos($constraint, '~') === false) {
+    if ($showReleaseInfo && !str_contains($constraint, '*') && !str_contains($constraint, '^') && !str_contains($constraint, '~')) {
         // Only fetch release info for specific versions to avoid unnecessary API calls
         // Show progress indicator (only if not in debug mode, as debug shows everything)
         if (!$debug && !isset($releaseInfoShown)) {
-            error_log("⏳ Fetching release information...");
+            error_log('⏳ Fetching release information...');
             $releaseInfoShown = true;
         }
         $githubRepo = getGitHubRepoFromPackagist($name);
@@ -667,10 +689,10 @@ if ($totalOutdated > 0 && !$debug) {
     error_log($countMsg);
 }
 if ($debug && $totalOutdated > 0) {
-    Utils::debugLog("Total outdated packages found: {$totalOutdated} (prod: " . count($allOutdatedProd) . ", dev: " . count($allOutdatedDev) . ")", $debug);
+    Utils::debugLog("Total outdated packages found: {$totalOutdated} (prod: " . count($allOutdatedProd) . ', dev: ' . count($allOutdatedDev) . ')', $debug);
 }
 if ($debug && $totalOutdated > 0) {
-    Utils::debugLog("Total outdated packages found: {$totalOutdated} (prod: " . count($allOutdatedProd) . ", dev: " . count($allOutdatedDev) . ")", $debug);
+    Utils::debugLog("Total outdated packages found: {$totalOutdated} (prod: " . count($allOutdatedProd) . ', dev: ' . count($allOutdatedDev) . ')', $debug);
 }
 
 // ============================================================================
@@ -686,18 +708,18 @@ Utils::showProgressMessage('checking_all_abandoned_packages', $progressMsg, $deb
 // Check all packages from composer.json (require and require-dev)
 $allInstalledPackages = array_merge(
     array_keys($require),
-    array_keys($requireDev)
+    array_keys($requireDev),
 );
 
 if ($debug) {
-    Utils::debugLog("Checking " . count($allInstalledPackages) . " installed packages for abandoned status", $debug);
+    Utils::debugLog('Checking ' . count($allInstalledPackages) . ' installed packages for abandoned status', $debug);
 }
 
 foreach ($allInstalledPackages as $packageName) {
     // Skip if already checked (in filteredPackageAbandoned)
     $alreadyChecked = false;
     foreach ($filteredPackageAbandoned as $packageString => $abandonedInfo) {
-        if (strpos($packageString, $packageName . ':') === 0) {
+        if (str_starts_with($packageString, $packageName . ':')) {
             $alreadyChecked = true;
             break;
         }
@@ -713,17 +735,17 @@ foreach ($allInstalledPackages as $packageName) {
     if ($abandonedInfo && $abandonedInfo['abandoned']) {
         // Get installed version from composer.lock or composer.json
         $installedVersion = getInstalledPackageVersion($packageName);
-        $packageString = $packageName . ':' . ($installedVersion ?: 'unknown');
+        $packageString    = $packageName . ':' . ($installedVersion ?: 'unknown');
 
         $allInstalledAbandoned[$packageString] = [
-            'abandoned' => true,
+            'abandoned'   => true,
             'replacement' => $abandonedInfo['replacement'] ?? null,
-            'is_dev' => isset($devSet[$packageName])
+            'is_dev'      => isset($devSet[$packageName]),
         ];
 
         if ($debug) {
             error_log("DEBUG: Installed package {$packageName} is abandoned" .
-                      ($abandonedInfo['replacement'] ? " (replacement: {$abandonedInfo['replacement']})" : ""));
+                      ($abandonedInfo['replacement'] ? " (replacement: {$abandonedInfo['replacement']})" : ''));
         }
     }
 }
@@ -734,49 +756,49 @@ foreach ($allInstalledPackages as $packageName) {
 
 // Prepare data for OutputFormatter
 $outputData = [
-    'prod' => $prod,
-    'dev' => $dev,
-    'ignoredProd' => $ignoredProd,
-    'ignoredDev' => $ignoredDev,
-    'frameworkConstraints' => $frameworkConstraints,
-    'allOutdatedProd' => $allOutdatedProd,
-    'allOutdatedDev' => $allOutdatedDev,
-    'filteredByDependenciesProd' => $filteredByDependenciesProd,
-    'filteredByDependenciesDev' => $filteredByDependenciesDev,
-    'filteredPackageConflicts' => $filteredPackageConflicts,
-    'filteredPackageAbandoned' => $filteredPackageAbandoned,
-    'filteredPackageFallbacks' => $filteredPackageFallbacks,
-    'filteredPackageAlternatives' => $filteredPackageAlternatives,
-    'filteredPackageMaintainerContacts' => $filteredPackageMaintainerContacts,
-    'filteredPackageImpact' => $filteredPackageImpact,
-    'requiredTransitiveUpdates' => $requiredTransitiveUpdates,
-    'packagesWithCompatibleDependents' => $packagesWithCompatibleDependents,
+    'prod'                               => $prod,
+    'dev'                                => $dev,
+    'ignoredProd'                        => $ignoredProd,
+    'ignoredDev'                         => $ignoredDev,
+    'frameworkConstraints'               => $frameworkConstraints,
+    'allOutdatedProd'                    => $allOutdatedProd,
+    'allOutdatedDev'                     => $allOutdatedDev,
+    'filteredByDependenciesProd'         => $filteredByDependenciesProd,
+    'filteredByDependenciesDev'          => $filteredByDependenciesDev,
+    'filteredPackageConflicts'           => $filteredPackageConflicts,
+    'filteredPackageAbandoned'           => $filteredPackageAbandoned,
+    'filteredPackageFallbacks'           => $filteredPackageFallbacks,
+    'filteredPackageAlternatives'        => $filteredPackageAlternatives,
+    'filteredPackageMaintainerContacts'  => $filteredPackageMaintainerContacts,
+    'filteredPackageImpact'              => $filteredPackageImpact,
+    'requiredTransitiveUpdates'          => $requiredTransitiveUpdates,
+    'packagesWithCompatibleDependents'   => $packagesWithCompatibleDependents,
     'checkedDependentsWithoutCompatible' => $checkedDependentsWithoutCompatible,
-    'allInstalledPackages' => array_keys($allDeps), // List of all installed package names
-    'releaseInfo' => $releaseInfo,
-    'devSet' => $devSet,
-    'allInstalledAbandoned' => $allInstalledAbandoned,
+    'allInstalledPackages'               => array_keys($allDeps), // List of all installed package names
+    'releaseInfo'                        => $releaseInfo,
+    'devSet'                             => $devSet,
+    'allInstalledAbandoned'              => $allInstalledAbandoned,
 ];
 
 $outputOptions = [
-    'debug' => $debug,
-    'verbose' => $verbose,
-    'checkDependencies' => $checkDependencies,
-    'showReleaseInfo' => $showReleaseInfo,
-    'showReleaseDetail' => $showReleaseDetail,
+    'debug'              => $debug,
+    'verbose'            => $verbose,
+    'checkDependencies'  => $checkDependencies,
+    'showReleaseInfo'    => $showReleaseInfo,
+    'showReleaseDetail'  => $showReleaseDetail,
     'showImpactAnalysis' => $showImpactAnalysis,
-    'detectedLang' => $detectedLang,
+    'detectedLang'       => $detectedLang,
 ];
 
 // Generate output using OutputFormatter
 $output = OutputFormatter::formatOutput($outputData, $outputOptions);
 
 // Check if there's nothing to show (early exit case)
-if (count($output) === 1 && strpos($output[0], 'No outdated direct dependencies') !== false) {
+if (count($output) === 1 && str_contains($output[0], 'No outdated direct dependencies')) {
     if ($verbose || $debug) {
-        error_log("ℹ️  No outdated direct dependencies found.");
+        error_log('ℹ️  No outdated direct dependencies found.');
     }
-    echo $output[0] . PHP_EOL;
+    echo $output[0] . \PHP_EOL;
     exit(0);
 }
 
@@ -790,97 +812,96 @@ if ($saveImpactToFile && !empty($filteredPackageImpact)) {
         // Fallback to current directory
         $impactFile = 'composer-update-impact.txt';
     }
-    $impactContent = [];
-    $impactContent[] = "Composer Update Helper - Impact Analysis Report";
-    $impactContent[] = "Generated: " . date('Y-m-d H:i:s');
-    $impactContent[] = "";
-    $impactContent[] = "================================================================================";
-    $impactContent[] = "";
+    $impactContent   = [];
+    $impactContent[] = 'Composer Update Helper - Impact Analysis Report';
+    $impactContent[] = 'Generated: ' . date('Y-m-d H:i:s');
+    $impactContent[] = '';
+    $impactContent[] = '================================================================================';
+    $impactContent[] = '';
 
     foreach ($filteredPackageImpact as $packageString => $impact) {
         if ($impact['total_affected'] > 0) {
-            $packageName = explode(':', $packageString)[0];
-            $newVersion = $impact['new_version'];
+            $packageName     = explode(':', $packageString)[0];
+            $newVersion      = $impact['new_version'];
             $impactContent[] = "Impact Analysis: Updating {$packageName} to {$newVersion}";
-            $impactContent[] = str_repeat("-", 80);
-            $impactContent[] = "";
+            $impactContent[] = str_repeat('-', 80);
+            $impactContent[] = '';
 
             if (!empty($impact['direct_affected'])) {
-                $impactContent[] = "Directly Affected Packages (" . count($impact['direct_affected']) . "):";
+                $impactContent[] = 'Directly Affected Packages (' . count($impact['direct_affected']) . '):';
                 foreach ($impact['direct_affected'] as $affected) {
                     $impactContent[] = "  - {$affected['package']} ({$affected['reason']})";
                 }
-                $impactContent[] = "";
+                $impactContent[] = '';
             }
 
             if (!empty($impact['transitive_affected'])) {
-                $impactContent[] = "Transitively Affected Packages (" . count($impact['transitive_affected']) . "):";
+                $impactContent[] = 'Transitively Affected Packages (' . count($impact['transitive_affected']) . '):';
                 foreach ($impact['transitive_affected'] as $affected) {
                     $impactContent[] = "  - {$affected['package']} ({$affected['reason']})";
                 }
-                $impactContent[] = "";
+                $impactContent[] = '';
             }
 
             $impactContent[] = "Total Affected: {$impact['total_affected']} package(s)";
-            $impactContent[] = "";
-            $impactContent[] = str_repeat("=", 80);
-            $impactContent[] = "";
+            $impactContent[] = '';
+            $impactContent[] = str_repeat('=', 80);
+            $impactContent[] = '';
         }
     }
 
-    $impactContent[] = "End of Impact Analysis Report";
+    $impactContent[] = 'End of Impact Analysis Report';
 
     if ($debug) {
         error_log("DEBUG: Saving impact analysis to file: {$impactFile}");
-        error_log("DEBUG:   - File directory: " . dirname($impactFile));
-        error_log("DEBUG:   - Directory exists: " . (is_dir(dirname($impactFile)) ? 'yes' : 'no'));
-        error_log("DEBUG:   - Directory writable: " . (is_writable(dirname($impactFile)) ? 'yes' : 'no'));
-        error_log("DEBUG:   - Content size: " . strlen(implode(PHP_EOL, $impactContent)) . " bytes");
-        error_log("DEBUG:   - Packages with impact: " . count($filteredPackageImpact));
+        error_log('DEBUG:   - File directory: ' . dirname($impactFile));
+        error_log('DEBUG:   - Directory exists: ' . (is_dir(dirname($impactFile)) ? 'yes' : 'no'));
+        error_log('DEBUG:   - Directory writable: ' . (is_writable(dirname($impactFile)) ? 'yes' : 'no'));
+        error_log('DEBUG:   - Content size: ' . strlen(implode(\PHP_EOL, $impactContent)) . ' bytes');
+        error_log('DEBUG:   - Packages with impact: ' . count($filteredPackageImpact));
     }
 
-    if (file_put_contents($impactFile, implode(PHP_EOL, $impactContent))) {
+    if (file_put_contents($impactFile, implode(\PHP_EOL, $impactContent))) {
         $saveMsg = function_exists('t') ? t('impact_analysis_saved', [$impactFile], $detectedLang) : "✅ Impact analysis saved to: {$impactFile}";
         error_log($saveMsg);
         if ($debug) {
-            error_log("DEBUG: Impact file saved successfully");
+            error_log('DEBUG: Impact file saved successfully');
         }
     } else {
         error_log("⚠️  Failed to save impact analysis to: {$impactFile}");
         if ($debug) {
-            error_log("DEBUG: Failed to write impact file. Check directory permissions.");
+            error_log('DEBUG: Failed to write impact file. Check directory permissions.');
         }
     }
 }
 
 // Debug output summary
 if ($debug) {
-    error_log("DEBUG: Generated output:");
-    error_log("DEBUG:   - Prod packages: " . count($prod) . " (" . implode(', ', $prod) . ")");
-    error_log("DEBUG:   - Dev packages: " . count($dev) . " (" . implode(', ', $dev) . ")");
-    error_log("DEBUG:   - Ignored prod: " . count($ignoredProd) . " (" . implode(', ', $ignoredProd) . ")");
-    error_log("DEBUG:   - Ignored dev: " . count($ignoredDev) . " (" . implode(', ', $ignoredDev) . ")");
-    error_log("DEBUG:   - All outdated prod: " . count($allOutdatedProd) . " (" . implode(', ', $allOutdatedProd) . ")");
-    error_log("DEBUG:   - All outdated dev: " . count($allOutdatedDev) . " (" . implode(', ', $allOutdatedDev) . ")");
-    error_log("DEBUG:   - Filtered by dependencies prod: " . count($filteredByDependenciesProd) . " (" . implode(', ', $filteredByDependenciesProd) . ")");
-    error_log("DEBUG:   - Filtered by dependencies dev: " . count($filteredByDependenciesDev) . " (" . implode(', ', $filteredByDependenciesDev) . ")");
-    error_log("DEBUG:   - Packages with conflicts: " . count($filteredPackageConflicts));
-    error_log("DEBUG:   - Abandoned packages (outdated): " . count($filteredPackageAbandoned));
-    error_log("DEBUG:   - All installed abandoned packages: " . count($allInstalledAbandoned));
-    error_log("DEBUG:   - Packages with fallbacks: " . count($filteredPackageFallbacks));
-    error_log("DEBUG:   - Packages with alternatives: " . count($filteredPackageAlternatives));
-    error_log("DEBUG:   - Packages with maintainer contacts: " . count($filteredPackageMaintainerContacts));
-    error_log("DEBUG:   - Packages with impact analysis: " . count($filteredPackageImpact));
+    error_log('DEBUG: Generated output:');
+    error_log('DEBUG:   - Prod packages: ' . count($prod) . ' (' . implode(', ', $prod) . ')');
+    error_log('DEBUG:   - Dev packages: ' . count($dev) . ' (' . implode(', ', $dev) . ')');
+    error_log('DEBUG:   - Ignored prod: ' . count($ignoredProd) . ' (' . implode(', ', $ignoredProd) . ')');
+    error_log('DEBUG:   - Ignored dev: ' . count($ignoredDev) . ' (' . implode(', ', $ignoredDev) . ')');
+    error_log('DEBUG:   - All outdated prod: ' . count($allOutdatedProd) . ' (' . implode(', ', $allOutdatedProd) . ')');
+    error_log('DEBUG:   - All outdated dev: ' . count($allOutdatedDev) . ' (' . implode(', ', $allOutdatedDev) . ')');
+    error_log('DEBUG:   - Filtered by dependencies prod: ' . count($filteredByDependenciesProd) . ' (' . implode(', ', $filteredByDependenciesProd) . ')');
+    error_log('DEBUG:   - Filtered by dependencies dev: ' . count($filteredByDependenciesDev) . ' (' . implode(', ', $filteredByDependenciesDev) . ')');
+    error_log('DEBUG:   - Packages with conflicts: ' . count($filteredPackageConflicts));
+    error_log('DEBUG:   - Abandoned packages (outdated): ' . count($filteredPackageAbandoned));
+    error_log('DEBUG:   - All installed abandoned packages: ' . count($allInstalledAbandoned));
+    error_log('DEBUG:   - Packages with fallbacks: ' . count($filteredPackageFallbacks));
+    error_log('DEBUG:   - Packages with alternatives: ' . count($filteredPackageAlternatives));
+    error_log('DEBUG:   - Packages with maintainer contacts: ' . count($filteredPackageMaintainerContacts));
+    error_log('DEBUG:   - Packages with impact analysis: ' . count($filteredPackageImpact));
     if ($saveImpactToFile) {
         $impactFileDir = getenv('IMPACT_FILE_DIR');
-        $impactFile = $impactFileDir && is_dir($impactFileDir) && is_writable($impactFileDir)
+        $impactFile    = $impactFileDir && is_dir($impactFileDir) && is_writable($impactFileDir)
             ? rtrim($impactFileDir, '/') . '/composer-update-impact.txt'
             : 'composer-update-impact.txt';
         error_log("DEBUG:   - Impact file will be saved to: {$impactFile}");
-        error_log("DEBUG:   - Impact file directory writable: " . (is_writable($impactFileDir ?: getcwd()) ? 'yes' : 'no'));
+        error_log('DEBUG:   - Impact file directory writable: ' . (is_writable($impactFileDir ?: getcwd()) ? 'yes' : 'no'));
     }
 }
 
 // Output the formatted result
-echo implode(PHP_EOL, $output);
-
+echo implode(\PHP_EOL, $output);

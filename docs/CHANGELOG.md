@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.32] - 2026-07-27
+
+### Added
+
+- **REQ-REL-003**: `.scripts/check-open-prs.sh` and `make check-open-prs` wired into `release-check`.
+- **REQ-DOCS-017**: FrankenPHP Friendly Worker Mode banner (`docs/images/frankenphp-friendly.png`).
+- **REQ-MAKE-007**: `down-dev` Makefile target; Docker keep-alive uses `sleep infinity` (avoids `/dev/null` false positives).
+- **REQ-TEST-006**: `make coverage-check` (fails below 99% PHP line coverage).
+- **REQ-CS-004**: PHP-CS-Fixer finder includes `bin/`; `declare(strict_types=1)` on i18n PHP files.
+- **REQ-DOCS-018**: GitHub About website (Packagist) and repository topics.
+- **REQ-SEC-004**: Pass (conditional) recorded in `docs/SECURITY.md` (Medium residuals: opt-in wrapper overwrite, `--run`).
+
+### Changed
+
+- **REQ-DOCS-002 / DOCS-004**: Canonical `## Documentation` order; badges include GitHub stars and Coverage; Symfony badge reflects 7.4 / 8.0 / 8.1 floor.
+- **REQ-PHP-001**: `Plugin` and `Installer` marked `final`.
+- **REQ-CS-006**: PHPStan baseline comments document ignore reasons and removal plan.
+- **REQ-PKG-004**: `composer.json` `support.docs` URL.
+- **REQ-CS-005**: FrankenPHP rulesets included in `phpstan.neon.dist`.
+- **README**: Coverage section reports ≥99% (aligned with measured coverage).
+
+> **Note**: No consumer-facing migration for typical use. See [UPGRADING.md](UPGRADING.md#upgrading-to-2032-2026-07-27).
+
 ## [2.0.31] - 2026-07-16
 
 ### Added

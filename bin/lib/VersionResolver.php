@@ -4,15 +4,14 @@ declare(strict_types=1);
 
 /**
  * Version Resolver
- * Finds compatible versions considering dependent packages and requirements
+ * Finds compatible versions considering dependent packages and requirements.
  *
  * @author Héctor Franco Aceituno <hectorfranco@nowo.tech>
  */
-
 class VersionResolver
 {
     /**
-     * Find the highest compatible version considering dependent packages
+     * Find the highest compatible version considering dependent packages.
      *
      * @param string $packageName Package name
      * @param string $proposedVersion Proposed version
@@ -20,6 +19,7 @@ class VersionResolver
      * @param bool $checkDependencies Enable dependency checking
      * @param array|null $requiredTransitiveUpdates Output array for transitive updates
      * @param array|null $conflictingDependents Output array for conflicting dependents
+     *
      * @return string|null Compatible version or null if none found
      */
     public static function findCompatibleVersion(
@@ -35,6 +35,7 @@ class VersionResolver
             if ($debug) {
                 error_log("DEBUG: Dependency checking is disabled, using proposed version: {$proposedVersion}");
             }
+
             return $proposedVersion;
         }
 
@@ -45,7 +46,7 @@ class VersionResolver
         $proposedSatisfiesDependents = true;
         if (!empty($dependentConstraints)) {
             if ($debug) {
-                error_log("DEBUG: Found " . count($dependentConstraints) . " dependent packages for {$packageName}:");
+                error_log('DEBUG: Found ' . count($dependentConstraints) . " dependent packages for {$packageName}:");
                 foreach ($dependentConstraints as $dep => $constraint) {
                     error_log("DEBUG:   - {$dep} requires {$packageName}: {$constraint}");
                 }
@@ -74,6 +75,7 @@ class VersionResolver
                     if ($debug) {
                         error_log("DEBUG: Rejecting {$packageName}:{$proposedVersion} immediately due to conflict with {$depPackage} (requires {$constraint})");
                     }
+
                     return null;
                 }
             }
@@ -99,19 +101,19 @@ class VersionResolver
         $hasConflict = false;
         foreach ($packageRequirements as $requiredPackage => $requiredConstraint) {
             // Skip php and php-* requirements
-            if ($requiredPackage === 'php' || strpos($requiredPackage, 'php-') === 0) {
+            if ($requiredPackage === 'php' || str_starts_with($requiredPackage, 'php-')) {
                 continue;
             }
 
             // Skip ext-* requirements
-            if (strpos($requiredPackage, 'ext-') === 0) {
+            if (str_starts_with($requiredPackage, 'ext-')) {
                 continue;
             }
 
             // Handle "self.version" constraint
             if ($requiredConstraint === 'self.version' || $requiredConstraint === '@self') {
                 $normalizedProposed = ltrim($proposedVersion, 'v');
-                $requiredVersion = $normalizedProposed;
+                $requiredVersion    = $normalizedProposed;
 
                 $installedVersion = DependencyAnalyzer::getInstalledPackageVersion($requiredPackage);
                 if ($installedVersion === null) {
@@ -129,10 +131,10 @@ class VersionResolver
                         }
                         if (!isset($requiredTransitiveUpdates[$requiredPackage])) {
                             $requiredTransitiveUpdates[$requiredPackage] = [
-                                'required_by' => [],
+                                'required_by'         => [],
                                 'required_constraint' => $requiredConstraint . " (self.version = {$requiredVersion})",
-                                'installed_version' => $installedVersion,
-                                'suggested_version' => $requiredVersion
+                                'installed_version'   => $installedVersion,
+                                'suggested_version'   => $requiredVersion,
                             ];
                         }
                         $requiredTransitiveUpdates[$requiredPackage]['required_by'][] = "{$packageName}:{$proposedVersion}";
@@ -163,10 +165,10 @@ class VersionResolver
                     if ($compatibleVersion) {
                         if (!isset($requiredTransitiveUpdates[$requiredPackage])) {
                             $requiredTransitiveUpdates[$requiredPackage] = [
-                                'required_by' => [],
+                                'required_by'         => [],
                                 'required_constraint' => $requiredConstraint,
-                                'installed_version' => $installedVersion,
-                                'suggested_version' => $compatibleVersion
+                                'installed_version'   => $installedVersion,
+                                'suggested_version'   => $compatibleVersion,
                             ];
                         }
                         $requiredTransitiveUpdates[$requiredPackage]['required_by'][] = "{$packageName}:{$proposedVersion}";
@@ -182,6 +184,7 @@ class VersionResolver
             if ($debug) {
                 error_log("DEBUG: Rejecting {$packageName}:{$proposedVersion} because its requirements conflict with installed packages");
             }
+
             return null;
         }
 
@@ -190,6 +193,7 @@ class VersionResolver
             if ($debug) {
                 error_log("DEBUG: Proposed version {$proposedVersion} does not satisfy dependent constraints, searching for compatible version");
             }
+
             return self::findCompatibleVersionFromAvailable($packageName, $proposedVersion, $dependentConstraints, $debug, $requiredTransitiveUpdates);
         }
 
@@ -201,11 +205,12 @@ class VersionResolver
                 error_log("DEBUG: Proposed version {$proposedVersion} satisfies all dependent constraints and requirements are compatible");
             }
         }
+
         return $proposedVersion;
     }
 
     /**
-     * Find compatible version from available versions
+     * Find compatible version from available versions.
      */
     private static function findCompatibleVersionFromAvailable(
         string $packageName,
@@ -215,7 +220,7 @@ class VersionResolver
         ?array &$requiredTransitiveUpdates
     ): ?string {
         $composerBin = getenv('COMPOSER_BIN') ?: 'composer';
-        $phpBin = getenv('PHP_BIN') ?: 'php';
+        $phpBin      = getenv('PHP_BIN') ?: 'php';
 
         $cmd = escapeshellarg($phpBin) . ' -d date.timezone=UTC ' . escapeshellarg($composerBin) .
                ' show ' . escapeshellarg($packageName) . ' --all --format=json 2>/dev/null';
@@ -225,6 +230,7 @@ class VersionResolver
             if ($debug) {
                 error_log("DEBUG: Could not get available versions for {$packageName}, skipping compatibility check");
             }
+
             return null;
         }
 
@@ -233,6 +239,7 @@ class VersionResolver
             if ($debug) {
                 error_log("DEBUG: No versions found for {$packageName}, skipping compatibility check");
             }
+
             return null;
         }
 
@@ -249,10 +256,11 @@ class VersionResolver
             if ($debug) {
                 error_log("DEBUG: No stable versions found for {$packageName}");
             }
+
             return null;
         }
 
-        usort($stableVersions, function($a, $b) {
+        usort($stableVersions, static function ($a, $b) {
             return version_compare($b, $a); // Descending order
         });
 
@@ -275,7 +283,7 @@ class VersionResolver
             // Check package requirements for this version
             $versionRequirements = PackageInfoProvider::getPackageRequirements($packageName, $version);
             foreach ($versionRequirements as $requiredPackage => $requiredConstraint) {
-                if ($requiredPackage === 'php' || strpos($requiredPackage, 'php-') === 0 || strpos($requiredPackage, 'ext-') === 0) {
+                if ($requiredPackage === 'php' || str_starts_with($requiredPackage, 'php-') || str_starts_with($requiredPackage, 'ext-')) {
                     continue;
                 }
 
@@ -294,10 +302,10 @@ class VersionResolver
                         if ($compatibleVersion) {
                             if (!isset($requiredTransitiveUpdates[$requiredPackage])) {
                                 $requiredTransitiveUpdates[$requiredPackage] = [
-                                    'required_by' => [],
+                                    'required_by'         => [],
                                     'required_constraint' => $requiredConstraint,
-                                    'installed_version' => $installedVersion,
-                                    'suggested_version' => $compatibleVersion
+                                    'installed_version'   => $installedVersion,
+                                    'suggested_version'   => $compatibleVersion,
                                 ];
                             }
                             $requiredTransitiveUpdates[$requiredPackage]['required_by'][] = "{$packageName}:{$version}";
@@ -312,6 +320,7 @@ class VersionResolver
                 if ($debug) {
                     error_log("DEBUG: Found compatible version {$version} for {$packageName} (proposed was {$proposedVersion})");
                 }
+
                 return $version;
             }
         }
@@ -324,11 +333,12 @@ class VersionResolver
                 }
             }
         }
+
         return null;
     }
 
     /**
-     * Find compatible transitive version
+     * Find compatible transitive version.
      */
     private static function findCompatibleTransitiveVersion(
         string $packageName,
@@ -337,8 +347,8 @@ class VersionResolver
         bool $debug
     ): ?string {
         $composerBin = getenv('COMPOSER_BIN') ?: 'composer';
-        $phpBin = getenv('PHP_BIN') ?: 'php';
-        $cmd = escapeshellarg($phpBin) . ' -d date.timezone=UTC ' . escapeshellarg($composerBin) .
+        $phpBin      = getenv('PHP_BIN') ?: 'php';
+        $cmd         = escapeshellarg($phpBin) . ' -d date.timezone=UTC ' . escapeshellarg($composerBin) .
                ' show ' . escapeshellarg($packageName) . ' --all --format=json 2>/dev/null';
         $output = shell_exec($cmd);
         if (!$output) {
@@ -362,7 +372,7 @@ class VersionResolver
             return null;
         }
 
-        usort($stableVersions, function($a, $b) {
+        usort($stableVersions, static function ($a, $b) {
             return version_compare($b, $a); // Descending order
         });
 
@@ -371,6 +381,7 @@ class VersionResolver
                 if ($debug) {
                     error_log("DEBUG: Found compatible version {$version} for {$packageName} (satisfies {$constraint})");
                 }
+
                 return $version;
             }
         }
@@ -380,13 +391,14 @@ class VersionResolver
 
     /**
      * Find compatible versions of conflicting dependent packages
-     * When a dependent package conflicts, check if it has a newer version that supports the proposed version
+     * When a dependent package conflicts, check if it has a newer version that supports the proposed version.
      *
      * @param string $packageName Package name being updated
      * @param string $proposedVersion Proposed version of the package
      * @param array $conflictingDependents Array of ['package' => 'constraint'] pairs
      * @param array|null $requiredTransitiveUpdates Output array for transitive updates
      * @param bool $debug Enable debug logging
+     *
      * @return void Modifies $requiredTransitiveUpdates in place
      */
     public static function findCompatibleDependentVersions(
@@ -402,7 +414,7 @@ class VersionResolver
         }
 
         $composerBin = getenv('COMPOSER_BIN') ?: 'composer';
-        $phpBin = getenv('PHP_BIN') ?: 'php';
+        $phpBin      = getenv('PHP_BIN') ?: 'php';
 
         foreach ($conflictingDependents as $depPackage => $oldConstraint) {
             if ($debug) {
@@ -451,12 +463,12 @@ class VersionResolver
                 continue;
             }
 
-            usort($stableVersions, function($a, $b) {
+            usort($stableVersions, static function ($a, $b) {
                 return version_compare($b, $a); // Descending order
             });
 
             // Find the highest version that requires a version of $packageName compatible with $proposedVersion
-            $foundCompatible = false;
+            $foundCompatible         = false;
             $latestCheckedConstraint = null;
 
             foreach ($stableVersions as $depVersion) {
@@ -471,7 +483,7 @@ class VersionResolver
                     continue;
                 }
 
-                $depRequiresConstraint = $depRequirements[$packageName];
+                $depRequiresConstraint   = $depRequirements[$packageName];
                 $latestCheckedConstraint = $depRequiresConstraint; // Track the latest constraint checked
 
                 // Check if this constraint is compatible with the proposed version
@@ -483,16 +495,17 @@ class VersionResolver
                     // Add to required transitive updates
                     if (!isset($requiredTransitiveUpdates[$depPackage])) {
                         $requiredTransitiveUpdates[$depPackage] = [
-                            'required_by' => [],
+                            'required_by'         => [],
                             'required_constraint' => "compatible with {$packageName}:{$proposedVersion}",
-                            'installed_version' => $installedVersion,
-                            'suggested_version' => $depVersion
+                            'installed_version'   => $installedVersion,
+                            'suggested_version'   => $depVersion,
                         ];
                     }
                     $requiredTransitiveUpdates[$depPackage]['required_by'][] = "{$packageName}:{$proposedVersion}";
-                    $foundCompatible = true;
+                    $foundCompatible                                         = true;
                     break; // Found compatible version, no need to check older ones
-                } elseif ($debug) {
+                }
+                if ($debug) {
                     error_log("DEBUG: Version {$depVersion} of {$depPackage} requires {$packageName}:{$depRequiresConstraint} (NOT compatible with proposed {$proposedVersion})");
                 }
             }
@@ -500,10 +513,10 @@ class VersionResolver
             // If no compatible version found, track this for informative output
             if (!$foundCompatible && $checkedDependentsWithoutCompatible !== null) {
                 $checkedDependentsWithoutCompatible[$depPackage] = [
-                    'required_by' => "{$packageName}:{$proposedVersion}",
-                    'current_constraint' => $oldConstraint,
+                    'required_by'               => "{$packageName}:{$proposedVersion}",
+                    'current_constraint'        => $oldConstraint,
                     'latest_checked_constraint' => $latestCheckedConstraint ?? $oldConstraint,
-                    'installed_version' => $installedVersion
+                    'installed_version'         => $installedVersion,
                 ];
                 if ($debug) {
                     error_log("DEBUG: No compatible version of {$depPackage} found that supports {$packageName}:{$proposedVersion}");
@@ -514,13 +527,14 @@ class VersionResolver
 
     /**
      * Find compatible versions of installed packages that conflict with grouped packages
-     * When grouping packages for installation, check if installed packages need updates to support the grouped packages
+     * When grouping packages for installation, check if installed packages need updates to support the grouped packages.
      *
      * @param array $groupedPackages Array of package strings (format: "package-name:version")
      * @param array $allInstalledPackages Array of installed package names (from composer.json require/require-dev)
      * @param array|null $additionalUpdates Output array for additional updates needed
      * @param array|null $packagesNeedingMaintainerUpdate Output array for packages that need maintainer updates
      * @param bool $debug Enable debug logging
+     *
      * @return void Modifies $additionalUpdates and $packagesNeedingMaintainerUpdate in place
      */
     public static function findCompatibleInstalledVersionsForGrouped(
@@ -535,7 +549,7 @@ class VersionResolver
         }
 
         $composerBin = getenv('COMPOSER_BIN') ?: 'composer';
-        $phpBin = getenv('PHP_BIN') ?: 'php';
+        $phpBin      = getenv('PHP_BIN') ?: 'php';
 
         // Collect all requirements from grouped packages
         $allRequirements = [];
@@ -544,7 +558,7 @@ class VersionResolver
             if (count($parts) !== 2) {
                 continue;
             }
-            $packageName = $parts[0];
+            $packageName    = $parts[0];
             $packageVersion = $parts[1];
 
             if ($debug) {
@@ -558,7 +572,7 @@ class VersionResolver
 
             foreach ($requirements as $requiredPackage => $requiredConstraint) {
                 // Skip php and ext-* requirements
-                if ($requiredPackage === 'php' || strpos($requiredPackage, 'php-') === 0 || strpos($requiredPackage, 'ext-') === 0) {
+                if ($requiredPackage === 'php' || str_starts_with($requiredPackage, 'php-') || str_starts_with($requiredPackage, 'ext-')) {
                     continue;
                 }
 
@@ -595,8 +609,8 @@ class VersionResolver
                 if (!isset($allRequirements[$requiredPackage])) {
                     $allRequirements[$requiredPackage] = [
                         'installed_version' => $installedVersion,
-                        'required_by' => [],
-                        'constraints' => []
+                        'required_by'       => [],
+                        'constraints'       => [],
                     ];
                 }
                 $allRequirements[$requiredPackage]['required_by'][] = $packageString;
@@ -607,8 +621,8 @@ class VersionResolver
         // For each conflicting installed package, find a compatible newer version
         foreach ($allRequirements as $conflictingPackage => $info) {
             $installedVersion = $info['installed_version'];
-            $requiredBy = $info['required_by'];
-            $constraints = array_unique($info['constraints']);
+            $requiredBy       = $info['required_by'];
+            $constraints      = array_unique($info['constraints']);
 
             if ($debug) {
                 error_log("DEBUG: Checking if {$conflictingPackage} has a newer version compatible with constraints: " . implode(', ', $constraints));
@@ -647,7 +661,7 @@ class VersionResolver
                 continue;
             }
 
-            usort($stableVersions, function($a, $b) {
+            usort($stableVersions, static function ($a, $b) {
                 return version_compare($b, $a); // Descending order
             });
 
@@ -679,14 +693,14 @@ class VersionResolver
                     // Add to additional updates
                     if (!isset($additionalUpdates[$conflictingPackage])) {
                         $additionalUpdates[$conflictingPackage] = [
-                            'required_by' => [],
+                            'required_by'         => [],
                             'required_constraint' => implode(' OR ', $constraints),
-                            'installed_version' => $installedVersion,
-                            'suggested_version' => $newVersion
+                            'installed_version'   => $installedVersion,
+                            'suggested_version'   => $newVersion,
                         ];
                     }
                     $additionalUpdates[$conflictingPackage]['required_by'] = array_unique(
-                        array_merge($additionalUpdates[$conflictingPackage]['required_by'], $requiredBy)
+                        array_merge($additionalUpdates[$conflictingPackage]['required_by'], $requiredBy),
                     );
                     $foundCompatible = true;
                     break; // Found compatible version, no need to check older ones
@@ -701,10 +715,10 @@ class VersionResolver
                 // If no compatible version found, suggest contacting maintainer
                 if ($packagesNeedingMaintainerUpdate !== null) {
                     $packagesNeedingMaintainerUpdate[$conflictingPackage] = [
-                        'installed_version' => $installedVersion,
-                        'required_by' => $requiredBy,
+                        'installed_version'    => $installedVersion,
+                        'required_by'          => $requiredBy,
                         'required_constraints' => $constraints,
-                        'reason' => 'No compatible version available that satisfies the requirements of grouped packages'
+                        'reason'               => 'No compatible version available that satisfies the requirements of grouped packages',
                     ];
                     if ($debug) {
                         error_log("DEBUG: Marking {$conflictingPackage} as needing maintainer update");

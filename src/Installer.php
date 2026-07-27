@@ -19,7 +19,7 @@ use function sprintf;
  *
  * @see    https://github.com/HecFranco
  */
-class Installer
+final class Installer
 {
     /**
      * Get the octal permission mode compatible with the current PHP version.

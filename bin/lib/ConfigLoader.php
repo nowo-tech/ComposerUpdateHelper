@@ -4,15 +4,14 @@ declare(strict_types=1);
 
 /**
  * Configuration Loader
- * Handles reading configuration from YAML and TXT files
+ * Handles reading configuration from YAML and TXT files.
  *
  * @author Héctor Franco Aceituno <hectorfranco@nowo.tech>
  */
-
 class ConfigLoader
 {
     /**
-     * Read packages from YAML file
+     * Read packages from YAML file.
      */
     public static function readPackagesFromYaml(string $yamlPath, string $section): array
     {
@@ -25,16 +24,16 @@ class ConfigLoader
             return [];
         }
 
-        $packages = [];
-        $lines = explode("\n", $content);
+        $packages  = [];
+        $lines     = explode("\n", $content);
         $inSection = false;
 
         foreach ($lines as $line) {
-            $trimmedLine = trim($line);
+            $trimmedLine  = trim($line);
             $originalLine = $line;
 
             // Skip empty lines and pure comment lines
-            if (empty($trimmedLine) || strpos($trimmedLine, '#') === 0) {
+            if (empty($trimmedLine) || str_starts_with($trimmedLine, '#')) {
                 continue;
             }
 
@@ -63,12 +62,13 @@ class ConfigLoader
     }
 
     /**
-     * Read a configuration value from YAML file
+     * Read a configuration value from YAML file.
      *
      * @param string $yamlPath Path to YAML file
      * @param string $key Configuration key
-     * @param string|int|float|bool|null $default Default value if key not found
-     * @return string|int|float|bool|null Configuration value or default
+     * @param bool|float|int|string|null $default Default value if key not found
+     *
+     * @return bool|float|int|string|null Configuration value or default
      *                                    Returns: bool for 'true'/'false', int/float for numbers, string for text, null if not found
      */
     public static function readConfigValue(string $yamlPath, string $key, $default = null)
@@ -88,7 +88,7 @@ class ConfigLoader
             $trimmedLine = trim($line);
 
             // Skip empty lines and pure comment lines
-            if (empty($trimmedLine) || strpos($trimmedLine, '#') === 0) {
+            if (empty($trimmedLine) || str_starts_with($trimmedLine, '#')) {
                 continue;
             }
 
@@ -106,6 +106,7 @@ class ConfigLoader
                 if (is_numeric($value)) {
                     return $value + 0; // Convert to int or float
                 }
+
                 // Return as string
                 return $value;
             }
@@ -115,7 +116,7 @@ class ConfigLoader
     }
 
     /**
-     * Read packages from TXT file (backward compatibility)
+     * Read packages from TXT file (backward compatibility).
      */
     public static function readPackagesFromTxt(string $txtPath): array
     {
@@ -129,12 +130,12 @@ class ConfigLoader
         }
 
         $packages = [];
-        $lines = explode("\n", $content);
+        $lines    = explode("\n", $content);
 
         foreach ($lines as $line) {
             $line = trim($line);
             // Skip comments and empty lines
-            if (empty($line) || strpos($line, '#') === 0) {
+            if (empty($line) || str_starts_with($line, '#')) {
                 continue;
             }
             if (!empty($line)) {

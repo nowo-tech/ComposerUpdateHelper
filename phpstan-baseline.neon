@@ -1,11 +1,23 @@
+# PHPStan baseline justifications (REQ-CS-006)
+#
+# Baseline entries below are intentional for Composer IO / filesystem edges where
+# file_get_contents() and similar APIs return string|false. Call sites already
+# guard existence; PHPStan still sees the union. Prefer keeping these ignores
+# until the helpers are refactored to typed readers that throw on failure.
+#
+# Removal plan: replace with a small FileReader helper that returns string or
+# throws RuntimeException, then drop the matching ignore rows.
+
 parameters:
 	ignoreErrors:
+		# Installer: array_filter on already-filtered non-empty package name lists
 		-
 			message: '#^Parameter \#1 \$array \(list\<non\-falsy\-string\>\) to function array_filter does not contain falsy values, the array will always stay the same\.$#'
 			identifier: arrayFilter.same
 			count: 2
 			path: src/Installer.php
 
+		# Installer: file_get_contents / explode edges after is_file checks
 		-
 			message: '#^Parameter \#1 \$string of function trim expects string, string\|false given\.$#'
 			identifier: argument.type
@@ -24,12 +36,14 @@ parameters:
 			count: 4
 			path: src/Installer.php
 
+		# Plugin: same array_filter pattern as Installer
 		-
 			message: '#^Parameter \#1 \$array \(list\<non\-falsy\-string\>\) to function array_filter does not contain falsy values, the array will always stay the same\.$#'
 			identifier: arrayFilter.same
 			count: 2
 			path: src/Plugin.php
 
+		# Plugin: same file_get_contents / explode edges as Installer
 		-
 			message: '#^Parameter \#1 \$string of function trim expects string, string\|false given\.$#'
 			identifier: argument.type
