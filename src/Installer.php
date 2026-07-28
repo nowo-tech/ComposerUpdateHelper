@@ -94,7 +94,7 @@ final class Installer
         $oldIgnoreTxt = $projectDir . '/generate-composer-require.ignore.txt';
         if (file_exists($oldIgnoreTxt)) {
             // Read packages from TXT
-            $txtContent  = file_get_contents($oldIgnoreTxt);
+            $txtContent  = SafeFileReader::read($oldIgnoreTxt);
             $txtLines    = explode("\n", $txtContent);
             $txtPackages = [];
             foreach ($txtLines as $line) {
@@ -116,12 +116,12 @@ final class Installer
             } else {
                 // YAML exists and has content (user-defined packages)
                 // Check if TXT packages are already in ignore section
-                $yamlContent  = file_get_contents($yamlDest);
+                $yamlContent  = SafeFileReader::read($yamlDest);
                 $yamlPackages = self::extractPackagesFromYamlIgnoreSection($yamlContent);
 
                 // Verify packages match (order doesn't matter)
-                $txtPackagesSorted  = array_unique(array_filter($txtPackages));
-                $yamlPackagesSorted = array_unique(array_filter($yamlPackages));
+                $txtPackagesSorted  = array_values(array_unique($txtPackages));
+                $yamlPackagesSorted = array_values(array_unique($yamlPackages));
                 sort($txtPackagesSorted);
                 sort($yamlPackagesSorted);
 
@@ -141,12 +141,12 @@ final class Installer
 
                 // Verify migration was successful before deleting TXT
                 if (file_exists($yamlDest)) {
-                    $yamlContent  = file_get_contents($yamlDest);
+                    $yamlContent  = SafeFileReader::read($yamlDest);
                     $yamlPackages = self::extractPackagesFromYamlIgnoreSection($yamlContent);
 
                     // Verify packages match (order doesn't matter)
-                    $txtPackagesSorted  = array_unique(array_filter($txtPackages));
-                    $yamlPackagesSorted = array_unique(array_filter($yamlPackages));
+                    $txtPackagesSorted  = array_values(array_unique($txtPackages));
+                    $yamlPackagesSorted = array_values(array_unique($yamlPackages));
                     sort($txtPackagesSorted);
                     sort($yamlPackagesSorted);
 
@@ -178,7 +178,7 @@ final class Installer
      */
     private static function migrateTxtToYaml(string $txtPath, string $yamlPath, IOInterface $io): void
     {
-        $content = file_get_contents($txtPath);
+        $content = SafeFileReader::read($txtPath);
         $lines   = explode("\n", $content);
 
         $packages = [];
@@ -194,7 +194,7 @@ final class Installer
 
         // If YAML already exists, merge instead of overwriting
         if (file_exists($yamlPath)) {
-            $yamlContent            = file_get_contents($yamlPath);
+            $yamlContent            = SafeFileReader::read($yamlPath);
             $existingIgnorePackages = self::extractPackagesFromYamlIgnoreSection($yamlContent);
 
             // Merge packages (avoid duplicates)
@@ -354,7 +354,7 @@ final class Installer
             return true;
         }
 
-        $yamlContent = file_get_contents($yamlPath);
+        $yamlContent = SafeFileReader::read($yamlPath);
         $yamlContent = trim($yamlContent);
 
         // If file is empty, it's safe to migrate
@@ -433,7 +433,7 @@ final class Installer
             return; // No .gitignore file, nothing to do
         }
 
-        $content         = file_get_contents($gitignorePath);
+        $content         = SafeFileReader::read($gitignorePath);
         $lines           = explode("\n", $content);
         $existingEntries = array_map('trim', $lines);
         $updated         = false;

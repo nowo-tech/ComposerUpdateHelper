@@ -22,7 +22,18 @@ if ! command -v python3 >/dev/null 2>&1; then
   exit 1
 fi
 
-PRS_JSON="$(gh pr list --state open --limit 100 --json number,title,labels,body,url)"
+# Prefer explicit repo when gh cannot map SSH remotes (e.g. git@github.com:org/repo.git).
+GH_ARGS=()
+if [[ -n "${GH_REPO:-}" ]]; then
+  GH_ARGS=(-R "${GH_REPO}")
+else
+  ORIGIN_URL="$(git remote get-url origin 2>/dev/null || true)"
+  if [[ "${ORIGIN_URL}" =~ github\.com[:/]([^/]+)/([^/.]+)(\.git)?$ ]]; then
+    GH_ARGS=(-R "${BASH_REMATCH[1]}/${BASH_REMATCH[2]}")
+  fi
+fi
+
+PRS_JSON="$(gh "${GH_ARGS[@]}" pr list --state open --limit 100 --json number,title,labels,body,url)"
 
 export PRS_JSON
 python3 <<'PY'

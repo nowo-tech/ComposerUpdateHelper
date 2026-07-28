@@ -2,6 +2,25 @@
 
 This guide covers all configuration options for Composer Update Helper.
 
+## Table of contents
+
+- [Composer plugin options](#composer-plugin-options)
+  - [`auto_update_wrapper`](#auto_update_wrapper)
+- [Package Configuration](#package-configuration)
+  - [Ignoring Packages](#ignoring-packages)
+  - [Forcing Package Inclusion](#forcing-package-inclusion)
+  - [Backward Compatibility](#backward-compatibility)
+- [Language Configuration (Internationalization)](#language-configuration-internationalization)
+- [Command-Line Options Configuration](#command-line-options-configuration)
+  - [`show-release-info`](#show-release-info)
+  - [`show-release-detail`](#show-release-detail)
+  - [`show-impact-analysis`](#show-impact-analysis)
+  - [`save-impact-to-file`](#save-impact-to-file)
+  - [`verbose`](#verbose)
+  - [`debug`](#debug)
+- [Dependency Compatibility Checking](#dependency-compatibility-checking)
+- [HTTP timeouts (REQ-RUNTIME-001)](#http-timeouts-req-runtime-001)
+
 ## Composer plugin options
 
 These settings live in the **consuming project's** `composer.json` under `extra.composer-update-helper` (not in `generate-composer-require.yaml`).
@@ -361,4 +380,22 @@ For example output with dependency conflicts, abandoned package warnings, and fa
 ```yaml
 check-dependencies: false
 ```
+
+## HTTP timeouts (REQ-RUNTIME-001)
+
+Packagist and GitHub lookups use PHP `file_get_contents` with an explicit stream timeout (`HttpClientDefaults::TIMEOUT_SECONDS`, default **5 seconds**). All `bin/lib/*` HTTP callers share `HttpClientDefaults::streamContext()`.
+
+### Timeout hierarchy (CLI / CI)
+
+This package is a **Composer CLI plugin** (not a FrankenPHP web worker). Still apply layered deadlines so a hung Packagist/GitHub call cannot block CI forever:
+
+| Layer | Role | Typical value |
+|-------|------|----------------|
+| Operation timeout (`HttpClientDefaults::TIMEOUT_SECONDS`) | Fires first on each HTTP GET | **5s** |
+| PHP `max_execution_time` / CLI `max_execution_time` | Must be **greater** than the HTTP timeout when set | e.g. 30–120s in CI jobs |
+| CI job / shell timeout | Outermost guard for the whole `generate-composer-require` / `composer` run | job-level (minutes) |
+
+There is no Caddy/`servers.timeouts.write` layer unless you embed this tool inside a FrankenPHP demo (not shipped). When raising the HTTP timeout constant, raise PHP/CI ceilings in the same change.
+
+Automated coverage: `tests/Unit/HttpClientDefaultsTest.php` asserts the shared context timeout and that a hanging TCP peer fails within the configured deadline.
 

@@ -83,12 +83,7 @@ class AlternativePackageFinder
             error_log("DEBUG: Packagist search URL: {$url}");
         }
 
-        $context = stream_context_create([
-            'http' => [
-                'timeout'    => 5,
-                'user_agent' => 'Composer Update Helper',
-            ],
-        ]);
+        $context = HttpClientDefaults::streamContext();
 
         $response = @file_get_contents($url, false, $context);
         if (!$response) {
@@ -190,12 +185,7 @@ class AlternativePackageFinder
             error_log("DEBUG: Fetching package info for {$packageName} from {$url}");
         }
 
-        $context = stream_context_create([
-            'http' => [
-                'timeout'    => 5,
-                'user_agent' => 'Composer Update Helper',
-            ],
-        ]);
+        $context = HttpClientDefaults::streamContext();
 
         $response = @file_get_contents($url, false, $context);
         if (!$response) {

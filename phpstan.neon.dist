@@ -7,6 +7,10 @@ parameters:
     - tests/Unit
   excludePaths:
     - demo/*
+  bootstrapFiles:
+    - tests/namespace-stubs.php
+    - bin/lib/HttpClientDefaults.php
+  treatPhpDocTypesAsCertain: false
 
 includes:
   - vendor/phpstan/phpstan-symfony/extension.neon

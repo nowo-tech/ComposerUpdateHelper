@@ -1,5 +1,22 @@
 # Internationalization (i18n) Strategy
 
+## Table of contents
+
+- [File Structure](#file-structure)
+- [Configuration](#configuration)
+  - [In `generate-composer-require.yaml`:](#in-generate-composer-requireyaml)
+- [Language Detection Flow](#language-detection-flow)
+- [Implementation](#implementation)
+  - [PHP (process-updates.php)](#php-process-updatesphp)
+  - [Bash (generate-composer-require.sh)](#bash-generate-composer-requiresh)
+- [Translation File Format](#translation-file-format)
+  - [PHP (i18n/es.php):](#php-i18nesphp)
+  - [Bash (i18n/es.sh):](#bash-i18nessh)
+- [Messages to Translate](#messages-to-translate)
+  - [PHP (process-updates.php):](#php-process-updatesphp)
+  - [Bash (generate-composer-require.sh):](#bash-generate-composer-requiresh)
+- [Status: IN DEVELOPMENT](#status-in-development)
+
 ## File Structure
 
 ```

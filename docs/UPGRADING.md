@@ -2,6 +2,51 @@
 
 This guide will help you upgrade Composer Update Helper to newer versions.
 
+## Table of contents
+
+- [General Upgrade Process](#general-upgrade-process)
+- [Version-Specific Upgrade Notes](#version-specific-upgrade-notes)
+  - [Upgrading to 2.0.34+ (2026-07-28)](#upgrading-to-2034-2026-07-28)
+  - [Upgrading to 2.0.33+ (2026-07-27)](#upgrading-to-2033-2026-07-27)
+  - [Upgrading to 2.0.32+ (2026-07-27)](#upgrading-to-2032-2026-07-27)
+  - [Upgrading to 2.0.31+ (2026-07-16)](#upgrading-to-2031-2026-07-16)
+  - [Upgrading to 2.0.30+ (2026-07-09)](#upgrading-to-2030-2026-07-09)
+  - [Upgrading to 2.0.29+ (2026-01-22)](#upgrading-to-2029-2026-01-22)
+  - [Upgrading to 2.0.28+ (2026-01-20)](#upgrading-to-2028-2026-01-20)
+  - [Upgrading to 2.0.27+ (2026-01-20)](#upgrading-to-2027-2026-01-20)
+  - [Upgrading to 2.0.26+ (2026-01-20)](#upgrading-to-2026-2026-01-20)
+  - [Upgrading to 2.0.24+ (Unreleased)](#upgrading-to-2024-unreleased)
+  - [Upgrading to 2.0.23+](#upgrading-to-2023)
+  - [Upgrading to 2.0.22+](#upgrading-to-2022)
+  - [Upgrading to 2.0.21+](#upgrading-to-2021)
+  - [Upgrading to 2.0.20+](#upgrading-to-2020)
+  - [Upgrading to 2.0.19+ (Unreleased)](#upgrading-to-2019-unreleased)
+  - [Upgrading to 2.0.18+](#upgrading-to-2018)
+  - [Upgrading to 2.0.17+](#upgrading-to-2017)
+  - [Upgrading to 2.0.16+](#upgrading-to-2016)
+  - [Upgrading to 2.0.13+](#upgrading-to-2013)
+  - [Upgrading to 2.0.12+](#upgrading-to-2012)
+  - [Upgrading to 2.0.11+](#upgrading-to-2011)
+  - [Upgrading to 2.0.10+](#upgrading-to-2010)
+  - [Upgrading to 2.0.9+](#upgrading-to-209)
+  - [Upgrading to 2.0.8+](#upgrading-to-208)
+  - [Upgrading to 2.0.7+](#upgrading-to-207)
+  - [Upgrading to 2.0.6+](#upgrading-to-206)
+  - [Upgrading to 2.0.5+](#upgrading-to-205)
+  - [Upgrading to 2.0.4+](#upgrading-to-204)
+  - [Upgrading to 2.0.2+](#upgrading-to-202)
+  - [Upgrading to 2.0.1+](#upgrading-to-201)
+  - [Upgrading to 2.0.0+](#upgrading-to-200)
+  - [Upgrading to 1.3.4+](#upgrading-to-134)
+  - [Upgrading to 1.3.3+](#upgrading-to-133)
+  - [Upgrading to 1.3.0+](#upgrading-to-130)
+  - [Upgrading to 1.2.0+](#upgrading-to-120)
+- [Troubleshooting](#troubleshooting)
+  - [Script not found after upgrade](#script-not-found-after-upgrade)
+  - [Permission errors](#permission-errors)
+  - [Conflicts with custom modifications](#conflicts-with-custom-modifications)
+- [Getting Help](#getting-help)
+
 ## General Upgrade Process
 
 1. **Update the package**:
@@ -17,6 +62,19 @@ This guide will help you upgrade Composer Update Helper to newer versions.
    If you have custom modifications, you may need to reapply them.
 
 ## Version-Specific Upgrade Notes
+
+### Upgrading to 2.0.34+ (2026-07-28)
+
+#### What's Changed
+
+Reliability and standards hardening; CLI Packagist/GitHub lookups share a **5 second** HTTP timeout (`HttpClientDefaults`). Plugin file reads use `SafeFileReader` and throw `RuntimeException` if a path that should exist cannot be read (instead of silently treating `false` as empty content).
+
+#### Migration Steps
+
+1. Update the package: `composer update nowo-tech/composer-update-helper`.
+2. Optional: review [CONFIGURATION.md — HTTP timeouts](CONFIGURATION.md#http-timeouts-req-runtime-001) if CI jobs wrap many network lookups.
+
+**No Breaking Changes** for typical consumers (timeout matches the previous per-call 5s defaults; unreadable config/gitignore paths now fail loudly during install/update hooks).
 
 ### Upgrading to 2.0.33+ (2026-07-27)
 

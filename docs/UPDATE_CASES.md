@@ -2,6 +2,46 @@
 
 This document explains the different update scenarios that Composer Update Helper currently handles, and identifies scenarios that are not yet fully supported.
 
+## Table of contents
+
+- [Currently Supported Cases](#currently-supported-cases)
+  - [1. Basic Package Updates](#1-basic-package-updates)
+  - [2. Dependent Package Constraint Conflicts](#2-dependent-package-constraint-conflicts)
+  - [3. Package Requirement Conflicts](#3-package-requirement-conflicts)
+  - [4. Self-Version Constraints](#4-self-version-constraints)
+  - [5. Framework Version Constraints](#5-framework-version-constraints)
+  - [6. Ignored Packages](#6-ignored-packages)
+  - [7. Force-Included Packages](#7-force-included-packages)
+  - [8. Production vs Development Dependencies](#8-production-vs-development-dependencies)
+  - [9. Version Comparison to Avoid Unnecessary Updates](#9-version-comparison-to-avoid-unnecessary-updates)
+  - [10. Multiple Transitive Dependencies](#10-multiple-transitive-dependencies)
+  - [14. Conflict Impact Analysis](#14-conflict-impact-analysis)
+- [Partially Supported Cases](#partially-supported-cases)
+  - [11. Wildcard Version Constraints](#11-wildcard-version-constraints)
+- [Not Yet Supported Cases](#not-yet-supported-cases)
+  - [12. Circular Dependency Conflicts](#12-circular-dependency-conflicts)
+  - [13. Cascading Conflict Chains](#13-cascading-conflict-chains)
+  - [14. Abandoned Package Conflicts](#14-abandoned-package-conflicts)
+  - [15. Repository-Specific Conflicts](#15-repository-specific-conflicts)
+  - [16. Batch Update Optimization](#16-batch-update-optimization)
+  - [17. Pre-Installation Conflict Prediction](#17-pre-installation-conflict-prediction)
+  - [18. Alternative Package Suggestions](#18-alternative-package-suggestions)
+  - [19. Conflict Resolution Strategies](#19-conflict-resolution-strategies)
+- [Case #20: Edge Cases - No Compatible Versions Available](#case-20-edge-cases-no-compatible-versions-available)
+- [Summary](#summary)
+  - [Fully Supported (15 cases)](#fully-supported-15-cases)
+  - [Partially Supported (2 cases)](#partially-supported-2-cases)
+  - [Not Yet Supported (4 cases)](#not-yet-supported-4-cases)
+- [Recommendations](#recommendations)
+  - [High Priority](#high-priority)
+  - [Medium Priority](#medium-priority)
+  - [Low Priority](#low-priority)
+- [Testing Recommendations](#testing-recommendations)
+- [Manual Intervention: Contacting Package Maintainers](#manual-intervention-contacting-package-maintainers)
+  - [When Manual Contact is Required](#when-manual-contact-is-required)
+- [Implementation Roadmap](#implementation-roadmap)
+  - [Translation Requirements](#translation-requirements)
+
 ## Currently Supported Cases
 
 ### 1. Basic Package Updates

@@ -10,6 +10,7 @@ use Composer\IO\IOInterface;
 use Composer\Script\Event;
 use Composer\Script\ScriptEvents;
 use NowoTech\ComposerUpdateHelper\Plugin;
+use NowoTech\ComposerUpdateHelper\TestIoHooks;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 
@@ -28,6 +29,14 @@ use const JSON_THROW_ON_ERROR;
  */
 final class PluginTest extends TestCase
 {
+    private function requireFile(string $path): string
+    {
+        $content = file_get_contents($path);
+        self::assertNotFalse($content, 'Expected readable file: ' . $path);
+
+        return $content;
+    }
+
     public function testGetSubscribedEvents(): void
     {
         $events = Plugin::getSubscribedEvents();
@@ -41,6 +50,7 @@ final class PluginTest extends TestCase
 
     public function testActivateStoresComposerAndIo(): void
     {
+        $this->expectNotToPerformAssertions();
         $plugin   = new Plugin();
         $composer = $this->createMock(Composer::class);
         $io       = $this->createMock(IOInterface::class);
@@ -48,19 +58,15 @@ final class PluginTest extends TestCase
         // Should not throw any exception
         $plugin->activate($composer, $io);
 
-        $this->assertTrue(true);
     }
 
     public function testDeactivateDoesNothing(): void
     {
+        $this->expectNotToPerformAssertions();
         $plugin   = new Plugin();
         $composer = $this->createMock(Composer::class);
         $io       = $this->createMock(IOInterface::class);
-
-        // Should not throw any exception
         $plugin->deactivate($composer, $io);
-
-        $this->assertTrue(true);
     }
 
     public function testUninstallRemovesFiles(): void
@@ -197,7 +203,7 @@ final class PluginTest extends TestCase
         $this->assertFileExists($tempDir . '/generate-composer-require.sh');
 
         // Verify .gitignore was updated (should remove old entries, not add new ones)
-        $gitignoreContent = file_get_contents($gitignorePath);
+        $gitignoreContent = $this->requireFile($gitignorePath);
         // .sh and .yaml should NOT be in .gitignore (they should be committed)
         $this->assertStringNotContainsString('generate-composer-require.sh', $gitignoreContent);
         $this->assertStringNotContainsString('generate-composer-require.yaml', $gitignoreContent);
@@ -256,7 +262,7 @@ final class PluginTest extends TestCase
 
         // File should be preserved when auto-update is not enabled
         $this->assertFileExists($tempDir . '/generate-composer-require.sh');
-        $this->assertStringContainsString('old', (string) file_get_contents($tempDir . '/generate-composer-require.sh'));
+        $this->assertStringContainsString('old', $this->requireFile($tempDir . '/generate-composer-require.sh'));
 
         // Cleanup
         @unlink($tempDir . '/composer.json');
@@ -301,7 +307,7 @@ final class PluginTest extends TestCase
         $plugin->activate($composer, $io);
         $plugin->onPostInstall($event);
 
-        $this->assertStringContainsString('old', (string) file_get_contents($tempDir . '/generate-composer-require.sh'));
+        $this->assertStringContainsString('old', $this->requireFile($tempDir . '/generate-composer-require.sh'));
 
         @unlink($tempDir . '/generate-composer-require.sh');
         @unlink($binDir . '/generate-composer-require.sh');
@@ -322,7 +328,7 @@ final class PluginTest extends TestCase
         $composerJsonPath = $tempDir . '/composer.json';
         file_put_contents($composerJsonPath, '{"name":"test/project"}');
         // Force namespaced file_get_contents stub to simulate read failure (REQ-TEST-003)
-        $GLOBALS['__cuh_force_fgc_false'] = $composerJsonPath;
+        TestIoHooks::setForceFgcFalse($composerJsonPath);
 
         file_put_contents($tempDir . '/generate-composer-require.sh', "#!/bin/sh\necho \"old\"\n");
         file_put_contents($binDir . '/generate-composer-require.sh', "#!/bin/sh\necho \"new\"\n");
@@ -349,9 +355,9 @@ final class PluginTest extends TestCase
         $plugin->activate($composer, $io);
         $plugin->onPostInstall($event);
 
-        $this->assertStringContainsString('old', (string) file_get_contents($tempDir . '/generate-composer-require.sh'));
+        $this->assertStringContainsString('old', $this->requireFile($tempDir . '/generate-composer-require.sh'));
 
-        unset($GLOBALS['__cuh_force_fgc_false']);
+        TestIoHooks::setForceFgcFalse(null);
         @unlink($composerJsonPath);
         @unlink($tempDir . '/generate-composer-require.sh');
         @unlink($binDir . '/generate-composer-require.sh');
@@ -405,7 +411,7 @@ final class PluginTest extends TestCase
         $plugin->activate($composer, $io);
         $plugin->onPostInstall($event);
 
-        $this->assertStringContainsString('new', (string) file_get_contents($tempDir . '/generate-composer-require.sh'));
+        $this->assertStringContainsString('new', $this->requireFile($tempDir . '/generate-composer-require.sh'));
 
         @unlink($tempDir . '/composer.json');
         @unlink($tempDir . '/generate-composer-require.sh');
@@ -615,7 +621,7 @@ final class PluginTest extends TestCase
         // Verify .sh and .yaml are NOT in .gitignore (they should be committed to repo)
         $gitignorePath = $tempDir . '/.gitignore';
         if (file_exists($gitignorePath)) {
-            $gitignoreContent = file_get_contents($gitignorePath);
+            $gitignoreContent = $this->requireFile($gitignorePath);
             $this->assertStringNotContainsString('generate-composer-require.sh', $gitignoreContent);
             $this->assertStringNotContainsString('generate-composer-require.yaml', $gitignoreContent);
         }
@@ -667,7 +673,7 @@ final class PluginTest extends TestCase
         $plugin->onPostInstall($event);
 
         // Verify .gitignore was updated - old entries should be removed
-        $gitignoreContent = file_get_contents($gitignorePath);
+        $gitignoreContent = $this->requireFile($gitignorePath);
         // .sh and .yaml should NOT be in .gitignore (they should be committed)
         $this->assertStringNotContainsString('generate-composer-require.sh', $gitignoreContent);
         $this->assertStringNotContainsString('generate-composer-require.yaml', $gitignoreContent);
@@ -730,7 +736,7 @@ final class PluginTest extends TestCase
 
         // File should be updated with new content
         $this->assertFileExists($tempDir . '/generate-composer-require.sh');
-        $this->assertStringContainsString('new', (string) file_get_contents($tempDir . '/generate-composer-require.sh'));
+        $this->assertStringContainsString('new', $this->requireFile($tempDir . '/generate-composer-require.sh'));
         // Verify process-updates.php is NOT copied (stays in vendor)
         $this->assertFileDoesNotExist($tempDir . '/process-updates.php');
         $this->assertFileExists($binDir . '/process-updates.php');
@@ -797,7 +803,7 @@ final class PluginTest extends TestCase
         $this->assertFileExists($yamlFile);
 
         // Verify content was migrated correctly
-        $yamlContent = file_get_contents($yamlFile);
+        $yamlContent = $this->requireFile($yamlFile);
         $this->assertStringContainsString('doctrine/orm', $yamlContent);
         $this->assertStringContainsString('symfony/security-bundle', $yamlContent);
         $this->assertStringContainsString('ignore:', $yamlContent);
@@ -924,7 +930,7 @@ final class PluginTest extends TestCase
 
         // Verify YAML file was updated with migrated content
         $this->assertFileExists($yamlFile);
-        $yamlContent = file_get_contents($yamlFile);
+        $yamlContent = $this->requireFile($yamlFile);
         $this->assertStringContainsString('doctrine/orm', $yamlContent);
         $this->assertStringContainsString('symfony/security-bundle', $yamlContent);
         $this->assertStringContainsString('ignore:', $yamlContent);
@@ -989,7 +995,7 @@ final class PluginTest extends TestCase
 
         // Verify YAML file was updated with migrated content
         $this->assertFileExists($yamlFile);
-        $yamlContent = file_get_contents($yamlFile);
+        $yamlContent = $this->requireFile($yamlFile);
         $this->assertStringContainsString('doctrine/orm', $yamlContent);
         $this->assertStringContainsString('symfony/security-bundle', $yamlContent);
         $this->assertStringContainsString('ignore:', $yamlContent);
@@ -1049,7 +1055,7 @@ final class PluginTest extends TestCase
         $plugin->onPostUpdate($event);
 
         // Verify YAML file was NOT changed (preserves user packages)
-        $yamlContent = file_get_contents($yamlFile);
+        $yamlContent = $this->requireFile($yamlFile);
         $this->assertStringContainsString('existing/package', $yamlContent);
         $this->assertStringContainsString('another/package', $yamlContent);
         $this->assertStringNotContainsString('doctrine/orm', $yamlContent);
@@ -1115,7 +1121,7 @@ final class PluginTest extends TestCase
 
         // Verify YAML file was updated with migrated content
         $this->assertFileExists($yamlFile);
-        $yamlContent = file_get_contents($yamlFile);
+        $yamlContent = $this->requireFile($yamlFile);
         $this->assertStringContainsString('package1/one', $yamlContent);
         $this->assertStringContainsString('package2/two', $yamlContent);
         // Include section should still be there
@@ -1256,8 +1262,6 @@ final class PluginTest extends TestCase
         // The development mode functionality is tested indirectly through other tests
         // that verify Plugin correctly handles the case when package is not in vendor
         $this->markTestSkipped('Development mode test skipped to avoid modifying real bin/ directory. Functionality is tested indirectly.');
-        @rmdir($vendorDir);
-        @rmdir($tempDir);
     }
 
     public function testMigrationCreatesNewYamlWhenYamlDoesNotExist(): void
@@ -1305,7 +1309,7 @@ final class PluginTest extends TestCase
         // Verify YAML was created with migrated content
         $yamlFile = $tempDir . '/generate-composer-require.yaml';
         $this->assertFileExists($yamlFile);
-        $yamlContent = file_get_contents($yamlFile);
+        $yamlContent = $this->requireFile($yamlFile);
         $this->assertStringContainsString('newpackage/one', $yamlContent);
         $this->assertStringContainsString('newpackage/two', $yamlContent);
 
@@ -1367,7 +1371,7 @@ final class PluginTest extends TestCase
         $plugin->onPostUpdate($event);
 
         // Verify YAML was updated with ignore section
-        $yamlContent = file_get_contents($yamlFile);
+        $yamlContent = $this->requireFile($yamlFile);
         $this->assertStringContainsString('ignore:', $yamlContent);
         $this->assertStringContainsString('package1/one', $yamlContent);
         $this->assertStringContainsString('package2/two', $yamlContent);
@@ -1431,7 +1435,7 @@ final class PluginTest extends TestCase
         // Verify YAML was created with template (empty packages)
         $yamlFile = $tempDir . '/generate-composer-require.yaml';
         $this->assertFileExists($yamlFile);
-        $yamlContent = file_get_contents($yamlFile);
+        $yamlContent = $this->requireFile($yamlFile);
         $this->assertStringContainsString('ignore:', $yamlContent);
         // Should have template comments
         $this->assertStringContainsString('# Add packages to ignore', $yamlContent);
@@ -1494,7 +1498,7 @@ final class PluginTest extends TestCase
         $plugin->onPostUpdate($event);
 
         // Verify YAML was updated with packages in ignore section
-        $yamlContent = file_get_contents($yamlFile);
+        $yamlContent = $this->requireFile($yamlFile);
         $this->assertStringContainsString('ignore:', $yamlContent);
         $this->assertStringContainsString('package1/one', $yamlContent);
         $this->assertStringContainsString('package2/two', $yamlContent);
@@ -1601,7 +1605,7 @@ final class PluginTest extends TestCase
         $method->invoke($plugin, $io);
 
         // Verify YAML content was preserved
-        $yamlContent = file_get_contents($yamlFile);
+        $yamlContent = $this->requireFile($yamlFile);
         $this->assertEquals($customContent, $yamlContent);
 
         // Cleanup
@@ -1658,7 +1662,7 @@ final class PluginTest extends TestCase
         // Verify YAML was created with packages
         $yamlFile = $tempDir . '/generate-composer-require.yaml';
         $this->assertFileExists($yamlFile);
-        $yamlContent = file_get_contents($yamlFile);
+        $yamlContent = $this->requireFile($yamlFile);
         $this->assertStringContainsString('package1/one', $yamlContent);
         $this->assertStringContainsString('package2/two', $yamlContent);
 
@@ -1718,7 +1722,7 @@ final class PluginTest extends TestCase
         $method->invoke($plugin, $io);
 
         // Verify YAML was preserved (not migrated)
-        $yamlContent = file_get_contents($yamlFile);
+        $yamlContent = $this->requireFile($yamlFile);
         $this->assertStringContainsString('user/package1', $yamlContent);
         $this->assertStringContainsString('user/package2', $yamlContent);
         $this->assertStringNotContainsString('txt/package1', $yamlContent);
@@ -1840,7 +1844,7 @@ final class PluginTest extends TestCase
 
         // Verify YAML was created (migration should proceed when YAML doesn't exist)
         $this->assertFileExists($yamlFile);
-        $yamlContent = file_get_contents($yamlFile);
+        $yamlContent = $this->requireFile($yamlFile);
         $this->assertStringContainsString('package1', $yamlContent);
         $this->assertStringContainsString('package2', $yamlContent);
 
@@ -1903,7 +1907,7 @@ final class PluginTest extends TestCase
         $method->invoke($plugin, $io);
 
         // Verify YAML was migrated (empty file should be considered template)
-        $yamlContent = file_get_contents($yamlFile);
+        $yamlContent = $this->requireFile($yamlFile);
         $this->assertStringContainsString('package1', $yamlContent);
         $this->assertStringContainsString('package2', $yamlContent);
 
@@ -2063,7 +2067,7 @@ final class PluginTest extends TestCase
         $method->invoke($plugin, $io);
 
         // Verify packages were merged (old entries in YAML are skipped, new ones added)
-        $yamlContent = file_get_contents($yamlFile);
+        $yamlContent = $this->requireFile($yamlFile);
         $this->assertStringContainsString('new/package', $yamlContent);
         $this->assertStringContainsString('another/package', $yamlContent);
         $this->assertStringContainsString('included/package', $yamlContent); // Include section preserved
@@ -2117,7 +2121,7 @@ final class PluginTest extends TestCase
         $plugin->activate($composer, $io);
         $plugin->onPostInstall($event);
 
-        $gitignoreContent = file_get_contents($gitignorePath);
+        $gitignoreContent = $this->requireFile($gitignorePath);
         $this->assertStringNotContainsString('generate-composer-require.ignore.txt', $gitignoreContent);
         $this->assertStringContainsString('vendor/', $gitignoreContent);
         $this->assertStringContainsString('node_modules/', $gitignoreContent);
@@ -2230,7 +2234,7 @@ final class PluginTest extends TestCase
 
         // Verify packages were merged correctly
         // Old entries should be skipped (line 422) and new ones added
-        $yamlContent = file_get_contents($yamlFile);
+        $yamlContent = $this->requireFile($yamlFile);
         $this->assertStringContainsString('new/package1', $yamlContent);
         $this->assertStringContainsString('new/package2', $yamlContent);
         $this->assertStringContainsString('included/package', $yamlContent);
@@ -2264,8 +2268,6 @@ final class PluginTest extends TestCase
 
         if (!is_dir($devBinDir) || !file_exists($devBinDir . '/generate-composer-require.sh')) {
             $this->markTestSkipped('Development bin directory or script does not exist');
-
-            return;
         }
 
         $config = $this->createMock(Config::class);
@@ -2317,8 +2319,6 @@ final class PluginTest extends TestCase
 
         if (!is_dir($devBinDir) || !file_exists($devBinDir . '/generate-composer-require.yaml')) {
             $this->markTestSkipped('Development bin directory or YAML config does not exist');
-
-            return;
         }
 
         $config = $this->createMock(Config::class);
@@ -2394,7 +2394,7 @@ final class PluginTest extends TestCase
 
         // Verify packages were merged correctly
         // Old entries should be skipped (line 422) and new ones added
-        $yamlContent = file_get_contents($yamlFile);
+        $yamlContent = $this->requireFile($yamlFile);
         $this->assertStringContainsString('new/package', $yamlContent);
         $this->assertStringContainsString('included/package', $yamlContent);
         // existing/package1 should appear in the merged list (line 422 skips old entries, but merge adds them back)
@@ -2453,7 +2453,7 @@ final class PluginTest extends TestCase
 
         // Verify packages were merged correctly
         // Line 422 should skip old ignore entries when ignoreSectionProcessed is false
-        $yamlContent = file_get_contents($yamlFile);
+        $yamlContent = $this->requireFile($yamlFile);
         $this->assertStringContainsString('new/package', $yamlContent);
         $this->assertStringContainsString('included/package', $yamlContent);
 
@@ -2509,7 +2509,7 @@ final class PluginTest extends TestCase
         $migrateMethod->invoke($plugin, $oldTxtFile, $yamlFile, $io);
 
         // Manually manipulate YAML to simulate verification failure (remove packages)
-        $yamlContent = file_get_contents($yamlFile);
+        $yamlContent = $this->requireFile($yamlFile);
         // Remove all packages to make verification fail
         $yamlContent = preg_replace('/\s+-\s+package[0-9]\/[^\n]+\n/', "\n", $yamlContent);
         file_put_contents($yamlFile, $yamlContent);
@@ -2517,9 +2517,9 @@ final class PluginTest extends TestCase
         // Now manually simulate the verification logic that would trigger line 260
         $extractMethod = $reflection->getMethod('extractPackagesFromYamlIgnoreSection');
         $extractMethod->setAccessible(true);
-        $yamlPackages = $extractMethod->invoke($plugin, file_get_contents($yamlFile));
+        $yamlPackages = $extractMethod->invoke($plugin, $this->requireFile($yamlFile));
 
-        $txtContent  = file_get_contents($oldTxtFile);
+        $txtContent  = $this->requireFile($oldTxtFile);
         $txtLines    = explode("\n", $txtContent);
         $txtPackages = [];
         foreach ($txtLines as $line) {
@@ -2529,8 +2529,8 @@ final class PluginTest extends TestCase
             }
         }
 
-        $txtPackagesSorted  = array_unique(array_filter($txtPackages));
-        $yamlPackagesSorted = array_unique(array_filter($yamlPackages));
+        $txtPackagesSorted  = array_values(array_unique($txtPackages));
+        $yamlPackagesSorted = array_values(array_unique($yamlPackages));
         sort($txtPackagesSorted);
         sort($yamlPackagesSorted);
 
@@ -2585,7 +2585,7 @@ final class PluginTest extends TestCase
         $method->setAccessible(true);
         $method->invoke($plugin, $oldTxtFile, $yamlFile, $io);
 
-        $yamlContent = file_get_contents($yamlFile);
+        $yamlContent = $this->requireFile($yamlFile);
         $this->assertStringContainsString('new/package', $yamlContent);
 
         // Cleanup
@@ -2614,9 +2614,7 @@ final class PluginTest extends TestCase
         $oldTxt   = $tempDir . '/generate-composer-require.ignore.txt';
         file_put_contents($oldTxt, "pkg/one\npkg/two\n");
 
-        $GLOBALS['__cuh_yaml_verify_target'] = $yamlFile;
-        $GLOBALS['__cuh_verify_mode']        = 'plugin';
-        $GLOBALS['__cuh_yaml_read_count']    = [];
+        TestIoHooks::setYamlVerify($yamlFile, 'plugin');
 
         $io = $this->createMock(IOInterface::class);
         $io->expects($this->once())
@@ -2642,7 +2640,7 @@ final class PluginTest extends TestCase
         try {
             $plugin->onPostInstall($event);
         } finally {
-            unset($GLOBALS['__cuh_yaml_verify_target'], $GLOBALS['__cuh_verify_mode'], $GLOBALS['__cuh_yaml_read_count']);
+            TestIoHooks::reset();
         }
 
         $this->assertFileExists($oldTxt);

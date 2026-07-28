@@ -2,6 +2,21 @@
 
 This guide covers all usage options and features of Composer Update Helper.
 
+## Table of contents
+
+- [Basic Usage](#basic-usage)
+  - [Show suggested update commands](#show-suggested-update-commands)
+  - [Show full release details](#show-full-release-details)
+  - [Skip release information](#skip-release-information)
+  - [Verbose mode](#verbose-mode)
+  - [Debug mode](#debug-mode)
+  - [Show help](#show-help)
+  - [Execute the update commands](#execute-the-update-commands)
+- [Release Information](#release-information)
+  - [Release Information Options](#release-information-options)
+- [Dependency Conflicts and Filtered Packages](#dependency-conflicts-and-filtered-packages)
+- [Environment Variables](#environment-variables)
+
 ## Basic Usage
 
 ### Show suggested update commands

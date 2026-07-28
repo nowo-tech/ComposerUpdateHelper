@@ -1,5 +1,18 @@
 # Security — Composer Update Helper
 
+## Table of contents
+
+- [Scope](#scope)
+- [Attack surface](#attack-surface)
+- [Threats and mitigations](#threats-and-mitigations)
+- [Secrets and cryptography](#secrets-and-cryptography)
+- [Logging](#logging)
+- [Dependencies](#dependencies)
+- [Reporting a vulnerability](#reporting-a-vulnerability)
+- [AI security audit (REQ-SEC-004)](#ai-security-audit-req-sec-004)
+  - [Residuals (accepted)](#residuals-accepted)
+- [Release security checklist (12.4.1)](#release-security-checklist-1241)
+
 ## Scope
 
 Composer Update Helper is a **development-time** Composer plugin that reads `composer.json` / `composer.lock`, suggests `composer require` commands, and optionally runs Composer with `--run`. It operates on the **local filesystem** of the project where it is installed.
@@ -67,6 +80,6 @@ Before tagging a release, confirm:
 | **Logging** | No secrets in logs. |
 | **Cryptography** | N/A; signing keys not embedded. |
 | **Permissions / exposure** | Runs as local user/CI; document in README. |
-| **Limits / DoS** | Large lockfiles may take time; document for CI timeouts. |
+| **Limits / DoS** | Large lockfiles may take time; Packagist/GitHub HTTP uses a **5s** stream timeout (`HttpClientDefaults`); see [CONFIGURATION.md — HTTP timeouts](CONFIGURATION.md#http-timeouts-req-runtime-001). |
 
 Record confirmation in the release PR or tag notes.

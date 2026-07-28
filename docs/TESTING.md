@@ -2,6 +2,33 @@
 
 This document provides comprehensive information about the test suite for Composer Update Helper, including tests for the new features implemented in Phase 1.
 
+## Table of contents
+
+- [Test Structure](#test-structure)
+- [Running Tests](#running-tests)
+  - [All Tests](#all-tests)
+  - [Specific Test Classes](#specific-test-classes)
+- [Test Coverage](#test-coverage)
+  - [Coverage Report](#coverage-report)
+- [New Feature Tests (Phase 1)](#new-feature-tests-phase-1)
+  - [Abandoned Package Detection Tests](#abandoned-package-detection-tests)
+  - [Fallback Version Tests](#fallback-version-tests)
+- [Integration Tests](#integration-tests)
+  - [Testing Abandoned Package Detection in Output](#testing-abandoned-package-detection-in-output)
+  - [Testing Fallback Version Suggestions in Output](#testing-fallback-version-suggestions-in-output)
+- [Test Files Structure](#test-files-structure)
+- [Writing New Tests](#writing-new-tests)
+  - [Test Class Structure](#test-class-structure)
+  - [Test Naming Convention](#test-naming-convention)
+  - [Best Practices](#best-practices)
+- [Continuous Integration](#continuous-integration)
+- [Coverage Requirements](#coverage-requirements)
+- [Debugging Tests](#debugging-tests)
+  - [Verbose Output](#verbose-output)
+  - [Stop on First Failure](#stop-on-first-failure)
+  - [Debug Specific Test](#debug-specific-test)
+- [Future Test Enhancements](#future-test-enhancements)
+
 ## Test Structure
 
 The test suite is organized into several test classes:

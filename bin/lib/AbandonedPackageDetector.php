@@ -26,12 +26,7 @@ class AbandonedPackageDetector
             error_log("DEBUG: Checking abandoned status for {$packageName} at {$url}");
         }
 
-        $context = stream_context_create([
-            'http' => [
-                'timeout'    => 5,
-                'user_agent' => 'Composer Update Helper',
-            ],
-        ]);
+        $context = HttpClientDefaults::streamContext();
 
         $response = @file_get_contents($url, false, $context);
         if (!$response) {

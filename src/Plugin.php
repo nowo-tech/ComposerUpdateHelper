@@ -10,6 +10,7 @@ use Composer\IO\IOInterface;
 use Composer\Plugin\PluginInterface;
 use Composer\Script\Event;
 use Composer\Script\ScriptEvents;
+use RuntimeException;
 
 use function count;
 use function dirname;
@@ -205,7 +206,7 @@ final class Plugin implements PluginInterface, EventSubscriberInterface
         // Migrate if: TXT exists AND (YAML doesn't exist OR YAML is empty/template only OR packages match)
         if (file_exists($oldIgnoreTxt)) {
             // Read packages from TXT
-            $txtContent  = file_get_contents($oldIgnoreTxt);
+            $txtContent  = SafeFileReader::read($oldIgnoreTxt);
             $txtLines    = explode("\n", $txtContent);
             $txtPackages = [];
             foreach ($txtLines as $line) {
@@ -227,12 +228,12 @@ final class Plugin implements PluginInterface, EventSubscriberInterface
             } else {
                 // YAML exists and has content (user-defined packages)
                 // Check if TXT packages are already in ignore section
-                $yamlContent  = file_get_contents($newIgnoreYaml);
+                $yamlContent  = SafeFileReader::read($newIgnoreYaml);
                 $yamlPackages = $this->extractPackagesFromYamlIgnoreSection($yamlContent);
 
                 // Verify packages match (order doesn't matter)
-                $txtPackagesSorted  = array_unique(array_filter($txtPackages));
-                $yamlPackagesSorted = array_unique(array_filter($yamlPackages));
+                $txtPackagesSorted  = array_values(array_unique($txtPackages));
+                $yamlPackagesSorted = array_values(array_unique($yamlPackages));
                 sort($txtPackagesSorted);
                 sort($yamlPackagesSorted);
 
@@ -252,12 +253,12 @@ final class Plugin implements PluginInterface, EventSubscriberInterface
 
                 // Verify migration was successful before deleting TXT
                 if (file_exists($newIgnoreYaml)) {
-                    $yamlContent  = file_get_contents($newIgnoreYaml);
+                    $yamlContent  = SafeFileReader::read($newIgnoreYaml);
                     $yamlPackages = $this->extractPackagesFromYamlIgnoreSection($yamlContent);
 
                     // Verify packages match (order doesn't matter)
-                    $txtPackagesSorted  = array_unique(array_filter($txtPackages));
-                    $yamlPackagesSorted = array_unique(array_filter($yamlPackages));
+                    $txtPackagesSorted  = array_values(array_unique($txtPackages));
+                    $yamlPackagesSorted = array_values(array_unique($yamlPackages));
                     sort($txtPackagesSorted);
                     sort($yamlPackagesSorted);
 
@@ -296,7 +297,7 @@ final class Plugin implements PluginInterface, EventSubscriberInterface
             return true;
         }
 
-        $yamlContent = file_get_contents($yamlPath);
+        $yamlContent = SafeFileReader::read($yamlPath);
         $yamlContent = trim($yamlContent);
 
         // If file is empty, it's safe to migrate
@@ -369,7 +370,7 @@ final class Plugin implements PluginInterface, EventSubscriberInterface
      */
     private function migrateTxtToYaml(string $txtPath, string $yamlPath, IOInterface $io): void
     {
-        $content = file_get_contents($txtPath);
+        $content = SafeFileReader::read($txtPath);
         $lines   = explode("\n", $content);
 
         $packages = [];
@@ -385,7 +386,7 @@ final class Plugin implements PluginInterface, EventSubscriberInterface
 
         // If YAML already exists, merge instead of overwriting
         if (file_exists($yamlPath)) {
-            $yamlContent            = file_get_contents($yamlPath);
+            $yamlContent            = SafeFileReader::read($yamlPath);
             $existingIgnorePackages = $this->extractPackagesFromYamlIgnoreSection($yamlContent);
 
             // Merge packages (avoid duplicates)
@@ -559,7 +560,7 @@ final class Plugin implements PluginInterface, EventSubscriberInterface
             return; // No .gitignore file, nothing to do
         }
 
-        $content         = file_get_contents($gitignorePath);
+        $content         = SafeFileReader::read($gitignorePath);
         $lines           = explode("\n", $content);
         $existingEntries = array_map('trim', $lines);
         $updated         = false;
@@ -627,8 +628,9 @@ final class Plugin implements PluginInterface, EventSubscriberInterface
             return [];
         }
 
-        $content = file_get_contents($composerJsonPath);
-        if ($content === false) {
+        try {
+            $content = SafeFileReader::read($composerJsonPath);
+        } catch (RuntimeException) {
             return [];
         }
 

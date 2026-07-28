@@ -2,6 +2,13 @@
 
 Composer Update Helper automatically detects your framework and respects version constraints to prevent breaking updates.
 
+## Table of contents
+
+- [Symfony](#symfony)
+- [Laravel](#laravel)
+- [Other Frameworks](#other-frameworks)
+- [Example Output](#example-output)
+
 ## Symfony
 
 Respects `extra.symfony.require` in `composer.json`:

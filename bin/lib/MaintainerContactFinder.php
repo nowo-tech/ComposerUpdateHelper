@@ -126,12 +126,7 @@ class MaintainerContactFinder
     private static function getPackagistPackageInfo(string $packageName, bool $debug = false): ?array
     {
         $url     = "https://packagist.org/packages/{$packageName}.json";
-        $context = stream_context_create([
-            'http' => [
-                'timeout'    => 5,
-                'user_agent' => 'Composer Update Helper',
-            ],
-        ]);
+        $context = HttpClientDefaults::streamContext();
 
         $json = @file_get_contents($url, false, $context);
         if (!$json) {

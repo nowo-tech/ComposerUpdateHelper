@@ -21,12 +21,7 @@ class PackageInfoProvider
     public static function getPackageRequirements(string $packageName, string $version): array
     {
         $url     = "https://packagist.org/packages/{$packageName}.json";
-        $context = stream_context_create([
-            'http' => [
-                'timeout'    => 5,
-                'user_agent' => 'Composer Update Helper',
-            ],
-        ]);
+        $context = HttpClientDefaults::streamContext();
 
         $json = @file_get_contents($url, false, $context);
         if (!$json) {
@@ -94,12 +89,7 @@ class PackageInfoProvider
     public static function getGitHubRepoFromPackagist(string $packageName): ?string
     {
         $url     = "https://packagist.org/packages/{$packageName}.json";
-        $context = stream_context_create([
-            'http' => [
-                'timeout'    => 5,
-                'user_agent' => 'Composer Update Helper',
-            ],
-        ]);
+        $context = HttpClientDefaults::streamContext();
 
         $json = @file_get_contents($url, false, $context);
         if (!$json) {
@@ -137,12 +127,8 @@ class PackageInfoProvider
         // Normalize version (remove 'v' prefix if present)
         $normalizedVersion = ltrim($version, 'v');
 
-        $context = stream_context_create([
-            'http' => [
-                'timeout'    => 5,
-                'user_agent' => 'Composer Update Helper',
-                'header'     => 'Accept: application/vnd.github.v3+json',
-            ],
+        $context = HttpClientDefaults::streamContext([
+            'Accept: application/vnd.github.v3+json',
         ]);
 
         // Try to get release by tag

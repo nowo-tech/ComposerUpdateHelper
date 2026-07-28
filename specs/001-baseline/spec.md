@@ -41,7 +41,7 @@ Composer **plugin** that installs **`generate-composer-require.sh`** and PHP lib
 
 ## Success Criteria
 
-- **SC-001**: **2/2** `src/` files mapped.
+- **SC-001**: **3/3** `src/` files mapped.
 - **SC-002**: Install + script smoke test documented.
 
 ---

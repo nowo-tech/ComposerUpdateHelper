@@ -9,6 +9,7 @@ use Composer\Config;
 use Composer\IO\IOInterface;
 use Composer\Script\Event;
 use NowoTech\ComposerUpdateHelper\Installer;
+use NowoTech\ComposerUpdateHelper\TestIoHooks;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use RecursiveDirectoryIterator;
@@ -30,6 +31,13 @@ use const FILE_APPEND;
  */
 final class InstallerTest extends TestCase
 {
+    private function requireFile(string $path): string
+    {
+        $content = file_get_contents($path);
+        self::assertNotFalse($content, 'Expected readable file: ' . $path);
+
+        return $content;
+    }
     private string $tempDir;
 
     private string $vendorDir;
@@ -101,7 +109,7 @@ final class InstallerTest extends TestCase
         Installer::install($event);
 
         // Verify the custom content was preserved
-        $this->assertStringContainsString('My custom packages', (string) file_get_contents($this->tempDir . '/generate-composer-require.yaml'));
+        $this->assertStringContainsString('My custom packages', $this->requireFile($this->tempDir . '/generate-composer-require.yaml'));
     }
 
     public function testUninstallRemovesScript(): void
@@ -134,12 +142,10 @@ final class InstallerTest extends TestCase
     public function testUninstallWhenFileDoesNotExist(): void
     {
         $event = $this->createMockEvent();
-
         // Don't create the file
         Installer::uninstall($event);
 
-        // Should not throw any exception
-        $this->assertTrue(true);
+        $this->assertFileDoesNotExist($this->tempDir . '/generate-composer-require.sh');
     }
 
     public function testInstallUpdatesWhenContentDiffers(): void
@@ -156,7 +162,7 @@ final class InstallerTest extends TestCase
         Installer::install($event);
 
         $this->assertFileExists($this->tempDir . '/generate-composer-require.sh');
-        $this->assertStringContainsString('new', (string) file_get_contents($this->tempDir . '/generate-composer-require.sh'));
+        $this->assertStringContainsString('new', $this->requireFile($this->tempDir . '/generate-composer-require.sh'));
     }
 
     public function testInstallSkipsWhenContentMatches(): void
@@ -226,8 +232,6 @@ final class InstallerTest extends TestCase
 
         if (!is_dir($devBinDir) || !file_exists($devBinDir . '/generate-composer-require.sh')) {
             $this->markTestSkipped('Development bin directory or script does not exist');
-
-            return;
         }
 
         // Install should work in development mode
@@ -252,7 +256,7 @@ final class InstallerTest extends TestCase
 
         Installer::install($event);
 
-        $gitignoreContent = file_get_contents($gitignorePath);
+        $gitignoreContent = $this->requireFile($gitignorePath);
         // .sh and .yaml should NOT be in .gitignore (they should be committed)
         $this->assertStringNotContainsString('generate-composer-require.sh', $gitignoreContent);
         $this->assertStringNotContainsString('generate-composer-require.yaml', $gitignoreContent);
@@ -273,7 +277,7 @@ final class InstallerTest extends TestCase
 
         Installer::install($event);
 
-        $gitignoreContent = file_get_contents($gitignorePath);
+        $gitignoreContent = $this->requireFile($gitignorePath);
         // .sh and .yaml should NOT be in .gitignore (they should be committed)
         $this->assertStringNotContainsString('generate-composer-require.sh', $gitignoreContent);
         $this->assertStringNotContainsString('generate-composer-require.yaml', $gitignoreContent);
@@ -299,7 +303,7 @@ final class InstallerTest extends TestCase
         $this->assertFileExists($yamlFile);
 
         // Verify content was migrated correctly
-        $yamlContent = file_get_contents($yamlFile);
+        $yamlContent = $this->requireFile($yamlFile);
         $this->assertStringContainsString('doctrine/orm', $yamlContent);
         $this->assertStringContainsString('symfony/security-bundle', $yamlContent);
         $this->assertStringContainsString('ignore:', $yamlContent);
@@ -328,7 +332,7 @@ final class InstallerTest extends TestCase
         Installer::install($event);
 
         // Verify YAML file was updated with migrated content
-        $yamlContent = file_get_contents($yamlFile);
+        $yamlContent = $this->requireFile($yamlFile);
         $this->assertStringContainsString('doctrine/orm', $yamlContent);
         $this->assertStringContainsString('symfony/security-bundle', $yamlContent);
         $this->assertStringContainsString('ignore:', $yamlContent);
@@ -357,7 +361,7 @@ final class InstallerTest extends TestCase
         Installer::install($event);
 
         // Verify YAML file was NOT changed (preserves user packages)
-        $yamlContent = file_get_contents($yamlFile);
+        $yamlContent = $this->requireFile($yamlFile);
         $this->assertStringContainsString('existing/package', $yamlContent);
         $this->assertStringNotContainsString('doctrine/orm', $yamlContent);
 
@@ -470,7 +474,7 @@ final class InstallerTest extends TestCase
 
         // Verify YAML file still has include section after migration
         $this->assertFileExists($yamlFile);
-        $yamlContent = file_get_contents($yamlFile);
+        $yamlContent = $this->requireFile($yamlFile);
         // Migration should preserve include section
         $this->assertStringContainsString('included1/one', $yamlContent);
         $this->assertStringContainsString('included2/two', $yamlContent);
@@ -503,7 +507,7 @@ final class InstallerTest extends TestCase
         $sourceFile      = $devBinDir . '/generate-composer-require.sh';
         $originalContent = null;
         if (file_exists($sourceFile)) {
-            $originalContent = file_get_contents($sourceFile);
+            $originalContent = $this->requireFile($sourceFile);
         }
 
         try {
@@ -548,7 +552,7 @@ final class InstallerTest extends TestCase
         // Verify YAML was created/updated with packages from TXT
         $yamlFile = $this->tempDir . '/generate-composer-require.yaml';
         $this->assertFileExists($yamlFile);
-        $yamlContent = file_get_contents($yamlFile);
+        $yamlContent = $this->requireFile($yamlFile);
         $this->assertStringContainsString('ignore:', $yamlContent);
         $this->assertStringContainsString('package1/one', $yamlContent);
         $this->assertStringContainsString('package2/two', $yamlContent);
@@ -585,7 +589,7 @@ final class InstallerTest extends TestCase
         // Verify YAML was created with migrated content
         $yamlFile = $this->tempDir . '/generate-composer-require.yaml';
         $this->assertFileExists($yamlFile);
-        $yamlContent = file_get_contents($yamlFile);
+        $yamlContent = $this->requireFile($yamlFile);
         $this->assertStringContainsString('newpackage/one', $yamlContent);
         $this->assertStringContainsString('newpackage/two', $yamlContent);
 
@@ -620,7 +624,7 @@ final class InstallerTest extends TestCase
         Installer::install($event);
 
         // Verify YAML was updated with ignore section
-        $yamlContent = file_get_contents($yamlFile);
+        $yamlContent = $this->requireFile($yamlFile);
         $this->assertStringContainsString('ignore:', $yamlContent);
         $this->assertStringContainsString('package1/one', $yamlContent);
         $this->assertStringContainsString('package2/two', $yamlContent);
@@ -657,7 +661,7 @@ final class InstallerTest extends TestCase
         // Verify YAML was created with template (empty packages)
         $yamlFile = $this->tempDir . '/generate-composer-require.yaml';
         $this->assertFileExists($yamlFile);
-        $yamlContent = file_get_contents($yamlFile);
+        $yamlContent = $this->requireFile($yamlFile);
         $this->assertStringContainsString('ignore:', $yamlContent);
         // When YAML exists and TXT is empty, merge preserves structure but may not have specific template comment
         // Just verify ignore section exists
@@ -688,7 +692,7 @@ final class InstallerTest extends TestCase
 
         Installer::install($event);
 
-        $gitignoreContent = file_get_contents($gitignorePath);
+        $gitignoreContent = $this->requireFile($gitignorePath);
         $this->assertStringNotContainsString('generate-composer-require.ignore.txt', $gitignoreContent);
         $this->assertStringContainsString('vendor/', $gitignoreContent);
         $this->assertStringContainsString('node_modules/', $gitignoreContent);
@@ -718,7 +722,7 @@ final class InstallerTest extends TestCase
 
         Installer::install($event);
 
-        $gitignoreContent = file_get_contents($gitignorePath);
+        $gitignoreContent = $this->requireFile($gitignorePath);
         $this->assertStringNotContainsString('generate-composer-require.sh', $gitignoreContent);
         $this->assertStringNotContainsString('generate-composer-require.yaml', $gitignoreContent);
         $this->assertStringContainsString('vendor/', $gitignoreContent);
@@ -782,7 +786,7 @@ final class InstallerTest extends TestCase
         Installer::install($event);
 
         // YAML should be preserved (not migrated) because it has user-defined packages
-        $yamlContent = file_get_contents($yamlFile);
+        $yamlContent = $this->requireFile($yamlFile);
         $this->assertStringContainsString('different/package', $yamlContent);
         $this->assertStringContainsString('another/package', $yamlContent);
         // TXT file should still exist because packages don't match
@@ -848,7 +852,7 @@ final class InstallerTest extends TestCase
         Installer::install($event);
 
         // Verify YAML was preserved (packages match, so just delete TXT)
-        $yamlContent = file_get_contents($yamlFile);
+        $yamlContent = $this->requireFile($yamlFile);
         $this->assertStringContainsString('existing/package', $yamlContent);
         $this->assertStringContainsString('included/package', $yamlContent); // Include section preserved
 
@@ -884,7 +888,7 @@ final class InstallerTest extends TestCase
         Installer::install($event);
 
         // Verify ignore section was added before include section
-        $yamlContent = file_get_contents($yamlFile);
+        $yamlContent = $this->requireFile($yamlFile);
         $this->assertStringContainsString('ignore:', $yamlContent);
         $this->assertStringContainsString('package1/one', $yamlContent);
         $this->assertStringContainsString('package2/two', $yamlContent);
@@ -931,7 +935,7 @@ final class InstallerTest extends TestCase
         Installer::install($event);
 
         // Verify packages were merged (old entries in YAML are skipped, new ones added)
-        $yamlContent = file_get_contents($yamlFile);
+        $yamlContent = $this->requireFile($yamlFile);
         $this->assertStringContainsString('old/package1', $yamlContent);
         $this->assertStringContainsString('new/package', $yamlContent);
         $this->assertStringContainsString('included/package', $yamlContent); // Include section preserved
@@ -967,7 +971,7 @@ final class InstallerTest extends TestCase
         Installer::install($event);
 
         // .gitignore should remain unchanged (no entries to remove)
-        $gitignoreContent = file_get_contents($gitignorePath);
+        $gitignoreContent = $this->requireFile($gitignorePath);
         $this->assertStringContainsString('vendor/', $gitignoreContent);
         $this->assertStringContainsString('node_modules/', $gitignoreContent);
         // Content should be the same (or with newline added, but no entries removed)
@@ -1004,7 +1008,7 @@ final class InstallerTest extends TestCase
         Installer::install($event);
 
         // Verify YAML was merged correctly, preserving all sections
-        $yamlContent = file_get_contents($yamlFile);
+        $yamlContent = $this->requireFile($yamlFile);
         $this->assertStringContainsString('new/package', $yamlContent);
         $this->assertStringContainsString('included/package', $yamlContent);
         $this->assertStringContainsString('other:', $yamlContent);
@@ -1043,7 +1047,7 @@ final class InstallerTest extends TestCase
         Installer::install($event);
 
         // Verify YAML was merged correctly, preserving comments
-        $yamlContent = file_get_contents($yamlFile);
+        $yamlContent = $this->requireFile($yamlFile);
         $this->assertStringContainsString('Header comment', $yamlContent);
         $this->assertStringContainsString('Comment before package', $yamlContent);
         $this->assertStringContainsString('new/package', $yamlContent);
@@ -1082,7 +1086,7 @@ final class InstallerTest extends TestCase
 
         // Verify packages were extracted correctly (should match, so TXT deleted)
         $this->assertFileDoesNotExist($oldTxtFile);
-        $yamlContent = file_get_contents($yamlFile);
+        $yamlContent = $this->requireFile($yamlFile);
         $this->assertStringContainsString('package1', $yamlContent);
         $this->assertStringContainsString('package2', $yamlContent);
 
@@ -1115,7 +1119,7 @@ final class InstallerTest extends TestCase
         Installer::install($event);
 
         // Verify ignore section was added before include
-        $yamlContent = file_get_contents($yamlFile);
+        $yamlContent = $this->requireFile($yamlFile);
         $this->assertStringContainsString('ignore:', $yamlContent);
         $this->assertStringContainsString('package1/one', $yamlContent);
         $this->assertStringContainsString('package2/two', $yamlContent);
@@ -1194,7 +1198,7 @@ final class InstallerTest extends TestCase
 
         // Verify YAML was created (migration should proceed when YAML doesn't exist)
         $this->assertFileExists($yamlFile);
-        $yamlContent = file_get_contents($yamlFile);
+        $yamlContent = $this->requireFile($yamlFile);
         $this->assertStringContainsString('package1', $yamlContent);
         $this->assertStringContainsString('package2', $yamlContent);
 
@@ -1230,7 +1234,7 @@ final class InstallerTest extends TestCase
         Installer::install($event);
 
         // Verify YAML was migrated (empty file should be considered template)
-        $yamlContent = file_get_contents($yamlFile);
+        $yamlContent = $this->requireFile($yamlFile);
         $this->assertStringContainsString('package1', $yamlContent);
         $this->assertStringContainsString('package2', $yamlContent);
 
@@ -1264,7 +1268,7 @@ final class InstallerTest extends TestCase
         // Verify YAML was created with template (no packages extracted from comments)
         $yamlFile = $this->tempDir . '/generate-composer-require.yaml';
         $this->assertFileExists($yamlFile);
-        $yamlContent = file_get_contents($yamlFile);
+        $yamlContent = $this->requireFile($yamlFile);
         $this->assertStringContainsString('ignore:', $yamlContent);
         // Should not contain the commented package
         $this->assertStringNotContainsString('package/name', $yamlContent);
@@ -1330,7 +1334,7 @@ final class InstallerTest extends TestCase
 
         // Verify YAML was created with template (empty packages)
         $this->assertFileExists($yamlFile);
-        $yamlContent = file_get_contents($yamlFile);
+        $yamlContent = $this->requireFile($yamlFile);
         // When YAML is created from empty TXT, it should have template structure
         // Just verify ignore section exists (template comments may vary)
         $this->assertStringContainsString('ignore:', $yamlContent);
@@ -1370,7 +1374,7 @@ final class InstallerTest extends TestCase
 
         // Verify YAML was created with migrated content
         $this->assertFileExists($yamlFile);
-        $yamlContent = file_get_contents($yamlFile);
+        $yamlContent = $this->requireFile($yamlFile);
         $this->assertStringContainsString('package1/one', $yamlContent);
         $this->assertStringContainsString('package2/two', $yamlContent);
         $this->assertStringContainsString('ignore:', $yamlContent);
@@ -1411,7 +1415,7 @@ final class InstallerTest extends TestCase
         // Verify YAML was created with packages
         // Note: YAML template is created first, then migration happens, so it may merge instead of creating from scratch
         $this->assertFileExists($yamlFile);
-        $yamlContent = file_get_contents($yamlFile);
+        $yamlContent = $this->requireFile($yamlFile);
         $this->assertStringContainsString('doctrine/orm', $yamlContent);
         $this->assertStringContainsString('symfony/security-bundle', $yamlContent);
         $this->assertStringContainsString('ignore:', $yamlContent);
@@ -1480,7 +1484,7 @@ final class InstallerTest extends TestCase
 
         // Verify packages were merged correctly
         // Old entries should be skipped (line 235) and new ones added
-        $yamlContent = file_get_contents($yamlFile);
+        $yamlContent = $this->requireFile($yamlFile);
         $this->assertStringContainsString('new/package1', $yamlContent);
         $this->assertStringContainsString('new/package2', $yamlContent);
         $this->assertStringContainsString('included/package', $yamlContent);
@@ -1523,7 +1527,7 @@ final class InstallerTest extends TestCase
 
         // Verify YAML was created with migrated content (lines 272-296: create new YAML from scratch)
         $this->assertFileExists($yamlFile);
-        $yamlContent = file_get_contents($yamlFile);
+        $yamlContent = $this->requireFile($yamlFile);
         $this->assertStringContainsString('package1/one', $yamlContent);
         $this->assertStringContainsString('package2/two', $yamlContent);
         $this->assertStringContainsString('ignore:', $yamlContent);
@@ -1570,7 +1574,7 @@ final class InstallerTest extends TestCase
         $migrateMethod->invoke(null, $oldTxtFile, $yamlFile, $io);
 
         // Manually manipulate YAML to cause verification failure (remove one package)
-        $yamlContent = file_get_contents($yamlFile);
+        $yamlContent = $this->requireFile($yamlFile);
         // Remove package2/two to make packages not match
         $yamlContent = preg_replace('/\s+-\s+package2\/two\n/', "\n", $yamlContent);
         file_put_contents($yamlFile, $yamlContent);
@@ -1578,9 +1582,9 @@ final class InstallerTest extends TestCase
         // Now manually test the verification logic to verify it detects the mismatch
         $extractMethod = $reflection->getMethod('extractPackagesFromYamlIgnoreSection');
         $extractMethod->setAccessible(true);
-        $yamlPackages = $extractMethod->invoke(null, file_get_contents($yamlFile));
+        $yamlPackages = $extractMethod->invoke(null, $this->requireFile($yamlFile));
 
-        $txtContent  = file_get_contents($oldTxtFile);
+        $txtContent  = $this->requireFile($oldTxtFile);
         $txtLines    = explode("\n", $txtContent);
         $txtPackages = [];
         foreach ($txtLines as $line) {
@@ -1590,8 +1594,8 @@ final class InstallerTest extends TestCase
             }
         }
 
-        $txtPackagesSorted  = array_unique(array_filter($txtPackages));
-        $yamlPackagesSorted = array_unique(array_filter($yamlPackages));
+        $txtPackagesSorted  = array_values(array_unique($txtPackages));
+        $yamlPackagesSorted = array_values(array_unique($yamlPackages));
         sort($txtPackagesSorted);
         sort($yamlPackagesSorted);
 
@@ -1636,7 +1640,7 @@ final class InstallerTest extends TestCase
 
         // Verify packages were merged correctly
         // Old entries should be skipped (line 235) and new ones added
-        $yamlContent = file_get_contents($yamlFile);
+        $yamlContent = $this->requireFile($yamlFile);
         $this->assertStringContainsString('new/package', $yamlContent);
         $this->assertStringContainsString('included/package', $yamlContent);
         // existing/package1 should appear in the merged list (line 235 skips old entries, but merge adds them back)
@@ -1677,7 +1681,7 @@ final class InstallerTest extends TestCase
 
         // Verify YAML was created with template (empty packages - lines 281-283)
         $this->assertFileExists($yamlFile);
-        $yamlContent = file_get_contents($yamlFile);
+        $yamlContent = $this->requireFile($yamlFile);
         $this->assertStringContainsString('ignore:', $yamlContent);
         $this->assertStringContainsString('# Add packages to ignore', $yamlContent);
         $this->assertStringContainsString('# - doctrine/orm', $yamlContent);
@@ -1723,7 +1727,7 @@ final class InstallerTest extends TestCase
 
         // Verify packages were merged correctly
         // Line 235 should skip old ignore entries when ignoreSectionProcessed is false
-        $yamlContent = file_get_contents($yamlFile);
+        $yamlContent = $this->requireFile($yamlFile);
         $this->assertStringContainsString('new/package', $yamlContent);
         $this->assertStringContainsString('included/package', $yamlContent);
 
@@ -1767,7 +1771,7 @@ final class InstallerTest extends TestCase
         $migrateMethod->invoke(null, $oldTxtFile, $yamlFile, $io);
 
         // Manually manipulate YAML to simulate verification failure (remove packages)
-        $yamlContent = file_get_contents($yamlFile);
+        $yamlContent = $this->requireFile($yamlFile);
         // Remove all packages to make verification fail
         $yamlContent = preg_replace('/\s+-\s+package[0-9]\/[^\n]+\n/', "\n", $yamlContent);
         file_put_contents($yamlFile, $yamlContent);
@@ -1775,9 +1779,9 @@ final class InstallerTest extends TestCase
         // Now manually simulate the verification logic that would trigger line 154
         $extractMethod = $reflection->getMethod('extractPackagesFromYamlIgnoreSection');
         $extractMethod->setAccessible(true);
-        $yamlPackages = $extractMethod->invoke(null, file_get_contents($yamlFile));
+        $yamlPackages = $extractMethod->invoke(null, $this->requireFile($yamlFile));
 
-        $txtContent  = file_get_contents($oldTxtFile);
+        $txtContent  = $this->requireFile($oldTxtFile);
         $txtLines    = explode("\n", $txtContent);
         $txtPackages = [];
         foreach ($txtLines as $line) {
@@ -1787,8 +1791,8 @@ final class InstallerTest extends TestCase
             }
         }
 
-        $txtPackagesSorted  = array_unique(array_filter($txtPackages));
-        $yamlPackagesSorted = array_unique(array_filter($yamlPackages));
+        $txtPackagesSorted  = array_values(array_unique($txtPackages));
+        $yamlPackagesSorted = array_values(array_unique($yamlPackages));
         sort($txtPackagesSorted);
         sort($yamlPackagesSorted);
 
@@ -1857,7 +1861,7 @@ final class InstallerTest extends TestCase
         $method->invoke(null, $oldTxtFile, $yamlFile, $io);
 
         // Verify migration worked
-        $yamlContent = file_get_contents($yamlFile);
+        $yamlContent = $this->requireFile($yamlFile);
         $this->assertStringContainsString('new/package', $yamlContent);
 
         // Cleanup
@@ -1882,9 +1886,7 @@ final class InstallerTest extends TestCase
             "# template\nignore:\n  # placeholder\ninclude:\n",
         );
 
-        $GLOBALS['__cuh_yaml_verify_target'] = $yamlDest;
-        $GLOBALS['__cuh_verify_mode']        = 'installer';
-        $GLOBALS['__cuh_yaml_read_count']    = [];
+        TestIoHooks::setYamlVerify($yamlDest, 'installer');
 
         $io = $this->createMock(IOInterface::class);
         $io->expects($this->once())
@@ -1909,7 +1911,7 @@ final class InstallerTest extends TestCase
         try {
             Installer::install($event);
         } finally {
-            unset($GLOBALS['__cuh_yaml_verify_target'], $GLOBALS['__cuh_verify_mode'], $GLOBALS['__cuh_yaml_read_count']);
+            TestIoHooks::reset();
         }
 
         $this->assertFileExists($oldTxt);

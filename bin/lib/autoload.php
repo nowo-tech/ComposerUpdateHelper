@@ -14,6 +14,7 @@ require_once __DIR__ . '/ConfigLoader.php';
 require_once __DIR__ . '/Utils.php';
 require_once __DIR__ . '/FrameworkDetector.php';
 require_once __DIR__ . '/DependencyAnalyzer.php';
+require_once __DIR__ . '/HttpClientDefaults.php';
 require_once __DIR__ . '/PackageInfoProvider.php';
 require_once __DIR__ . '/AbandonedPackageDetector.php';
 require_once __DIR__ . '/FallbackVersionFinder.php';

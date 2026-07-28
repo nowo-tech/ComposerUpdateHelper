@@ -2,6 +2,23 @@
 
 Thank you for considering contributing to Composer Update Helper!
 
+## Table of contents
+
+- [Code of Conduct](#code-of-conduct)
+- [Maintainer](#maintainer)
+- [Development Setup](#development-setup)
+  - [Using Docker (Recommended)](#using-docker-recommended)
+  - [Without Docker](#without-docker)
+- [Branching Strategy](#branching-strategy)
+- [Pull Request Process](#pull-request-process)
+- [Coding Standards](#coding-standards)
+- [Running Tests](#running-tests)
+  - [With Docker](#with-docker)
+  - [Without Docker](#without-docker)
+- [Available Make Commands](#available-make-commands)
+- [Reporting Issues](#reporting-issues)
+- [Contact](#contact)
+- [Git hooks (REQ-GIT-001)](#git-hooks-req-git-001)
 
 ## Code of Conduct
 

@@ -2,6 +2,46 @@
 
 This document provides a detailed action plan for implementing the not-yet-supported update scenarios, ordered by complexity and feasibility.
 
+## Table of contents
+
+- [Implementation Priority Matrix](#implementation-priority-matrix)
+  - [Complexity vs Feasibility Analysis](#complexity-vs-feasibility-analysis)
+- [Phase 1: Quick Wins (Low Complexity, High Feasibility)](#phase-1-quick-wins-low-complexity-high-feasibility)
+  - [Priority 1: Conflict Resolution Strategies - Fallback Versions (#19)](#priority-1-conflict-resolution-strategies-fallback-versions-19)
+  - [Priority 2: Alternative Package Suggestions (#18)](#priority-2-alternative-package-suggestions-18)
+  - [Priority 3: Abandoned Package Detection (#14)](#priority-3-abandoned-package-detection-14)
+- [Phase 2: Medium Complexity Improvements](#phase-2-medium-complexity-improvements)
+  - [Priority 4: Conflict Impact Analysis (#20)](#priority-4-conflict-impact-analysis-20)
+  - [Priority 6: Batch Update Optimization (#16)](#priority-6-batch-update-optimization-16)
+  - [Priority 7: Wildcard Dependency Checking (#11)](#priority-7-wildcard-dependency-checking-11)
+- [Phase 3: Complex Features (Higher Complexity)](#phase-3-complex-features-higher-complexity)
+  - [Priority 8: Cascading Conflict Chains (#13)](#priority-8-cascading-conflict-chains-13)
+  - [Priority 9: Circular Dependency Conflicts (#12)](#priority-9-circular-dependency-conflicts-12)
+  - [Priority 10: Repository-Specific Conflicts (#15)](#priority-10-repository-specific-conflicts-15)
+- [Phase 4: Long-Term (High Complexity)](#phase-4-long-term-high-complexity)
+  - [Priority 11: Pre-Installation Conflict Prediction (#17)](#priority-11-pre-installation-conflict-prediction-17)
+- [Implementation Timeline](#implementation-timeline)
+  - [Phase 1: Quick Wins (Weeks 1-4)](#phase-1-quick-wins-weeks-1-4)
+  - [Phase 2: Medium Improvements (Weeks 5-11)](#phase-2-medium-improvements-weeks-5-11)
+  - [Phase 3: Complex Features (Weeks 12-19)](#phase-3-complex-features-weeks-12-19)
+  - [Phase 4: Long-Term (Months 4-6)](#phase-4-long-term-months-4-6)
+- [Risk Assessment](#risk-assessment)
+  - [High Risk](#high-risk)
+  - [Medium Risk](#medium-risk)
+  - [Low Risk](#low-risk)
+- [Success Metrics](#success-metrics)
+- [Notes](#notes)
+- [Translation Requirements](#translation-requirements)
+  - [Internationalization (i18n) for New Features](#internationalization-i18n-for-new-features)
+  - [Translation Keys for New Features](#translation-keys-for-new-features)
+  - [Translation Checklist for Each Feature](#translation-checklist-for-each-feature)
+  - [Translation Function Usage](#translation-function-usage)
+  - [Estimated Translation Effort](#estimated-translation-effort)
+  - [Resources](#resources)
+- [Manual Intervention Required: Contact Package Maintainers](#manual-intervention-required-contact-package-maintainers)
+  - [When to Suggest Contacting Maintainers](#when-to-suggest-contacting-maintainers)
+  - [Implementation Plan for Maintainer Contact Suggestions](#implementation-plan-for-maintainer-contact-suggestions)
+
 ## Implementation Priority Matrix
 
 ### Complexity vs Feasibility Analysis
