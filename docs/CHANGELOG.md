@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Table of contents
 
 - [[Unreleased]](#unreleased)
-- [[2.0.34] - 2026-07-28](#2034-2026-07-28)
+- [[2.0.34] - 2026-07-29](#2034-2026-07-29)
   - [Added](#added)
   - [Changed](#changed)
   - [Documentation](#documentation)
@@ -179,7 +179,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [2.0.34] - 2026-07-28
+## [2.0.34] - 2026-07-29
 
 ### Added
 
@@ -187,6 +187,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`HttpClientDefaults`** (`bin/lib/HttpClientDefaults.php`): shared 5s Packagist/GitHub HTTP timeout; unit test for hanging-socket behaviour (REQ-RUNTIME-001).
 - Table of contents on long docs (REQ-DOCS-005).
 - **REQ-REL-003**: `check-open-prs.sh` resolves `owner/repo` from the `origin` SSH/HTTPS URL when `gh` cannot detect the host from remotes.
+- **REQ-MAKE-010**: Root Makefile detects Compose V2 (`docker compose`) with fallback to `docker-compose` V1.
+- **REQ-MAKE-009**: Soft `-include` of monorepo `Makefile.update-deps.mk` so standalone CI checkouts parse cleanly.
 
 ### Changed
 
@@ -200,7 +202,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `docs/SECURITY.md`: DoS/limits row links the shared 5s HTTP timeout.
 - Spec Kit inventory: `SafeFileReader.php` mapped (3 `src/` files).
 
-> **Note**: No consumer-facing migration for typical use. See [UPGRADING.md](UPGRADING.md#upgrading-to-2034-2026-07-28).
+> **Note**: No consumer-facing migration for typical use. See [UPGRADING.md](UPGRADING.md#upgrading-to-2034-2026-07-29).
 
 ## [2.0.33] - 2026-07-27
 

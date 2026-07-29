@@ -2,7 +2,9 @@
 # All dev targets use the root docker-compose.yml.
 
 COMPOSE_FILE := docker-compose.yml
-COMPOSE     := docker-compose -f $(COMPOSE_FILE)
+# Prefer Compose V2 plugin (GitHub Actions / modern Docker Desktop); fall back to docker-compose V1 (REQ-MAKE-010).
+COMPOSE_BIN := $(shell docker compose version >/dev/null 2>&1 && echo "docker compose" || echo "docker-compose")
+COMPOSE     := $(COMPOSE_BIN) -f $(COMPOSE_FILE)
 SERVICE_PHP := php
 
 .PHONY: help up down down-dev build shell install ensure-up test test-coverage coverage-check cs-check cs-fix rector rector-dry phpstan qa \
@@ -66,7 +68,7 @@ install: ensure-up
 
 ensure-up:
 	@if ! $(COMPOSE) exec -T $(SERVICE_PHP) true 2>/dev/null; then \
-		echo "Starting container (root docker-compose)..."; \
+		echo "Starting container (root $(COMPOSE))..."; \
 		$(COMPOSE) up -d; \
 		sleep 3; \
 		$(COMPOSE) exec -T $(SERVICE_PHP) composer install --no-interaction; \
@@ -142,7 +144,8 @@ setup-hooks:
 
 # REQ-MAKE-008: update-deps (REQ-MAKE-008)
 BUNDLE_ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
-include $(BUNDLE_ROOT)/../.scripts/Makefile.update-deps.mk
+# Optional: monorepo helper absent on standalone GitHub Actions checkout (REQ-MAKE-009).
+-include $(BUNDLE_ROOT)/../.scripts/Makefile.update-deps.mk
 
 strip-cursor-coauthor-from-history:
 	@chmod +x .scripts/strip-cursor-coauthor-from-history.sh

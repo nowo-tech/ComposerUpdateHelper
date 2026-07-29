@@ -6,7 +6,7 @@ This guide will help you upgrade Composer Update Helper to newer versions.
 
 - [General Upgrade Process](#general-upgrade-process)
 - [Version-Specific Upgrade Notes](#version-specific-upgrade-notes)
-  - [Upgrading to 2.0.34+ (2026-07-28)](#upgrading-to-2034-2026-07-28)
+  - [Upgrading to 2.0.34+ (2026-07-29)](#upgrading-to-2034-2026-07-29)
   - [Upgrading to 2.0.33+ (2026-07-27)](#upgrading-to-2033-2026-07-27)
   - [Upgrading to 2.0.32+ (2026-07-27)](#upgrading-to-2032-2026-07-27)
   - [Upgrading to 2.0.31+ (2026-07-16)](#upgrading-to-2031-2026-07-16)
@@ -63,16 +63,19 @@ This guide will help you upgrade Composer Update Helper to newer versions.
 
 ## Version-Specific Upgrade Notes
 
-### Upgrading to 2.0.34+ (2026-07-28)
+### Upgrading to 2.0.34+ (2026-07-29)
 
 #### What's Changed
 
 Reliability and standards hardening; CLI Packagist/GitHub lookups share a **5 second** HTTP timeout (`HttpClientDefaults`). Plugin file reads use `SafeFileReader` and throw `RuntimeException` if a path that should exist cannot be read (instead of silently treating `false` as empty content).
 
+Maintainer/CI Makefiles: Compose V2 detection with V1 fallback (REQ-MAKE-010); optional monorepo `update-deps` include so GitHub Actions checkouts do not fail at parse time (REQ-MAKE-009).
+
 #### Migration Steps
 
 1. Update the package: `composer update nowo-tech/composer-update-helper`.
 2. Optional: review [CONFIGURATION.md — HTTP timeouts](CONFIGURATION.md#http-timeouts-req-runtime-001) if CI jobs wrap many network lookups.
+3. Contributors: prefer `docker compose` (V2); legacy `docker-compose` still works via Makefile detection.
 
 **No Breaking Changes** for typical consumers (timeout matches the previous per-call 5s defaults; unreadable config/gitignore paths now fail loudly during install/update hooks).
 
