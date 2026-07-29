@@ -40,6 +40,10 @@ This bundle is **FrankenPHP worker mode friendly**.
 - ✅ **Lightweight architecture**: Script delegates complex logic to PHP in vendor, keeping the repo script lightweight and maintainable
 - ⚠️ **Internationalization (i18n)** (DEVELOPMENT MODE): Multi-language support for output messages with automatic language detection
 
+## Version information
+
+Supported PHP versions follow `composer.json` (`>=8.1 <8.6`). Release history is in [docs/CHANGELOG.md](docs/CHANGELOG.md).
+
 ## Installation
 
 ```bash
@@ -93,64 +97,10 @@ The script automatically detects `process-updates.php` in `vendor/nowo-tech/comp
 - ✅ **Better maintainability**: Clear separation of concerns
 - ✅ **Automatic detection**: No configuration needed
 
-## Usage
+## Requirements
 
-### Basic Usage
-
-```bash
-# Show suggested update commands
-./generate-composer-require.sh
-
-# Execute commands directly
-./generate-composer-require.sh --run
-
-# Show release information
-./generate-composer-require.sh --release-info
-
-# Show full changelogs
-./generate-composer-require.sh --release-detail
-
-# Show impact analysis for conflicting packages
-./generate-composer-require.sh --show-impact
-
-# Save impact analysis to file
-./generate-composer-require.sh --save-impact
-
-# Verbose output
-./generate-composer-require.sh --verbose
-
-# Debug mode
-./generate-composer-require.sh --debug
-
-# Show help
-./generate-composer-require.sh --help
-```
-
-Example output:
-
-```
-⏭️ Ignored packages (prod):
- - doctrine/doctrine-bundle:2.13.2
-
-🔧 Suggested commands:
- composer require --with-all-dependencies vendor/package:1.2.3 another/package:4.5.6
- composer require --dev --with-all-dependencies phpstan/phpstan:2.0.0
-```
-
-> **Note:** By default, release information is **not shown** (no API calls are made). Use `--release-info` or `--release-detail` to enable it.
-
-**Available options:**
-- `--run` - Execute suggested commands automatically
-- `--release-info` - Show release information (summary with links)
-- `--release-detail` - Show full release changelog for each package (implies `--release-info`)
-- `--no-release-info` - Skip release information section (default behavior)
-- `--show-impact, --impact` - Show impact analysis for conflicting packages (disabled by default)
-- `--save-impact` - Save impact analysis to `composer-update-impact.txt` file (implies `--show-impact`)
-- `-v, --verbose` - Show verbose output (configuration files, packages, etc.)
-- `--debug` - Show debug information (very detailed, includes file paths, parsing, etc.)
-- `-h, --help` - Show help message
-
-For detailed usage information, see [Usage Guide](docs/USAGE.md).
+- PHP `>=8.1 <8.6`
+- Composer 2.x
 
 ## Configuration
 
@@ -209,6 +159,64 @@ include:
 For detailed configuration options including language settings, dependency checking, and backward compatibility, see [Configuration Guide](docs/CONFIGURATION.md).
 
 For framework support details, see [Framework Support](docs/FRAMEWORKS.md).
+
+## Usage
+### Basic Usage
+
+```bash
+# Show suggested update commands
+./generate-composer-require.sh
+
+# Execute commands directly
+./generate-composer-require.sh --run
+
+# Show release information
+./generate-composer-require.sh --release-info
+
+# Show full changelogs
+./generate-composer-require.sh --release-detail
+
+# Show impact analysis for conflicting packages
+./generate-composer-require.sh --show-impact
+
+# Save impact analysis to file
+./generate-composer-require.sh --save-impact
+
+# Verbose output
+./generate-composer-require.sh --verbose
+
+# Debug mode
+./generate-composer-require.sh --debug
+
+# Show help
+./generate-composer-require.sh --help
+```
+
+Example output:
+
+```
+⏭️ Ignored packages (prod):
+ - doctrine/doctrine-bundle:2.13.2
+
+🔧 Suggested commands:
+ composer require --with-all-dependencies vendor/package:1.2.3 another/package:4.5.6
+ composer require --dev --with-all-dependencies phpstan/phpstan:2.0.0
+```
+
+> **Note:** By default, release information is **not shown** (no API calls are made). Use `--release-info` or `--release-detail` to enable it.
+
+**Available options:**
+- `--run` - Execute suggested commands automatically
+- `--release-info` - Show release information (summary with links)
+- `--release-detail` - Show full release changelog for each package (implies `--release-info`)
+- `--no-release-info` - Skip release information section (default behavior)
+- `--show-impact, --impact` - Show impact analysis for conflicting packages (disabled by default)
+- `--save-impact` - Save impact analysis to `composer-update-impact.txt` file (implies `--show-impact`)
+- `-v, --verbose` - Show verbose output (configuration files, packages, etc.)
+- `--debug` - Show debug information (very detailed, includes file paths, parsing, etc.)
+- `-h, --help` - Show help message
+
+For detailed usage information, see [Usage Guide](docs/USAGE.md).
 
 ## Packagist Integration
 
@@ -274,43 +282,7 @@ When the Packagist API doesn't have information about these packages, the tool a
 
 > 💡 **Tip**: If you're using a VPN or behind a corporate firewall, configuring a Packagist mirror or ensuring `composer show` works will provide the best experience.
 
-## Requirements
-
-- PHP `>=8.1 <8.6`
-- Composer 2.x
-
-## Version information
-
-Supported PHP versions follow `composer.json` (`>=8.1 <8.6`). Release history is in [docs/CHANGELOG.md](docs/CHANGELOG.md).
-
-## Documentation
-
-- [Installation](docs/INSTALLATION.md)
-- [Configuration](docs/CONFIGURATION.md)
-- [Usage](docs/USAGE.md)
-- [Contributing](docs/CONTRIBUTING.md)
-- [Code of Conduct](CODE_OF_CONDUCT.md)
-- [Changelog](docs/CHANGELOG.md)
-- [Upgrading](docs/UPGRADING.md)
-- [Release](docs/RELEASE.md)
-- [Security](docs/SECURITY.md)
-- [Engram](docs/ENGRAM.md)
-- [Spec-driven development](docs/SPEC-DRIVEN-DEVELOPMENT.md)
-- [GitHub Spec Kit](docs/SPEC-KIT.md)
-
-### Additional documentation
-
-- [GitHub Actions CI requirements](docs/GITHUB_CI.md)
-- [Framework support](docs/FRAMEWORKS.md)
-- [Update cases and scenarios](docs/UPDATE_CASES.md)
-- [Testing](docs/TESTING.md)
-- [Implementation roadmap](docs/IMPLEMENTATION_ROADMAP.md)
-- [Development](docs/DEVELOPMENT.md)
-- [Branching](docs/BRANCHING.md)
-- [I18N strategy](docs/I18N_STRATEGY.md)
-
 ## Related Packages
-
 ### Code Review Guardian
 
 Looking for a complete code review solution? We highly recommend **[Code Review Guardian](https://github.com/nowo-tech/CodeReviewGuardian)** - a provider-agnostic code review guardian that works perfectly with Composer Update Helper:
@@ -342,9 +314,31 @@ Together with Composer Update Helper, you get a complete development workflow:
 
 **Perfect combination for maintaining high-quality PHP projects!** 🚀
 
-## Author
+## Documentation
 
-Created by [Héctor Franco Aceituno](https://github.com/HecFranco) at [Nowo.tech](https://nowo.tech)
+- [Installation](docs/INSTALLATION.md)
+- [Configuration](docs/CONFIGURATION.md)
+- [Usage](docs/USAGE.md)
+- [Contributing](docs/CONTRIBUTING.md)
+- [Code of Conduct](CODE_OF_CONDUCT.md)
+- [Changelog](docs/CHANGELOG.md)
+- [Upgrading](docs/UPGRADING.md)
+- [Release](docs/RELEASE.md)
+- [Security](docs/SECURITY.md)
+- [Engram](docs/ENGRAM.md)
+- [Spec-driven development](docs/SPEC-DRIVEN-DEVELOPMENT.md)
+- [GitHub Spec Kit](docs/SPEC-KIT.md)
+
+### Additional documentation
+
+- [GitHub Actions CI requirements](docs/GITHUB_CI.md)
+- [Framework support](docs/FRAMEWORKS.md)
+- [Update cases and scenarios](docs/UPDATE_CASES.md)
+- [Testing](docs/TESTING.md)
+- [Implementation roadmap](docs/IMPLEMENTATION_ROADMAP.md)
+- [Development](docs/DEVELOPMENT.md)
+- [Branching](docs/BRANCHING.md)
+- [I18N strategy](docs/I18N_STRATEGY.md)
 
 ## Tests and coverage
 
@@ -356,3 +350,7 @@ Created by [Héctor Franco Aceituno](https://github.com/HecFranco) at [Nowo.tech
 ## License
 
 The MIT License (MIT). Please see [LICENSE](LICENSE) for more information.
+## Author
+
+Created by [Héctor Franco Aceituno](https://github.com/HecFranco) at [Nowo.tech](https://nowo.tech)
+
