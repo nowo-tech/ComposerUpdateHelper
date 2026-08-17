@@ -2,6 +2,8 @@
 
 This document provides a detailed action plan for implementing the not-yet-supported update scenarios, ordered by complexity and feasibility.
 
+**Status (v2.0.34, 2026-08):** Phase 1 and most of Phase 2 are **shipped** (fallback versions, alternative packages, abandoned detection, conflict impact, wildcard checking, maintainer contact). Still open: batch update optimization, cascading conflict chains, circular dependency conflicts, repository-specific conflicts, pre-installation conflict prediction. The “Weeks 1–19” timeline below is historical, not a schedule.
+
 ## Table of contents
 
 - [Implementation Priority Matrix](#implementation-priority-matrix)

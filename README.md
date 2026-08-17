@@ -50,8 +50,6 @@ Supported PHP versions follow `composer.json` (`>=8.1 <8.6`). Release history is
 composer require --dev nowo-tech/composer-update-helper
 ```
 
-> 💡 **Tip**: We also recommend installing [Code Review Guardian](https://github.com/nowo-tech/CodeReviewGuardian) for a complete code quality workflow. See [Related Packages](#related-packages) section below.
-
 After installation, two files will be copied to your project root:
 - `generate-composer-require.sh` - The lightweight wrapper script (delegates complex logic to PHP in vendor)
 - `generate-composer-require.yaml` - Configuration file for ignored and included packages (only created if doesn't exist)
@@ -283,36 +281,16 @@ When the Packagist API doesn't have information about these packages, the tool a
 > 💡 **Tip**: If you're using a VPN or behind a corporate firewall, configuring a Packagist mirror or ensuring `composer show` works will provide the best experience.
 
 ## Related Packages
-### Code Review Guardian
 
-Looking for a complete code review solution? We highly recommend **[Code Review Guardian](https://github.com/nowo-tech/CodeReviewGuardian)** - a provider-agnostic code review guardian that works perfectly with Composer Update Helper:
+### PHP Quality Tools
 
-- ✅ **Provider-agnostic**: Works with GitHub, GitLab, Bitbucket, and any Git provider
-- ✅ **Multi-framework support**: Automatic framework detection (Symfony, Laravel, etc.)
-- ✅ **Code quality checks**: PHP-CS-Fixer, PHPStan, PHPUnit, Security checks
-- ✅ **Easy integration**: Simple YAML configuration
-- ✅ **Framework-specific configs**: Optimized configurations for each framework
+For Rector / PHP-CS-Fixer / Twig-CS-Fixer configs with automatic framework detection, use **[PHP Quality Tools](https://github.com/nowo-tech/PhpQualityTools)** (`nowo-tech/php-quality-tools`). [Code Review Guardian](https://github.com/nowo-tech/CodeReviewGuardian) is **abandoned** and should not be installed on new projects.
 
-**Installation:**
 ```bash
-composer require --dev nowo-tech/code-review-guardian
+composer require --dev nowo-tech/php-quality-tools
 ```
 
-**Why use both together?**
-
-Together with Composer Update Helper, you get a complete development workflow:
-
-1. **Composer Update Helper** → Keeps your dependencies up to date
-  - Automatically detects outdated packages
-  - Generates update commands
-  - Respects framework version constraints
-
-2. **Code Review Guardian** → Ensures code quality in your pull requests
-  - Runs code quality checks automatically
-  - Validates code style and standards
-  - Prevents merging low-quality code
-
-**Perfect combination for maintaining high-quality PHP projects!** 🚀
+Composer Update Helper keeps dependencies current; PHP Quality Tools keeps style and static-analysis configs in sync with the framework.
 
 ## Documentation
 
