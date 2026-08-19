@@ -63,6 +63,14 @@ This guide will help you upgrade Composer Update Helper to newer versions.
 
 ## Version-Specific Upgrade Notes
 
+### Upgrading to 2.0.35+ (2026-08-19)
+
+No application upgrade steps.
+
+```bash
+composer update nowo-tech/composer-update-helper
+```
+
 ### Upgrading to 2.0.34+ (2026-07-29)
 
 #### What's Changed

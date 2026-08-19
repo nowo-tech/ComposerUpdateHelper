@@ -179,6 +179,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.35] - 2026-08-19
+
+### Security
+
+- **CI:** run `composer audit --locked` after dependency install (REQ-SEC / P3).
+
+### Changed
+
+- **CI:** bump `actions/stale` to v11.
+- **Documentation:** README and roadmap aligned with shipped functionality.
+
 ## [2.0.34] - 2026-07-29
 
 ### Added
