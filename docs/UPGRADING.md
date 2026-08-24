@@ -4,6 +4,8 @@ This guide will help you upgrade Composer Update Helper to newer versions.
 
 ## Table of contents
 
+
+- [From 2.0.35 to 2.0.36](#from-2035-to-2036)
 - [General Upgrade Process](#general-upgrade-process)
 - [Version-Specific Upgrade Notes](#version-specific-upgrade-notes)
   - [Upgrading to 2.0.34+ (2026-07-29)](#upgrading-to-2034-2026-07-29)
