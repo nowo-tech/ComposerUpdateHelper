@@ -8,6 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Table of contents
 
 - [[Unreleased]](#unreleased)
+- [[2.0.37] - 2026-09-24](#2037-2026-09-24)
+  - [Changed](#changed)
+  - [Documentation](#documentation)
+- [[2.0.36] - 2026-08-24](#2036-2026-08-24)
+  - [Changed](#changed)
+  - [Notes](#notes)
+- [[2.0.35] - 2026-08-19](#2035-2026-08-19)
+  - [Security](#security)
+  - [Changed](#changed)
 - [[2.0.34] - 2026-07-29](#2034-2026-07-29)
   - [Added](#added)
   - [Changed](#changed)
@@ -179,6 +188,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.37] - 2026-09-24
+
+### Changed
+
+- **FrankenPHP worker (scenario B / kernel not reset):** CLI helpers no longer use mutable static state — `Utils` progress dedup is caller-owned; `FrameworkDetector` framework map is `private const`; `Utils::buildComposerCommand()` uses class constants instead of `define()`.
+- **PHPStan:** include `ruleset-worker-strict.neon` (REQ-CS-005) alongside classic + worker rulesets.
+
+### Documentation
+
+- **`docs/FRANKENPHP-WORKER-AUDIT.md`**: Pass (100% compatible) under kernel-not-reset; closed former W-01.
+- README links the worker audit next to the FrankenPHP banner.
+
+> **Note**: No consumer-facing migration. See [UPGRADING.md](UPGRADING.md#upgrading-to-2037-2026-09-24).
+
+[2.0.37]: https://github.com/nowo-tech/ComposerUpdateHelper/releases/tag/v2.0.37
 
 ## [2.0.36] - 2026-08-24
 

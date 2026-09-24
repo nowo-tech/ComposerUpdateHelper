@@ -2,7 +2,7 @@
 
 **Baseline spec**: [`spec.md`](spec.md)  
 **Package**: `nowo-tech/composer-update-helper`  
-**Last audited**: 2026-07-28
+**Last audited**: 2026-09-24
 
 ## Plugin (`src/`)
 
@@ -19,4 +19,4 @@
 | Plugin (`src/`) | 3 | 3 |
 | **Total production sources** | **3** | **3** |
 
-**Note:** Analysis libraries and shell scripts under `bin/` are shipped artifacts documented in README but outside Spec Kit `src/` inventory (REQ-SPECKIT-001).
+**Note:** Analysis libraries and shell scripts under `bin/` are shipped artifacts documented in README but outside Spec Kit `src/` inventory (REQ-SPECKIT-001). FrankenPHP worker compatibility (scenario B) is recorded in [`docs/FRANKENPHP-WORKER-AUDIT.md`](../../docs/FRANKENPHP-WORKER-AUDIT.md).

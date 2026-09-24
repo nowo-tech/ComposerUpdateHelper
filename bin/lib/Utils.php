@@ -12,7 +12,11 @@ class Utils
 {
     public const DEBUG_PREFIX = 'DEBUG: ';
 
-    private static array $progressMessagesShown = [];
+    private const COMPOSER_REQUIRE = 'composer require';
+
+    private const COMPOSER_REQUIRE_DEV = 'composer require --dev';
+
+    private const COMPOSER_REQUIRE_FLAGS = '--with-all-dependencies';
 
     /**
      * Log debug message.
@@ -25,27 +29,32 @@ class Utils
     }
 
     /**
-     * Show progress message (only once per message type, and only if not in debug mode).
+     * Show progress message (only once per message type when $shown is provided, and only if not in debug mode).
+     *
+     * Deduplication state is caller-owned (no mutable statics — FrankenPHP worker / scenario B safe).
      *
      * @param string $messageType Unique identifier for this message type
      * @param string $message Message to show
      * @param bool $debug If true, don't show progress message (debug shows detailed info)
      * @param bool $verbose If true, show the message
+     * @param array<string, true>|null $shown Optional per-run map of already shown message types
      */
-    public static function showProgressMessage(string $messageType, string $message, bool $debug = false, bool $verbose = false): void
+    public static function showProgressMessage(string $messageType, string $message, bool $debug = false, bool $verbose = false, ?array &$shown = null): void
     {
         // Don't show progress in debug mode (debug already shows detailed info)
         if ($debug) {
             return;
         }
 
-        // Don't show if already shown
-        if (isset(self::$progressMessagesShown[$messageType])) {
-            return;
-        }
+        // $verbose kept for call-site BC; progress is always emitted when not debug
+        // (historical behaviour). Dedup uses caller-owned $shown — no mutable statics.
 
-        // Mark as shown
-        self::$progressMessagesShown[$messageType] = true;
+        if ($shown !== null) {
+            if (isset($shown[$messageType])) {
+                return;
+            }
+            $shown[$messageType] = true;
+        }
 
         // Show the message (use error_log to stderr to not interfere with output)
         error_log($message);
@@ -100,19 +109,8 @@ class Utils
             return null;
         }
 
-        // Constants are defined in process-updates.php, but define them here if not already defined (for testing)
-        if (!defined('COMPOSER_REQUIRE')) {
-            define('COMPOSER_REQUIRE', 'composer require');
-        }
-        if (!defined('COMPOSER_REQUIRE_DEV')) {
-            define('COMPOSER_REQUIRE_DEV', 'composer require --dev');
-        }
-        if (!defined('COMPOSER_REQUIRE_FLAGS')) {
-            define('COMPOSER_REQUIRE_FLAGS', '--with-all-dependencies');
-        }
+        $baseCommand = $isDev ? self::COMPOSER_REQUIRE_DEV : self::COMPOSER_REQUIRE;
 
-        $baseCommand = $isDev ? COMPOSER_REQUIRE_DEV : COMPOSER_REQUIRE;
-
-        return $baseCommand . ' ' . COMPOSER_REQUIRE_FLAGS . ' ' . implode(' ', $packages);
+        return $baseCommand . ' ' . self::COMPOSER_REQUIRE_FLAGS . ' ' . implode(' ', $packages);
     }
 }

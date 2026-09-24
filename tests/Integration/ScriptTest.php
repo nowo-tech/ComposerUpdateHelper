@@ -129,7 +129,7 @@ final class ScriptTest extends TestCase
         }
 
         // Check for framework detection logic in FrameworkDetector class
-        $this->assertStringContainsString('frameworkConfigs', (string) $content);
+        $this->assertStringContainsString('FRAMEWORK_CONFIGS', (string) $content);
         $this->assertStringContainsString('frameworkConstraints', (string) $content);
         $this->assertStringContainsString('getFrameworkConstraint', (string) $content);
         $this->assertStringContainsString('detectFrameworkConstraints', (string) $content);

@@ -18,4 +18,5 @@ includes:
   - phpstan-baseline.neon
   - vendor/nowo-tech/phpstan-frankenphp/extension.neon
   - vendor/nowo-tech/phpstan-frankenphp/ruleset-classic.neon
-  - vendor/nowo-tech/phpstan-frankenphp/ruleset-worker.neon
+  # worker-strict includes ruleset-worker.neon and flags request superglobals
+  - vendor/nowo-tech/phpstan-frankenphp/ruleset-worker-strict.neon

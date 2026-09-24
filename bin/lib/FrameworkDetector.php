@@ -10,7 +10,8 @@ declare(strict_types=1);
  */
 class FrameworkDetector
 {
-    private static array $frameworkConfigs = [
+    /** @var array<string, array<string, mixed>> */
+    private const FRAMEWORK_CONFIGS = [
         'symfony' => [
             'prefix'      => 'symfony/',
             'corePackage' => null, // Uses extra.symfony.require
@@ -78,7 +79,7 @@ class FrameworkDetector
         }
 
         // Detect other frameworks from installed versions
-        foreach (self::$frameworkConfigs as $name => $config) {
+        foreach (self::FRAMEWORK_CONFIGS as $name => $config) {
             if ($name === 'symfony') {
                 continue;
             } // Already handled above

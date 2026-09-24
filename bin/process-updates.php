@@ -133,6 +133,8 @@ if ($saveImpactToFile) {
 }
 $debug   = getenv('DEBUG') === 'true';
 $verbose = getenv('VERBOSE') === 'true';
+/** @var array<string, true> Per-run progress dedup (no process-wide statics) */
+$progressShown = [];
 
 // Detect and load language for translations
 $detectedLang = null;
@@ -475,7 +477,7 @@ foreach ($report['installed'] as $pkg) {
         // Check if package is abandoned (for ALL outdated packages, not just those with conflicts)
         // Show progress message for abandoned package checking (only once)
         $progressMsg = function_exists('t') ? t('checking_abandoned_packages', [], $detectedLang) : '⏳ Checking for abandoned packages...';
-        Utils::showProgressMessage('checking_abandoned_packages', $progressMsg, $debug, $verbose);
+        Utils::showProgressMessage('checking_abandoned_packages', $progressMsg, $debug, $verbose, $progressShown);
 
         $abandonedInfo = isPackageAbandoned($name, $debug);
         if ($abandonedInfo && $abandonedInfo['abandoned']) {
@@ -492,7 +494,7 @@ foreach ($report['installed'] as $pkg) {
     if ($needsUpdate && $checkDependencies) {
         // Show progress message for dependency conflict checking (only once)
         $progressMsg = function_exists('t') ? t('checking_dependency_conflicts', [], $detectedLang) : '⏳ Checking dependency conflicts...';
-        Utils::showProgressMessage('checking_dependency_conflicts', $progressMsg, $debug, $verbose);
+        Utils::showProgressMessage('checking_dependency_conflicts', $progressMsg, $debug, $verbose, $progressShown);
 
         $conflictingDependents = [];
         $fallbackVersion       = null; // New variable for fallback versions
@@ -516,7 +518,7 @@ foreach ($report['installed'] as $pkg) {
         if ($compatibleVersion === null && !empty($conflictingDependents)) {
             // Show progress message for fallback version search (only once)
             $progressMsg = function_exists('t') ? t('searching_fallback_versions', [], $detectedLang) : '⏳ Searching for fallback versions...';
-            Utils::showProgressMessage('searching_fallback_versions', $progressMsg, $debug, $verbose);
+            Utils::showProgressMessage('searching_fallback_versions', $progressMsg, $debug, $verbose, $progressShown);
 
             $fallbackVersion = findFallbackVersion($name, $constraint, $conflictingDependents, $debug);
             if ($fallbackVersion) {
@@ -591,7 +593,7 @@ foreach ($report['installed'] as $pkg) {
                     if (!$abandonedInfo['replacement'] && !isset($filteredPackageFallbacks[$packageString])) {
                         // Show progress message for alternative package search (only once)
                         $progressMsg = function_exists('t') ? t('searching_alternative_packages', [], $detectedLang) : '⏳ Searching for alternative packages...';
-                        Utils::showProgressMessage('searching_alternative_packages', $progressMsg, $debug, $verbose);
+                        Utils::showProgressMessage('searching_alternative_packages', $progressMsg, $debug, $verbose, $progressShown);
 
                         $alternatives = AlternativePackageFinder::findAlternatives($name, $debug);
                         if ($alternatives && !empty($alternatives['alternatives'])) {
@@ -605,7 +607,7 @@ foreach ($report['installed'] as $pkg) {
                     // If not abandoned but no fallback available, search for alternatives
                     // Show progress message for alternative package search (only once)
                     $progressMsg = function_exists('t') ? t('searching_alternative_packages', [], $detectedLang) : '⏳ Searching for alternative packages...';
-                    Utils::showProgressMessage('searching_alternative_packages', $progressMsg, $debug, $verbose);
+                    Utils::showProgressMessage('searching_alternative_packages', $progressMsg, $debug, $verbose, $progressShown);
 
                     $alternatives = AlternativePackageFinder::findAlternatives($name, $debug);
                     if ($alternatives && !empty($alternatives['alternatives'])) {
@@ -633,7 +635,7 @@ foreach ($report['installed'] as $pkg) {
                             )) {
                                 // Show progress message for maintainer info checking (only once)
                                 $progressMsg = function_exists('t') ? t('checking_maintainer_info', [], $detectedLang) : '⏳ Checking maintainer information...';
-                                Utils::showProgressMessage('checking_maintainer_info', $progressMsg, $debug, $verbose);
+                                Utils::showProgressMessage('checking_maintainer_info', $progressMsg, $debug, $verbose, $progressShown);
 
                                 $maintainerInfo = MaintainerContactFinder::getMaintainerInfo($name, $debug);
                                 if (!empty($maintainerInfo['maintainers']) || $maintainerInfo['repository_url']) {
@@ -703,7 +705,7 @@ $allInstalledAbandoned = []; // Format: 'package:version' => ['abandoned' => tru
 
 // Show progress message for checking all installed packages (only once)
 $progressMsg = function_exists('t') ? t('checking_all_abandoned_packages', [], $detectedLang) : '⏳ Checking all installed packages for abandoned status...';
-Utils::showProgressMessage('checking_all_abandoned_packages', $progressMsg, $debug, $verbose);
+Utils::showProgressMessage('checking_all_abandoned_packages', $progressMsg, $debug, $verbose, $progressShown);
 
 // Check all packages from composer.json (require and require-dev)
 $allInstalledPackages = array_merge(

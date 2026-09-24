@@ -10,6 +10,8 @@ Generates `composer require` commands from outdated dependencies. Works with any
 
 This bundle is **FrankenPHP worker mode friendly**.
 
+FrankenPHP worker mode (kernel not reset between requests): **Pass (100% compatible)** — see [FRANKENPHP-WORKER-AUDIT.md](docs/FRANKENPHP-WORKER-AUDIT.md). The package is a Composer plugin / CLI tool and does not run inside the HTTP worker.
+
 ## Features
 
 - ✅ Works with any PHP project
@@ -304,6 +306,7 @@ Composer Update Helper keeps dependencies current; PHP Quality Tools keeps style
 - [Upgrading](docs/UPGRADING.md)
 - [Release](docs/RELEASE.md)
 - [Security](docs/SECURITY.md)
+- [FrankenPHP worker mode audit](docs/FRANKENPHP-WORKER-AUDIT.md)
 - [Engram](docs/ENGRAM.md)
 - [Spec-driven development](docs/SPEC-DRIVEN-DEVELOPMENT.md)
 - [GitHub Spec Kit](docs/SPEC-KIT.md)

@@ -5,9 +5,12 @@ This guide will help you upgrade Composer Update Helper to newer versions.
 ## Table of contents
 
 
+- [From 2.0.36 to 2.0.37](#from-2036-to-2037)
 - [From 2.0.35 to 2.0.36](#from-2035-to-2036)
 - [General Upgrade Process](#general-upgrade-process)
 - [Version-Specific Upgrade Notes](#version-specific-upgrade-notes)
+  - [Upgrading to 2.0.37+ (2026-09-24)](#upgrading-to-2037-2026-09-24)
+  - [Upgrading to 2.0.35+ (2026-08-19)](#upgrading-to-2035-2026-08-19)
   - [Upgrading to 2.0.34+ (2026-07-29)](#upgrading-to-2034-2026-07-29)
   - [Upgrading to 2.0.33+ (2026-07-27)](#upgrading-to-2033-2026-07-27)
   - [Upgrading to 2.0.32+ (2026-07-27)](#upgrading-to-2032-2026-07-27)
@@ -63,7 +66,36 @@ This guide will help you upgrade Composer Update Helper to newer versions.
    The `generate-composer-require.sh` script is automatically updated during installation.
    If you have custom modifications, you may need to reapply them.
 
+## From 2.0.36 to 2.0.37
+
+No application upgrade steps. See [Upgrading to 2.0.37+](#upgrading-to-2037-2026-09-24) and [FRANKENPHP-WORKER-AUDIT.md](FRANKENPHP-WORKER-AUDIT.md).
+
+```bash
+composer update nowo-tech/composer-update-helper
+```
+
+## From 2.0.35 to 2.0.36
+
+No application upgrade steps (PHP floor raised to 8.2 — ensure your runtime meets `>=8.2 <8.6`).
+
+```bash
+composer update nowo-tech/composer-update-helper
+```
+
 ## Version-Specific Upgrade Notes
+
+### Upgrading to 2.0.37+ (2026-09-24)
+
+#### What's Changed
+
+FrankenPHP worker audit (kernel **not** reset between requests): **Pass (100% compatible)**. Defense-in-depth on CLI helpers (no mutable static progress map / framework config; no `define()` in `Utils::buildComposerCommand`). PHPStan enables `ruleset-worker-strict.neon`.
+
+#### Migration Steps
+
+1. Update the package: `composer update nowo-tech/composer-update-helper`.
+2. Optional: read [FRANKENPHP-WORKER-AUDIT.md](FRANKENPHP-WORKER-AUDIT.md).
+
+**No Breaking Changes** for package consumers (CLI progress dedup behaviour unchanged when running via the shipped wrapper).
 
 ### Upgrading to 2.0.35+ (2026-08-19)
 
