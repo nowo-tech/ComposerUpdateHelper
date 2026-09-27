@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Table of contents
 
 - [[Unreleased]](#unreleased)
+- [[2.0.38] - 2026-09-27](#2038-2026-09-27)
+  - [Fixed](#fixed)
 - [[2.0.37] - 2026-09-24](#2037-2026-09-24)
   - [Changed](#changed)
   - [Documentation](#documentation)
@@ -187,6 +189,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - [Added](#added)
 
 ## [Unreleased]
+
+## [2.0.38] - 2026-09-27
+
+### Fixed
+
+- **Branch package require commands:** Composer `outdated --format=json` exposes VCS/path branch packages as `dev-branch <hash>` via `getFullPrettyVersion()`. That string was used as the require constraint, so `implode(' ', …)` split the CLI into a bare commit-hash token (e.g. `nowo/risk:dev-develop 97190d9`). `Utils::normalizeVersion()` now strips the hash; tip updates are detected by comparing the raw full-pretty strings so real branch moves are not skipped.
+
+> **Note**: No consumer-facing migration. See [UPGRADING.md](UPGRADING.md#upgrading-to-2038-2026-09-27).
+
+[2.0.38]: https://github.com/nowo-tech/ComposerUpdateHelper/releases/tag/v2.0.38
 
 ## [2.0.37] - 2026-09-24
 
