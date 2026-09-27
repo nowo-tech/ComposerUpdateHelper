@@ -61,7 +61,14 @@ class Utils
     }
 
     /**
-     * Normalize version (remove 'v' prefix).
+     * Normalize a version string for use in `composer require` constraints.
+     *
+     * - Strips a leading "v" (Composer / GitHub tags): `v1.2.3` → `1.2.3`
+     * - Strips the commit suffix from Composer `getFullPrettyVersion()` on
+     *   branch packages: `dev-develop 97190d9` → `dev-develop`
+     *
+     * The commit suffix must not appear in generated require commands: a space
+     * would split the CLI argument into a bare hash token (invalid package name).
      */
     public static function normalizeVersion(?string $version): ?string
     {
@@ -69,7 +76,15 @@ class Utils
             return null;
         }
 
-        return ltrim($version, 'v');
+        $version = ltrim($version, 'v');
+
+        // Composer outdated --format=json uses getFullPrettyVersion() for "latest":
+        // "dev-branch" + truncated/full commit hash (7–40 hex chars).
+        if (preg_match('/^(dev-\S+)\s+[0-9a-f]{7,40}$/i', $version, $matches) === 1) {
+            return $matches[1];
+        }
+
+        return $version;
     }
 
     /**

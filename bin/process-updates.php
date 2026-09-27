@@ -439,7 +439,22 @@ foreach ($report['installed'] as $pkg) {
 
     // Compare installed version with the proposed one: only include if there's really an update
     $needsUpdate = false;
-    if ($installedNormalized) {
+    if (str_starts_with((string) $constraint, 'dev-')) {
+        // Branch packages: Composer outdated uses getFullPrettyVersion() ("dev-branch hash").
+        // normalizeVersion() strips the hash for the require constraint; comparing the bare
+        // branch names with version_compare would skip real tip updates. Compare the raw
+        // full-pretty strings instead (hash change ⇒ outdated).
+        $needsUpdate = ($installed !== $latest);
+        if (!$needsUpdate) {
+            if ($debug) {
+                error_log('DEBUG:   - Action: SKIPPED (dev branch already at same full pretty version)');
+            }
+            continue;
+        }
+        if ($debug) {
+            error_log("DEBUG:   - Dev branch tip update: {$installed} → {$latest} (require constraint: {$constraint})");
+        }
+    } elseif ($installedNormalized) {
         $constraintNormalized = $constraint;
         // If it's a wildcard constraint, we can't compare directly, so we include it
         if (!str_contains($constraint, '*') && !str_contains($constraint, '^') && !str_contains($constraint, '~')) {
@@ -456,8 +471,10 @@ foreach ($report['installed'] as $pkg) {
                 continue;
             }
             $needsUpdate = true;
-        } elseif ($debug) {
-            error_log('DEBUG:   - Wildcard constraint, including for update');
+        } else {
+            if ($debug) {
+                error_log('DEBUG:   - Wildcard constraint, including for update');
+            }
             $needsUpdate = true;
         }
     } else {

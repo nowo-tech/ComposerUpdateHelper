@@ -365,6 +365,13 @@ final class DependencyCompatibilityTest extends TestCase
         $this->assertNull($this->normalizeVersion(null));
         $this->assertEquals('1.0.0', $this->normalizeVersion('v1.0.0'));
         $this->assertEquals('2.5.3', $this->normalizeVersion('2.5.3'));
+        // Composer outdated JSON: getFullPrettyVersion() → "dev-branch <hash>"
+        $this->assertEquals('dev-develop', $this->normalizeVersion('dev-develop 97190d9'));
+        $this->assertEquals('dev-develop', $this->normalizeVersion('dev-develop'));
+        $this->assertEquals(
+            'dev-develop',
+            $this->normalizeVersion('dev-develop 97190d9bae8a906c9bf23a60d8fe776952f38aad')
+        );
     }
 
     public function testFormatPackageList(): void
