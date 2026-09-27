@@ -370,7 +370,7 @@ final class DependencyCompatibilityTest extends TestCase
         $this->assertEquals('dev-develop', $this->normalizeVersion('dev-develop'));
         $this->assertEquals(
             'dev-develop',
-            $this->normalizeVersion('dev-develop 97190d9bae8a906c9bf23a60d8fe776952f38aad')
+            $this->normalizeVersion('dev-develop 97190d9bae8a906c9bf23a60d8fe776952f38aad'),
         );
     }
 

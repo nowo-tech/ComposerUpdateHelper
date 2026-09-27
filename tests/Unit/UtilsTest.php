@@ -55,7 +55,7 @@ final class UtilsTest extends TestCase
 
         self::assertSame(
             'composer require --with-all-dependencies nowo/risk:dev-develop sentry/sentry:4.32.0',
-            $command
+            $command,
         );
         self::assertStringNotContainsString(' 97190d9', (string) $command);
     }
