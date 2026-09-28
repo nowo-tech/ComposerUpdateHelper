@@ -334,13 +334,20 @@ OUTPUT="$(printf "%s\n" "$OUTPUT" | sed '/^---COMMANDS_START---$/,/^---COMMANDS_
 # Display output
 printf "%s\n" "$OUTPUT"
 
-# Execute if --run
+# Execute if --run (argv only — no shell interpolation of composer args)
 [ "$RUN_FLAG" = "--run" ] && [ -n "$COMMANDS" ] && {
     echo ""; echo "🚀  $(get_msg running)"
     printf "%s\n" "$COMMANDS" | while IFS= read -r cmd; do
         [ -z "$cmd" ] && continue
         echo "→ $cmd"
-        sh -lc "$PHP_BIN -d date.timezone=UTC $COMPOSER_BIN $(printf '%s' "$cmd" | sed 's/^composer //')"
+        # Strip leading "composer " then split into argv for safe execution
+        args="${cmd#composer }"
+        # Disable glob so constraints like "symfony/*" are not expanded
+        set -f
+        # shellcheck disable=SC2086
+        set -- $args
+        set +f
+        "$PHP_BIN" -d date.timezone=UTC "$COMPOSER_BIN" "$@"
     done
     echo "✅  $(get_msg update_completed)"
 }

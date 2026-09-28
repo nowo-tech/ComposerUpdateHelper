@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Table of contents
 
 - [[Unreleased]](#unreleased)
+- [[2.0.39] - 2026-09-28](#2039-2026-09-28)
 - [[2.0.38] - 2026-09-27](#2038-2026-09-27)
   - [Fixed](#fixed)
 - [[2.0.37] - 2026-09-24](#2037-2026-09-24)
@@ -190,6 +191,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.39] - 2026-09-28
+
+### Security
+
+- `--run` executes Composer via `"$PHP_BIN" … "$@"` (argv / `noglob`) instead of `sh -lc`, so package arguments are not shell-interpolated.
+
 ## [2.0.38] - 2026-09-27
 
 ### Fixed
@@ -198,6 +205,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > **Note**: No consumer-facing migration. See [UPGRADING.md](UPGRADING.md#upgrading-to-2038-2026-09-27).
 
+[2.0.39]: https://github.com/nowo-tech/ComposerUpdateHelper/releases/tag/v2.0.39
 [2.0.38]: https://github.com/nowo-tech/ComposerUpdateHelper/releases/tag/v2.0.38
 
 ## [2.0.37] - 2026-09-24

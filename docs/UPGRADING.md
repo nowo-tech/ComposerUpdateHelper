@@ -5,6 +5,7 @@ This guide will help you upgrade Composer Update Helper to newer versions.
 ## Table of contents
 
 
+- [From 2.0.38 to 2.0.39](#from-2038-to-2039)
 - [From 2.0.37 to 2.0.38](#from-2037-to-2038)
 - [From 2.0.36 to 2.0.37](#from-2036-to-2037)
 - [From 2.0.35 to 2.0.36](#from-2035-to-2036)
@@ -67,6 +68,21 @@ This guide will help you upgrade Composer Update Helper to newer versions.
 3. **Update your scripts** (if needed):
    The `generate-composer-require.sh` script is automatically updated during installation.
    If you have custom modifications, you may need to reapply them.
+
+## From 2.0.38 to 2.0.39
+
+From **2.0.38** — `--run` argv / noglob.
+
+```bash
+composer update nowo-tech/composer-update-helper
+```
+
+- No application upgrade steps. `--run` no longer shells package arguments through `sh -lc`.
+
+### Upgrading to 2.0.39+ (2026-09-28)
+
+`--run` uses argv / noglob (`"$PHP_BIN" … "$@"`). No application upgrade steps.
+
 
 ## From 2.0.37 to 2.0.38
 

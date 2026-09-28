@@ -53,15 +53,15 @@ Report security issues **privately** (see `composer.json` maintainers). Do not d
 
 | Field | Value |
 |-------|--------|
-| **Date** | 2026-07-27 |
-| **Method** | Monorepo static review + prior [BUNDLES_SECURITY_ANALYSIS.md](../../BUNDLES_SECURITY_ANALYSIS.md) posture (Medium: opt-in wrapper overwrite) |
+| **Date** | 2026-09-28 (re-audit wave 5) |
+| **Method** | Monorepo static review + harden (`--run` via argv / no `sh -lc`) |
 | **Grade** | **Pass (conditional)** |
 | **Overall residual risk** | Medium |
 
 ### Residuals (accepted)
 
 - Wrapper overwrite is **opt-in** (`extra.composer-update-helper.auto_update_wrapper`). Misconfiguration can replace a customized `generate-composer-require.sh`; default remains non-destructive.
-- `--run` executes Composer in the project root — only trusted projects/CI should enable it.
+- `--run` executes Composer in the project root via `"$PHP_BIN" … "$@"` (no shell interpolation of package args) — only trusted projects/CI should enable it.
 
 No Critical/High findings remain open for shipping.
 
