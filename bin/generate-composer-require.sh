@@ -292,6 +292,11 @@ rm -f /tmp/composer-outdated-$$.json
 
 [ -z "${OUTDATED_JSON}" ] && [ "$DEBUG" = "true" ] && echo "🔍 $(get_msg debug_prefix)$(get_msg debug_empty_json)" >&2
 [ -z "${OUTDATED_JSON}" ] && echo "✅  $(get_msg no_outdated)" && exit 0
+# "composer outdated" returns {"installed": []} when everything is up to date
+if printf "%s" "$OUTDATED_JSON" | tr -d ' \t\r\n' | grep -q '"installed":\[\]'; then
+    echo "✅  $(get_msg no_outdated)"
+    exit 0
+fi
 
 # Process with PHP
 [ "$DEBUG" = "true" ] && echo "🔍 $(get_msg debug_prefix)$(get_msg debug_passing_to_php)" >&2
@@ -335,7 +340,7 @@ OUTPUT="$(printf "%s\n" "$OUTPUT" | sed '/^---COMMANDS_START---$/,/^---COMMANDS_
 printf "%s\n" "$OUTPUT"
 
 # Execute if --run (argv only — no shell interpolation of composer args)
-[ "$RUN_FLAG" = "--run" ] && [ -n "$COMMANDS" ] && {
+if [ "$RUN_FLAG" = "--run" ] && [ -n "$COMMANDS" ]; then
     echo ""; echo "🚀  $(get_msg running)"
     printf "%s\n" "$COMMANDS" | while IFS= read -r cmd; do
         [ -z "$cmd" ] && continue
@@ -350,4 +355,6 @@ printf "%s\n" "$OUTPUT"
         "$PHP_BIN" -d date.timezone=UTC "$COMPOSER_BIN" "$@"
     done
     echo "✅  $(get_msg update_completed)"
-}
+fi
+
+exit 0

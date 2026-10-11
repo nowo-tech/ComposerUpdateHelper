@@ -5,6 +5,7 @@ This guide will help you upgrade Composer Update Helper to newer versions.
 ## Table of contents
 
 
+- [From 2.0.39 to 2.0.40](#from-2039-to-2040)
 - [From 2.0.38 to 2.0.39](#from-2038-to-2039)
 - [From 2.0.37 to 2.0.38](#from-2037-to-2038)
 - [From 2.0.36 to 2.0.37](#from-2036-to-2037)
@@ -68,6 +69,14 @@ This guide will help you upgrade Composer Update Helper to newer versions.
 3. **Update your scripts** (if needed):
    The `generate-composer-require.sh` script is automatically updated during installation.
    If you have custom modifications, you may need to reapply them.
+
+## From 2.0.39 to 2.0.40
+
+```bash
+composer update nowo-tech/composer-update-helper
+```
+
+- No application upgrade steps. `generate-composer-require.sh` now exits 0 and prints "No outdated direct dependencies." when everything is up to date, so wrappers no longer need to ignore its exit code in that case.
 
 ## From 2.0.38 to 2.0.39
 

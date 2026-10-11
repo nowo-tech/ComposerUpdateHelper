@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Table of contents
 
 - [[Unreleased]](#unreleased)
+- [[2.0.40] - 2026-10-11](#2040-2026-10-11)
+  - [Fixed](#fixed)
+  - [Changed](#changed)
 - [[2.0.39] - 2026-09-28](#2039-2026-09-28)
 - [[2.0.38] - 2026-09-27](#2038-2026-09-27)
   - [Fixed](#fixed)
@@ -191,6 +194,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.40] - 2026-10-11
+
+### Fixed
+
+- `generate-composer-require.sh` no longer exits with code 1 when there is nothing to update: it now prints "No outdated direct dependencies." when `composer outdated` returns `{"installed": []}`, and always ends with `exit 0` (the trailing `--run` block was an `&&` chain whose failed test became the script's exit status).
+
 ### Changed
 
 - Development: `composer.json` pins `config.platform.php` to 8.2.0 so the committed lock stays installable on the minimum PHP; CI overrides the platform per matrix cell.
@@ -209,6 +218,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > **Note**: No consumer-facing migration. See [UPGRADING.md](UPGRADING.md#upgrading-to-2038-2026-09-27).
 
+[2.0.40]: https://github.com/nowo-tech/ComposerUpdateHelper/releases/tag/v2.0.40
 [2.0.39]: https://github.com/nowo-tech/ComposerUpdateHelper/releases/tag/v2.0.39
 [2.0.38]: https://github.com/nowo-tech/ComposerUpdateHelper/releases/tag/v2.0.38
 
