@@ -4,7 +4,7 @@ This guide will help you upgrade Composer Update Helper to newer versions.
 
 ## Table of contents
 
-
+- [From 2.0.40 to 2.1.0](#from-2040-to-210)
 - [From 2.0.39 to 2.0.40](#from-2039-to-2040)
 - [From 2.0.38 to 2.0.39](#from-2038-to-2039)
 - [From 2.0.37 to 2.0.38](#from-2037-to-2038)
@@ -72,6 +72,14 @@ This guide will help you upgrade Composer Update Helper to newer versions.
 
 ## Unreleased
 
+## From 2.0.40 to 2.1.0
+
+From **2.0.40** — fail loudly on invalid composer outdated output; hardened wrapper; Installer deprecated.
+
+```bash
+composer update nowo-tech/composer-update-helper
+```
+
 - **Exit codes:** `generate-composer-require.sh` now exits non-zero when `composer outdated` fails, prints no JSON, or prints invalid JSON (previously exit 0 / "No outdated direct dependencies"). CI jobs that run the script will now fail on those errors.
 - **Wrapper refresh:** the fixes live in `generate-composer-require.sh`, which is copied to your project root. An unmodified copy is refreshed on `composer update`; a locally modified one is kept unless `extra.composer-update-helper.auto_update_wrapper` is `true` (or delete it and run `composer install`).
 - **`Installer` deprecated:** if your composer.json `scripts` call `NowoTech\ComposerUpdateHelper\Installer::install` / `::uninstall`, remove them — the Composer plugin already does the same work. Until 3.0 they keep working but now delegate to the plugin, so a locally modified wrapper is no longer overwritten without `auto_update_wrapper`.
@@ -97,7 +105,6 @@ composer update nowo-tech/composer-update-helper
 ### Upgrading to 2.0.39+ (2026-09-28)
 
 `--run` uses argv / noglob (`"$PHP_BIN" … "$@"`). No application upgrade steps.
-
 
 ## From 2.0.37 to 2.0.38
 

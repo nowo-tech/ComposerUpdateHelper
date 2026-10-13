@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Table of contents
 
 - [[Unreleased]](#unreleased)
+- [[2.1.0] - 2026-10-13](#210-2026-10-13)
 - [[2.0.40] - 2026-10-11](#2040-2026-10-11)
   - [Fixed](#fixed)
   - [Changed](#changed)
@@ -194,6 +195,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.0] - 2026-10-13
+
 ### Fixed
 
 - `bin/process-updates.php` now prints an error and exits non-zero when the `composer outdated` output contains no JSON object or invalid JSON (it used to exit 0 silently); `generate-composer-require.sh` propagates the processor's exit status.
@@ -233,6 +236,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > **Note**: No consumer-facing migration. See [UPGRADING.md](UPGRADING.md#upgrading-to-2038-2026-09-27).
 
+[2.1.0]: https://github.com/nowo-tech/ComposerUpdateHelper/releases/tag/v2.1.0
 [2.0.40]: https://github.com/nowo-tech/ComposerUpdateHelper/releases/tag/v2.0.40
 [2.0.39]: https://github.com/nowo-tech/ComposerUpdateHelper/releases/tag/v2.0.39
 [2.0.38]: https://github.com/nowo-tech/ComposerUpdateHelper/releases/tag/v2.0.38
