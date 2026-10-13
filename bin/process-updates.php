@@ -65,12 +65,18 @@ $raw = getenv('OUTDATED_JSON') ?: '';
 $start = strpos($raw, '{');
 $end   = strrpos($raw, '}');
 if ($start === false || $end === false || $end < $start) {
-    // Nothing parseable
-    exit(0);
+    // Nothing parseable: composer outdated failed or printed something unexpected
+    fwrite(\STDERR, "❌  Could not parse the output of \"composer outdated --format=json\": no JSON object found.\n");
+    exit(1);
 }
 $json   = substr($raw, $start, $end - $start + 1);
 $report = json_decode($json, true);
-if (!$report || empty($report['installed'])) {
+if (!is_array($report)) {
+    fwrite(\STDERR, sprintf("❌  Invalid JSON from \"composer outdated --format=json\": %s\n", json_last_error_msg()));
+    exit(1);
+}
+if (empty($report['installed'])) {
+    // Valid report with nothing outdated
     exit(0);
 }
 

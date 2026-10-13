@@ -138,23 +138,24 @@ read_yaml_config_value() {
 
     # Try to use PHP if available (more reliable)
     if command -v php >/dev/null 2>&1; then
-        local php_code="
-        \$content = @file_get_contents('$yaml_file');
-        if (!\$content) { echo '$default'; exit; }
-        \$lines = explode(\"\\n\", \$content);
-        foreach (\$lines as \$line) {
-            \$line = trim(\$line);
-            if (empty(\$line) || strpos(\$line, '#') === 0) continue;
-            if (preg_match('/^' . preg_quote('$key', '/') . ':\\\\s*(.+)\$/', \$line, \$matches)) {
-                \$value = trim(\$matches[1]);
-                if (strtolower(\$value) === 'true') { echo 'true'; exit; }
-                if (strtolower(\$value) === 'false') { echo 'false'; exit; }
-                echo \$value; exit;
+        # Values are passed as argv (never interpolated into the PHP source)
+        # shellcheck disable=SC2016
+        php -r '
+        [, $file, $key, $default] = $argv;
+        $content = @file_get_contents($file);
+        if (!$content) { echo $default; exit; }
+        foreach (explode("\n", $content) as $line) {
+            $line = trim($line);
+            if ($line === "" || strpos($line, "#") === 0) continue;
+            if (preg_match("/^" . preg_quote($key, "/") . ":\\s*(.+)\$/", $line, $matches)) {
+                $value = trim($matches[1]);
+                if (strtolower($value) === "true") { echo "true"; exit; }
+                if (strtolower($value) === "false") { echo "false"; exit; }
+                echo $value; exit;
             }
         }
-        echo '$default';
-        "
-        php -r "$php_code" 2>/dev/null || echo "$default"
+        echo $default;
+        ' -- "$yaml_file" "$key" "$default" 2>/dev/null || echo "$default"
     else
         # Fallback: simple grep (less reliable)
         local value=$(grep -E "^${key}:" "$yaml_file" 2>/dev/null | head -1 | sed 's/^[^:]*:[[:space:]]*//' | tr -d '\n')
@@ -269,29 +270,47 @@ else
     [ "$VERBOSE" = "true" ] || [ "$DEBUG" = "true" ] && echo "ℹ️  $(get_msg no_config)" >&2
 fi
 
-# Run composer outdated
-("$PHP_BIN" -d date.timezone=UTC "$COMPOSER_BIN" outdated --direct --format=json 2>&1 | grep -v '^Warning:' || true) > /tmp/composer-outdated-$$.json &
+# Private temporary files (mktemp, not predictable /tmp/<name>-$$ paths), removed on exit
+OUTDATED_OUT="$(mktemp "${TMPDIR:-/tmp}/composer-outdated.XXXXXX")"
+OUTDATED_ERR="$(mktemp "${TMPDIR:-/tmp}/composer-outdated-err.XXXXXX")"
+PROCESS_OUT="$(mktemp "${TMPDIR:-/tmp}/composer-process.XXXXXX")"
+trap 'rm -f "$OUTDATED_OUT" "$OUTDATED_ERR" "$PROCESS_OUT"' EXIT
+trap 'exit 130' INT TERM
+
+# Run composer outdated (stdout = JSON only; stderr kept apart so notices cannot corrupt the JSON)
+"$PHP_BIN" -d date.timezone=UTC "$COMPOSER_BIN" outdated --direct --format=json > "$OUTDATED_OUT" 2> "$OUTDATED_ERR" &
 OUTDATED_PID=$!
+OUTDATED_STATUS=0
 
 if [ "${DEBUG:-false}" = "true" ]; then
     echo "⏳ $(get_msg checking_outdated)" >&2
-    show_loading $OUTDATED_PID ""
+    show_loading $OUTDATED_PID "" || OUTDATED_STATUS=$?
 elif [ "${VERBOSE:-false}" = "true" ]; then
     echo "⏳ $(get_msg checking_outdated)" >&2
-    show_loading $OUTDATED_PID ""
+    show_loading $OUTDATED_PID "" || OUTDATED_STATUS=$?
     echo "✅" >&2
 else
-    show_loading $OUTDATED_PID "⏳ $(get_msg checking_outdated)"
+    show_loading $OUTDATED_PID "⏳ $(get_msg checking_outdated)" || OUTDATED_STATUS=$?
 fi
 
-OUTDATED_JSON="$(cat /tmp/composer-outdated-$$.json 2>/dev/null || true)"
-rm -f /tmp/composer-outdated-$$.json
+OUTDATED_JSON="$(grep -v '^Warning:' "$OUTDATED_OUT" 2>/dev/null || true)"
 
 [ "$DEBUG" = "true" ] && echo "🔍 $(get_msg debug_prefix)$(get_msg debug_composer_executed)" >&2
 [ "$DEBUG" = "true" ] && echo "🔍 $(get_msg debug_prefix)$(get_msg debug_json_length) ${#OUTDATED_JSON} characters" >&2
+[ "$DEBUG" = "true" ] && [ -s "$OUTDATED_ERR" ] && sed 's/^/   composer: /' "$OUTDATED_ERR" >&2
 
-[ -z "${OUTDATED_JSON}" ] && [ "$DEBUG" = "true" ] && echo "🔍 $(get_msg debug_prefix)$(get_msg debug_empty_json)" >&2
-[ -z "${OUTDATED_JSON}" ] && echo "✅  $(get_msg no_outdated)" && exit 0
+if [ "$OUTDATED_STATUS" -ne 0 ]; then
+    echo "❌  composer outdated failed (exit code $OUTDATED_STATUS):" >&2
+    cat "$OUTDATED_ERR" >&2
+    exit "$OUTDATED_STATUS"
+fi
+
+if [ -z "${OUTDATED_JSON}" ]; then
+    [ "$DEBUG" = "true" ] && echo "🔍 $(get_msg debug_prefix)$(get_msg debug_empty_json)" >&2
+    echo "❌  composer outdated returned no JSON output." >&2
+    cat "$OUTDATED_ERR" >&2
+    exit 1
+fi
 # "composer outdated" returns {"installed": []} when everything is up to date
 if printf "%s" "$OUTDATED_JSON" | tr -d ' \t\r\n' | grep -q '"installed":\[\]'; then
     echo "✅  $(get_msg no_outdated)"
@@ -311,23 +330,29 @@ fi
 IMPACT_FILE_DIR="$(dirname "$0")"
 [ "$DEBUG" = "true" ] && echo "   - IMPACT_FILE_DIR: $IMPACT_FILE_DIR" >&2
 
-(OUTDATED_JSON="$OUTDATED_JSON" COMPOSER_BIN="$COMPOSER_BIN" PHP_BIN="$PHP_BIN" CONFIG_FILE="$CONFIG_FILE" SHOW_RELEASE_INFO="$SHOW_RELEASE_INFO" SHOW_IMPACT_ANALYSIS="$SHOW_IMPACT_ANALYSIS" SAVE_IMPACT_TO_FILE="$SAVE_IMPACT_TO_FILE" IMPACT_FILE_DIR="$IMPACT_FILE_DIR" DEBUG="$DEBUG" VERBOSE="$VERBOSE" "$PHP_BIN" -d date.timezone=UTC "$PROCESSOR_PHP" 2>&1 | grep -v '^Warning:' || true) > /tmp/composer-process-$$.out &
+# The processor's stderr (error messages) is shown with its output; its exit status is propagated
+OUTDATED_JSON="$OUTDATED_JSON" COMPOSER_BIN="$COMPOSER_BIN" PHP_BIN="$PHP_BIN" CONFIG_FILE="$CONFIG_FILE" SHOW_RELEASE_INFO="$SHOW_RELEASE_INFO" SHOW_IMPACT_ANALYSIS="$SHOW_IMPACT_ANALYSIS" SAVE_IMPACT_TO_FILE="$SAVE_IMPACT_TO_FILE" IMPACT_FILE_DIR="$IMPACT_FILE_DIR" DEBUG="$DEBUG" VERBOSE="$VERBOSE" "$PHP_BIN" -d date.timezone=UTC "$PROCESSOR_PHP" > "$PROCESS_OUT" 2>&1 &
 PROCESS_PID=$!
+PROCESS_STATUS=0
 
 if [ "${DEBUG:-false}" = "true" ]; then
     echo "⏳ $(get_msg processing_php)" >&2
-    show_loading $PROCESS_PID ""
+    show_loading $PROCESS_PID "" || PROCESS_STATUS=$?
 elif [ "${VERBOSE:-false}" = "true" ]; then
     echo "⏳ $(get_msg processing)" >&2
-    show_loading $PROCESS_PID ""
+    show_loading $PROCESS_PID "" || PROCESS_STATUS=$?
     echo "✅" >&2
 else
-    show_loading $PROCESS_PID "⏳ $(get_msg processing)"
+    show_loading $PROCESS_PID "⏳ $(get_msg processing)" || PROCESS_STATUS=$?
 fi
 
-OUTPUT="$(cat /tmp/composer-process-$$.out 2>/dev/null || true)"
-rm -f /tmp/composer-process-$$.out
-OUTPUT="$(printf "%s\n" "$OUTPUT" | grep -v '^Warning:' || true)"
+OUTPUT="$(grep -v '^Warning:' "$PROCESS_OUT" 2>/dev/null || true)"
+
+if [ "$PROCESS_STATUS" -ne 0 ]; then
+    printf "%s\n" "$OUTPUT" >&2
+    echo "❌  process-updates.php failed (exit code $PROCESS_STATUS)." >&2
+    exit "$PROCESS_STATUS"
+fi
 
 [ "$DEBUG" = "true" ] && echo "🔍 $(get_msg debug_prefix)$(get_msg debug_output_length) ${#OUTPUT} characters" >&2
 

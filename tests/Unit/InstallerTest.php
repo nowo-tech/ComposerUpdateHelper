@@ -14,7 +14,6 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
-use ReflectionClass;
 
 use function dirname;
 
@@ -148,11 +147,11 @@ final class InstallerTest extends TestCase
         $this->assertFileDoesNotExist($this->tempDir . '/generate-composer-require.sh');
     }
 
-    public function testInstallUpdatesWhenContentDiffers(): void
+    public function testInstallDoesNotOverwriteModifiedWrapperWithoutOptIn(): void
     {
         $event = $this->createMockEvent();
 
-        // Create existing file with different content
+        // Existing wrapper with local changes
         file_put_contents($this->tempDir . '/generate-composer-require.sh', '#!/bin/sh\necho "old"');
 
         $packageDir = $this->vendorDir . '/nowo-tech/composer-update-helper';
@@ -161,7 +160,25 @@ final class InstallerTest extends TestCase
 
         Installer::install($event);
 
-        $this->assertFileExists($this->tempDir . '/generate-composer-require.sh');
+        // Same policy as the plugin: no overwrite unless extra.composer-update-helper.auto_update_wrapper is true
+        $this->assertStringContainsString('old', $this->requireFile($this->tempDir . '/generate-composer-require.sh'));
+    }
+
+    public function testInstallOverwritesModifiedWrapperWhenAutoUpdateWrapperIsEnabled(): void
+    {
+        $event = $this->createMockEvent();
+
+        file_put_contents($this->tempDir . '/composer.json', (string) json_encode([
+            'extra' => ['composer-update-helper' => ['auto_update_wrapper' => true]],
+        ]));
+        file_put_contents($this->tempDir . '/generate-composer-require.sh', '#!/bin/sh\necho "old"');
+
+        $packageDir = $this->vendorDir . '/nowo-tech/composer-update-helper';
+        mkdir($packageDir . '/bin', 0777, true);
+        file_put_contents($packageDir . '/bin/generate-composer-require.sh', '#!/bin/sh\necho "new"');
+
+        Installer::install($event);
+
         $this->assertStringContainsString('new', $this->requireFile($this->tempDir . '/generate-composer-require.sh'));
     }
 
@@ -414,43 +431,6 @@ final class InstallerTest extends TestCase
         }
 
         rmdir($dir);
-    }
-
-    public function testIsYamlEmptyOrTemplateDetectsIncludeSection(): void
-    {
-        $event = $this->createMockEvent();
-
-        $packageDir = $this->vendorDir . '/nowo-tech/composer-update-helper';
-        mkdir($packageDir . '/bin', 0777, true);
-        file_put_contents($packageDir . '/bin/generate-composer-require.yaml', '# YAML config');
-
-        // Use reflection to call private isYamlEmptyOrTemplate method
-        $reflection = new ReflectionClass(Installer::class);
-        $method     = $reflection->getMethod('isYamlEmptyOrTemplate');
-        $method->setAccessible(true);
-
-        // Test with YAML that has only include section (should be considered empty for migration)
-        $yamlFile = $this->tempDir . '/generate-composer-require.yaml';
-        file_put_contents($yamlFile, "ignore:\n  # - package1\ninclude:\n  # - package2\n");
-        $result = $method->invoke(null, $yamlFile);
-        $this->assertTrue($result, 'YAML with only commented packages should be considered empty');
-
-        // Test with YAML that has packages in include section (should be considered empty for ignore section)
-        // Include section doesn't prevent migration - only ignore section matters
-        file_put_contents($yamlFile, "ignore:\n  # - package1\ninclude:\n  - included/package\n");
-        $result = $method->invoke(null, $yamlFile);
-        $this->assertTrue($result, 'YAML with packages in include section should be considered empty for ignore section (migration allowed)');
-
-        // Test with YAML that has packages in ignore section (should NOT be considered empty)
-        file_put_contents($yamlFile, "ignore:\n  - ignored/package\ninclude:\n  # - package2\n");
-        $result = $method->invoke(null, $yamlFile);
-        $this->assertFalse($result, 'YAML with packages in ignore section should NOT be considered empty');
-
-        // Cleanup
-        @unlink($yamlFile);
-        @unlink($packageDir . '/bin/generate-composer-require.yaml');
-        @rmdir($packageDir . '/bin');
-        @rmdir($packageDir);
     }
 
     public function testMigrationReadsIncludeSectionFromYaml(): void
@@ -1285,32 +1265,6 @@ final class InstallerTest extends TestCase
         @rmdir($packageDir);
     }
 
-    public function testIsYamlEmptyOrTemplateHandlesEndOfSectionDetection(): void
-    {
-        $event = $this->createMockEvent();
-
-        $packageDir = $this->vendorDir . '/nowo-tech/composer-update-helper';
-        mkdir($packageDir . '/bin', 0777, true);
-        file_put_contents($packageDir . '/bin/generate-composer-require.yaml', '# YAML config');
-
-        // Use reflection to call private isYamlEmptyOrTemplate method
-        $reflection = new ReflectionClass(Installer::class);
-        $method     = $reflection->getMethod('isYamlEmptyOrTemplate');
-        $method->setAccessible(true);
-
-        // Test with YAML that has ignore section followed by another section (tests end of section detection)
-        $yamlFile = $this->tempDir . '/generate-composer-require.yaml';
-        file_put_contents($yamlFile, "ignore:\n  # - package1\nother_section:\n  - value\n");
-        $result = $method->invoke(null, $yamlFile);
-        $this->assertTrue($result, 'YAML with only commented packages should be considered empty');
-
-        // Cleanup
-        @unlink($yamlFile);
-        @unlink($packageDir . '/bin/generate-composer-require.yaml');
-        @rmdir($packageDir . '/bin');
-        @rmdir($packageDir);
-    }
-
     public function testMigrationCreatesNewYamlWithEmptyPackagesFromTxt(): void
     {
         $event = $this->createMockEvent();
@@ -1434,34 +1388,6 @@ final class InstallerTest extends TestCase
         @rmdir($packageDir);
     }
 
-    public function testIsYamlEmptyOrTemplateWhenFileNotExists(): void
-    {
-        $event = $this->createMockEvent();
-
-        $packageDir = $this->vendorDir . '/nowo-tech/composer-update-helper';
-        mkdir($packageDir . '/bin', 0777, true);
-        file_put_contents($packageDir . '/bin/generate-composer-require.yaml', '# YAML config');
-
-        // Use reflection to call private isYamlEmptyOrTemplate method
-        $reflection = new ReflectionClass(Installer::class);
-        $method     = $reflection->getMethod('isYamlEmptyOrTemplate');
-        $method->setAccessible(true);
-
-        // Test when YAML doesn't exist (line 357: return true)
-        $yamlFile = $this->tempDir . '/generate-composer-require.yaml';
-        if (file_exists($yamlFile)) {
-            @unlink($yamlFile);
-        }
-
-        $result = $method->invoke(null, $yamlFile);
-        $this->assertTrue($result, 'YAML that does not exist should be considered empty/template');
-
-        // Cleanup
-        @unlink($packageDir . '/bin/generate-composer-require.yaml');
-        @rmdir($packageDir . '/bin');
-        @rmdir($packageDir);
-    }
-
     public function testMigrationSkipsOldIgnoreEntriesWhenMergingWithExistingPackages(): void
     {
         $event = $this->createMockEvent();
@@ -1545,118 +1471,6 @@ final class InstallerTest extends TestCase
         @rmdir($packageDir);
     }
 
-    public function testMigrationVerificationFailureByManipulatingYaml(): void
-    {
-        // This test verifies the verification failure path (line 154)
-        // We simulate a scenario where migration happens but packages don't match after
-        $event = $this->createMockEvent();
-
-        // Create old TXT file with packages
-        $oldTxtFile = $this->tempDir . '/generate-composer-require.ignore.txt';
-        file_put_contents($oldTxtFile, "package1/one\npackage2/two\n");
-
-        $packageDir = $this->vendorDir . '/nowo-tech/composer-update-helper';
-        mkdir($packageDir . '/bin', 0777, true);
-        file_put_contents($packageDir . '/bin/generate-composer-require.sh', '#!/bin/sh');
-        file_put_contents($packageDir . '/bin/generate-composer-require.yaml', '# YAML config');
-
-        // Create YAML file that is empty/template (allows migration)
-        $yamlFile = $this->tempDir . '/generate-composer-require.yaml';
-        file_put_contents($yamlFile, "ignore:\n  # - commented\n");
-
-        // Use reflection to call migrateTxtToYaml directly
-        $reflection    = new ReflectionClass(Installer::class);
-        $migrateMethod = $reflection->getMethod('migrateTxtToYaml');
-        $migrateMethod->setAccessible(true);
-
-        $io = $this->createMock(IOInterface::class);
-        // Call migration
-        $migrateMethod->invoke(null, $oldTxtFile, $yamlFile, $io);
-
-        // Manually manipulate YAML to cause verification failure (remove one package)
-        $yamlContent = $this->requireFile($yamlFile);
-        // Remove package2/two to make packages not match
-        $yamlContent = preg_replace('/\s+-\s+package2\/two\n/', "\n", $yamlContent);
-        file_put_contents($yamlFile, $yamlContent);
-
-        // Now manually test the verification logic to verify it detects the mismatch
-        $extractMethod = $reflection->getMethod('extractPackagesFromYamlIgnoreSection');
-        $extractMethod->setAccessible(true);
-        $yamlPackages = $extractMethod->invoke(null, $this->requireFile($yamlFile));
-
-        $txtContent  = $this->requireFile($oldTxtFile);
-        $txtLines    = explode("\n", $txtContent);
-        $txtPackages = [];
-        foreach ($txtLines as $line) {
-            $line = trim($line);
-            if (!empty($line) && !str_starts_with($line, '#')) {
-                $txtPackages[] = $line;
-            }
-        }
-
-        $txtPackagesSorted  = array_values(array_unique($txtPackages));
-        $yamlPackagesSorted = array_values(array_unique($yamlPackages));
-        sort($txtPackagesSorted);
-        sort($yamlPackagesSorted);
-
-        // Verify they don't match (simulating verification failure - line 154 would be executed)
-        $this->assertNotEquals($txtPackagesSorted, $yamlPackagesSorted, 'Packages should not match to test verification failure path');
-
-        // Cleanup
-        @unlink($oldTxtFile);
-        @unlink($yamlFile);
-        @unlink($this->tempDir . '/generate-composer-require.sh');
-        @unlink($packageDir . '/bin/generate-composer-require.sh');
-        @unlink($packageDir . '/bin/generate-composer-require.yaml');
-        @rmdir($packageDir . '/bin');
-        @rmdir($packageDir);
-    }
-
-    public function testMigrationSkipsOldIgnoreEntriesWhenMergingWithExistingIgnoreSection(): void
-    {
-        $event = $this->createMockEvent();
-
-        // Create YAML file with existing packages in ignore section (not empty)
-        // This will trigger merge logic, not create from scratch
-        $yamlFile = $this->tempDir . '/generate-composer-require.yaml';
-        file_put_contents($yamlFile, "ignore:\n  - existing/package1\n  - existing/package2\ninclude:\n  - included/package\n");
-
-        // Create old TXT file with packages (some overlap, some new)
-        $oldTxtFile = $this->tempDir . '/generate-composer-require.ignore.txt';
-        file_put_contents($oldTxtFile, "existing/package1\nnew/package\n");
-
-        $packageDir = $this->vendorDir . '/nowo-tech/composer-update-helper';
-        mkdir($packageDir . '/bin', 0777, true);
-        file_put_contents($packageDir . '/bin/generate-composer-require.sh', '#!/bin/sh');
-        file_put_contents($packageDir . '/bin/generate-composer-require.yaml', '# YAML config');
-
-        // Use reflection to call migrateTxtToYaml directly to test line 235
-        $reflection = new ReflectionClass(Installer::class);
-        $method     = $reflection->getMethod('migrateTxtToYaml');
-        $method->setAccessible(true);
-
-        $io = $this->createMock(IOInterface::class);
-        $method->invoke(null, $oldTxtFile, $yamlFile, $io);
-
-        // Verify packages were merged correctly
-        // Old entries should be skipped (line 235) and new ones added
-        $yamlContent = $this->requireFile($yamlFile);
-        $this->assertStringContainsString('new/package', $yamlContent);
-        $this->assertStringContainsString('included/package', $yamlContent);
-        // existing/package1 should appear in the merged list (line 235 skips old entries, but merge adds them back)
-        // The merge logic adds all packages (existing + new), so existing/package1 will appear once in the merged section
-        $this->assertStringContainsString('existing/package1', $yamlContent);
-
-        // Cleanup
-        @unlink($yamlFile);
-        @unlink($oldTxtFile);
-        @unlink($this->tempDir . '/generate-composer-require.sh');
-        @unlink($packageDir . '/bin/generate-composer-require.sh');
-        @unlink($packageDir . '/bin/generate-composer-require.yaml');
-        @rmdir($packageDir . '/bin');
-        @rmdir($packageDir);
-    }
-
     public function testMigrationCreatesNewYamlWithEmptyPackages(): void
     {
         // Test lines 281-283: Create new YAML with empty packages (template comments)
@@ -1699,179 +1513,6 @@ final class InstallerTest extends TestCase
         @rmdir($packageDir);
     }
 
-    public function testMigrationSkipsOldIgnoreEntriesWhenIgnoreSectionProcessed(): void
-    {
-        // Test line 235: Skip old ignore entries when merging
-        $event = $this->createMockEvent();
-
-        // Create YAML file with existing packages in ignore section
-        $yamlFile = $this->tempDir . '/generate-composer-require.yaml';
-        file_put_contents($yamlFile, "ignore:\n  - old/package1\n  - old/package2\ninclude:\n  - included/package\n");
-
-        // Create old TXT file with packages (some overlap)
-        $oldTxtFile = $this->tempDir . '/generate-composer-require.ignore.txt';
-        file_put_contents($oldTxtFile, "old/package1\nnew/package\n");
-
-        $packageDir = $this->vendorDir . '/nowo-tech/composer-update-helper';
-        mkdir($packageDir . '/bin', 0777, true);
-        file_put_contents($packageDir . '/bin/generate-composer-require.sh', '#!/bin/sh');
-        file_put_contents($packageDir . '/bin/generate-composer-require.yaml', '# YAML config');
-
-        // Use reflection to call migrateTxtToYaml directly to test line 235
-        $reflection = new ReflectionClass(Installer::class);
-        $method     = $reflection->getMethod('migrateTxtToYaml');
-        $method->setAccessible(true);
-
-        $io = $this->createMock(IOInterface::class);
-        $method->invoke(null, $oldTxtFile, $yamlFile, $io);
-
-        // Verify packages were merged correctly
-        // Line 235 should skip old ignore entries when ignoreSectionProcessed is false
-        $yamlContent = $this->requireFile($yamlFile);
-        $this->assertStringContainsString('new/package', $yamlContent);
-        $this->assertStringContainsString('included/package', $yamlContent);
-
-        // Cleanup
-        @unlink($yamlFile);
-        @unlink($oldTxtFile);
-        @unlink($this->tempDir . '/generate-composer-require.sh');
-        @unlink($packageDir . '/bin/generate-composer-require.sh');
-        @unlink($packageDir . '/bin/generate-composer-require.yaml');
-        @rmdir($packageDir . '/bin');
-        @rmdir($packageDir);
-    }
-
-    public function testMigrationVerificationFailurePath(): void
-    {
-        // Test line 154: Migration verification failure path exists
-        // This test verifies that the verification failure logic exists and can be triggered
-        // We simulate a scenario where packages don't match after migration
-        $event = $this->createMockEvent();
-
-        // Create old TXT file with packages
-        $oldTxtFile = $this->tempDir . '/generate-composer-require.ignore.txt';
-        file_put_contents($oldTxtFile, "package1/one\npackage2/two\npackage3/three\n");
-
-        $packageDir = $this->vendorDir . '/nowo-tech/composer-update-helper';
-        mkdir($packageDir . '/bin', 0777, true);
-        file_put_contents($packageDir . '/bin/generate-composer-require.sh', '#!/bin/sh');
-        file_put_contents($packageDir . '/bin/generate-composer-require.yaml', '# YAML config');
-
-        // Create YAML file that is empty/template (allows migration)
-        $yamlFile = $this->tempDir . '/generate-composer-require.yaml';
-        file_put_contents($yamlFile, "ignore:\n  # - commented\n");
-
-        // Use reflection to call migrateTxtToYaml
-        $reflection    = new ReflectionClass(Installer::class);
-        $migrateMethod = $reflection->getMethod('migrateTxtToYaml');
-        $migrateMethod->setAccessible(true);
-
-        $io = $this->createMock(IOInterface::class);
-        // Call migration
-        $migrateMethod->invoke(null, $oldTxtFile, $yamlFile, $io);
-
-        // Manually manipulate YAML to simulate verification failure (remove packages)
-        $yamlContent = $this->requireFile($yamlFile);
-        // Remove all packages to make verification fail
-        $yamlContent = preg_replace('/\s+-\s+package[0-9]\/[^\n]+\n/', "\n", $yamlContent);
-        file_put_contents($yamlFile, $yamlContent);
-
-        // Now manually simulate the verification logic that would trigger line 154
-        $extractMethod = $reflection->getMethod('extractPackagesFromYamlIgnoreSection');
-        $extractMethod->setAccessible(true);
-        $yamlPackages = $extractMethod->invoke(null, $this->requireFile($yamlFile));
-
-        $txtContent  = $this->requireFile($oldTxtFile);
-        $txtLines    = explode("\n", $txtContent);
-        $txtPackages = [];
-        foreach ($txtLines as $line) {
-            $line = trim($line);
-            if (!empty($line) && !str_starts_with($line, '#')) {
-                $txtPackages[] = $line;
-            }
-        }
-
-        $txtPackagesSorted  = array_values(array_unique($txtPackages));
-        $yamlPackagesSorted = array_values(array_unique($yamlPackages));
-        sort($txtPackagesSorted);
-        sort($yamlPackagesSorted);
-
-        // Verify the verification failure path exists (line 154 would be executed if we could trigger it)
-        // This test verifies the logic exists, even though we can't easily trigger it in a real scenario
-        $this->assertNotEquals($txtPackagesSorted, $yamlPackagesSorted, 'Packages should not match to verify failure path exists');
-
-        // Cleanup
-        @unlink($oldTxtFile);
-        @unlink($yamlFile);
-        @unlink($this->tempDir . '/generate-composer-require.sh');
-        @unlink($packageDir . '/bin/generate-composer-require.sh');
-        @unlink($packageDir . '/bin/generate-composer-require.yaml');
-        @rmdir($packageDir . '/bin');
-        @rmdir($packageDir);
-    }
-
-    public function testMigrationSkipsOldIgnoreEntriesWhenAllPackagesEmpty(): void
-    {
-        // Test line 235: This line executes when $inIgnore && !$ignoreSectionProcessed && package line
-        // This can happen if $allPackages is empty, so the foreach doesn't execute but we still need to skip old entries
-        // Actually, wait - if $allPackages is empty, $ignoreSectionProcessed is still set to true...
-        // Let me think of another scenario.
-        // Actually, the condition is: we're in ignore section, haven't processed it yet, and find a package line
-        // But when we find ignore:, we set ignoreSectionProcessed = true if !ignoreSectionProcessed
-        // So this can only happen if we're already in ignore section from a previous iteration
-        // But $inIgnore starts as false...
-
-        // Actually, I think the issue is that this line is unreachable in normal flow.
-        // But let me try to create a scenario where it might execute.
-        // What if the YAML has a malformed structure? Or what if there's a case I'm missing?
-
-        // Let me try a different approach: create a YAML where we can somehow get into ignore section
-        // without setting ignoreSectionProcessed = true. But that seems impossible with the current logic.
-
-        // Actually, wait - what if $allPackages is empty? Then the foreach doesn't add anything,
-        // but ignoreSectionProcessed is still set to true. So that doesn't work either.
-
-        // I think these lines (235, 422) might be unreachable dead code, or there's a very specific
-        // edge case I'm missing. Let me check if there's a way to have $inIgnore = true
-        // and $ignoreSectionProcessed = false at the same time when processing a package line.
-
-        // Actually, I realize the issue: when we find 'ignore:', we set $ignoreSectionProcessed = true
-        // immediately if !$ignoreSectionProcessed. So by the time we process the next line (which
-        // would be a package), $ignoreSectionProcessed is already true, so line 235/422 never executes.
-
-        // These lines might be defensive code that's never actually reached, or there's a bug in the logic.
-        // For now, let me create a test that at least verifies the condition exists, even if we can't trigger it.
-
-        // Create a scenario that's as close as possible to triggering line 235
-        $yamlFile = $this->tempDir . '/generate-composer-require.yaml';
-        file_put_contents($yamlFile, "ignore:\n  - old/package\ninclude:\n  - included\n");
-
-        $oldTxtFile = $this->tempDir . '/generate-composer-require.ignore.txt';
-        file_put_contents($oldTxtFile, "old/package\nnew/package\n");
-
-        $packageDir = $this->vendorDir . '/nowo-tech/composer-update-helper';
-        mkdir($packageDir . '/bin', 0777, true);
-        file_put_contents($packageDir . '/bin/generate-composer-require.yaml', '# YAML config');
-
-        $reflection = new ReflectionClass(Installer::class);
-        $method     = $reflection->getMethod('migrateTxtToYaml');
-        $method->setAccessible(true);
-
-        $io = $this->createMock(IOInterface::class);
-        $method->invoke(null, $oldTxtFile, $yamlFile, $io);
-
-        // Verify migration worked
-        $yamlContent = $this->requireFile($yamlFile);
-        $this->assertStringContainsString('new/package', $yamlContent);
-
-        // Cleanup
-        @unlink($yamlFile);
-        @unlink($oldTxtFile);
-        @unlink($packageDir . '/bin/generate-composer-require.yaml');
-        @rmdir($packageDir . '/bin');
-        @rmdir($packageDir);
-    }
-
     public function testInstallWritesErrorWhenMigrationVerificationFails(): void
     {
         $yamlDest = $this->tempDir . '/generate-composer-require.yaml';
@@ -1886,7 +1527,7 @@ final class InstallerTest extends TestCase
             "# template\nignore:\n  # placeholder\ninclude:\n",
         );
 
-        TestIoHooks::setYamlVerify($yamlDest, 'installer');
+        TestIoHooks::setYamlVerify($yamlDest, 'plugin');
 
         $io = $this->createMock(IOInterface::class);
         $io->expects($this->once())

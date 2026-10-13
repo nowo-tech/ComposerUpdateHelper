@@ -194,6 +194,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- `bin/process-updates.php` now prints an error and exits non-zero when the `composer outdated` output contains no JSON object or invalid JSON (it used to exit 0 silently); `generate-composer-require.sh` propagates the processor's exit status.
+- `generate-composer-require.sh` reports a failed `composer outdated` (non-zero exit or empty output) with Composer's stderr and exits non-zero instead of printing "No outdated direct dependencies".
+- `generate-composer-require.sh` no longer merges Composer's stderr into the JSON passed to the processor (`2>&1` removed; stderr is shown on failure or with `--debug`).
+
+### Security
+
+- `generate-composer-require.sh` uses private `mktemp` files (honouring `$TMPDIR`, removed on exit) instead of predictable `/tmp/composer-outdated-$$.json` / `/tmp/composer-process-$$.out`.
+- `read_yaml_config_value()` passes the file, key and default to `php -r` as argv instead of interpolating them into the PHP source.
+
+### Deprecated
+
+- `NowoTech\ComposerUpdateHelper\Installer` (static `install()` / `uninstall()` for composer.json `scripts`) is deprecated and will be removed in 3.0. It now delegates to `Plugin`, so it follows the same rules (a locally modified wrapper is no longer overwritten unless `extra.composer-update-helper.auto_update_wrapper` is `true`). The plugin already runs on install/update/uninstall; remove the script entries.
+
 ## [2.0.40] - 2026-10-11
 
 ### Fixed

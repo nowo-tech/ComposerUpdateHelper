@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 /**
  * Namespace-level hook for tests that need to simulate a post-migration YAML
- * mismatch (Installer::install / Plugin::handleConfigMigration verification).
+ * mismatch (Plugin::handleConfigMigration verification, also reached via Installer::install).
  *
  * Hooks use putenv/getenv (not static props / $GLOBALS) so FrankenPHP worker
  * PHPStan rules stay clean under REQ-CS-005/006.
@@ -116,11 +116,6 @@ function file_get_contents(string $filename, bool $use_include_path = false, $co
 
     $mode = TestIoHooks::verifyMode();
     $c = TestIoHooks::bumpYamlReadCount($filename);
-
-    // installer: isYamlEmptyOrTemplate (0), migrate merge read (1), verification (2) -> corrupt on 3rd read
-    if ($mode === 'installer' && $c === 2) {
-        return (string) preg_replace('/^\s*-\s+pkg\/two\s*$/m', '', $real);
-    }
 
     // plugin: migrate writes YAML with no prior project YAML reads; verification is 1st read of project YAML
     if ($mode === 'plugin' && $c === 0) {

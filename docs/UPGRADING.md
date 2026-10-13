@@ -70,6 +70,12 @@ This guide will help you upgrade Composer Update Helper to newer versions.
    The `generate-composer-require.sh` script is automatically updated during installation.
    If you have custom modifications, you may need to reapply them.
 
+## Unreleased
+
+- **Exit codes:** `generate-composer-require.sh` now exits non-zero when `composer outdated` fails, prints no JSON, or prints invalid JSON (previously exit 0 / "No outdated direct dependencies"). CI jobs that run the script will now fail on those errors.
+- **Wrapper refresh:** the fixes live in `generate-composer-require.sh`, which is copied to your project root. An unmodified copy is refreshed on `composer update`; a locally modified one is kept unless `extra.composer-update-helper.auto_update_wrapper` is `true` (or delete it and run `composer install`).
+- **`Installer` deprecated:** if your composer.json `scripts` call `NowoTech\ComposerUpdateHelper\Installer::install` / `::uninstall`, remove them — the Composer plugin already does the same work. Until 3.0 they keep working but now delegate to the plugin, so a locally modified wrapper is no longer overwritten without `auto_update_wrapper`.
+
 ## From 2.0.39 to 2.0.40
 
 ```bash
