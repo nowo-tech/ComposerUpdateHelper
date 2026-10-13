@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace NowoTech\ComposerUpdateHelper\Tests\Integration;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Process\ExecutableFinder;
 use Symfony\Component\Process\Process;
 
 use function dirname;
+use function sprintf;
 
 use const PHP_BINARY;
 
@@ -40,6 +43,7 @@ final class OutdatedFailureHandlingTest extends TestCase
         file_put_contents($this->workDir . '/bin/composer', <<<'PHP'
             #!/usr/bin/env php
             <?php
+            usleep((int) getenv('FAKE_COMPOSER_DELAY_MS') * 1000);
             fwrite(STDERR, (string) getenv('FAKE_COMPOSER_STDERR'));
             echo (string) getenv('FAKE_COMPOSER_STDOUT');
             exit((int) getenv('FAKE_COMPOSER_EXIT'));
@@ -106,6 +110,34 @@ final class OutdatedFailureHandlingTest extends TestCase
         $this->assertSame([], array_values(array_diff((array) scandir($this->workDir . '/tmp'), ['.', '..'])));
     }
 
+    /**
+     * The non-verbose spinner loop must be POSIX: /bin/sh is dash on Debian/Ubuntu (GitHub runners),
+     * which aborts with "Bad substitution" (exit 2) on bashisms such as ${var:0:1}.
+     *
+     * @return iterable<string, array{string}>
+     */
+    public static function posixShellProvider(): iterable
+    {
+        yield 'sh' => ['sh'];
+        yield 'dash' => ['dash'];
+        yield 'bash' => ['bash'];
+    }
+
+    #[DataProvider('posixShellProvider')]
+    public function testSpinnerWorksUnderEveryPosixShell(string $shell): void
+    {
+        if ((new ExecutableFinder())->find($shell) === null) {
+            $this->markTestSkipped(sprintf('"%s" is not installed.', $shell));
+        }
+
+        // Slow fake composer so the spinner loop actually iterates while waiting
+        $process = $this->runWrapper('this is not json', '', 0, $shell, 400);
+
+        $this->assertStringNotContainsString('Bad substitution', $process->getErrorOutput());
+        $this->assertSame(1, $process->getExitCode(), $process->getErrorOutput());
+        $this->assertStringContainsString('process-updates.php failed (exit code 1)', $process->getErrorOutput());
+    }
+
     public function testProcessorExitsNonZeroOnInvalidJson(): void
     {
         $process = $this->runProcessor('{"installed": [}');
@@ -130,17 +162,18 @@ final class OutdatedFailureHandlingTest extends TestCase
         $this->assertSame('', $process->getErrorOutput());
     }
 
-    private function runWrapper(string $stdout, string $stderr, int $exitCode): Process
+    private function runWrapper(string $stdout, string $stderr, int $exitCode, string $shell = 'sh', int $composerDelayMs = 0): Process
     {
         $process = new Process(
-            ['sh', dirname(__DIR__, 2) . '/bin/generate-composer-require.sh'],
+            [$shell, dirname(__DIR__, 2) . '/bin/generate-composer-require.sh'],
             $this->projectDir,
             [
-                'PATH'                 => $this->workDir . '/bin:' . (string) getenv('PATH'),
-                'TMPDIR'               => $this->workDir . '/tmp',
-                'FAKE_COMPOSER_STDOUT' => $stdout,
-                'FAKE_COMPOSER_STDERR' => $stderr,
-                'FAKE_COMPOSER_EXIT'   => (string) $exitCode,
+                'PATH'                   => $this->workDir . '/bin:' . (string) getenv('PATH'),
+                'TMPDIR'                 => $this->workDir . '/tmp',
+                'FAKE_COMPOSER_STDOUT'   => $stdout,
+                'FAKE_COMPOSER_STDERR'   => $stderr,
+                'FAKE_COMPOSER_EXIT'     => (string) $exitCode,
+                'FAKE_COMPOSER_DELAY_MS' => (string) $composerDelayMs,
             ],
             null,
             60,

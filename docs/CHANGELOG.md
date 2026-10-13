@@ -202,6 +202,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `bin/process-updates.php` now prints an error and exits non-zero when the `composer outdated` output contains no JSON object or invalid JSON (it used to exit 0 silently); `generate-composer-require.sh` propagates the processor's exit status.
 - `generate-composer-require.sh` reports a failed `composer outdated` (non-zero exit or empty output) with Composer's stderr and exits non-zero instead of printing "No outdated direct dependencies".
 - `generate-composer-require.sh` no longer merges Composer's stderr into the JSON passed to the processor (`2>&1` removed; stderr is shown on failure or with `--debug`).
+- The progress spinner (`show_loading` in `bin/script-helper.sh`) is POSIX-compliant: under dash (`/bin/sh` on Debian/Ubuntu) the `${var:0:1}` bashism aborted `generate-composer-require.sh` with "Bad substitution" (exit 2) whenever `composer outdated` took longer than an instant.
+- CI/tests: `OutdatedFailureHandlingTest` failed on the Ubuntu runners because of that spinner; new regression test runs the wrapper with a slow fake Composer under `sh`, `dash` and `bash`, and the Docker image now installs `dash`/`bash` so local runs match CI.
 
 ### Security
 

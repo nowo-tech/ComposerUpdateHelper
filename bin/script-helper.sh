@@ -92,6 +92,7 @@ show_loading() {
     local verbose="${VERBOSE:-false}"
     local spinstr='|/-\'
     local temp
+    local spinchar
 
     # In debug or verbose mode, just wait without spinner
     if [ "$debug" = "true" ] || [ "$verbose" = "true" ]; then
@@ -99,12 +100,13 @@ show_loading() {
         return $?
     fi
 
-    # Show animated spinner
-    echo -n "$message" >&2
+    # Show animated spinner (POSIX only: /bin/sh is dash on Debian/Ubuntu, so no ${var:offset:length})
+    printf '%s' "$message" >&2
     while kill -0 $pid 2>/dev/null; do
         temp=${spinstr#?}
-        printf "\b${spinstr:0:1}" >&2
-        spinstr=$temp${spinstr%"$temp"}
+        spinchar=${spinstr%"$temp"}
+        printf '\b%s' "$spinchar" >&2
+        spinstr=$temp$spinchar
         sleep 0.1
     done
     printf "\b✅\n" >&2

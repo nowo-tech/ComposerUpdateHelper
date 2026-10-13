@@ -1,8 +1,10 @@
 FROM php:8.2-cli-alpine
 
-# Install system dependencies
+# Install system dependencies (dash/bash: the shell wrapper is tested under the /bin/sh of Debian/Ubuntu too)
 RUN apk add --no-cache \
     git \
+    dash \
+    bash \
     unzip \
     autoconf \
     g++ \
