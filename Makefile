@@ -7,7 +7,7 @@ COMPOSE_BIN := $(shell docker compose version >/dev/null 2>&1 && echo "docker co
 COMPOSE     := $(COMPOSE_BIN) -f $(COMPOSE_FILE)
 SERVICE_PHP := php
 
-.PHONY: help up down down-dev build shell install ensure-up test test-coverage coverage-check cs-check cs-fix rector rector-dry phpstan qa \
+.PHONY: help up down down-dev build shell install ensure-up test test-coverage coverage-check cs-check cs-fix rector rector-dry phpstan igor qa \
 	check-no-cursor-coauthor check-open-prs strip-cursor-coauthor-from-history \
 	release-check release-check-demos composer-sync clean update validate assets setup-hooks update-deps update-deps-demos
 
@@ -32,6 +32,7 @@ help:
 	@echo "  rector          Apply Rector refactoring"
 	@echo "  rector-dry      Run Rector in dry-run mode"
 	@echo "  phpstan         Run PHPStan static analysis"
+	@echo "  igor          Run Igor worker-state audit (REQ-CS-008)"
 	@echo "  qa              Run QA (cs-check + test)"
 	@echo "  release-check   Pre-release pipeline (git/PR gates, sync, style, analysis, coverage)"
 	@echo "  check-no-cursor-coauthor  Fail if Cursor co-author trailers in history (REQ-GIT-001)"
@@ -115,7 +116,11 @@ composer-sync: ensure-up
 	$(COMPOSE) exec -T $(SERVICE_PHP) composer update --no-install
 
 # Pre-release (REQ-MAKE-002): git/PR gates → composer-sync → QA → demos
-release-check: ensure-up check-no-cursor-coauthor check-open-prs composer-sync cs-fix cs-check rector-dry phpstan test-coverage release-check-demos
+
+# Run Igor worker-state audit (REQ-CS-008)
+igor: ensure-up
+	$(COMPOSE) exec -T php composer igor
+release-check: ensure-up check-no-cursor-coauthor check-open-prs composer-sync cs-fix cs-check rector-dry phpstan igor test-coverage release-check-demos
 
 release-check-demos:
 	@if [ -f demo/Makefile ]; then $(MAKE) -C demo release-check; else echo "No demo/Makefile — skip release-check-demos"; fi

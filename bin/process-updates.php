@@ -67,16 +67,19 @@ $end   = strrpos($raw, '}');
 if ($start === false || $end === false || $end < $start) {
     // Nothing parseable: composer outdated failed or printed something unexpected
     fwrite(\STDERR, "❌  Could not parse the output of \"composer outdated --format=json\": no JSON object found.\n");
+    // @igor-ignore - CLI script exit; not executed in FrankenPHP worker HTTP requests.
     exit(1);
 }
 $json   = substr($raw, $start, $end - $start + 1);
 $report = json_decode($json, true);
 if (!is_array($report)) {
     fwrite(\STDERR, sprintf("❌  Invalid JSON from \"composer outdated --format=json\": %s\n", json_last_error_msg()));
+    // @igor-ignore - CLI script exit; not executed in FrankenPHP worker HTTP requests.
     exit(1);
 }
 if (empty($report['installed'])) {
     // Valid report with nothing outdated
+    // @igor-ignore - CLI script exit; not executed in FrankenPHP worker HTTP requests.
     exit(0);
 }
 
@@ -824,6 +827,7 @@ if (count($output) === 1 && str_contains($output[0], 'No outdated direct depende
         error_log('ℹ️  No outdated direct dependencies found.');
     }
     echo $output[0] . \PHP_EOL;
+    // @igor-ignore - CLI script exit; not executed in FrankenPHP worker HTTP requests.
     exit(0);
 }
 

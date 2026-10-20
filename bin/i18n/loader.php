@@ -34,6 +34,7 @@ function detectLanguage(): string
  */
 function loadTranslations(string $lang): array
 {
+    // @igor-ignore - Not shared worker service state.
     static $cache = [];
 
     // Check cache first

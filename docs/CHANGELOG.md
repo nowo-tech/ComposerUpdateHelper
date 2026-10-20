@@ -66,6 +66,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Development: Igor FrankenPHP worker-state audit (REQ-CS-008) with `igor-php/igor-php` ^0.10.1 in `require-dev`, `igor.json`, `composer igor` / `make igor`, and Igor in `make release-check`. The CLI `exit` calls in `bin/` and `Plugin::activate()` carry `@igor-ignore` notes (they never run in a FrankenPHP worker request). No runtime change.
+- Development: the git hooks also reject Claude co-author trailers, audited from a baseline (REQ-GIT-001); the release sync workflow is idempotent.
+
 ## [2.1.0] - 2026-10-13
 
 ### Fixed
