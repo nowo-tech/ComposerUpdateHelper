@@ -6,6 +6,7 @@ This guide will help you upgrade Composer Update Helper to newer versions.
 
 - [General Upgrade Process](#general-upgrade-process)
 - [Unreleased](#unreleased)
+- [To 2.1.1](#to-211)
 - [From 2.0.40 to 2.1.0](#from-2040-to-210)
 - [From 2.0.39 to 2.0.40](#from-2039-to-2040)
 - [From 2.0.38 to 2.0.39](#from-2038-to-2039)
@@ -73,6 +74,14 @@ This guide will help you upgrade Composer Update Helper to newer versions.
    If you have custom modifications, you may need to reapply them.
 
 ## Unreleased
+
+## To 2.1.1
+
+From **2.1.0**:
+
+```bash
+composer update nowo-tech/composer-update-helper
+```
 
 ## From 2.0.40 to 2.1.0
 

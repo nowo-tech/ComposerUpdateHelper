@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Table of contents
 
 - [[Unreleased]](#unreleased)
+- [[2.1.1] - 2026-10-20](#211---2026-10-20)
 - [[2.1.0] - 2026-10-13](#210---2026-10-13)
 - [[2.0.40] - 2026-10-11](#2040---2026-10-11)
 - [[2.0.39] - 2026-09-28](#2039---2026-09-28)
@@ -66,6 +67,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.1] - 2026-10-20
+
+Development: Igor FrankenPHP worker-state audit (REQ-CS-008) in require-dev, composer igor / make igor and release-check; no runtime change. See [UPGRADING](UPGRADING.md#to-211).
+
 ### Changed
 
 - Development: Igor FrankenPHP worker-state audit (REQ-CS-008) with `igor-php/igor-php` ^0.10.1 in `require-dev`, `igor.json`, `composer igor` / `make igor`, and Igor in `make release-check`. The CLI `exit` calls in `bin/` and `Plugin::activate()` carry `@igor-ignore` notes (they never run in a FrankenPHP worker request). No runtime change.
@@ -114,6 +119,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > **Note**: No consumer-facing migration. See [UPGRADING.md](UPGRADING.md#upgrading-to-2038-2026-09-27).
 
+[2.1.1]: https://github.com/nowo-tech/ComposerUpdateHelper/releases/tag/v2.1.1
 [2.1.0]: https://github.com/nowo-tech/ComposerUpdateHelper/releases/tag/v2.1.0
 [2.0.40]: https://github.com/nowo-tech/ComposerUpdateHelper/releases/tag/v2.0.40
 [2.0.39]: https://github.com/nowo-tech/ComposerUpdateHelper/releases/tag/v2.0.39
