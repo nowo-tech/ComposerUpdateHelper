@@ -6,7 +6,7 @@
 
 ## Table of contents
 
-- [Currently Implemented Languages (31) ✅](#currently-implemented-languages-31)
+- [Currently Implemented Languages (31) ✅](#currently-implemented-languages-31-)
 - [Countries with High PHP Usage and Proposed Languages](#countries-with-high-php-usage-and-proposed-languages)
   - [Europe (European Union and others)](#europe-european-union-and-others)
   - [Eastern Europe and Central Asia](#eastern-europe-and-central-asia)
@@ -14,9 +14,9 @@
   - [Middle East and Africa](#middle-east-and-africa)
   - [Americas (main countries already covered)](#americas-main-countries-already-covered)
 - [Summary of Proposed Languages (new)](#summary-of-proposed-languages-new)
-  - [High Priority (very widespread PHP usage) ✅ IMPLEMENTED](#high-priority-very-widespread-php-usage-implemented)
-  - [Medium Priority (significant PHP usage) ✅ IMPLEMENTED](#medium-priority-significant-php-usage-implemented)
-  - [Low Priority (moderate PHP usage) ⏳ PENDING](#low-priority-moderate-php-usage-pending)
+  - [High Priority (very widespread PHP usage) ✅ IMPLEMENTED](#high-priority-very-widespread-php-usage--implemented)
+  - [Medium Priority (significant PHP usage) ✅ IMPLEMENTED](#medium-priority-significant-php-usage--implemented)
+  - [Low Priority (moderate PHP usage) ⏳ PENDING](#low-priority-moderate-php-usage--pending)
 - [Total Proposed](#total-proposed)
 - [Recommendation](#recommendation)
 

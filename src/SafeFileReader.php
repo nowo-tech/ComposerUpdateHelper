@@ -15,6 +15,13 @@ use function sprintf;
  */
 final class SafeFileReader
 {
+    /**
+     * Return the whole contents of a file.
+     *
+     * @param string $path Path of the file to read
+     *
+     * @throws RuntimeException When the file cannot be read
+     */
     public static function read(string $path): string
     {
         $content = file_get_contents($path);

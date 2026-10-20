@@ -20,6 +20,7 @@ This guide covers all configuration options for Composer Update Helper.
   - [`debug`](#debug)
 - [Dependency Compatibility Checking](#dependency-compatibility-checking)
 - [HTTP timeouts (REQ-RUNTIME-001)](#http-timeouts-req-runtime-001)
+  - [Timeout hierarchy (CLI / CI)](#timeout-hierarchy-cli--ci)
 
 ## Composer plugin options
 

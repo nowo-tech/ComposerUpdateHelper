@@ -9,7 +9,7 @@ This document provides a detailed action plan for implementing the not-yet-suppo
 - [Implementation Priority Matrix](#implementation-priority-matrix)
   - [Complexity vs Feasibility Analysis](#complexity-vs-feasibility-analysis)
 - [Phase 1: Quick Wins (Low Complexity, High Feasibility)](#phase-1-quick-wins-low-complexity-high-feasibility)
-  - [Priority 1: Conflict Resolution Strategies - Fallback Versions (#19)](#priority-1-conflict-resolution-strategies-fallback-versions-19)
+  - [Priority 1: Conflict Resolution Strategies - Fallback Versions (#19)](#priority-1-conflict-resolution-strategies---fallback-versions-19)
   - [Priority 2: Alternative Package Suggestions (#18)](#priority-2-alternative-package-suggestions-18)
   - [Priority 3: Abandoned Package Detection (#14)](#priority-3-abandoned-package-detection-14)
 - [Phase 2: Medium Complexity Improvements](#phase-2-medium-complexity-improvements)

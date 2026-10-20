@@ -27,7 +27,7 @@ This document explains the different update scenarios that Composer Update Helpe
   - [17. Pre-Installation Conflict Prediction](#17-pre-installation-conflict-prediction)
   - [18. Alternative Package Suggestions](#18-alternative-package-suggestions)
   - [19. Conflict Resolution Strategies](#19-conflict-resolution-strategies)
-- [Case #20: Edge Cases - No Compatible Versions Available](#case-20-edge-cases-no-compatible-versions-available)
+- [Case #20: Edge Cases - No Compatible Versions Available](#case-20-edge-cases---no-compatible-versions-available)
 - [Summary](#summary)
   - [Fully Supported (15 cases)](#fully-supported-15-cases)
   - [Partially Supported (2 cases)](#partially-supported-2-cases)

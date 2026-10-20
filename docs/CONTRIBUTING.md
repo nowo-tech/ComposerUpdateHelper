@@ -14,10 +14,11 @@ Thank you for considering contributing to Composer Update Helper!
 - [Coding Standards](#coding-standards)
 - [Running Tests](#running-tests)
   - [With Docker](#with-docker)
-  - [Without Docker](#without-docker)
+  - [Without Docker](#without-docker-1)
 - [Available Make Commands](#available-make-commands)
 - [Reporting Issues](#reporting-issues)
 - [Contact](#contact)
+- [Cursor Agent](#cursor-agent)
 - [Git hooks (REQ-GIT-001)](#git-hooks-req-git-001)
 
 ## Code of Conduct
@@ -187,6 +188,21 @@ When reporting issues, please include:
 For questions or suggestions, you can reach out to:
 - GitHub: [@HecFranco](https://github.com/HecFranco)
 - Organization: [nowo-tech](https://github.com/nowo-tech)
+
+## Cursor Agent
+
+Contributors using Cursor Agent on this repository should enable these user-level settings (REQ-IDE-006):
+
+1. **Submit with Ctrl + Enter** (macOS: **⌘ + Enter**) — Cursor Settings → Agents / Chat → Submit with Ctrl + Enter. Enter inserts a newline; Ctrl/⌘+Enter submits the prompt.
+2. **Queue follow-ups while the agent is running** — in your user `settings.json` (Linux `~/.config/Cursor/User/settings.json`, Windows `%APPDATA%\Cursor\User\settings.json`, macOS `~/Library/Application Support/Cursor/User/settings.json`):
+
+```json
+{
+  "cursor.composer.queueMessageDefaultBehavior": "queue"
+}
+```
+
+Do not use `"steer"` as the default: it interrupts the running agent turn as soon as the follow-up is sent.
 
 ## Git hooks (REQ-GIT-001)
 

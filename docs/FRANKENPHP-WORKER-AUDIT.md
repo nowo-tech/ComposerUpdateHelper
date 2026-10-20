@@ -8,6 +8,17 @@
 | Method | Manual review of every file under `src/` (`Plugin.php`, `Installer.php`, `SafeFileReader.php`); `bin/process-updates.php`, `bin/lib/*.php`; PHPStan with `ruleset-classic`, `ruleset-worker`, and `ruleset-worker-strict` on `src/` + `tests/Unit` |
 | **Verdict** | **Pass (100% compatible)** under scenario **B** (kernel not reset between requests). The package never executes inside the FrankenPHP HTTP worker; shipped `src/` is free of worker anti-patterns, and CLI helpers under `bin/lib` were hardened so they remain safe if mistakenly loaded into a long-lived process |
 
+## Table of contents
+
+- [Execution model assumed](#execution-model-assumed)
+- [Why it does not run in the HTTP worker](#why-it-does-not-run-in-the-http-worker)
+- [Summary](#summary)
+- [Services reviewed](#services-reviewed)
+- [Findings](#findings)
+  - [Closed in 2.0.37](#closed-in-2037)
+- [Usage recommendations in worker mode](#usage-recommendations-in-worker-mode)
+- [Re-audit triggers](#re-audit-triggers)
+
 ## Execution model assumed
 
 FrankenPHP worker mode boots the Symfony kernel once per worker and serves many requests with the same container. This audit assumes the **strict** variant: the kernel is **not** rebooted between requests, so every shared service, static property and PHP global survives from one request to the next. Two scenarios are evaluated:

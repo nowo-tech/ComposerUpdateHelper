@@ -1,5 +1,11 @@
 # Installation
 
+## Table of contents
+
+- [Composer](#composer)
+- [Requirements](#requirements)
+- [Next steps](#next-steps)
+
 ## Composer
 
 Install as a development dependency in the project where you want to generate update commands:

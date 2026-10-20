@@ -67,6 +67,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Documentation: wave-1 REQ compliance — README documentation list order (PSR evaluation and FrankenPHP worker audit under Additional documentation), CONTRIBUTING Cursor Agent queue settings (REQ-IDE-006), canonical issue templates only (duplicate `bug_report.md` / `feature_request.md` removed), `.github/SECURITY.md` canonical structure, tables of contents and anchor fixes on long docs, PHPDoc on `SafeFileReader::read()`.
+
 ## [2.1.1] - 2026-10-20
 
 Development: Igor FrankenPHP worker-state audit (REQ-CS-008) in require-dev, composer igor / make igor and release-check; no runtime change. See [UPGRADING](UPGRADING.md#to-211).
