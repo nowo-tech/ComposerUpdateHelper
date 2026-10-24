@@ -112,8 +112,8 @@ validate: ensure-up
 	$(COMPOSE) exec -T $(SERVICE_PHP) composer validate --strict
 
 composer-sync: ensure-up
-	$(COMPOSE) exec -T $(SERVICE_PHP) composer validate --strict
-	$(COMPOSE) exec -T $(SERVICE_PHP) composer install --no-interaction --prefer-dist
+	$(COMPOSE) exec -T $(SERVICE_PHP) composer validate --strict --no-check-lock
+	$(COMPOSE) exec -T $(SERVICE_PHP) composer update --no-interaction
 
 # Pre-release (REQ-MAKE-002): git/PR gates → composer-sync → QA → demos
 
