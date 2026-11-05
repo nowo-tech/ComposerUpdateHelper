@@ -68,6 +68,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Config parsing — inline comments**: `ignore` / `include` entries written as `- vendor/package  # reason` (the format shown in CONFIGURATION.md) were read with the comment as part of the package name, so the package was never ignored or included. `ConfigLoader` now strips YAML-style trailing comments (`#` preceded by whitespace, outside quotes) and surrounding quotes in `readPackagesFromYaml()`, `readConfigValue()` (e.g. `language: es  # Spanish`) and the legacy `readPackagesFromTxt()`. Covered by `tests/Unit/ConfigLoaderTest.php`; `bin/lib/ConfigLoader.php` added to PHPStan `bootstrapFiles`.
+
 ## [2.1.2] - 2026-10-21
 
 Dependency refresh, php-cs-fixer worker cap, wave-1 documentation compliance, worktree-aware co-author check. See [UPGRADING](UPGRADING.md#to-212).
