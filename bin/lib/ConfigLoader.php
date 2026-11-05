@@ -51,8 +51,8 @@ class ConfigLoader
 
             // If we're in the section and it's a package line
             if ($inSection && preg_match('/^\s*-\s*(.+)$/', $trimmedLine, $matches)) {
-                $package = trim($matches[1]);
-                if (!empty($package)) {
+                $package = self::unquote(self::stripInlineComment($matches[1]));
+                if ($package !== '') {
                     $packages[] = $package;
                 }
             }
@@ -94,7 +94,15 @@ class ConfigLoader
 
             // Check for key: value pattern
             if (preg_match('/^' . preg_quote($key, '/') . ':\s*(.+)$/', $trimmedLine, $matches)) {
-                $value = trim($matches[1]);
+                $value = self::stripInlineComment($matches[1]);
+                if ($value === '') {
+                    return $default;
+                }
+                $isQuoted = self::isQuoted($value);
+                $value    = self::unquote($value);
+                if ($isQuoted) {
+                    return $value;
+                }
                 // Handle boolean values
                 if (strtolower($value) === 'true') {
                     return true;
@@ -138,11 +146,52 @@ class ConfigLoader
             if (empty($line) || str_starts_with($line, '#')) {
                 continue;
             }
-            if (!empty($line)) {
+            $line = self::stripInlineComment($line);
+            if ($line !== '') {
                 $packages[] = $line;
             }
         }
 
         return $packages;
+    }
+
+    /**
+     * Remove a trailing YAML-style comment: a "#" preceded by whitespace and outside quotes.
+     * "vendor/pkg  # reason" → "vendor/pkg"; "'a # b'" is kept as is.
+     */
+    private static function stripInlineComment(string $value): string
+    {
+        $quote  = null;
+        $length = strlen($value);
+        for ($i = 0; $i < $length; ++$i) {
+            $char = $value[$i];
+            if ($quote !== null) {
+                if ($char === $quote) {
+                    $quote = null;
+                }
+                continue;
+            }
+            if ($char === '"' || $char === "'") {
+                $quote = $char;
+                continue;
+            }
+            if ($char === '#' && ($i === 0 || ctype_space($value[$i - 1]))) {
+                return trim(substr($value, 0, $i));
+            }
+        }
+
+        return trim($value);
+    }
+
+    private static function isQuoted(string $value): bool
+    {
+        return strlen($value) >= 2
+            && ($value[0] === '"' || $value[0] === "'")
+            && $value[strlen($value) - 1] === $value[0];
+    }
+
+    private static function unquote(string $value): string
+    {
+        return self::isQuoted($value) ? substr($value, 1, -1) : $value;
     }
 }

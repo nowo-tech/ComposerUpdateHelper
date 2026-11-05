@@ -11,6 +11,7 @@ parameters:
     - tests/namespace-stubs.php
     - bin/lib/HttpClientDefaults.php
     - bin/lib/Utils.php
+    - bin/lib/ConfigLoader.php
   treatPhpDocTypesAsCertain: false
 
 includes:
