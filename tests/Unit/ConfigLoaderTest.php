@@ -88,9 +88,9 @@ final class ConfigLoaderTest extends TestCase
 
     public function testReadPackagesFromTxtStripsInlineComments(): void
     {
-        $this->write("# header\nvendor/a  # reason\nvendor/b\n\n");
+        $this->write("# header\nvendor/a  # reason\nvendor/hash#name\nvendor/b\n\n");
 
-        self::assertSame(['vendor/a', 'vendor/b'], ConfigLoader::readPackagesFromTxt($this->file));
+        self::assertSame(['vendor/a', 'vendor/hash#name', 'vendor/b'], ConfigLoader::readPackagesFromTxt($this->file));
     }
 
     private function write(string $content): void
