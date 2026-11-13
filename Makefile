@@ -26,7 +26,7 @@ help:
 	@echo "  assets          No-op (no frontend in this package)"
 	@echo "  test            Run PHPUnit tests"
 	@echo "  test-coverage   Run tests with code coverage"
-	@echo "  coverage-check  Fail if PHP line coverage is below 99%"
+	@echo "  coverage-check  Fail if PHP line coverage is below 100%"
 	@echo "  cs-check        Check code style"
 	@echo "  cs-fix          Fix code style"
 	@echo "  rector          Apply Rector refactoring"
@@ -85,7 +85,7 @@ test-coverage: ensure-up
 coverage-check: test-coverage
 	@./.scripts/php-coverage-percent.sh coverage-php.txt >/tmp/cuh-cov.txt
 	@pct=$$(sed -n 's/.*Global PHP coverage (Lines):[[:space:]]*\([0-9][0-9]*\.[0-9]*\).*/\1/p' /tmp/cuh-cov.txt | head -1); \
-	awk -v p="$${pct:-0}" 'BEGIN { if ((p+0) < 99) { printf "ERROR: PHP coverage %s%% is below 99%% (REQ-TEST-006)\n", p > "/dev/stderr"; exit 1 } printf "OK: PHP coverage %s%% >= 99%%\n", p }'
+	awk -v p="$${pct:-0}" 'BEGIN { if ((p+0) < 100) { printf "ERROR: PHP coverage %s%% is below 100%% (REQ-TEST-006)\n", p > "/dev/stderr"; exit 1 } printf "OK: PHP coverage %s%% >= 100%%\n", p }'
 
 cs-check: ensure-up
 	$(COMPOSE) exec -T $(SERVICE_PHP) composer cs-check
