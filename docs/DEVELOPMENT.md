@@ -100,13 +100,13 @@ Every push to GitHub automatically triggers:
 
 - ✅ **Tests** on PHP 7.4, 8.0, 8.1, 8.2, 8.3
 - ✅ **Code Style** check (PSR-12) with automatic fixes on main/master branch
-- ✅ **Code Coverage** report with **99% coverage requirement**
+- ✅ **Code Coverage** report with **100% coverage requirement**
 - ✅ **Automatic code style fixes** committed back to repository
 
 ### CI/CD Features
 
 - **Automatic Code Style Fixes**: On push to main/master, PHP CS Fixer automatically fixes code style issues and commits them back
-- **99% Code Coverage**: The CI pipeline requires 99% code coverage to pass, ensuring comprehensive test coverage (current: 99.20%)
+- **100% Code Coverage**: The CI pipeline requires 100% code coverage to pass
 - **Multi-PHP Testing**: Tests run on all supported PHP versions (7.4, 8.0, 8.1, 8.2, 8.3)
 - **Pull Request Validation**: On pull requests, code style is checked (but not auto-fixed) to maintain code quality
 

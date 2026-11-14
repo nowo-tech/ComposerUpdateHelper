@@ -325,7 +325,7 @@ Composer Update Helper keeps dependencies current; PHP Quality Tools keeps style
 ## Tests and coverage
 
 - Tests: PHPUnit (`tests/Unit`, `tests/Integration`).
-- PHP: **100%** line coverage on `src/` (refresh with `make test-coverage`; gate with `make coverage-check`; minimum gate **≥99%**).
+- PHP: **100%** line coverage on `src/` (refresh with `make test-coverage`; gate with `make coverage-check`; gate **100%**).
 - TS/JS: N/A
 - Python: N/A
 
