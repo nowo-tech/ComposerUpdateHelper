@@ -24,6 +24,10 @@ Composer **plugin** that installs **`generate-composer-require.sh`** and PHP lib
 
 **Given** outdated packages, **When** integrator runs the shell entrypoint, **Then** `bin/lib/*` analyzers produce require commands and impact notes (documented in README, not in `src/` inventory).
 
+### US-03 — Ignore / include list with inline comments (P1)
+
+**Given** `generate-composer-require.yaml` entries such as `- vendor/package  # reason`, **When** the integrator runs the shell entrypoint, **Then** `vendor/package` is listed under "Ignored packages" (or force-included) and is not suggested in the `composer require` commands.
+
 ---
 
 ## Requirements
@@ -36,6 +40,7 @@ Composer **plugin** that installs **`generate-composer-require.sh`** and PHP lib
 ### Shipped runtime (documented, outside `src/` inventory)
 
 - `bin/generate-composer-require.sh`, `bin/process-updates.php`, `bin/lib/*` (VersionResolver, DependencyAnalyzer, i18n loader, etc.).
+- **FR-CFG-001**: `bin/lib/ConfigLoader` — `readPackagesFromYaml()`, `readConfigValue()` and the legacy `readPackagesFromTxt()` strip YAML-style trailing comments (`#` preceded by whitespace, outside quotes) and surrounding quotes. `vendor/hash#name` (no whitespace before `#`) and `'a # b'` (quoted) are kept intact; a quoted scalar is returned as a string (no bool/number coercion). Covered by `tests/Unit/ConfigLoaderTest.php`; `bin/lib/ConfigLoader.php` is in PHPStan `bootstrapFiles`.
 
 ---
 
@@ -43,6 +48,7 @@ Composer **plugin** that installs **`generate-composer-require.sh`** and PHP lib
 
 - **SC-001**: **3/3** `src/` files mapped.
 - **SC-002**: Install + script smoke test documented.
+- **SC-003**: Every `ignore` / `include` format shown in `docs/CONFIGURATION.md` (including inline comments) is honoured by `ConfigLoader` (FR-CFG-001).
 
 ---
 
@@ -55,4 +61,4 @@ Composer **plugin** that installs **`generate-composer-require.sh`** and PHP lib
 
 ## Validation
 
-PHPUnit for plugin/installer, inventory audit.
+PHPUnit for plugin/installer and `bin/lib/ConfigLoader` (`tests/Unit/ConfigLoaderTest.php`), inventory audit.
