@@ -44,7 +44,7 @@ FrankenPHP worker mode (kernel not reset between requests): **Pass (100% compati
 
 ## Version information
 
-Supported PHP versions follow `composer.json` (`>=8.1 <8.6`). Release history is in [docs/CHANGELOG.md](docs/CHANGELOG.md).
+Supported PHP versions follow `composer.json` (`>=8.1 <8.7`). Release history is in [docs/CHANGELOG.md](docs/CHANGELOG.md).
 
 ## Installation
 
@@ -99,7 +99,7 @@ The script automatically detects `process-updates.php` in `vendor/nowo-tech/comp
 
 ## Requirements
 
-- PHP `>=8.1 <8.6`
+- PHP `>=8.1 <8.7`
 - Composer 2.x
 
 ## Configuration
